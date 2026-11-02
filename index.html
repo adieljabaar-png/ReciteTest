@@ -235,7 +235,9 @@ body{
 
 <!-- ── Whisper Quran Patch for GitHub + Vercel ── -->
 <script type="module">
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@3.4.1/+esm';
+
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
+
 // Configure to use ONNX quantized model - 8.57MB encoder
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
@@ -280,13 +282,18 @@ window.WhisperQuran = {
   load: loadWhisperQuranModel,
   transcribe: async (audioBlob) => {
     const pipe = await loadWhisperQuranModel();
-    // Convert blob to float32 16kHz expected by whisper
     const arrayBuffer = await audioBlob.arrayBuffer();
     const audioContext = new (window.AudioContext || window.webkitAudioContext)({sampleRate: 16000});
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
-    // resample handled by transformers.js automatically if you pass Blob URL
-    // but we pass raw audio for Quran model
-    const result = await pipe(audioBlob, {
+    
+    let float32Audio;
+    try {
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+      float32Audio = audioBuffer.getChannelData(0);
+    } finally {
+      try { await audioContext.close(); } catch(_) {}
+    }
+
+    const result = await pipe(float32Audio, {
       language: 'arabic',
       task: 'transcribe',
       chunk_length_s: 30,
