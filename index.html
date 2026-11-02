@@ -340,15 +340,23 @@ class WhisperSpeechRecognition {
         try {
           const text = await window.WhisperQuran.transcribe(blob);
           if (!text || !text.trim()) return;
-          // Create a fake SpeechRecognitionResult compatible with your existing logic
+         // Create a fake SpeechRecognitionResult compatible with your existing logic
           const result = {
             0: { transcript: text, confidence: 0.95 },
             isFinal: true,
             length: 1
           };
+          // Each Whisper chunk is a brand-new final result. Emit it under a
+          // monotonically increasing resultIndex so the main script's
+          // "lastSpeechResultIndex" guard does not swallow subsequent chunks.
+          this._resultSeq = (this._resultSeq || 0) + 1;
+          const seq = this._resultSeq;
+          const results = [];
+          results.length = seq + 1;
+          results[seq] = result;
           const event = {
-            results: [result],
-            resultIndex: 0,
+            results: results,
+            resultIndex: seq,
             interpretation: text
           };
           this._emit('result', event);
@@ -3055,12 +3063,10 @@ const IS_IN_APP_BROWSER = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|What
 
 
 /* ── WHISPER ONLY - Browser speech REMOVED ── */
-const null /* SpeechRecognitionCtor removed - whisper only */ = null; // REMOVED - Using Whisper only
 const SPEECH_SUPPORTED = true; // Always true now - whisper works everywhere
 const SPEECH_LANG = 'ar-SA';
 const WHISPER_ONLY = true;
 console.log('[App] Using Whisper Quran only - tarteel-ai/whisper-tiny-ar-quran');
-
 
 const TASHKEEL = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\uFEFF\u0640]/g;
 
@@ -5967,7 +5973,12 @@ function scoreAlternativeToks(toks, startPtr){
 function createSpeechRecognition(){
   if(!SPEECH_SUPPORTED) return null;
   if(speechRecognition) return speechRecognition;
-  const rec = createSpeechRecognition();
+  const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!Ctor){
+    console.warn('[Speech] No SpeechRecognition constructor available.');
+    return null;
+  }
+  const rec = new Ctor();
   rec.lang = SPEECH_LANG;
   rec.continuous = true;
   rec.interimResults = true;

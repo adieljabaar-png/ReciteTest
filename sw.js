@@ -1,6 +1,11 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
+   v69 — FIX: declare TRANSFORMERS_CACHE / WHISPER_CACHE / *_CACHE_MAX
+         (undefined constants that crashed the SW on load, disabling
+         offline mode, audio caching, push notifications and Whisper
+         model caching entirely). Bumped VERSION so the broken v68
+         worker is replaced on next navigation.
    v68 — FIX: tabs clickable + HTML 93% + cache bust
    v67 — FIX: Home tabs alignment + small text + no swipe + cache-bust
    - Fixes broken duplicate const req / let url that caused SW to crash and tabs not to open
@@ -202,29 +207,31 @@
        /robots.txt also bypassed so AI policy is always fresh.
      - Push notifications with inline SVG icon.
 
-   NOTE ON DEPLOY: after shipping v65, fully close the PWA (or
+   NOTE ON DEPLOY: after shipping v69, fully close the PWA (or
    close every tab showing the site) and reopen it. The browser
    fetches sw.js on navigation; the new worker's install calls
    skipWaiting() and its activate calls clients.claim(), so the
-   next open runs the new code path. Caches qc-*-v64 and older
+   next open runs the new code path. Caches qc-*-v68 and older
    are deleted on activate; qc-audio (downloads) is preserved.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v68';
+const VERSION = 'v69';
 
-const SHELL_CACHE   = `qc-shell-${VERSION}`;
-const TEXT_CACHE    = `qc-text-${VERSION}`;
-const FONTS_CACHE   = `qc-fonts-${VERSION}`;
-const RUNTIME_CACHE = `qc-runtime-${VERSION}`;
+const SHELL_CACHE        = `qc-shell-${VERSION}`;
+const TEXT_CACHE         = `qc-text-${VERSION}`;
+const FONTS_CACHE        = `qc-fonts-${VERSION}`;
+const RUNTIME_CACHE      = `qc-runtime-${VERSION}`;
+const TRANSFORMERS_CACHE = `qc-transformers-${VERSION}`;
+const WHISPER_CACHE      = `qc-whisper-${VERSION}`;
 
 const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
 
 const AUDIO_CACHE = 'qc-audio';
 const PERSISTENT_CACHES = [AUDIO_CACHE];
 
-const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-'];
+const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-', 'qc-transformers-', 'qc-whisper-'];
 
 const SHELL_URLS = ['./', './index.html', './manifest.json'];
 
@@ -234,9 +241,11 @@ const HOST_EVERYAYAH            = 'everyayah.com';
 const HOST_GOOGLE_FONTS_CSS     = 'fonts.googleapis.com';
 const HOST_GOOGLE_FONTS_STATIC  = 'fonts.gstatic.com';
 
-const TEXT_CACHE_MAX = 400;
-const RUNTIME_MAX    = 120;
-const MANIFEST_TIMEOUT_MS = 2000;
+const TEXT_CACHE_MAX         = 400;
+const RUNTIME_MAX            = 120;
+const TRANSFORMERS_CACHE_MAX = 20;
+const WHISPER_CACHE_MAX      = 40;
+const MANIFEST_TIMEOUT_MS    = 2000;
 
 /* The exact Google Fonts stylesheet URL used by <link> in index.html.
    Pre-cached during install so the stylesheet is available offline
@@ -272,7 +281,7 @@ const WHISPER_MODEL_URLS = [
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     // 1. Shell — awaited (mandatory for offline open). The
-    //    `cache:'reload'` marker below guarantees the v65 worker
+    //    `cache:'reload'` marker below guarantees the v69 worker
     //    stores the *new* index.html containing the madd/ghunnah
     //    timing fix, CSS !important change, and dead-code cleanup,
     //    while keeping the AI-blocker, meta tags and hidden policy
