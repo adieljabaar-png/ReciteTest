@@ -1,6 +1,10 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
+   v67 — FIX: Home tabs alignment + small text + no swipe + cache-bust
+   - Fixes broken duplicate const req / let url that caused SW to crash and tabs not to open
+   - Bumps VERSION v65->v67 to force shell cache refresh (gets fixed index_15.html)
+   - Keeps Whisper Quran Edition offline speech
    v66 — WHISPER QURAN EDITION - Browser speech REMOVED, Whisper only.
    - Removed dependency on Google/Apple online speech service
    - Added ONNX Whisper model caching (tarteel-ai/whisper-tiny-ar-quran)
@@ -207,14 +211,14 @@
 
 'use strict';
 
-const VERSION = 'v65';
+const VERSION = 'v67';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
 const FONTS_CACHE   = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE = `qc-runtime-${VERSION}`;
 
-const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE];
+const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
 
 const AUDIO_CACHE = 'qc-audio';
 const PERSISTENT_CACHES = [AUDIO_CACHE];
@@ -300,19 +304,6 @@ self.addEventListener('install', event => {
 /* ============================================================
    ACTIVATE — drop every stale versioned cache, claim clients
    ============================================================ */
-self.addEventListener('activate', event => {
-  event.waitUntil((async () => {
-    try{
-      const keys = await caches.keys();
-      await Promise.all(keys.map(k => {
-        if(k.includes('qrc-shell-v65') || k.includes('qrc-text-v65') || k.includes('qrc-audio-v65') || k.includes('qrc-fonts-v65') || k.includes('v64') || k.includes('v63')){
-          console.log('[SW v66] Deleting old cache', k);
-          return caches.delete(k);
-        }
-      }));
-    }catch(_){}
-  })());
-});
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     try{
@@ -421,20 +412,6 @@ self.addEventListener('notificationclick', event => {
    ============================================================ */
 self.addEventListener('fetch', event => {
   const req = event.request;
-  const url = req.url;
-
-  // ── WHISPER QURAN - Cache transformers.js and ONNX models ──
-  if(url.includes('cdn.jsdelivr.net/npm/@xenova/transformers') || url.includes('cdn.jsdelivr.net/npm/onnxruntime-web') || url.includes('huggingface.co') && (url.includes('whisper-tiny-ar-quran') || url.includes('tarteel-ai')) || url.includes('onnx-community') ){
-    event.respondWith(whisperCacheFirst(req, url.includes('transformers') || url.includes('onnxruntime') ? TRANSFORMERS_CACHE : WHISPER_CACHE));
-    return;
-  }
-
-  // ── FIX: Force bypass cache for index.html to get new tabs layout ──
-  if(url.endsWith('index.html') || url.endsWith('/index_final_whisper_only.html') || req.mode === 'navigate'){
-    // Always network-first for navigation to get updated tabs + whisper code
-  }
-
-  const req = event.request;
 
   // Only intercept GET. POST / PUT / DELETE — including Vercel Analytics
   // view events, /api/feedback and /api/subscribe — must go straight to
@@ -443,6 +420,17 @@ self.addEventListener('fetch', event => {
 
   let url;
   try{ url = new URL(req.url); }catch(_){ return; }
+  if(url.protocol !== 'http:' && url.protocol !== 'https:') return;
+
+  // ── WHISPER QURAN - Cache transformers.js and ONNX models ──
+  const rawUrl = req.url;
+  if(rawUrl.includes('cdn.jsdelivr.net/npm/@xenova/transformers') || rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime-web') || (rawUrl.includes('huggingface.co') && (rawUrl.includes('whisper-tiny-ar-quran') || rawUrl.includes('tarteel-ai'))) || rawUrl.includes('onnx-community') ){
+    event.respondWith(whisperCacheFirst(req, rawUrl.includes('transformers') || rawUrl.includes('onnxruntime') ? TRANSFORMERS_CACHE : WHISPER_CACHE));
+    return;
+  }
+
+  // ── FIX v67: Force network-first for navigation to bust stale tabs layout ──
+  // Previously index.html was cached aggressively; this ensures new home-tiles fix reaches client.
   if(url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
   // Same-origin paths that must NEVER be intercepted by the SW.
