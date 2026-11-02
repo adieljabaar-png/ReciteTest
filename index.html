@@ -256,14 +256,22 @@ async function loadWhisperQuranModel(onProgress) {
       {
         dtype: 'q4', // quantized - ~ 39MB total, fits Vercel 250MB limit
         device: 'webgpu',
-        progress_callback: (p) => {
+   progress_callback: (p) => {
           if (onProgress) onProgress(p);
           console.log('[Whisper Quran]', p);
+          
+          // Update global state so the main app can read it
+          window.whisperDownloadStatus = 'downloading';
+          window.whisperDownloadPct = Math.round(p.progress || 0);
+          
+          // Broadcast progress to the main app
+          document.dispatchEvent(new CustomEvent('whisper-progress', { detail: p }));
         }
       }
     );
     // fallback to original tarteel tiny if community model not found
-  } catch(e) {
+
+} catch(e) {
     console.warn('[Whisper] primary failed, trying fallback', e);
     whisperPipeline = await pipeline(
       'automatic-speech-recognition',
@@ -274,6 +282,11 @@ async function loadWhisperQuranModel(onProgress) {
       }
     );
   }
+  
+  // Mark as ready when finished
+  window.whisperDownloadStatus = 'ready';
+  document.dispatchEvent(new CustomEvent('whisper-ready'));
+  
   return whisperPipeline;
 }
 
@@ -7904,7 +7917,11 @@ async function loadSurah(n, keepFeedback){
       try{ const enJson = await enSettled.value.json(); if(enJson.code === 200 && enJson.data && Array.isArray(enJson.data.ayahs)) translations = enJson.data.ayahs.map(a => cleanTranslation(a.text)); }catch(_){}
     }
     renderVerses(arJson.data.ayahs, translations);
-    setStatus('Ready', 'idle', surahMeta.numberOfAyahs + ' ayahs · ' + (micPermission==='granted' ? 'Mic on' : 'Tap Start reciting to allow mic'));
+  if (window.whisperDownloadStatus === 'downloading') {
+      setStatus('Downloading Whisper AI...', 'loading', window.whisperDownloadPct + '%');
+    } else {
+      setStatus('Ready', 'idle', surahMeta.numberOfAyahs + ' ayahs · ' + (micPermission==='granted' ? 'Mic on' : 'Tap Start reciting to allow mic'));
+    } 
     if(!keepFeedback) feedbackEl.innerHTML = '<div class="line"><b>' + surahMeta.englishName + '</b> <span class="ar">' + surahMeta.name + '</span> — loaded.</div>';
     if (!followOnly){
       coachTajweedApplied = false;
@@ -9053,6 +9070,24 @@ function openQrScreen(){
 function closeQrScreen(){ if(!qrFullscreen) return; qrFullscreen.hidden = true; document.body.classList.remove('qr-open'); }
 if(qrCloseBtn) qrCloseBtn.addEventListener('click', closeQrScreen);
 if(qrFullscreen){ qrFullscreen.addEventListener('click', (e) => { if(e.target === qrFullscreen) closeQrScreen(); }); }
+
+// ── Listen for Whisper Download Progress ──
+document.addEventListener('whisper-progress', (e) => {
+  const p = e.detail;
+  if (currentScreenName === 'coach' && !wantMic) {
+    if (p.status === 'progress' || p.status === 'download') {
+      setStatus('Downloading Whisper AI...', 'loading', Math.round(p.progress || 0) + '%');
+    }
+  }
+});
+
+document.addEventListener('whisper-ready', () => {
+  if (currentScreenName === 'coach' && !wantMic) {
+    setStatus('Ready', 'idle', 'Whisper model loaded. Tap Start reciting.');
+  }
+});
+
+
 
 (function boot(){
   initServiceWorker().catch(err => console.warn('[SW] boot init failed:', err));

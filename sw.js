@@ -1,19 +1,17 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
+   v71 — UPDATE: Version bump to force cache refresh for the new
+         Whisper download progress UI in index.html. Ensures the 
+         @huggingface CDN routes are intercepted correctly.
    v70 — FIX: update Whisper CDN urls from @xenova to @huggingface 
          (the @xenova package 404s at version 3.4.1). Matches the 
          import in index.html. Forces cache refresh.
-   v69 — FIX: declare TRANSFORMERS_CACHE / WHISPER_CACHE / *_CACHE_MAX
-         (undefined constants that crashed the SW on load, disabling
-         offline mode, audio caching, push notifications and Whisper
-         model caching entirely). Bumped VERSION so the broken v68
-         worker is replaced on next navigation.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v70';
+const VERSION = 'v71';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
@@ -59,16 +57,11 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
    INSTALL — cache shell + pre-cache Google Fonts
    ============================================================ */
 
-// WHISPER QURAN MODEL - Updated to @huggingface
+// WHISPER QURAN MODEL
 const WHISPER_CDN_URLS = [
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/dist/transformers.min.js',
   'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.0/dist/ort.min.js'
 ];
-
-const WHISPER_MODEL_URLS = [
-  // These will be cached on first use, not pre-cached to avoid 8MB upfront
-];
-
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
@@ -119,8 +112,7 @@ self.addEventListener('activate', event => {
 });
 
 /* ============================================================
-   MESSAGES — SKIP_WAITING / CLEAR_CACHES / CLEAR_AUDIO_CACHE /
-              REFRESH_MANIFEST
+   MESSAGES
    ============================================================ */
 self.addEventListener('message', event => {
   const data = event.data || {};
@@ -157,7 +149,7 @@ self.addEventListener('message', event => {
 });
 
 /* ============================================================
-   PUSH — show notification with the Recite logo
+   PUSH
    ============================================================ */
 self.addEventListener('push', event => {
   let data = { title: 'Quran Recitation Coach', body: 'You have a new message.', url: './' };
@@ -179,11 +171,7 @@ self.addEventListener('notificationclick', event => {
     const list = await clients.matchAll({ type: 'window', includeUncontrolled: true });
     for(const c of list){
       if(c.url.startsWith(self.location.origin) && 'focus' in c){
-        const isSpecific =
-          target &&
-          target !== './' &&
-          target !== '/' &&
-          target !== self.registration.scope;
+        const isSpecific = target && target !== './' && target !== '/' && target !== self.registration.scope;
         if(isSpecific){
           try{ await c.navigate(target); }catch(_){}
         }
@@ -526,7 +514,7 @@ async function trimCache(cacheName, maxEntries){
 }
 
 /* ============================================================
-   Google Fonts pre-cache (bounded, best-effort)
+   Google Fonts pre-cache
    ============================================================ */
 
 async function fetchWithTimeout(url, ms){
