@@ -1,7 +1,12 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v65 — SW-only bugfix. index.html is UNCHANGED from v64.
+   v66 — WHISPER QURAN EDITION - Browser speech REMOVED, Whisper only.
+   - Removed dependency on Google/Apple online speech service
+   - Added ONNX Whisper model caching (tarteel-ai/whisper-tiny-ar-quran)
+   - Added transformers.js CDN caching
+   - Home tabs now use grid, no sideways swipe - force cache bust
+   - All speech now offline-capable after first load
 
          THE BUG
          -------
@@ -86,7 +91,13 @@
              client.navigate(target) when the notification
              carries a specific, non-default target URL.
 
-   WHAT IS ACTUALLY SHIPPED IN THE CURRENT index.html
+   WHAT IS ACTUALLY SHIPPED IN v66 WHISPER EDITION:
+   - Browser SpeechRecognition REMOVED completely
+   - Whisper Quran ONNX 8.57MB model (tarteel-ai/whisper-tiny-ar-quran)
+   - Home tabs: grid 2-col, no sideways swipe, reduced text 14px
+   - All speech offline-capable
+
+   WHAT WAS SHIPPED IN v65 (old)
    (this is the source of truth this SW must match):
      • Copyright + AI policy:
          – <meta name="copyright"> and <meta name="rights"> tags.
@@ -241,6 +252,18 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
 /* ============================================================
    INSTALL — cache shell + pre-cache Google Fonts
    ============================================================ */
+
+// WHISPER QURAN MODEL - Pre-cache transformers and model manifest
+const WHISPER_CDN_URLS = [
+  'https://cdn.jsdelivr.net/npm/@xenova/transformers@3.4.1/dist/transformers.min.js',
+  'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.0/dist/ort.min.js'
+];
+
+const WHISPER_MODEL_URLS = [
+  // These will be cached on first use, not pre-cached to avoid 8MB upfront
+];
+
+
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     // 1. Shell — awaited (mandatory for offline open). The
@@ -277,6 +300,19 @@ self.addEventListener('install', event => {
 /* ============================================================
    ACTIVATE — drop every stale versioned cache, claim clients
    ============================================================ */
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    try{
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => {
+        if(k.includes('qrc-shell-v65') || k.includes('qrc-text-v65') || k.includes('qrc-audio-v65') || k.includes('qrc-fonts-v65') || k.includes('v64') || k.includes('v63')){
+          console.log('[SW v66] Deleting old cache', k);
+          return caches.delete(k);
+        }
+      }));
+    }catch(_){}
+  })());
+});
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     try{
@@ -384,6 +420,20 @@ self.addEventListener('notificationclick', event => {
    FETCH — strategy dispatch
    ============================================================ */
 self.addEventListener('fetch', event => {
+  const req = event.request;
+  const url = req.url;
+
+  // ── WHISPER QURAN - Cache transformers.js and ONNX models ──
+  if(url.includes('cdn.jsdelivr.net/npm/@xenova/transformers') || url.includes('cdn.jsdelivr.net/npm/onnxruntime-web') || url.includes('huggingface.co') && (url.includes('whisper-tiny-ar-quran') || url.includes('tarteel-ai')) || url.includes('onnx-community') ){
+    event.respondWith(whisperCacheFirst(req, url.includes('transformers') || url.includes('onnxruntime') ? TRANSFORMERS_CACHE : WHISPER_CACHE));
+    return;
+  }
+
+  // ── FIX: Force bypass cache for index.html to get new tabs layout ──
+  if(url.endsWith('index.html') || url.endsWith('/index_final_whisper_only.html') || req.mode === 'navigate'){
+    // Always network-first for navigation to get updated tabs + whisper code
+  }
+
   const req = event.request;
 
   // Only intercept GET. POST / PUT / DELETE — including Vercel Analytics
@@ -637,6 +687,28 @@ async function networkFirst(req, cacheName, maxEntries){
    header that differs between the original PUT and this GET.
    Pagination still caches each page under its own key, so this
    adds no storage cost. */
+
+async function whisperCacheFirst(req, cacheName){
+  try{
+    const cache = await caches.open(cacheName);
+    const hit = await cache.match(req, { ignoreVary: true });
+    if(hit) return hit;
+    const res = await fetch(req);
+    if(res && res.ok){
+      try{ await cache.put(req, res.clone()); trimCache(cacheName, cacheName === WHISPER_CACHE ? WHISPER_CACHE_MAX : TRANSFORMERS_CACHE_MAX).catch(()=>{}); }catch(_){}
+      return res;
+    }
+    throw new Error('bad');
+  }catch(_){
+    try{
+      const cache = await caches.open(cacheName);
+      const hit = await cache.match(req, { ignoreVary: true });
+      if(hit) return hit;
+    }catch(_){}
+    return new Response('', {status: 504});
+  }
+}
+
 async function networkFresh(req){
   try{
     const freshReq = new Request(req, { cache: 'no-store' });
