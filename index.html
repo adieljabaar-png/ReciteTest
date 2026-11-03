@@ -81,12 +81,31 @@ window.getAudioCtx = getAudioCtx;
 let _decodeCtx = null;
 function getDecodeCtx() {
   if (!_decodeCtx) {
-    _decodeCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+    try {
+      _decodeCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+    } catch (e) {
+      _decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
   }
   if (_decodeCtx.state === 'suspended') _decodeCtx.resume().catch(() => {});
   return _decodeCtx;
 }
 window.getDecodeCtx = getDecodeCtx;
+
+function resampleTo16k(float32, originalSampleRate) {
+  if (originalSampleRate === 16000) return float32;
+  const ratio = originalSampleRate / 16000;
+  const newLength = Math.round(float32.length / ratio);
+  const result = new Float32Array(newLength);
+  for (let i = 0; i < newLength; i++) {
+    const index = i * ratio;
+    const idx1 = Math.floor(index);
+    const idx2 = Math.min(idx1 + 1, float32.length - 1);
+    const frac = index - idx1;
+    result[i] = float32[idx1] * (1 - frac) + float32[idx2] * frac;
+  }
+  return result;
+}
 
 let _worker = null;
 let _workerReady = false;
@@ -311,11 +330,12 @@ async function decodeBlobTo16k(blob) {
       audioBuf = await ctx.decodeAudioData(await (await fetch(url)).arrayBuffer());
     } finally { URL.revokeObjectURL(url); }
   }
-  return audioBuf.getChannelData(0).slice(0);
+  let data = audioBuf.getChannelData(0).slice(0);
+  return resampleTo16k(data, audioBuf.sampleRate);
 }
 
 // Trim leading/trailing silence — the cheapest, biggest perf win.
-function trimSilence(float32, rmsFloor = 0.006) {
+function trimSilence(float32, rmsFloor = 0.002) {
   let start = 0, end = float32.length;
   const win = 160;
   while (start < end) {
@@ -437,16 +457,18 @@ class WhisperSpeechRecognition {
       this._chunkMs = cores >= 8 ? 2500 : cores >= 4 ? 3500 : 4500;
 
       this._stream = await navigator.mediaDevices.getUserMedia({
-        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true }
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
       });
 
-      this._ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+      this._ctx = new (window.AudioContext || window.webkitAudioContext)();
       if (this._ctx.state === 'suspended') await this._ctx.resume();
 
       await this._ctx.audioWorklet.addModule(getPcmWorkletUrl());
 
       const src = this._ctx.createMediaStreamSource(this._stream);
-      const target = Math.round(16000 * (this._chunkMs / 1000));
+      const actualSampleRate = this._ctx.sampleRate;
+      const target = Math.round(actualSampleRate * (this._chunkMs / 1000));
+      
       this._node = new AudioWorkletNode(this._ctx, 'pcm-capture', {
         processorOptions: { targetSamples: target },
         numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1]
@@ -459,7 +481,12 @@ class WhisperSpeechRecognition {
 
       this._node.port.onmessage = async (ev) => {
         if (!this._isRunning) return;
-        const pcm = new Float32Array(ev.data);
+        let pcm = new Float32Array(ev.data);
+        
+        if (actualSampleRate !== 16000) {
+          pcm = resampleTo16k(pcm, actualSampleRate);
+        }
+        
         if (this._busy) return;
         const trimmed = trimSilence(pcm);
         if (!trimmed) return;
@@ -5076,7 +5103,7 @@ async function ensureMicStream(){
     if(live){ try{ micStream.getAudioTracks().forEach(t => { t.enabled = true; }); }catch(_){} if(!rmsAnalyser.isRunning()) rmsAnalyser.start(micStream); return micStream; }
   }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return null;
-  try{ lastMicError = null; const s = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: false, autoGainControl: true } }); micStream = s; rmsAnalyser.start(s); return s; }
+  try{ lastMicError = null; const s = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); micStream = s; rmsAnalyser.start(s); return s; }
   catch(e){ lastMicError = e; micStream = null; rmsAnalyser.stop(); return null; }
 }
 

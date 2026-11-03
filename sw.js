@@ -1,20 +1,14 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v76 — UPDATE:
+   v77 — UPDATE:
          • Version bump forces refresh of index.html + whisper-worker.js
-           (Moonshine-first download + accurate model name/size display).
-         • Bumped TRANSFORMERS_CACHE_MAX (100 → 150) and
-           WHISPER_CACHE_MAX (40 → 80) so two quantized models and their
-           onnxruntime WASM assets can coexist without thrashing.
-         • No URL-matching changes — onnx-community/moonshine-tiny-ar-ONNX
-           and onnx-community/tarteel-ai-whisper-tiny-ar-quran-ONNX (plus
-           their jsdelivr + cdn-lfs proxies) were already covered.
+           to apply the native sample rate resampling fix.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v76';
+const VERSION = 'v77';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;

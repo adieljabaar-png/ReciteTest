@@ -167,7 +167,7 @@ self.addEventListener('message', async (e) => {
 
     try {
       const t0 = performance.now();
-      const result = await transcriber(audioData, { language: 'arabic' });
+      const result = await transcriber(audioData, { language: 'ar', task: 'transcribe' });
       self.postMessage({
         type: 'result',
         text: (result && result.text) || '',
