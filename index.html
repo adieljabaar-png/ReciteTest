@@ -395,7 +395,7 @@ class WhisperSpeechRecognition {
         if (this._mediaRecorder && this._mediaRecorder.state === 'recording') {
           this._mediaRecorder.stop();
         }
-      }, 3000);
+      }, 1000);
       this._emit('start', {});
       this._emit('audiostart', {});
     } catch(err) {
