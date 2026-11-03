@@ -1,24 +1,15 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v74 — UPDATE:
+   v75 — UPDATE:
          • Version bump forces refresh of index.html + whisper-worker.js
-           after the B2 WhisperSpeechRecognition integration.
-         • whisper-worker.js now routed to SHELL_CACHE (was RUNTIME_CACHE),
-           so it can't be evicted by LRU.
-         • Precache @huggingface/transformers +esm bundle during install.
-         • Enlarged TRANSFORMERS_CACHE_MAX (20 → 100) so the split
-           ESM sub-module graph fits without eviction.
-         • Broadened AI-model URL patterns: xenova/*, *.onnx on HF,
-           onnxruntime (all variants).
-
-   v73 — Switched app from Whisper to Moonshine (worker still works both ways).
-   v71 — Whisper download progress UI.
+           so the Whisper 100% stuck fix takes effect.
+         • Added 'hf.co' to AI model URL matching for Hugging Face redirects.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v74';
+const VERSION = 'v75';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
@@ -224,7 +215,7 @@ self.addEventListener('fetch', event => {
     rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime-web');
 
   const isAiModel =
-    rawUrl.includes('huggingface.co') && (
+    (rawUrl.includes('huggingface.co') || rawUrl.includes('hf.co')) && (
       rawUrl.includes('whisper') ||
       rawUrl.includes('tarteel') ||
       rawUrl.includes('moonshine') ||
