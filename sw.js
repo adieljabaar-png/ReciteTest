@@ -1,21 +1,22 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v79 — UPDATE:
-         • Version bumped to force refresh of index.html + whisper-worker.js
-         • Reverted to the stable Whisper Tiny model for mobile compatibility.
+   v80 — UPDATE:
+         • Fixed OOM crash during model download by skipping SW 
+           interception for large ONNX model files.
+         • UI now waits for actual 'ready' signal.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v79';
+const VERSION = 'v80';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
 const FONTS_CACHE        = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE      = `qc-runtime-${VERSION}`;
 const TRANSFORMERS_CACHE = `qc-transformers-${VERSION}`;
-const WHISPER_CACHE      = `qc-whisper-${VERSION}`; // ONNX model files (Whisper / Tarteel)
+const WHISPER_CACHE      = `qc-whisper-${VERSION}`;
 
 const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
 
@@ -24,12 +25,8 @@ const PERSISTENT_CACHES = [AUDIO_CACHE];
 
 const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-', 'qc-transformers-', 'qc-whisper-'];
 
-// whisper-worker.js is REQUIRED for the app to function offline — must be in shell.
 const SHELL_URLS = ['./', './index.html', './manifest.json', './whisper-worker.js'];
 
-/* AI runtime libraries — precached so the worker can boot instantly.
-   NOTE: only the +esm wrapper is listed here. The many sub-modules it
-   imports are fetched + cached on demand by whisperCacheFirst(). */
 const AI_LIBS_CDN_URLS = [
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm'
 ];
@@ -63,7 +60,6 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
    ============================================================ */
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    // 1) Shell (index.html, manifest, whisper-worker.js)
     try{
       const cache = await caches.open(SHELL_CACHE);
       await Promise.all(SHELL_URLS.map(async url => {
@@ -75,7 +71,6 @@ self.addEventListener('install', event => {
       }));
     }catch(_){}
 
-    // 2) AI runtime libs (transformers +esm wrapper)
     try{
       const cache = await caches.open(TRANSFORMERS_CACHE);
       await Promise.allSettled(AI_LIBS_CDN_URLS.map(async url => {
@@ -86,7 +81,6 @@ self.addEventListener('install', event => {
       }));
     }catch(_){}
 
-    // 3) Google Fonts (best-effort, capped)
     try{
       await Promise.race([
         prefetchFonts().catch(() => {}),
@@ -210,7 +204,7 @@ self.addEventListener('fetch', event => {
   const isAiLib =
     rawUrl.includes('cdn.jsdelivr.net/npm/@huggingface/transformers') ||
     rawUrl.includes('cdn.jsdelivr.net/npm/@xenova/transformers') ||
-    rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime') ||       // web / node / all variants
+    rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime') ||      
     rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime-web');
 
   const isAiModel =
@@ -222,12 +216,16 @@ self.addEventListener('fetch', event => {
       rawUrl.includes('onnx-community') ||
       rawUrl.includes('.onnx')
     ) ||
-    rawUrl.includes('onnx-community') ||  // catches jsdelivr proxies of HF ONNX repos
-    rawUrl.includes('eventhorizon0');     // catches the specific Quran-tuned base model
+    rawUrl.includes('onnx-community') ||
+    rawUrl.includes('eventhorizon0');
 
-  if(isAiLib || isAiModel){
-    const target = isAiLib ? TRANSFORMERS_CACHE : WHISPER_CACHE;
-    event.respondWith(whisperCacheFirst(req, target));
+  if(isAiLib){
+    event.respondWith(whisperCacheFirst(req, TRANSFORMERS_CACHE));
+    return;
+  }
+  
+  if(isAiModel) {
+    // Skip SW interception for large ONNX models to avoid OOM and allow native streaming progress
     return;
   }
 
@@ -240,37 +238,31 @@ self.addEventListener('fetch', event => {
     if(url.pathname === '/robots.txt')             return;
   }
 
-  // Worker scripts (whisper-worker.js) → SHELL_CACHE, never RUNTIME.
   if(req.destination === 'worker' || req.destination === 'sharedworker'){
     event.respondWith(cacheFirst(req, SHELL_CACHE));
     return;
   }
 
-  // Tajweed annotation requests
   if(url.hostname === HOST_QURAN_COM && url.search.includes('text_uthmani_tajweed')){
     event.respondWith(networkFresh(req));
     return;
   }
 
-  // Audio from everyayah.com
   if(url.hostname === HOST_EVERYAYAH){
     event.respondWith(audioFromDownloadCache(req));
     return;
   }
 
-  // Google Fonts
   if(url.hostname === HOST_GOOGLE_FONTS_CSS || url.hostname === HOST_GOOGLE_FONTS_STATIC){
     event.respondWith(cacheFirst(req, FONTS_CACHE));
     return;
   }
 
-  // Quran text APIs
   if(url.hostname === HOST_QURAN_COM || url.hostname === HOST_ALQURAN){
     event.respondWith(networkFirst(req, TEXT_CACHE, TEXT_CACHE_MAX));
     return;
   }
 
-  // Same-origin
   if(url.origin === self.location.origin){
     if(url.pathname.endsWith('/manifest.json')){
       event.respondWith(manifestFresh(req));

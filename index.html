@@ -218,34 +218,18 @@ function ensureWorker() {
       const totalBytes = window.whisperModelInfo.sizeBytes || _computeTotalBytes();
 
       const pct = _computeOverallPct(p.progress);
-      if (pct >= 100) {
-        if (!_readyDispatched) {
-          _readyDispatched = true;
-          setTimeout(() => {
-            if (window.whisperDownloadStatus === 'error') return;
-            _workerReady = true;
-            window.whisperDownloadStatus = 'ready';
-            window.whisperDownloadPct = 100;
-            document.dispatchEvent(new CustomEvent('whisper-progress', {
-              detail: { status:'ready', overallProgress:100,
-                model: window.whisperModelInfo.active,
-                loadedBytes: window.whisperModelInfo.loadedBytes, totalBytes }
-            }));
-            document.dispatchEvent(new CustomEvent('whisper-ready', { detail:{type:'ready'} }));
-          }, 1500);
-        }
-      } else {
-        window.whisperDownloadStatus = 'downloading';
-        window.whisperDownloadPct = pct;
-        document.dispatchEvent(new CustomEvent('whisper-progress', {
-          detail: Object.assign({}, p, {
-            overallProgress: pct,
-            model: window.whisperModelInfo.active,
-            loadedBytes: window.whisperModelInfo.loadedBytes,
-            totalBytes
-          })
-        }));
-      }
+      
+      window.whisperDownloadStatus = 'downloading';
+      window.whisperDownloadPct = Math.min(99, pct); // Cap at 99% until actual 'ready' event
+      
+      document.dispatchEvent(new CustomEvent('whisper-progress', {
+        detail: Object.assign({}, p, {
+          overallProgress: window.whisperDownloadPct,
+          model: window.whisperModelInfo.active,
+          loadedBytes: window.whisperModelInfo.loadedBytes,
+          totalBytes
+        })
+      }));
       return;
     }
 
@@ -254,7 +238,7 @@ function ensureWorker() {
       for (const k in _dlTotal) _dlLoaded[k] = _dlTotal[k];
       _workerReady = true;
       window.whisperDownloadStatus = 'ready';
-      window.whisperDownloadPct = 100;
+      window.whisperDownloadPct = 100; // Set to 100% NOW
       if (msg.model) window.whisperModelInfo.active = msg.model;
       window.whisperModelInfo.loadedBytes = _computeLoadedBytes();
       const totalBytes = window.whisperModelInfo.sizeBytes || _computeTotalBytes();
@@ -271,7 +255,6 @@ function ensureWorker() {
       console.error('[Worker] Load error:', msg.error);
       if (!window.whisperModelInfo._triedFallback) {
         window.whisperModelInfo._triedFallback = true;
-        // Since we are defaulting to Whisper, this fallback now logs retry
         console.warn('[Worker] Whisper failed — retrying...');
         document.dispatchEvent(new CustomEvent('whisper-progress', {
           detail: { status:'downloading', overallProgress:0, model:'whisper' }
@@ -2898,7 +2881,15 @@ function showScreen(name){
   currentScreenName = name;
   const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed };
   Object.entries(map).forEach(([k, el]) => { if(!el) return; el.hidden = (k !== name); });
-  if (name !== 'coach') hideModelDownloadBanner();
+  
+  // Ensure banner state syncs correctly when navigating
+  if (name === 'coach') {
+    if (window.whisperDownloadStatus === 'downloading') showModelDownloadBanner();
+    else hideModelDownloadBanner();
+  } else {
+    hideModelDownloadBanner();
+  }
+
   if(name !== 'coach' && readerFullscreen) exitReaderFullscreen();
   if(name === 'home') refreshProgressMenu();
   closeReciterMenu();
@@ -6552,14 +6543,23 @@ if(qrFullscreen){ qrFullscreen.addEventListener('click', (e) => { if(e.target ==
 // ── Whisper / Moonshine download progress ──
 document.addEventListener('whisper-progress', (e) => {
   const p = e.detail || {};
-  if (p.status === 'ready' || p.status === 'error') { hideModelDownloadBanner(); }
-  else if (currentScreenName === 'coach' && window.whisperDownloadStatus === 'downloading') { showModelDownloadBanner(); updateModelDownloadBanner(); }
+  if (p.status === 'ready' || p.status === 'error') {
+    hideModelDownloadBanner();
+  } else if (currentScreenName === 'coach') {
+    showModelDownloadBanner();
+    updateModelDownloadBanner();
+  }
+
   if (currentScreenName !== 'coach') return;
   const pct = (typeof p.overallProgress === 'number') ? p.overallProgress : Math.round(p.progress || 0);
   const s = getModelStatusText();
-  if (p.status === 'ready' || pct >= 100) { setStatus(`${s.name} AI ready ✓`, 'idle', '100%'); }
-  else if (p.status === 'error') { setStatus(`${s.name} download failed`, 'error', 'Check connection'); }
-  else { setStatus(`Downloading ${s.name} AI…`, 'loading', s.hint); }
+
+  if (p.status === 'error') {
+    setStatus(`${s.name} download failed`, 'error', 'Check connection');
+  } else {
+    // Remains in downloading state until 'ready' event
+    setStatus(`Downloading ${s.name} AI…`, 'loading', s.hint);
+  }
 });
 
 document.addEventListener('whisper-model-info', () => updateModelDownloadBanner());
@@ -6568,8 +6568,12 @@ document.addEventListener('whisper-ready', () => {
   hideModelDownloadBanner();
   if (currentScreenName !== 'coach') return;
   const s = getModelStatusText();
-  if (wantMic) { setStatus('Listening', 'listening', contextLabel()); addFeedback(`✅ ${s.name} AI ready — listening.`, false, false, true); }
-  else { setStatus('Ready', 'idle', `${s.name} AI loaded. Tap Start reciting.`); }
+  if (wantMic) {
+    setStatus('Listening', 'listening', contextLabel());
+    addFeedback(`✅ ${s.name} AI ready — listening.`, false, false, true);
+  } else {
+    setStatus('Ready', 'idle', `${s.name} AI loaded. Tap Start reciting.`);
+  }
 });
 
 (function boot(){
