@@ -5,11 +5,13 @@ import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transfo
 
 env.allowLocalModels  = false;
 env.allowRemoteModels = true;
+env.useBrowserCache   = false; // Prevent corrupted stale downloads
 
-// Memory optimizations for mobile
-env.useBrowserCache = false; // Prevent corrupted stale downloads
-env.backends.onnx.wasm.numThreads = 1; // Single thread saves memory
-env.backends.onnx.wasm.proxy = true;   // Offloads memory pressure
+// WASM tuning
+const cores = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2;
+env.backends.onnx.wasm.numThreads = 1; 
+env.backends.onnx.wasm.simd       = true;
+// Removed env.backends.onnx.wasm.proxy = true; as it causes silent failures on mobile
 
 const MODEL_REPOS = {
   whisper: 'omartariq612/tarteel-ai-whisper-tiny-ar-quran-onnx',
@@ -17,7 +19,7 @@ const MODEL_REPOS = {
 };
 
 const MODEL_SIZE_HINTS = {
-  whisper: 40 * 1024 * 1024, 
+  whisper: 50 * 1024 * 1024, 
   'whisper-base': 150 * 1024 * 1024
 };
 
@@ -43,7 +45,7 @@ async function pickDevice() {
 
 function buildPipeline(repo, device) {
   return pipeline('automatic-speech-recognition', repo, {
-    dtype: 'q4', // Switch from q8 to q4 to drastically reduce memory
+    dtype: 'q8', // Back to q8 for better accuracy
     device,
     progress_callback: (p) => {
       try { self.postMessage({ type: 'progress', data: p }); } catch (_) {}

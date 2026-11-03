@@ -1,15 +1,14 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v80 — UPDATE:
-         • Fixed OOM crash during model download by skipping SW 
-           interception for large ONNX model files.
-         • UI now waits for actual 'ready' signal.
+   v82 — UPDATE:
+         • Version bump forces refresh of index.html + whisper-worker.js
+           to apply the AudioContext fix and silence threshold improvements.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v80';
+const VERSION = 'v82';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
@@ -217,7 +216,8 @@ self.addEventListener('fetch', event => {
       rawUrl.includes('.onnx')
     ) ||
     rawUrl.includes('onnx-community') ||
-    rawUrl.includes('eventhorizon0');
+    rawUrl.includes('eventhorizon0') ||
+    rawUrl.includes('omartariq612');
 
   if(isAiLib){
     event.respondWith(whisperCacheFirst(req, TRANSFORMERS_CACHE));

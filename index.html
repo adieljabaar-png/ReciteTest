@@ -316,7 +316,7 @@ async function decodeBlobTo16k(blob) {
 }
 
 // Trim leading/trailing silence — the cheapest, biggest perf win.
-function trimSilence(float32, rmsFloor = 0.002) {
+function trimSilence(float32, rmsFloor = 0.0005) {
   let start = 0, end = float32.length;
   const win = 160;
   while (start < end) {
@@ -441,7 +441,7 @@ class WhisperSpeechRecognition {
         audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
       });
 
-      this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this._ctx = window.getAudioCtx(); // Use the global shared context
       if (this._ctx.state === 'suspended') await this._ctx.resume();
 
       await this._ctx.audioWorklet.addModule(getPcmWorkletUrl());
@@ -475,7 +475,12 @@ class WhisperSpeechRecognition {
         this._busy = true;
         try {
           const text = await window.WhisperQuran.transcribeRaw(trimmed);
-          if (!text || !text.trim()) return;
+          if (!text || !text.trim()) {
+            // If it heard something but transcribed nothing, reset the silence timer anyway
+            // so it doesn't immediately pause.
+            if (typeof resetSilenceTimer === 'function') resetSilenceTimer(true);
+            return;
+          }
           const seq = ++this._resultSeq;
           const results = [];
           results.length = seq + 1;
