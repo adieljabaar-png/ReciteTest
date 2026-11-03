@@ -148,7 +148,6 @@ function _computeTotalBytes(){
 function _detectModelFromFile(name){
   if (!name) return null;
   const f = String(name).toLowerCase();
-  if (f.includes('moonshine')) return 'moonshine';
   if (f.includes('whisper') || f.includes('tarteel')) return 'whisper';
   return null;
 }
@@ -176,7 +175,7 @@ function ensureWorker() {
   window.whisperModelInfo.sizeBytes = 0;
   if (!window.whisperModelInfo.active){
     window.whisperModelInfo.active =
-      window.whisperModelInfo._forceModel || 'moonshine';
+      window.whisperModelInfo._forceModel || 'whisper';
   }
 
   // Pause every active media source the moment a download begins.
@@ -272,9 +271,8 @@ function ensureWorker() {
       console.error('[Worker] Load error:', msg.error);
       if (!window.whisperModelInfo._triedFallback) {
         window.whisperModelInfo._triedFallback = true;
-        window.whisperModelInfo._forceModel = 'whisper';
-        window.whisperModelInfo.active = 'whisper';
-        console.warn('[Worker] Moonshine failed — falling back to Whisper');
+        // Since we are defaulting to Whisper, this fallback now logs retry
+        console.warn('[Worker] Whisper failed — retrying...');
         document.dispatchEvent(new CustomEvent('whisper-progress', {
           detail: { status:'downloading', overallProgress:0, model:'whisper' }
         }));
@@ -305,7 +303,7 @@ function ensureWorker() {
     }
   };
 
-  const prefer = window.whisperModelInfo._forceModel || 'moonshine';
+  const prefer = window.whisperModelInfo._forceModel || 'whisper';
   _worker.postMessage({ action: 'load', prefer, fallback: 'whisper' });
   return _worker;
 }

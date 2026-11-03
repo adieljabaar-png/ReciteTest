@@ -1,21 +1,21 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v77 — UPDATE:
-         • Version bump forces refresh of index.html + whisper-worker.js
-           to apply the native sample rate resampling fix.
+   v78 — UPDATE:
+         • Version bumped to force refresh of index.html + whisper-worker.js
+         • Applies the new Whisper Base model and mobile WASM stability fixes.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v77';
+const VERSION = 'v78';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
 const FONTS_CACHE        = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE      = `qc-runtime-${VERSION}`;
 const TRANSFORMERS_CACHE = `qc-transformers-${VERSION}`;
-const WHISPER_CACHE      = `qc-whisper-${VERSION}`; // ONNX model files (Moonshine / Whisper / Tarteel)
+const WHISPER_CACHE      = `qc-whisper-${VERSION}`; // ONNX model files (Whisper / Tarteel)
 
 const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
 
@@ -205,7 +205,7 @@ self.addEventListener('fetch', event => {
   try{ url = new URL(req.url); }catch(_){ return; }
   if(url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
-  // ── AI MODELS & CDN (Moonshine / Whisper / Tarteel / future) ──
+  // ── AI MODELS & CDN (Whisper / Tarteel / future) ──
   const rawUrl = req.url;
   const isAiLib =
     rawUrl.includes('cdn.jsdelivr.net/npm/@huggingface/transformers') ||
@@ -222,7 +222,8 @@ self.addEventListener('fetch', event => {
       rawUrl.includes('onnx-community') ||
       rawUrl.includes('.onnx')
     ) ||
-    rawUrl.includes('onnx-community');   // catches jsdelivr proxies of HF ONNX repos
+    rawUrl.includes('onnx-community') ||  // catches jsdelivr proxies of HF ONNX repos
+    rawUrl.includes('eventhorizon0');     // catches the specific Quran-tuned base model
 
   if(isAiLib || isAiModel){
     const target = isAiLib ? TRANSFORMERS_CACHE : WHISPER_CACHE;

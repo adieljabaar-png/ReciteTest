@@ -6,16 +6,11 @@
 //   IN  { action: 'load',      prefer?: string, fallback?: string }
 //   IN  { action: 'transcribe', audioData: Float32Array@16kHz, id: number, prefer?: string }
 //
-//   OUT { type: 'model-info', model: 'moonshine'|'whisper', repo: string, sizeBytes: number }
+//   OUT { type: 'model-info', model: 'whisper'|'whisper-tiny', repo: string, sizeBytes: number }
 //   OUT { type: 'progress',   data: <transformers.js per-file progress> }
 //   OUT { type: 'ready',      model, repo }
 //   OUT { type: 'error',      error: string, id?: number }
 //   OUT { type: 'result',     text, id, ms, model }
-//
-// Moonshine is tried first by default. The *caller* (index.html) is
-// responsible for the Whisper fallback: it terminates this worker and
-// recreates it with `prefer: 'whisper'` when an error is received
-// without an `id`.
 // ─────────────────────────────────────────────────────────────
 
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
@@ -23,25 +18,23 @@ import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transfo
 env.allowLocalModels  = false;
 env.allowRemoteModels = true;
 
-// WASM tuning — 1 thread on 2-core phones, 2 threads on 4+ cores.
+// WASM tuning — Force single-thread on mobile for maximum stability
 const cores = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2;
-env.backends.onnx.wasm.numThreads = cores >= 4 ? 2 : 1;
+env.backends.onnx.wasm.numThreads = 1; 
 env.backends.onnx.wasm.simd       = true;
 
 // ── Known models ───────────────────────────────────────────────
 const MODEL_REPOS = {
-  moonshine: 'onnx-community/moonshine-tiny-ar-ONNX',
-  whisper:   'onnx-community/tarteel-ai-whisper-tiny-ar-quran-ONNX'
+  // The new, more accurate Quran-tuned base model
+  whisper: 'eventhorizon0/tarteel-ai-onnx-whisper-base-ar-quran',
+  // Kept as fallback if needed, though we recommend the base model
+  'whisper-tiny': 'onnx-community/tarteel-ai-whisper-tiny-ar-quran-ONNX'
 };
 
-// Approximate download totals (bytes) — used only to give the UI a
-// stable denominator from the first progress event. The real total is
-// computed by index.html from per-file `total` fields, so an
-// over-estimate here just means the last visible % is below 100 before
-// the banner hides on `ready`.
+// Approximate download totals (bytes)
 const MODEL_SIZE_HINTS = {
-  moonshine: 40 * 1024 * 1024,   // ~40 MB q8
-  whisper:   50 * 1024 * 1024    // ~50 MB q8
+  whisper: 150 * 1024 * 1024, // ~150 MB for the base model
+  'whisper-tiny': 50 * 1024 * 1024 
 };
 
 let transcriber      = null;
@@ -52,21 +45,19 @@ let activeModelRepo  = null;
 // ── Helpers ────────────────────────────────────────────────────
 
 function resolveModelName(name) {
-  if (!name) return { key: 'moonshine', repo: MODEL_REPOS.moonshine };
+  if (!name) return { key: 'whisper', repo: MODEL_REPOS.whisper };
   const n = String(name).toLowerCase().trim();
   if (MODEL_REPOS[n]) return { key: n, repo: MODEL_REPOS[n] };
-  if (n.includes('moonshine'))                     return { key: 'moonshine', repo: name };
-  if (n.includes('whisper') || n.includes('tarteel')) return { key: 'whisper',   repo: name };
-  return { key: 'moonshine', repo: MODEL_REPOS.moonshine };
+  if (n.includes('whisper')) {
+    // Default to the base model unless 'tiny' is explicitly requested
+    if (n.includes('tiny')) return { key: 'whisper-tiny', repo: MODEL_REPOS['whisper-tiny'] };
+    return { key: 'whisper', repo: MODEL_REPOS.whisper };
+  }
+  return { key: 'whisper', repo: MODEL_REPOS.whisper };
 }
 
 async function pickDevice() {
-  try {
-    if (navigator.gpu) {
-      const adapter = await navigator.gpu.requestAdapter();
-      if (adapter) return 'webgpu';
-    }
-  } catch (_) {}
+  // Forced to WASM for mobile compatibility. WebGPU often fails silently on mobile.
   return 'wasm';
 }
 
@@ -88,7 +79,6 @@ async function loadModel(prefer) {
     return transcriber;
   }
   if (loadingPromise) {
-    // Another caller is already loading — wait for it.
     await loadingPromise;
     return transcriber;
   }
@@ -97,8 +87,6 @@ async function loadModel(prefer) {
   activeModelKey  = key;
   activeModelRepo = repo;
 
-  // Announce the model + size hint so the UI can render the banner
-  // immediately, before the first per-file progress event arrives.
   self.postMessage({
     type: 'model-info',
     model: key,
@@ -134,8 +122,6 @@ self.addEventListener('message', async (e) => {
     try {
       await loadModel(prefer);
     } catch (err) {
-      // Post an error WITHOUT an id so index.html's load-failure
-      // path kicks in and retries with `prefer: 'whisper'`.
       self.postMessage({
         type: 'error',
         error: err && err.message ? err.message : String(err)
@@ -152,21 +138,14 @@ self.addEventListener('message', async (e) => {
       return;
     }
 
-    // Ignore trivially short clips (< 250 ms @ 16 kHz). The main
-    // thread already filters, but a second guard costs nothing.
     if (!audioData || audioData.length < 4000) {
-      self.postMessage({
-        type: 'result',
-        text: '',
-        id,
-        ms: 0,
-        model: activeModelKey
-      });
+      self.postMessage({ type: 'result', text: '', id, ms: 0, model: activeModelKey });
       return;
     }
 
     try {
       const t0 = performance.now();
+      // Using 'ar' language and 'transcribe' task
       const result = await transcriber(audioData, { language: 'ar', task: 'transcribe' });
       self.postMessage({
         type: 'result',
