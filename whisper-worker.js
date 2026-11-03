@@ -1,16 +1,6 @@
 // whisper-worker.js
 // ─────────────────────────────────────────────────────────────
 // Model loader + transcriber for the Quran Recitation Coach.
-//
-// Protocol (all messages via self.postMessage):
-//   IN  { action: 'load',      prefer?: string, fallback?: string }
-//   IN  { action: 'transcribe', audioData: Float32Array@16kHz, id: number, prefer?: string }
-//
-//   OUT { type: 'model-info', model: 'whisper'|'whisper-tiny', repo: string, sizeBytes: number }
-//   OUT { type: 'progress',   data: <transformers.js per-file progress> }
-//   OUT { type: 'ready',      model, repo }
-//   OUT { type: 'error',      error: string, id?: number }
-//   OUT { type: 'result',     text, id, ms, model }
 // ─────────────────────────────────────────────────────────────
 
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
@@ -25,16 +15,16 @@ env.backends.onnx.wasm.simd       = true;
 
 // ── Known models ───────────────────────────────────────────────
 const MODEL_REPOS = {
-  // The new, more accurate Quran-tuned base model
-  whisper: 'eventhorizon0/tarteel-ai-onnx-whisper-base-ar-quran',
-  // Kept as fallback if needed, though we recommend the base model
-  'whisper-tiny': 'onnx-community/tarteel-ai-whisper-tiny-ar-quran-ONNX'
+  // The tiny model is small, fast, and proven to work on mobile devices.
+  whisper: 'onnx-community/tarteel-ai-whisper-tiny-ar-quran-ONNX',
+  // The base model is larger (higher accuracy) but may fail on devices with limited storage.
+  'whisper-base': 'eventhorizon0/tarteel-ai-onnx-whisper-base-ar-quran'
 };
 
 // Approximate download totals (bytes)
 const MODEL_SIZE_HINTS = {
-  whisper: 150 * 1024 * 1024, // ~150 MB for the base model
-  'whisper-tiny': 50 * 1024 * 1024 
+  whisper: 50 * 1024 * 1024,       // ~50 MB for the tiny model
+  'whisper-base': 150 * 1024 * 1024 // ~150 MB for the base model
 };
 
 let transcriber      = null;
@@ -49,8 +39,8 @@ function resolveModelName(name) {
   const n = String(name).toLowerCase().trim();
   if (MODEL_REPOS[n]) return { key: n, repo: MODEL_REPOS[n] };
   if (n.includes('whisper')) {
-    // Default to the base model unless 'tiny' is explicitly requested
-    if (n.includes('tiny')) return { key: 'whisper-tiny', repo: MODEL_REPOS['whisper-tiny'] };
+    // Default to the tiny model unless 'base' is explicitly requested
+    if (n.includes('base')) return { key: 'whisper-base', repo: MODEL_REPOS['whisper-base'] };
     return { key: 'whisper', repo: MODEL_REPOS.whisper };
   }
   return { key: 'whisper', repo: MODEL_REPOS.whisper };

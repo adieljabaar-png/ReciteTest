@@ -1,14 +1,14 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v78 — UPDATE:
+   v79 — UPDATE:
          • Version bumped to force refresh of index.html + whisper-worker.js
-         • Applies the new Whisper Base model and mobile WASM stability fixes.
+         • Reverted to the stable Whisper Tiny model for mobile compatibility.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v78';
+const VERSION = 'v79';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
