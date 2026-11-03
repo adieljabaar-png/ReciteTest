@@ -1,15 +1,20 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v75 — UPDATE:
+   v76 — UPDATE:
          • Version bump forces refresh of index.html + whisper-worker.js
-           so the Whisper 100% stuck fix takes effect.
-         • Added 'hf.co' to AI model URL matching for Hugging Face redirects.
+           (Moonshine-first download + accurate model name/size display).
+         • Bumped TRANSFORMERS_CACHE_MAX (100 → 150) and
+           WHISPER_CACHE_MAX (40 → 80) so two quantized models and their
+           onnxruntime WASM assets can coexist without thrashing.
+         • No URL-matching changes — onnx-community/moonshine-tiny-ar-ONNX
+           and onnx-community/tarteel-ai-whisper-tiny-ar-quran-ONNX (plus
+           their jsdelivr + cdn-lfs proxies) were already covered.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v75';
+const VERSION = 'v76';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
@@ -43,8 +48,8 @@ const HOST_GOOGLE_FONTS_STATIC  = 'fonts.gstatic.com';
 
 const TEXT_CACHE_MAX         = 400;
 const RUNTIME_MAX            = 120;
-const TRANSFORMERS_CACHE_MAX = 100;
-const WHISPER_CACHE_MAX      = 40;
+const TRANSFORMERS_CACHE_MAX = 150;
+const WHISPER_CACHE_MAX      = 80;
 const MANIFEST_TIMEOUT_MS    = 2000;
 
 const FONT_CSS_URL = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap';
