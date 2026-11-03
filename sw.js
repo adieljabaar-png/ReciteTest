@@ -1,24 +1,24 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
+   v73 — UPDATE: Switched from Whisper to Moonshine for faster
+         real-time transcription. Added whisper-worker.js to the
+         shell cache so the AI worker runs offline.
    v71 — UPDATE: Version bump to force cache refresh for the new
          Whisper download progress UI in index.html. Ensures the 
          @huggingface CDN routes are intercepted correctly.
-   v70 — FIX: update Whisper CDN urls from @xenova to @huggingface 
-         (the @xenova package 404s at version 3.4.1). Matches the 
-         import in index.html. Forces cache refresh.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v71';
+const VERSION = 'v73';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
 const FONTS_CACHE        = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE      = `qc-runtime-${VERSION}`;
 const TRANSFORMERS_CACHE = `qc-transformers-${VERSION}`;
-const WHISPER_CACHE      = `qc-whisper-${VERSION}`;
+const WHISPER_CACHE      = `qc-whisper-${VERSION}`; // Using this for Moonshine ONNX models too
 
 const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
 
@@ -27,7 +27,8 @@ const PERSISTENT_CACHES = [AUDIO_CACHE];
 
 const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-', 'qc-transformers-', 'qc-whisper-'];
 
-const SHELL_URLS = ['./', './index.html', './manifest.json'];
+// Added whisper-worker.js here so it's available offline
+const SHELL_URLS = ['./', './index.html', './manifest.json', './whisper-worker.js'];
 
 const HOST_ALQURAN              = 'api.alquran.cloud';
 const HOST_QURAN_COM            = 'api.quran.com';
@@ -57,7 +58,7 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
    INSTALL — cache shell + pre-cache Google Fonts
    ============================================================ */
 
-// WHISPER QURAN MODEL
+// MOONSHINE / TRANSFORMERS CDN URLS
 const WHISPER_CDN_URLS = [
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/dist/transformers.min.js',
   'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.0/dist/ort.min.js'
@@ -194,13 +195,17 @@ self.addEventListener('fetch', event => {
   try{ url = new URL(req.url); }catch(_){ return; }
   if(url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
-  // ── WHISPER QURAN - Cache transformers.js and ONNX models ──
+  // ── AI MODELS & CDN (Moonshine / Whisper) ──
   const rawUrl = req.url;
   if(
     rawUrl.includes('cdn.jsdelivr.net/npm/@huggingface/transformers') || 
     rawUrl.includes('cdn.jsdelivr.net/npm/@xenova/transformers') || 
     rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime-web') || 
-    (rawUrl.includes('huggingface.co') && (rawUrl.includes('whisper-tiny-ar-quran') || rawUrl.includes('tarteel-ai'))) || 
+    (rawUrl.includes('huggingface.co') && (
+      rawUrl.includes('whisper') || 
+      rawUrl.includes('tarteel') || 
+      rawUrl.includes('moonshine')
+    )) || 
     rawUrl.includes('onnx-community') 
   ){
     event.respondWith(whisperCacheFirst(req, rawUrl.includes('transformers') || rawUrl.includes('onnxruntime') ? TRANSFORMERS_CACHE : WHISPER_CACHE));
