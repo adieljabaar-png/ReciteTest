@@ -1,24 +1,31 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v73 — UPDATE: Switched from Whisper to Moonshine for faster
-         real-time transcription. Added whisper-worker.js to the
-         shell cache so the AI worker runs offline.
-   v71 — UPDATE: Version bump to force cache refresh for the new
-         Whisper download progress UI in index.html. Ensures the 
-         @huggingface CDN routes are intercepted correctly.
+   v74 — UPDATE:
+         • Version bump forces refresh of index.html + whisper-worker.js
+           after the B2 WhisperSpeechRecognition integration.
+         • whisper-worker.js now routed to SHELL_CACHE (was RUNTIME_CACHE),
+           so it can't be evicted by LRU.
+         • Precache @huggingface/transformers +esm bundle during install.
+         • Enlarged TRANSFORMERS_CACHE_MAX (20 → 100) so the split
+           ESM sub-module graph fits without eviction.
+         • Broadened AI-model URL patterns: xenova/*, *.onnx on HF,
+           onnxruntime (all variants).
+
+   v73 — Switched app from Whisper to Moonshine (worker still works both ways).
+   v71 — Whisper download progress UI.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v73';
+const VERSION = 'v74';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;
 const FONTS_CACHE        = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE      = `qc-runtime-${VERSION}`;
 const TRANSFORMERS_CACHE = `qc-transformers-${VERSION}`;
-const WHISPER_CACHE      = `qc-whisper-${VERSION}`; // Using this for Moonshine ONNX models too
+const WHISPER_CACHE      = `qc-whisper-${VERSION}`; // ONNX model files (Moonshine / Whisper / Tarteel)
 
 const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
 
@@ -27,8 +34,15 @@ const PERSISTENT_CACHES = [AUDIO_CACHE];
 
 const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-', 'qc-transformers-', 'qc-whisper-'];
 
-// Added whisper-worker.js here so it's available offline
+// whisper-worker.js is REQUIRED for the app to function offline — must be in shell.
 const SHELL_URLS = ['./', './index.html', './manifest.json', './whisper-worker.js'];
+
+/* AI runtime libraries — precached so the worker can boot instantly.
+   NOTE: only the +esm wrapper is listed here. The many sub-modules it
+   imports are fetched + cached on demand by whisperCacheFirst(). */
+const AI_LIBS_CDN_URLS = [
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm'
+];
 
 const HOST_ALQURAN              = 'api.alquran.cloud';
 const HOST_QURAN_COM            = 'api.quran.com';
@@ -38,7 +52,7 @@ const HOST_GOOGLE_FONTS_STATIC  = 'fonts.gstatic.com';
 
 const TEXT_CACHE_MAX         = 400;
 const RUNTIME_MAX            = 120;
-const TRANSFORMERS_CACHE_MAX = 20;
+const TRANSFORMERS_CACHE_MAX = 100;
 const WHISPER_CACHE_MAX      = 40;
 const MANIFEST_TIMEOUT_MS    = 2000;
 
@@ -55,17 +69,11 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
 );
 
 /* ============================================================
-   INSTALL — cache shell + pre-cache Google Fonts
+   INSTALL — cache shell + transformers lib + Google Fonts
    ============================================================ */
-
-// MOONSHINE / TRANSFORMERS CDN URLS
-const WHISPER_CDN_URLS = [
-  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/dist/transformers.min.js',
-  'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.0/dist/ort.min.js'
-];
-
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
+    // 1) Shell (index.html, manifest, whisper-worker.js)
     try{
       const cache = await caches.open(SHELL_CACHE);
       await Promise.all(SHELL_URLS.map(async url => {
@@ -77,6 +85,18 @@ self.addEventListener('install', event => {
       }));
     }catch(_){}
 
+    // 2) AI runtime libs (transformers +esm wrapper)
+    try{
+      const cache = await caches.open(TRANSFORMERS_CACHE);
+      await Promise.allSettled(AI_LIBS_CDN_URLS.map(async url => {
+        try{
+          const res = await fetch(url, { cache: 'reload' });
+          if(res && res.ok) await cache.put(url, res.clone());
+        }catch(_){}
+      }));
+    }catch(_){}
+
+    // 3) Google Fonts (best-effort, capped)
     try{
       await Promise.race([
         prefetchFonts().catch(() => {}),
@@ -195,20 +215,28 @@ self.addEventListener('fetch', event => {
   try{ url = new URL(req.url); }catch(_){ return; }
   if(url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
-  // ── AI MODELS & CDN (Moonshine / Whisper) ──
+  // ── AI MODELS & CDN (Moonshine / Whisper / Tarteel / future) ──
   const rawUrl = req.url;
-  if(
-    rawUrl.includes('cdn.jsdelivr.net/npm/@huggingface/transformers') || 
-    rawUrl.includes('cdn.jsdelivr.net/npm/@xenova/transformers') || 
-    rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime-web') || 
-    (rawUrl.includes('huggingface.co') && (
-      rawUrl.includes('whisper') || 
-      rawUrl.includes('tarteel') || 
-      rawUrl.includes('moonshine')
-    )) || 
-    rawUrl.includes('onnx-community') 
-  ){
-    event.respondWith(whisperCacheFirst(req, rawUrl.includes('transformers') || rawUrl.includes('onnxruntime') ? TRANSFORMERS_CACHE : WHISPER_CACHE));
+  const isAiLib =
+    rawUrl.includes('cdn.jsdelivr.net/npm/@huggingface/transformers') ||
+    rawUrl.includes('cdn.jsdelivr.net/npm/@xenova/transformers') ||
+    rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime') ||       // web / node / all variants
+    rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime-web');
+
+  const isAiModel =
+    rawUrl.includes('huggingface.co') && (
+      rawUrl.includes('whisper') ||
+      rawUrl.includes('tarteel') ||
+      rawUrl.includes('moonshine') ||
+      rawUrl.includes('xenova') ||
+      rawUrl.includes('onnx-community') ||
+      rawUrl.includes('.onnx')
+    ) ||
+    rawUrl.includes('onnx-community');   // catches jsdelivr proxies of HF ONNX repos
+
+  if(isAiLib || isAiModel){
+    const target = isAiLib ? TRANSFORMERS_CACHE : WHISPER_CACHE;
+    event.respondWith(whisperCacheFirst(req, target));
     return;
   }
 
@@ -219,6 +247,12 @@ self.addEventListener('fetch', event => {
     if(url.pathname.startsWith('/api/'))           return;
     if(url.pathname === '/sw.js')                  return;
     if(url.pathname === '/robots.txt')             return;
+  }
+
+  // Worker scripts (whisper-worker.js) → SHELL_CACHE, never RUNTIME.
+  if(req.destination === 'worker' || req.destination === 'sharedworker'){
+    event.respondWith(cacheFirst(req, SHELL_CACHE));
+    return;
   }
 
   // Tajweed annotation requests
@@ -401,7 +435,10 @@ async function whisperCacheFirst(req, cacheName){
     if(hit) return hit;
     const res = await fetch(req);
     if(res && res.ok){
-      try{ await cache.put(req, res.clone()); trimCache(cacheName, cacheName === WHISPER_CACHE ? WHISPER_CACHE_MAX : TRANSFORMERS_CACHE_MAX).catch(()=>{}); }catch(_){}
+      try{
+        await cache.put(req, res.clone());
+        trimCache(cacheName, cacheName === WHISPER_CACHE ? WHISPER_CACHE_MAX : TRANSFORMERS_CACHE_MAX).catch(()=>{});
+      }catch(_){}
       return res;
     }
     throw new Error('bad');

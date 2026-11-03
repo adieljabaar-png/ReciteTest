@@ -234,89 +234,174 @@ body{
 <title>Quran Recitation Coach - Whisper Quran</title>
 
 <!-- ── Whisper Quran Patch for GitHub + Vercel ── -->
+
 <script type="module">
-
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
-
-// Configure to use ONNX quantized model - 8.57MB encoder
-env.allowLocalModels = false;
-env.allowRemoteModels = true;
-
-let whisperPipeline = null;
-let whisperStatusCb = null;
-
-async function loadWhisperQuranModel(onProgress) {
-  if (whisperPipeline) return whisperPipeline;
-  whisperStatusCb = onProgress;
-  try {
-    // This is tarteel-ai/whisper-tiny-ar-quran converted to ONNX - Vercel safe
-    whisperPipeline = await pipeline(
-      'automatic-speech-recognition',
-      'onnx-community/tarteel-ai-whisper-tiny-ar-quran-ONNX',
-      {
-        dtype: 'q4', // quantized - ~ 39MB total, fits Vercel 250MB limit
-        device: 'webgpu',
-   progress_callback: (p) => {
-          if (onProgress) onProgress(p);
-          console.log('[Whisper Quran]', p);
-          
-          // Update global state so the main app can read it
-          window.whisperDownloadStatus = 'downloading';
-          window.whisperDownloadPct = Math.round(p.progress || 0);
-          
-          // Broadcast progress to the main app
-          document.dispatchEvent(new CustomEvent('whisper-progress', { detail: p }));
-        }
-      }
-    );
-    // fallback to original tarteel tiny if community model not found
-
-} catch(e) {
-    console.warn('[Whisper] primary failed, trying fallback', e);
-    whisperPipeline = await pipeline(
-      'automatic-speech-recognition',
-      'Xenova/whisper-tiny',
-      { 
-        dtype: 'q4',
-        progress_callback: onProgress
-      }
-    );
+// One AudioContext for the entire session — do NOT create per chunk.
+let _sharedCtx = null;
+function getAudioCtx() {
+  if (!_sharedCtx) {
+    _sharedCtx = new (window.AudioContext || window.webkitAudioContext)();
+    window.__sharedAudioCtx = _sharedCtx;
   }
-  
-  // Mark as ready when finished
-  window.whisperDownloadStatus = 'ready';
-  document.dispatchEvent(new CustomEvent('whisper-ready'));
-  
-  return whisperPipeline;
+  if (_sharedCtx.state === 'suspended') _sharedCtx.resume().catch(() => {});
+  return _sharedCtx;
+}
+window.getAudioCtx = getAudioCtx;
+
+let _worker = null;
+let _workerReady = false;
+let _workerMsgId = 0;
+const _workerPending = new Map();
+
+// Per-file progress trackers so we can compute a true overall %.
+// transformers.js fires per-file progress — each file's `progress` restarts
+// at 0 for every new file. We need to sum `loaded` / `total` across files.
+const _dlLoaded = Object.create(null);
+const _dlTotal  = Object.create(null);
+
+function _computeOverallPct(fallback) {
+  let sumLoaded = 0, sumTotal = 0;
+  for (const k in _dlTotal) {
+    sumTotal += _dlTotal[k];
+    sumLoaded += Math.min(_dlLoaded[k] || 0, _dlTotal[k]);
+  }
+  if (sumTotal > 0) return Math.min(100, Math.round((sumLoaded / sumTotal) * 100));
+  return Math.max(0, Math.min(100, Math.round(fallback || 0)));
 }
 
-// Expose globally for your app
-window.WhisperQuran = {
-  load: loadWhisperQuranModel,
-  transcribe: async (audioBlob) => {
-    const pipe = await loadWhisperQuranModel();
-    const arrayBuffer = await audioBlob.arrayBuffer();
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)({sampleRate: 16000});
-    
-    let float32Audio;
-    try {
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
-      float32Audio = audioBuffer.getChannelData(0);
-    } finally {
-      try { await audioContext.close(); } catch(_) {}
+function ensureWorker() {
+  if (_worker) return _worker;
+  // Mark downloading immediately so startReciting() shows the right label
+  // before the first async progress event arrives.
+  window.whisperDownloadStatus = 'downloading';
+  window.whisperDownloadPct = 0;
+  _worker = new Worker('./whisper-worker.js', { type: 'module' });
+  _worker.onmessage = (e) => {
+    const msg = e.data;
+    if (msg.type === 'progress') {
+      const p = msg.data || {};
+      if (p.file && typeof p.total === 'number' && p.total > 0) {
+        _dlTotal[p.file] = p.total;
+        if (p.status === 'done' || p.status === 'ready') {
+          _dlLoaded[p.file] = p.total;
+        } else if (typeof p.loaded === 'number') {
+          _dlLoaded[p.file] = Math.max(_dlLoaded[p.file] || 0, p.loaded);
+        }
+      }
+      const pct = _computeOverallPct(p.progress);
+      window.whisperDownloadStatus = 'downloading';
+      window.whisperDownloadPct = pct;
+      document.dispatchEvent(new CustomEvent('whisper-progress', {
+        detail: Object.assign({}, p, { overallProgress: pct })
+      }));
+      return;
     }
+    if (msg.type === 'ready') {
+      // Pin every tracked file to 100% so the last % shown is 100.
+      for (const k in _dlTotal) _dlLoaded[k] = _dlTotal[k];
+      _workerReady = true;
+      window.whisperDownloadStatus = 'ready';
+      window.whisperDownloadPct = 100;
+      document.dispatchEvent(new CustomEvent('whisper-progress', {
+        detail: { status: 'ready', overallProgress: 100 }
+      }));
+      document.dispatchEvent(new CustomEvent('whisper-ready', { detail: msg }));
+      return;
+    }
+    if (msg.type === 'result' || msg.type === 'error') {
+      const resolver = _workerPending.get(msg.id);
+      if (resolver) { _workerPending.delete(msg.id); resolver(msg); }
+    }
+  };
+  _worker.postMessage({ action: 'load' });
+  return _worker;
+}
 
-    const result = await pipe(float32Audio, {
-      language: 'arabic',
-      task: 'transcribe',
-      chunk_length_s: 30,
-      stride_length_s: 5
+// Worker is created lazily on first mic tap (see ensureWorker below).
+window.ensureWorker = ensureWorker;
+
+// Decode a MediaRecorder blob → 16 kHz Float32, mono.
+async function decodeBlobTo16k(blob) {
+  const buf = await blob.arrayBuffer();
+  const ctx = getAudioCtx();
+  let audioBuf;
+  try {
+    // decodeAudioData resamples to ctx.sampleRate, but we want 16k.
+    // If ctx was created at the browser default (44.1k/48k) we resample ourselves.
+    audioBuf = await ctx.decodeAudioData(buf.slice(0));
+  } catch (e) {
+    // Safari sometimes fails to decode opus; retry via <audio> element.
+    const url = URL.createObjectURL(blob);
+    try {
+      const el = new Audio(url);
+      await el.play().catch(() => {});
+      el.pause();
+      audioBuf = await ctx.decodeAudioData(await (await fetch(url)).arrayBuffer());
+    } finally { URL.revokeObjectURL(url); }
+  }
+
+  // Downmix to mono
+  const ch0 = audioBuf.getChannelData(0);
+  const len = ch0.length;
+
+  // Simple linear resampler to 16k
+  const srcRate = audioBuf.sampleRate;
+  const tgtRate = 16000;
+  if (srcRate === tgtRate) return ch0.slice(0);
+
+  const ratio = srcRate / tgtRate;
+  const outLen = Math.floor(len / ratio);
+  const out = new Float32Array(outLen);
+  for (let i = 0; i < outLen; i++) {
+    const src = i * ratio;
+    const i0 = Math.floor(src), i1 = Math.min(i0 + 1, len - 1);
+    const f = src - i0;
+    out[i] = ch0[i0] * (1 - f) + ch0[i1] * f;
+  }
+  return out;
+}
+
+// Trim leading/trailing silence — the cheapest, biggest perf win.
+// Skips work on silent chunks entirely.
+function trimSilence(float32, rmsFloor = 0.006) {
+  let start = 0, end = float32.length;
+  const win = 160; // 10 ms
+  while (start < end) {
+    let s = 0;
+    for (let i = start; i < start + win && i < end; i++) s += float32[i] * float32[i];
+    if (Math.sqrt(s / win) >= rmsFloor) break;
+    start += win;
+  }
+  while (end > start) {
+    let s = 0;
+    for (let i = end - win; i < end; i++) s += float32[i] * float32[i];
+    if (Math.sqrt(s / win) >= rmsFloor) break;
+    end -= win;
+  }
+  if (end - start < 1600) return null; // < 100 ms of speech → skip
+  return float32.subarray(start, end);
+}
+
+window.WhisperQuran = {
+  load: () => ensureWorker(),
+  transcribe: async (audioBlob) => {
+    const w = ensureWorker();
+    const audio = await decodeBlobTo16k(audioBlob);
+    const trimmed = trimSilence(audio);
+    if (!trimmed) return '';
+
+    const id = ++_workerMsgId;
+    const res = await new Promise((resolve) => {
+      _workerPending.set(id, resolve);
+      w.postMessage({ action: 'transcribe', audioData: trimmed, id }, [trimmed.buffer]);
     });
-    return result.text;
+    if (res.type === 'error') throw new Error(res.error);
+    return res.text || '';
   }
 };
+</script>
 
-// Custom SpeechRecognition replacement using Whisper
+<script>
 class WhisperSpeechRecognition {
   constructor() {
     this.lang = 'ar-SA';
@@ -328,112 +413,104 @@ class WhisperSpeechRecognition {
     this._audioChunks = [];
     this._isRunning = false;
     this._stream = null;
-    this._whisperInterval = null;
+    this._chunkTimer = null;
+    this._busy = false;
+    this._resultSeq = 0;
+    this._chunkMs = 3000;
   }
-  addEventListener(type, cb) {
-    if (!this._listeners[type]) this._listeners[type] = [];
-    this._listeners[type].push(cb);
-  }
-  removeEventListener(type, cb) {
-    if (!this._listeners[type]) return;
-    this._listeners[type] = this._listeners[type].filter(f => f !== cb);
-  }
-  _emit(type, event) {
-    if (this['on'+type]) this['on'+type](event);
-    if (this._listeners[type]) this._listeners[type].forEach(fn => fn(event));
-  }
+
+  addEventListener(t, cb) { (this._listeners[t] ||= []).push(cb); }
+  removeEventListener(t, cb) { this._listeners[t] = (this._listeners[t] || []).filter(f => f !== cb); }
+  _emit(t, ev) { this['on' + t]?.(ev); this._listeners[t]?.forEach(fn => fn(ev)); }
+
   async start() {
     if (this._isRunning) return;
     this._isRunning = true;
     try {
-      const pipe = await loadWhisperQuranModel((p) => {
-        this._emit('audiostart', {});
+      await window.ensureWorker();
+
+      const cores = navigator.hardwareConcurrency || 2;
+      this._chunkMs = cores >= 8 ? 2500 : cores >= 4 ? 3500 : 5000;
+
+      this._stream = await navigator.mediaDevices.getUserMedia({
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true }
       });
-      this._stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true } });
-      this._audioChunks = [];
-      this._mediaRecorder = new MediaRecorder(this._stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm' });
-      this._mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) this._audioChunks.push(e.data); };
+
+      this._mediaRecorder = new MediaRecorder(
+        this._stream,
+        MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+          ? { mimeType: 'audio/webm;codecs=opus' }
+          : undefined
+      );
+
+      this._mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) this._audioChunks.push(e.data);
+      };
+
       this._mediaRecorder.onstop = async () => {
-        if (!this._isRunning || this._audioChunks.length === 0) return;
-        const blob = new Blob(this._audioChunks, { type: 'audio/webm' });
+        const chunks = this._audioChunks;
         this._audioChunks = [];
+        if (this._isRunning && this.continuous) {
+          try { this._mediaRecorder.start(); } catch (_) {}
+          this._armChunkTimer();
+        }
+        if (!chunks.length) return;
+        if (this._busy) return;
+        this._busy = true;
         try {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
           const text = await window.WhisperQuran.transcribe(blob);
           if (!text || !text.trim()) return;
-         // Create a fake SpeechRecognitionResult compatible with your existing logic
-          const result = {
-            0: { transcript: text, confidence: 0.95 },
-            isFinal: true,
-            length: 1
-          };
-          // Each Whisper chunk is a brand-new final result. Emit it under a
-          // monotonically increasing resultIndex so the main script's
-          // "lastSpeechResultIndex" guard does not swallow subsequent chunks.
-          this._resultSeq = (this._resultSeq || 0) + 1;
-          const seq = this._resultSeq;
+          const seq = ++this._resultSeq;
           const results = [];
           results.length = seq + 1;
-          results[seq] = result;
-          const event = {
-            results: results,
-            resultIndex: seq,
-            interpretation: text
-          };
-          this._emit('result', event);
-        } catch(err) {
-          console.error('[Whisper] transcribe error', err);
+          results[seq] = { 0: { transcript: text, confidence: 0.95 }, isFinal: true, length: 1 };
+          this._emit('result', { results, resultIndex: seq, interpretation: text });
+        } catch (err) {
+          console.warn('[Whisper] transcribe failed', err);
           this._emit('error', { error: 'whisper-error', message: err.message });
-        }
-        // restart recording for continuous mode
-        if (this._isRunning && this.continuous) {
-          try { this._mediaRecorder.start(3000); setTimeout(() => { if (this._mediaRecorder && this._mediaRecorder.state === 'recording') this._mediaRecorder.stop(); }, 3000); } catch(e){}
+        } finally {
+          this._busy = false;
         }
       };
-      this._mediaRecorder.start(3000);
-      // Chunk every 3 seconds for live feedback
-      this._whisperInterval = setInterval(() => {
-        if (this._mediaRecorder && this._mediaRecorder.state === 'recording') {
-          this._mediaRecorder.stop();
-        }
-      }, 1000);
+
+      this._mediaRecorder.start();
+      this._armChunkTimer();
       this._emit('start', {});
       this._emit('audiostart', {});
-    } catch(err) {
+    } catch (err) {
+      this._isRunning = false;
       this._emit('error', { error: 'not-allowed', message: err.message });
     }
   }
+
+  _armChunkTimer() {
+    clearTimeout(this._chunkTimer);
+    this._chunkTimer = setTimeout(() => {
+      if (this._isRunning && this._mediaRecorder?.state === 'recording') {
+        try { this._mediaRecorder.stop(); } catch (_) {}
+      }
+    }, this._chunkMs);
+  }
+
   stop() {
     this._isRunning = false;
-    clearInterval(this._whisperInterval);
-    if (this._mediaRecorder) { try { this._mediaRecorder.stop(); } catch(e){} }
-    if (this._stream) { this._stream.getTracks().forEach(t => t.stop()); }
+    clearTimeout(this._chunkTimer);
+    this._chunkTimer = null;
+    try { this._mediaRecorder?.stop(); } catch (_) {}
+    this._stream?.getTracks().forEach(t => t.stop());
+    this._stream = null;
     this._emit('end', {});
     this._emit('audioend', {});
   }
+
   abort() { this.stop(); }
 }
 
-// Override browser SpeechRecognition with Whisper
-// Comment this line if you want to keep browser fallback
 window.SpeechRecognition = WhisperSpeechRecognition;
 window.webkitSpeechRecognition = WhisperSpeechRecognition;
-
-// Show loading UI
-window.addEventListener('DOMContentLoaded', async () => {
-  const statusEl = document.getElementById('whisper-status');
-  try {
-    await loadWhisperQuranModel((p) => {
-      if (statusEl) {
-        if (p.status === 'progress') statusEl.textContent = `Downloading Quran model... ${Math.round(p.progress || 0)}%`;
-        else statusEl.textContent = p.status || 'Loading Quran ASR...';
-      }
-    });
-    if (statusEl) statusEl.textContent = 'Quran Whisper Ready ✓ (tarteel-ai/whisper-tiny-ar-quran)';
-  } catch(e) {
-    if (statusEl) statusEl.textContent = 'Whisper load failed, using fallback';
-  }
-});
 </script>
+
 <style>
 #whisper-status{font-size:.7rem;color:var(--muted);text-align:center;padding:6px 0;letter-spacing:.02em}
 </style>
@@ -7917,11 +7994,13 @@ async function loadSurah(n, keepFeedback){
       try{ const enJson = await enSettled.value.json(); if(enJson.code === 200 && enJson.data && Array.isArray(enJson.data.ayahs)) translations = enJson.data.ayahs.map(a => cleanTranslation(a.text)); }catch(_){}
     }
     renderVerses(arJson.data.ayahs, translations);
-  if (window.whisperDownloadStatus === 'downloading') {
-      setStatus('Downloading Whisper AI...', 'loading', window.whisperDownloadPct + '%');
+
+if (window.whisperDownloadStatus === 'downloading') {
+      setStatus('Downloading Whisper AI…', 'loading', (window.whisperDownloadPct || 0) + '%');
     } else {
       setStatus('Ready', 'idle', surahMeta.numberOfAyahs + ' ayahs · ' + (micPermission==='granted' ? 'Mic on' : 'Tap Start reciting to allow mic'));
-    } 
+    }
+
     if(!keepFeedback) feedbackEl.innerHTML = '<div class="line"><b>' + surahMeta.englishName + '</b> <span class="ar">' + surahMeta.name + '</span> — loaded.</div>';
     if (!followOnly){
       coachTajweedApplied = false;
@@ -8582,9 +8661,13 @@ async function startReciting(){
     if(!speechRecognition){ addFeedback('⚠️ Could not create speech recognizer.', true); wantMic = false; releaseMicStream(); setMicButton(); return; }
     if(speechStarting){}
     else { try{ speechStarting = true; speechRecognition.start(); }catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') throw e; } }
-    recRunning = true; lastResultAt = performance.now(); sessionHadResult = false; micWarningShown = false;
+ recRunning = true; lastResultAt = performance.now(); sessionHadResult = false; micWarningShown = false;
     startMicWatchdog(); armSpeechKeepalive();
-    setStatus('Listening', 'listening', contextLabel());
+    if (window.whisperDownloadStatus === 'downloading') {
+      setStatus('Downloading Whisper AI…', 'loading', (window.whisperDownloadPct || 0) + '%');
+    } else {
+      setStatus('Listening', 'listening', contextLabel());
+    }
     addFeedback('🎧 Listening — recite from anywhere in the page or surah.');
     updateFsMicBtn(); syncFsButtons();
   }catch(e){
@@ -9073,16 +9156,25 @@ if(qrFullscreen){ qrFullscreen.addEventListener('click', (e) => { if(e.target ==
 
 // ── Listen for Whisper Download Progress ──
 document.addEventListener('whisper-progress', (e) => {
-  const p = e.detail;
-  if (currentScreenName === 'coach' && !wantMic) {
-    if (p.status === 'progress' || p.status === 'download') {
-      setStatus('Downloading Whisper AI...', 'loading', Math.round(p.progress || 0) + '%');
-    }
+  const p = e.detail || {};
+  if (currentScreenName !== 'coach') return;
+  const pct = (typeof p.overallProgress === 'number')
+    ? p.overallProgress
+    : Math.round(p.progress || 0);
+  if (p.status === 'ready' || pct >= 100) {
+    setStatus('Whisper ready ✓', 'idle', '100%');
+  } else {
+    setStatus('Downloading Whisper AI…', 'loading', pct + '%');
   }
 });
 
 document.addEventListener('whisper-ready', () => {
-  if (currentScreenName === 'coach' && !wantMic) {
+  if (currentScreenName !== 'coach') return;
+  if (wantMic) {
+    // Download finished *after* the user tapped Start — start listening now.
+    setStatus('Listening', 'listening', contextLabel());
+    addFeedback('✅ Whisper model ready — listening.', false, false, true);
+  } else {
     setStatus('Ready', 'idle', 'Whisper model loaded. Tap Start reciting.');
   }
 });
