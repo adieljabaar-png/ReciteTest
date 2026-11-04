@@ -4,7 +4,7 @@
 
 'use strict';
 
-const VERSION = 'v88'; // BUMPED TO FORCE UPDATE
+const VERSION = 'v89'; // BUMPED TO FORCE UPDATE
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = 'qc-text'; 
