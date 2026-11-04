@@ -7,7 +7,8 @@ import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transfo
 
 env.allowLocalModels  = false;
 env.allowRemoteModels = true;
-env.useBrowserCache   = false; // Prevent corrupted stale downloads
+// CRITICAL FIX: Must be true to save the model so it doesn't redownload.
+env.useBrowserCache   = true; 
 
 // WASM tuning — Force single-thread on mobile for maximum stability
 const cores = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2;
@@ -141,13 +142,22 @@ self.addEventListener('message', async (e) => {
     }
 
     if (!audioData || audioData.length < 4000) {
+      console.log('[Whisper Worker] Audio too short, skipping.', audioData ? audioData.length : 0);
       self.postMessage({ type: 'result', text: '', id, ms: 0, model: activeModelKey });
       return;
     }
 
     try {
       const t0 = performance.now();
+      
+      // DEBUG LOG: What is the AI receiving?
+      console.log(`[Whisper Worker] Sending ${audioData.length} samples to AI...`);
+      
       const result = await transcriber(audioData, { language: 'ar', task: 'transcribe' });
+      
+      // DEBUG LOG: What did the AI return?
+      console.log('[Whisper Worker] AI Output:', result);
+
       self.postMessage({
         type: 'result',
         text: (result && result.text) || '',
@@ -156,6 +166,7 @@ self.addEventListener('message', async (e) => {
         model: activeModelKey
       });
     } catch (err) {
+      console.error('[Whisper Worker] Transcription error:', err);
       self.postMessage({ type: 'error', error: err.message, id });
     }
   }
