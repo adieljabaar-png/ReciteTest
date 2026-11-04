@@ -4,7 +4,7 @@
 
 'use strict';
 
-const VERSION = 'v86'; 
+const VERSION = 'v87'; // BUMPED TO FORCE UPDATE
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = 'qc-text'; 
@@ -156,8 +156,11 @@ self.addEventListener('fetch', event => {
   const isAiLib = rawUrl.includes('cdn.jsdelivr.net/npm/@huggingface/transformers') || rawUrl.includes('cdn.jsdelivr.net/npm/@xenova/transformers') || rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime') || rawUrl.includes('cdn.jsdelivr.net/npm/onnxruntime-web');
   const isAiModel = (rawUrl.includes('huggingface.co') || rawUrl.includes('hf.co')) && (rawUrl.includes('whisper') || rawUrl.includes('tarteel') || rawUrl.includes('moonshine') || rawUrl.includes('xenova') || rawUrl.includes('onnx-community') || rawUrl.includes('.onnx')) || rawUrl.includes('onnx-community') || rawUrl.includes('eventhorizon0') || rawUrl.includes('omartariq612');
 
-  if(isAiLib){ event.respondWith(whisperCacheFirst(req, TRANSFORMERS_CACHE)); return; }
-  if(isAiModel) return; // Skip SW for large models to avoid OOM
+  // CRITICAL FIX: Cache the AI models using the Service Worker
+  if(isAiLib || isAiModel){
+    event.respondWith(whisperCacheFirst(req, TRANSFORMERS_CACHE));
+    return;
+  }
 
   if(url.origin === self.location.origin){
     if(url.pathname.startsWith('/my-analytics/')) return;

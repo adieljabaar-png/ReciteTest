@@ -1,5 +1,5 @@
 // whisper-worker.js
-console.log('[Whisper Worker] v6 Loaded');
+console.log('[Whisper Worker] v7 Loaded - Safe Mode');
 
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
 
@@ -129,9 +129,18 @@ self.addEventListener('message', async (e) => {
       return;
     }
 
+    // Safety check: ensure audio isn't just silence
+    let sum = 0;
+    for(let i=0; i<audioData.length; i++) sum += Math.abs(audioData[i]);
+    if (sum < 0.1) {
+      console.log('[Whisper Worker] Audio is too quiet (all zeros).');
+      self.postMessage({ type: 'result', text: '', id, ms: 0, model: activeModelKey });
+      return;
+    }
+
     try {
       const t0 = performance.now();
-      console.log(`[Whisper Worker] Transcribing ${audioData.length} samples...`);
+      console.log(`[Whisper Worker] Transcribing ${audioData.length} samples. Volume sum: ${sum.toFixed(2)}`);
       
       const result = await transcriber(audioData, { language: 'ar', task: 'transcribe' });
       

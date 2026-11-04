@@ -185,7 +185,7 @@ function ensureWorker() {
   try{ if (typeof releaseMicStream === 'function') releaseMicStream(); }catch(_){}
 
   // Cache-buster added here
-  _worker = new Worker('./whisper-worker.js?v=6', { type: 'module' });
+  _worker = new Worker('./whisper-worker.js?v=7', { type: 'module' });
   _worker.onmessage = (e) => {
     const msg = e.data;
 
