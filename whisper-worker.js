@@ -1,28 +1,21 @@
 // whisper-worker.js
-// ─────────────────────────────────────────────────────────────
-// Model loader + transcriber for the Quran Recitation Coach.
-// ─────────────────────────────────────────────────────────────
+console.log('[Whisper Worker] v5 Loaded - Verification mode active');
 
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
 
 env.allowLocalModels  = false;
 env.allowRemoteModels = true;
-// MUST be true to save the model permanently
 env.useBrowserCache   = true; 
 
-// WASM tuning — Force single-thread on mobile for maximum stability
 const cores = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2;
 env.backends.onnx.wasm.numThreads = 1; 
 env.backends.onnx.wasm.simd       = true;
 
-// ── Known models ───────────────────────────────────────────────
-// Switched to the official Xenova models for guaranteed complete file downloads
 const MODEL_REPOS = {
   whisper: 'Xenova/whisper-tiny',
   'whisper-base': 'Xenova/whisper-base'
 };
 
-// Approximate download totals (bytes)
 const MODEL_SIZE_HINTS = {
   whisper: 150 * 1024 * 1024, 
   'whisper-base': 200 * 1024 * 1024 
@@ -33,7 +26,27 @@ let loadingPromise = null;
 let activeModelKey = null;
 let activeModelRepo = null;
 
-// ── Helpers ────────────────────────────────────────────────────
+// CRITICAL FIX: Purge corrupted model files before loading
+async function clearModelCache() {
+  if (typeof caches !== 'undefined') {
+    try {
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) {
+        if (name.includes('transformers') || name.includes('huggingface')) {
+          const cache = await caches.open(name);
+          const keys = await cache.keys();
+          for (const req of keys) {
+            if (req.url.includes('whisper') || req.url.includes('onnx')) {
+              await cache.delete(req);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Worker] Cache clear error:', e);
+    }
+  }
+}
 
 function resolveModelName(name) {
   if (!name) return { key: 'whisper', repo: MODEL_REPOS.whisper };
@@ -60,8 +73,6 @@ function buildPipeline(repo, device) {
   });
 }
 
-// ── Model loading (idempotent with retry logic) ────────────────
-
 async function loadModel(prefer) {
   if (transcriber) {
     self.postMessage({ type: 'ready', model: activeModelKey, repo: activeModelRepo });
@@ -83,6 +94,9 @@ async function loadModel(prefer) {
     sizeBytes: MODEL_SIZE_HINTS[key] || 0
   });
 
+  // Delete old corrupted files before downloading
+  await clearModelCache();
+
   loadingPromise = (async () => {
     const MAX_ATTEMPTS = 3;
     let attempt = 0;
@@ -102,6 +116,18 @@ async function loadModel(prefer) {
 
   try {
     transcriber = await loadingPromise;
+    
+    // CRITICAL FIX: Verify model integrity with a silent audio buffer
+    // If the model is corrupted/truncated, this will fail and prevent "Ready"
+    try {
+      const testAudio = new Float32Array(16000); 
+      await transcriber(testAudio, { language: 'ar', task: 'transcribe' });
+      console.log('[Worker] Model verification passed.');
+    } catch (verifyErr) {
+      console.error('[Worker] Model verification failed:', verifyErr);
+      throw new Error('Model failed verification test. Cache may be corrupted.');
+    }
+
     self.postMessage({ type: 'ready', model: activeModelKey, repo: activeModelRepo });
   } catch (err) {
     transcriber = null;
@@ -113,8 +139,6 @@ async function loadModel(prefer) {
   return transcriber;
 }
 
-// ── Message handler ────────────────────────────────────────────
-
 self.addEventListener('message', async (e) => {
   const data = e.data || {};
   const { action, audioData, id, prefer } = data;
@@ -123,10 +147,7 @@ self.addEventListener('message', async (e) => {
     try {
       await loadModel(prefer);
     } catch (err) {
-      self.postMessage({
-        type: 'error',
-        error: err && err.message ? err.message : String(err)
-      });
+      self.postMessage({ type: 'error', error: err && err.message ? err.message : String(err) });
     }
     return;
   }
@@ -140,21 +161,17 @@ self.addEventListener('message', async (e) => {
     }
 
     if (!audioData || audioData.length < 4000) {
-      console.log('[Whisper Worker] Audio too short, skipping. Length:', audioData ? audioData.length : 0);
       self.postMessage({ type: 'result', text: '', id, ms: 0, model: activeModelKey });
       return;
     }
 
     try {
       const t0 = performance.now();
-      
-      // DEBUG LOG: Are we receiving audio samples?
-      console.log(`[Whisper Worker] Sending ${audioData.length} samples to AI...`);
+      console.log(`[Whisper Worker] Transcribing ${audioData.length} samples...`);
       
       const result = await transcriber(audioData, { language: 'ar', task: 'transcribe' });
       
-      // DEBUG LOG: What did the AI hear?
-      console.log('[Whisper Worker] AI Output:', result);
+      console.log('[Whisper Worker] Output:', result);
 
       self.postMessage({
         type: 'result',
@@ -164,7 +181,7 @@ self.addEventListener('message', async (e) => {
         model: activeModelKey
       });
     } catch (err) {
-      console.error('[Whisper Worker] Transcription error:', err);
+      console.error('[Whisper Worker] Error:', err);
       self.postMessage({ type: 'error', error: err.message, id });
     }
   }

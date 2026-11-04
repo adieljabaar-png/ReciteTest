@@ -184,7 +184,8 @@ function ensureWorker() {
   try{ if (typeof hideAudioOverlay === 'function') hideAudioOverlay(); }catch(_){}
   try{ if (typeof releaseMicStream === 'function') releaseMicStream(); }catch(_){}
 
-  _worker = new Worker('./whisper-worker.js', { type: 'module' });
+  // Cache-buster added here
+  _worker = new Worker('./whisper-worker.js?v=5', { type: 'module' });
   _worker.onmessage = (e) => {
     const msg = e.data;
 
@@ -355,10 +356,17 @@ window.WhisperQuran = {
     const w = ensureWorker();
     const copy = float32.slice(0);
     const id = ++_workerMsgId;
-    const res = await new Promise((resolve) => {
+    const res = await new Promise((resolve, reject) => {
       _workerPending.set(id, resolve);
       w.postMessage({ action: 'transcribe', audioData: copy, id }, [copy.buffer]);
+      setTimeout(() => {
+        if (_workerPending.has(id)) {
+          _workerPending.delete(id);
+          reject(new Error('Transcription timeout'));
+        }
+      }, 15000);
     });
+    if (!res) throw new Error('No response from worker');
     if (res.type === 'error') throw new Error(res.error);
     return res.text || '';
   }
@@ -475,8 +483,15 @@ class WhisperSpeechRecognition {
         
         if (this._busy) return;
         const trimmed = trimSilence(pcm);
-        if (!trimmed) return;
-        if (trimmed.length < 8000) return;
+        if (!trimmed) {
+          // DEBUGGING: Tell the user if audio was trimmed away
+          if (typeof addFeedback === 'function') addFeedback('🤖 AI: Audio chunk trimmed (too quiet).', false, true);
+          return;
+        }
+        if (trimmed.length < 8000) {
+           if (typeof addFeedback === 'function') addFeedback('🤖 AI: Audio chunk too short (' + trimmed.length + ').', false, true);
+           return;
+        }
         
         this._busy = true;
         try {
@@ -486,14 +501,20 @@ class WhisperSpeechRecognition {
           if (typeof lastResultAt !== 'undefined') lastResultAt = performance.now();
           if (typeof resetSilenceTimer === 'function') resetSilenceTimer(true);
           
-          if (!text || !text.trim()) return;
+          if (!text || !text.trim()) {
+             if (typeof addFeedback === 'function') addFeedback('🤖 AI returned empty string (silence).', false, true);
+             return;
+          }
           
+          if (typeof addFeedback === 'function') addFeedback('🗣️ AI Heard: ' + text, false, true);
+
           const seq = ++this._resultSeq;
           const results = [];
           results.length = seq + 1;
           results[seq] = { 0: { transcript: text, confidence: 0.95 }, isFinal: true, length: 1 };
           this._emit('result', { results, resultIndex: seq, interpretation: text });
         } catch (err) {
+          if (typeof addFeedback === 'function') addFeedback('⚠️ Transcribe Error: ' + err.message, true);
           this._emit('error', { error: 'whisper-error', message: err.message });
         } finally {
           this._busy = false;
@@ -4052,6 +4073,13 @@ function createSpeechRecognition(){
 
   rec.onerror = (event) => {
     const err = event && event.error ? event.error : 'unknown';
+    
+    // Handle AI/Whisper errors correctly
+    if(err === 'whisper-error') {
+      addFeedback('⚠️ AI Error: ' + (event.message || 'Unknown'), true);
+      return;
+    }
+
     console.warn('[Speech] error:', err);
     if(err === 'no-speech' || err === 'aborted') return;
     if(err === 'service-not-allowed'){ releaseMicStream(); stopMicWatchdog(); speechFatalError = true; wantMic = false; disarmSpeechKeepalive(); setMicButton(); updateFsMicBtn(); syncFsButtons(); notifySpeechServiceUnreachable(); return; }
