@@ -1,28 +1,35 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v83 — UPDATE:
-         • Version bump forces refresh of index.html + whisper-worker.js
-           to apply the microphone silence timer fix.
+   v84 — UPDATE:
+         • Version bump forces refresh of index.html + whisper-worker.js.
+         • Clears old v83 AI model caches to remove any corrupted 
+           117MB partial downloads.
+         • PRESERVES all downloaded audio (qc-audio) and text 
+           translations (qc-text) by making them unversioned/persistent.
+         • User data (bookmarks, progress, prayer settings) is stored 
+           in localStorage and is NEVER touched by the SW.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v83';
+const VERSION = 'v84';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
-const TEXT_CACHE         = `qc-text-${VERSION}`;
+// Unversioned to preserve cached text/translations across updates
+const TEXT_CACHE         = 'qc-text'; 
 const FONTS_CACHE        = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE      = `qc-runtime-${VERSION}`;
 const TRANSFORMERS_CACHE = `qc-transformers-${VERSION}`;
 const WHISPER_CACHE      = `qc-whisper-${VERSION}`;
 
-const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
+const VERSIONED_CACHES = [SHELL_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
 
 const AUDIO_CACHE = 'qc-audio';
-const PERSISTENT_CACHES = [AUDIO_CACHE];
+// These caches will NEVER be deleted by a version update
+const PERSISTENT_CACHES = [AUDIO_CACHE, TEXT_CACHE];
 
-const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-', 'qc-transformers-', 'qc-whisper-'];
+const OWNED_PREFIXES = ['qc-shell-', 'qc-text', 'qc-fonts-', 'qc-runtime-', 'qc-transformers-', 'qc-whisper-'];
 
 const SHELL_URLS = ['./', './index.html', './manifest.json', './whisper-worker.js'];
 
@@ -99,8 +106,12 @@ self.addEventListener('activate', event => {
     try{
       const keys = await caches.keys();
       const toDelete = keys.filter(name => {
+        // Do not delete caches that are current versioned caches
         if(VERSIONED_CACHES.includes(name)) return false;
+        // Do not delete persistent caches (audio, text translations)
         if(PERSISTENT_CACHES.includes(name)) return false;
+        
+        // Delete old versioned caches that belong to this app
         const owned = OWNED_PREFIXES.some(p => name.startsWith(p));
         if(!owned) return false;
         return true;

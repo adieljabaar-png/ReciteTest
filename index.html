@@ -316,7 +316,8 @@ async function decodeBlobTo16k(blob) {
 }
 
 // Trim leading/trailing silence — the cheapest, biggest perf win.
-function trimSilence(float32, rmsFloor = 0.0001) {
+// Lowered rmsFloor to 0.00001 to catch quieter microphones.
+function trimSilence(float32, rmsFloor = 0.00001) {
   let start = 0, end = float32.length;
   const win = 160;
   while (start < end) {
@@ -1441,7 +1442,7 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
   <div class="mdb-inner">
     <div class="mdb-icon">⬇️</div>
     <div class="mdb-content">
-      <div class="mdb-title" id="mdbTitle">Downloading AI model…</div>
+      <div class="mdb-title" id="mdbTitle">Installing AI model…</div>
       <div class="mdb-sub" id="mdbSub">Preparing…</div>
       <div class="mdb-bar"><div class="mdb-bar-fill" id="mdbBarFill"></div></div>
     </div>
@@ -2013,7 +2014,7 @@ const IS_IN_APP_BROWSER = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|What
 const SPEECH_SUPPORTED = true;
 const SPEECH_LANG = 'ar-SA';
 const WHISPER_ONLY = true;
-console.log('[App] Using Whisper Quran only - omartariq612/tarteel-ai-whisper-tiny-ar-quran-onnx');
+console.log('[App] Using Whisper Quran only - Xenova/whisper-tiny');
 
 const TASHKEEL = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\uFEFF\u0640]/g;
 
@@ -5551,7 +5552,7 @@ function updateModelDownloadBanner(){
   const titleEl = document.getElementById('mdbTitle');
   const subEl   = document.getElementById('mdbSub');
   const fillEl  = document.getElementById('mdbBarFill');
-  if (titleEl) titleEl.textContent = `Downloading ${s.name} AI model…`;
+  if (titleEl) titleEl.textContent = `Installing ${s.name} AI model…`;
   if (subEl)   subEl.textContent   = s.hint;
   if (fillEl)  fillEl.style.width  = s.pct + '%';
 }
@@ -5611,7 +5612,7 @@ async function loadSurah(n, keepFeedback){
       const _ms = getModelStatusText();
       setStatus(`Downloading ${_ms.name} AI…`, 'loading', _ms.hint);
     } else {
-      setStatus('Ready', 'idle', surahMeta.numberOfAyahs + ' ayahs · ' + (micPermission==='granted' ? 'Mic on' : 'Tap Start reciting to allow mic'));
+      setStatus('Installed', 'idle', surahMeta.numberOfAyahs + ' ayahs · ' + (micPermission==='granted' ? 'Mic on' : 'Tap Start reciting to allow mic'));
     }
     if(!keepFeedback) feedbackEl.innerHTML = '<div class="line"><b>' + surahMeta.englishName + '</b> <span class="ar">' + surahMeta.name + '</span> — loaded.</div>';
     if (!followOnly){ coachTajweedApplied = false; coachTajweedReady = false; applyTajweedColorsToCoach(); }
@@ -6098,15 +6099,15 @@ async function startReciting(){
     const firstTime = !banner || banner.hidden;
     showModelDownloadBanner();
     const s0 = getModelStatusText();
-    setStatus(`Downloading ${s0.name} AI model…`, 'loading', s0.hint);
+    setStatus(`Installing ${s0.name} AI model…`, 'loading', s0.hint);
     if (firstTime) {
-      addFeedback(wasError ? `🔄 Retrying ${s0.name} AI model download. Microphone and audio stay paused until it finishes.` : `📥 Downloading the ${s0.name} AI model. Microphone and audio are paused until it finishes.`, false, true);
+      addFeedback(wasError ? `🔄 Retrying ${s0.name} AI model install. Microphone and audio stay paused until it finishes.` : `📥 Installing the ${s0.name} AI model. Microphone and audio are paused until it finishes.`, false, true);
     }
     const ok = await waitForModelReady(5 * 60 * 1000);
     hideModelDownloadBanner();
     if (!ok || window.whisperDownloadStatus !== 'ready') {
-      addFeedback('⚠️ AI model download failed. Check your connection and tap Start reciting to retry.', true);
-      setStatus('Model download failed', 'error', 'Tap Start to retry');
+      addFeedback('⚠️ AI model install failed. Check your connection and tap Start reciting to retry.', true);
+      setStatus('Model install failed', 'error', 'Tap Start to retry');
       return;
     }
     const s1 = getModelStatusText();
@@ -6132,7 +6133,7 @@ async function startReciting(){
     recRunning = true; lastResultAt = performance.now(); sessionHadResult = false; micWarningShown = false;
     startMicWatchdog(); armSpeechKeepalive();
     if (window.whisperDownloadStatus === 'downloading') {
-      setStatus('Downloading AI…', 'loading', (window.whisperDownloadPct || 0) + '%');
+      setStatus('Installing AI…', 'loading', (window.whisperDownloadPct || 0) + '%');
     } else {
       setStatus('Listening', 'listening', contextLabel());
     }
@@ -6566,10 +6567,10 @@ document.addEventListener('whisper-progress', (e) => {
   const s = getModelStatusText();
 
   if (p.status === 'error') {
-    setStatus(`${s.name} download failed`, 'error', 'Check connection');
+    setStatus(`${s.name} install failed`, 'error', 'Check connection');
   } else {
     // Remains in downloading state until 'ready' event
-    setStatus(`Downloading ${s.name} AI…`, 'loading', s.hint);
+    setStatus(`Installing ${s.name} AI…`, 'loading', s.hint);
   }
 });
 
@@ -6583,7 +6584,7 @@ document.addEventListener('whisper-ready', () => {
     setStatus('Listening', 'listening', contextLabel());
     addFeedback(`✅ ${s.name} AI ready — listening.`, false, false, true);
   } else {
-    setStatus('Ready', 'idle', `${s.name} AI loaded. Tap Start reciting.`);
+    setStatus('Installed', 'idle', `${s.name} AI ready. Tap Start reciting.`);
   }
 });
 

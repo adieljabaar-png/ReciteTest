@@ -7,7 +7,7 @@ import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transfo
 
 env.allowLocalModels  = false;
 env.allowRemoteModels = true;
-// CRITICAL FIX: Must be true to save the model so it doesn't redownload.
+// MUST be true to save the model permanently
 env.useBrowserCache   = true; 
 
 // WASM tuning — Force single-thread on mobile for maximum stability
@@ -16,17 +16,16 @@ env.backends.onnx.wasm.numThreads = 1;
 env.backends.onnx.wasm.simd       = true;
 
 // ── Known models ───────────────────────────────────────────────
+// Switched to the official Xenova models for guaranteed complete file downloads
 const MODEL_REPOS = {
-  // The tiny model is small, fast, and proven to work on mobile devices.
-  whisper: 'omartariq612/tarteel-ai-whisper-tiny-ar-quran-onnx',
-  // The base model is larger (higher accuracy) but may fail on devices with limited storage.
-  'whisper-base': 'eventhorizon0/tarteel-ai-onnx-whisper-base-ar-quran'
+  whisper: 'Xenova/whisper-tiny',
+  'whisper-base': 'Xenova/whisper-base'
 };
 
 // Approximate download totals (bytes)
 const MODEL_SIZE_HINTS = {
-  whisper: 120 * 1024 * 1024,      // Actual size ~106MB
-  'whisper-base': 150 * 1024 * 1024 
+  whisper: 150 * 1024 * 1024, 
+  'whisper-base': 200 * 1024 * 1024 
 };
 
 let transcriber = null;
@@ -48,13 +47,12 @@ function resolveModelName(name) {
 }
 
 async function pickDevice() {
-  // Forced to WASM for mobile compatibility.
   return 'wasm';
 }
 
 function buildPipeline(repo, device) {
   return pipeline('automatic-speech-recognition', repo, {
-    dtype: 'q8', // q8 is accurate and fits in mobile memory
+    dtype: 'q8', 
     device,
     progress_callback: (p) => {
       try { self.postMessage({ type: 'progress', data: p }); } catch (_) {}
@@ -142,7 +140,7 @@ self.addEventListener('message', async (e) => {
     }
 
     if (!audioData || audioData.length < 4000) {
-      console.log('[Whisper Worker] Audio too short, skipping.', audioData ? audioData.length : 0);
+      console.log('[Whisper Worker] Audio too short, skipping. Length:', audioData ? audioData.length : 0);
       self.postMessage({ type: 'result', text: '', id, ms: 0, model: activeModelKey });
       return;
     }
@@ -150,12 +148,12 @@ self.addEventListener('message', async (e) => {
     try {
       const t0 = performance.now();
       
-      // DEBUG LOG: What is the AI receiving?
+      // DEBUG LOG: Are we receiving audio samples?
       console.log(`[Whisper Worker] Sending ${audioData.length} samples to AI...`);
       
       const result = await transcriber(audioData, { language: 'ar', task: 'transcribe' });
       
-      // DEBUG LOG: What did the AI return?
+      // DEBUG LOG: What did the AI hear?
       console.log('[Whisper Worker] AI Output:', result);
 
       self.postMessage({
