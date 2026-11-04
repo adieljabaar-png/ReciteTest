@@ -316,7 +316,7 @@ async function decodeBlobTo16k(blob) {
 }
 
 // Trim leading/trailing silence — the cheapest, biggest perf win.
-function trimSilence(float32, rmsFloor = 0.0005) {
+function trimSilence(float32, rmsFloor = 0.0001) {
   let start = 0, end = float32.length;
   const win = 160;
   while (start < end) {
@@ -468,19 +468,25 @@ class WhisperSpeechRecognition {
           pcm = resampleTo16k(pcm, actualSampleRate);
         }
         
+        // Tell the app we are actively hearing audio to prevent the 6-second timeout
+        if (typeof lastResultAt !== 'undefined') lastResultAt = performance.now();
+        if (typeof resetSilenceTimer === 'function') resetSilenceTimer(true);
+        
         if (this._busy) return;
         const trimmed = trimSilence(pcm);
         if (!trimmed) return;
         if (trimmed.length < 8000) return;
+        
         this._busy = true;
         try {
           const text = await window.WhisperQuran.transcribeRaw(trimmed);
-          if (!text || !text.trim()) {
-            // If it heard something but transcribed nothing, reset the silence timer anyway
-            // so it doesn't immediately pause.
-            if (typeof resetSilenceTimer === 'function') resetSilenceTimer(true);
-            return;
-          }
+          
+          // Reset timer again after processing
+          if (typeof lastResultAt !== 'undefined') lastResultAt = performance.now();
+          if (typeof resetSilenceTimer === 'function') resetSilenceTimer(true);
+          
+          if (!text || !text.trim()) return;
+          
           const seq = ++this._resultSeq;
           const results = [];
           results.length = seq + 1;
@@ -506,7 +512,7 @@ class WhisperSpeechRecognition {
     if (this._node) { try { this._node.port.onmessage = null; this._node.disconnect(); } catch(_){} this._node = null; }
     if (this._gain) { try { this._gain.disconnect(); } catch(_){} this._gain = null; }
     if (this._stream) { this._stream.getTracks().forEach(t => t.stop()); this._stream = null; }
-    if (this._ctx) { try { this._ctx.close(); } catch(_){} this._ctx = null; }
+    // Do not close the shared context
     this._emit('end', {});
     this._emit('audioend', {});
   }
@@ -2007,7 +2013,7 @@ const IS_IN_APP_BROWSER = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|What
 const SPEECH_SUPPORTED = true;
 const SPEECH_LANG = 'ar-SA';
 const WHISPER_ONLY = true;
-console.log('[App] Using Whisper Quran only - tarteel-ai/whisper-tiny-ar-quran');
+console.log('[App] Using Whisper Quran only - omartariq612/tarteel-ai-whisper-tiny-ar-quran-onnx');
 
 const TASHKEEL = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\uFEFF\u0640]/g;
 

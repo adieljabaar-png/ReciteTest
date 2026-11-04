@@ -1,14 +1,14 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v82 — UPDATE:
+   v83 — UPDATE:
          • Version bump forces refresh of index.html + whisper-worker.js
-           to apply the AudioContext fix and silence threshold improvements.
+           to apply the microphone silence timer fix.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v82';
+const VERSION = 'v83';
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = `qc-text-${VERSION}`;

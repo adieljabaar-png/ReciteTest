@@ -1,5 +1,7 @@
 // whisper-worker.js
 // ─────────────────────────────────────────────────────────────
+// Model loader + transcriber for the Quran Recitation Coach.
+// ─────────────────────────────────────────────────────────────
 
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
 
@@ -7,26 +9,31 @@ env.allowLocalModels  = false;
 env.allowRemoteModels = true;
 env.useBrowserCache   = false; // Prevent corrupted stale downloads
 
-// WASM tuning
+// WASM tuning — Force single-thread on mobile for maximum stability
 const cores = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2;
 env.backends.onnx.wasm.numThreads = 1; 
 env.backends.onnx.wasm.simd       = true;
-// Removed env.backends.onnx.wasm.proxy = true; as it causes silent failures on mobile
 
+// ── Known models ───────────────────────────────────────────────
 const MODEL_REPOS = {
+  // The tiny model is small, fast, and proven to work on mobile devices.
   whisper: 'omartariq612/tarteel-ai-whisper-tiny-ar-quran-onnx',
+  // The base model is larger (higher accuracy) but may fail on devices with limited storage.
   'whisper-base': 'eventhorizon0/tarteel-ai-onnx-whisper-base-ar-quran'
 };
 
+// Approximate download totals (bytes)
 const MODEL_SIZE_HINTS = {
-  whisper: 50 * 1024 * 1024, 
-  'whisper-base': 150 * 1024 * 1024
+  whisper: 120 * 1024 * 1024,      // Actual size ~106MB
+  'whisper-base': 150 * 1024 * 1024 
 };
 
 let transcriber = null;
 let loadingPromise = null;
 let activeModelKey = null;
 let activeModelRepo = null;
+
+// ── Helpers ────────────────────────────────────────────────────
 
 function resolveModelName(name) {
   if (!name) return { key: 'whisper', repo: MODEL_REPOS.whisper };
@@ -40,18 +47,21 @@ function resolveModelName(name) {
 }
 
 async function pickDevice() {
+  // Forced to WASM for mobile compatibility.
   return 'wasm';
 }
 
 function buildPipeline(repo, device) {
   return pipeline('automatic-speech-recognition', repo, {
-    dtype: 'q8', // Back to q8 for better accuracy
+    dtype: 'q8', // q8 is accurate and fits in mobile memory
     device,
     progress_callback: (p) => {
       try { self.postMessage({ type: 'progress', data: p }); } catch (_) {}
     }
   });
 }
+
+// ── Model loading (idempotent with retry logic) ────────────────
 
 async function loadModel(prefer) {
   if (transcriber) {
@@ -104,14 +114,20 @@ async function loadModel(prefer) {
   return transcriber;
 }
 
+// ── Message handler ────────────────────────────────────────────
+
 self.addEventListener('message', async (e) => {
   const data = e.data || {};
   const { action, audioData, id, prefer } = data;
 
   if (action === 'load') {
-    try { await loadModel(prefer); }
-    catch (err) {
-      self.postMessage({ type: 'error', error: err && err.message ? err.message : String(err) });
+    try {
+      await loadModel(prefer);
+    } catch (err) {
+      self.postMessage({
+        type: 'error',
+        error: err && err.message ? err.message : String(err)
+      });
     }
     return;
   }
