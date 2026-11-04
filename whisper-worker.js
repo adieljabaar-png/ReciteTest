@@ -1,5 +1,5 @@
 // whisper-worker.js
-console.log('[Whisper Worker] v5 Loaded - Verification mode active');
+console.log('[Whisper Worker] v6 Loaded');
 
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm';
 
@@ -25,28 +25,6 @@ let transcriber = null;
 let loadingPromise = null;
 let activeModelKey = null;
 let activeModelRepo = null;
-
-// CRITICAL FIX: Purge corrupted model files before loading
-async function clearModelCache() {
-  if (typeof caches !== 'undefined') {
-    try {
-      const cacheNames = await caches.keys();
-      for (const name of cacheNames) {
-        if (name.includes('transformers') || name.includes('huggingface')) {
-          const cache = await caches.open(name);
-          const keys = await cache.keys();
-          for (const req of keys) {
-            if (req.url.includes('whisper') || req.url.includes('onnx')) {
-              await cache.delete(req);
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('[Worker] Cache clear error:', e);
-    }
-  }
-}
 
 function resolveModelName(name) {
   if (!name) return { key: 'whisper', repo: MODEL_REPOS.whisper };
@@ -94,9 +72,6 @@ async function loadModel(prefer) {
     sizeBytes: MODEL_SIZE_HINTS[key] || 0
   });
 
-  // Delete old corrupted files before downloading
-  await clearModelCache();
-
   loadingPromise = (async () => {
     const MAX_ATTEMPTS = 3;
     let attempt = 0;
@@ -116,18 +91,7 @@ async function loadModel(prefer) {
 
   try {
     transcriber = await loadingPromise;
-    
-    // CRITICAL FIX: Verify model integrity with a silent audio buffer
-    // If the model is corrupted/truncated, this will fail and prevent "Ready"
-    try {
-      const testAudio = new Float32Array(16000); 
-      await transcriber(testAudio, { language: 'ar', task: 'transcribe' });
-      console.log('[Worker] Model verification passed.');
-    } catch (verifyErr) {
-      console.error('[Worker] Model verification failed:', verifyErr);
-      throw new Error('Model failed verification test. Cache may be corrupted.');
-    }
-
+    // Verification step removed to prevent OOM crashes on mobile
     self.postMessage({ type: 'ready', model: activeModelKey, repo: activeModelRepo });
   } catch (err) {
     transcriber = null;

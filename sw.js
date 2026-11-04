@@ -4,19 +4,21 @@
 
 'use strict';
 
-const VERSION = 'v85'; // BUMPED TO FORCE UPDATE
+const VERSION = 'v86'; 
 
 const SHELL_CACHE        = `qc-shell-${VERSION}`;
 const TEXT_CACHE         = 'qc-text'; 
 const FONTS_CACHE        = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE      = `qc-runtime-${VERSION}`;
-const TRANSFORMERS_CACHE = `qc-transformers-${VERSION}`;
-const WHISPER_CACHE      = `qc-whisper-${VERSION}`;
+// UNVERSIONED: These must never be deleted on update
+const TRANSFORMERS_CACHE = 'qc-transformers'; 
+const WHISPER_CACHE      = 'qc-whisper';      
 
-const VERSIONED_CACHES = [SHELL_CACHE, FONTS_CACHE, RUNTIME_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
+const VERSIONED_CACHES = [SHELL_CACHE, FONTS_CACHE, RUNTIME_CACHE];
 const AUDIO_CACHE = 'qc-audio';
-const PERSISTENT_CACHES = [AUDIO_CACHE, TEXT_CACHE];
-const OWNED_PREFIXES = ['qc-shell-', 'qc-text', 'qc-fonts-', 'qc-runtime-', 'qc-transformers-', 'qc-whisper-'];
+// Add AI caches to persistent so they survive updates
+const PERSISTENT_CACHES = [AUDIO_CACHE, TEXT_CACHE, TRANSFORMERS_CACHE, WHISPER_CACHE];
+const OWNED_PREFIXES = ['qc-shell-', 'qc-text', 'qc-fonts-', 'qc-runtime-', 'qc-transformers', 'qc-whisper'];
 
 const SHELL_URLS = ['./', './index.html', './manifest.json', './whisper-worker.js'];
 const AI_LIBS_CDN_URLS = ['https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.1/+esm'];
@@ -166,7 +168,6 @@ self.addEventListener('fetch', event => {
   }
 
   if(req.destination === 'worker' || req.destination === 'sharedworker'){
-    // CHANGE: Use networkFirst for workers so we always get the latest code
     event.respondWith(networkFirst(req, SHELL_CACHE));
     return;
   }
@@ -248,7 +249,7 @@ async function cacheFirst(req, cacheName, maxEntries){
 async function networkFirst(req, cacheName, maxEntries){
   const cache = await caches.open(cacheName);
   try{
-    const res = await fetch(req, { cache: 'reload' }); // Force network
+    const res = await fetch(req, { cache: 'reload' });
     if(res && res.ok){
       const clone = res.clone();
       cache.put(req, clone).then(() => { if(maxEntries) trimCache(cacheName, maxEntries); }).catch(() => {});
