@@ -1,7 +1,7 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v67 — SW-only version bump. No strategy, route, cache-name
+   v68 — SW-only version bump. No strategy, route, cache-name
          or API change. Shell-navigation and shell-install both
          still use cache:'reload', so the new index.html reaches
          the client on the next online navigation after the v67
