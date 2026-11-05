@@ -1,67 +1,97 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v66 — SW-only version bump. No strategy, route, cache-name
+   v67 — SW-only version bump. No strategy, route, cache-name
          or API change. Shell-navigation and shell-install both
          still use cache:'reload', so the new index.html reaches
-         the client on the next online navigation after the v66
+         the client on the next online navigation after the v67
          worker activates.
 
          THE CLIENT-SIDE CHANGE THAT PROMPTED THIS BUMP
          -----------------------------------------------
-         index.html now contains four surgical fixes to the
-         Follow-mode recitation path. That path previously
-         fell into gradeFull() — the *Tajweed* grader — because
-         matchStrictness() unconditionally returns 'strict'.
-         gradeFull() uses a 2-word lookahead and calls
-         markSkippedWord() with no followOnly guard, so any
-         ASR mis-recognition could jump the pointer 2–3 words
-         ahead and paint the abandoned word yellow (.skipped).
+         index.html now contains THREE FOLLOW-UP FIXES (E, F, G)
+         to the Follow-mode recitation path, layered on top of
+         the four v66 fixes (A, B, C, D).
 
-         The four fixes:
+         v66 (A/B/C/D) removed the yellow .skipped painting and
+         capped the lookahead to 1 word — but the pointer could
+         STILL visibly jump 2 words ahead of the reciter whenever
+         the ASR misheard the current word as the next word. The
+         root cause was that the lookahead still fired on a
+         *fuzzy* match against words[ptr+1] (both isMatchWord
+         AND the very lenient isPlausiblePronunciationAttempt
+         added by v66's fix B).
 
-           A. markSkippedWord() now returns immediately when
-              followOnly is true — Follow mode never paints
-              .skipped (yellow + line-through), regardless of
-              which code path invokes it.
+         The three v67 fixes close that gap:
 
-           B. isPlausiblePronunciationAttempt() — removed the
-              dead `return false;` at the top of the function
-              so the fuzzy rescue actually runs. A mildly-wrong
-              pronunciation of words[ptr] is now committed as
-              correct before the lookahead ever fires.
+           E. The Follow-mode fuzzy rescue of the CURRENT word
+              now fires BEFORE the lookahead. If the token is a
+              plausible (but not exact) pronunciation of
+              words[ptr], it is committed as correct and the
+              pointer advances exactly 1 word — no jump.
 
-           C. gradeFull() — `const LOOKAHEAD = followOnly ? 1 : 2;`
-              Follow-mode look-ahead capped to 1 word, so no
-              single mis-recognition can jump more than 2 words.
-              Tajweed mode keeps the 2-word look-ahead.
+           F. Follow-mode lookahead fires ONLY on an EXACT
+              `heard === target.norm` match. The fuzzy
+              `isMatchWord` and `isPlausiblePronunciationAttempt`
+              checks that used to sit inside the lookahead loop
+              are GONE for Follow mode. Tajweed mode keeps its
+              fuzzy lookahead.
 
-           D. Call-site guard on the 4-token flush branch —
-              `if(!followOnly) markSkippedWord(ptr);`, reinforcing
-              fix A at the point of call.
+           G. Even with an exact match on words[ptr+1], the
+              pointer does NOT skip if the token could also
+              plausibly be the current word (e.g. mishearing
+              الرحمن as الرحيم in a recitation). It buffers
+              instead.
 
-         Net result in Follow mode: the pointer advances word-by-
-         word with you, never marks yellow, and never "catches up"
-         by skipping ahead when the ASR drops a token.
+         NET RESULT IN FOLLOW MODE
+         -------------------------
+         A token either:
+           • matches the current word (exact OR plausible)
+             → commit as correct, advance 1; or
+           • does not match anywhere
+             → buffer, no advance.
+         The pointer can ONLY skip when the next word is an
+         EXACT match AND the token is dissimilar to the current
+         word — the strongest possible evidence that the
+         reciter actually skipped a word.
+
+         SW-SIDE IMPACT
+         --------------
+         None required. E/F/G are pure JavaScript in the
+         client. The only thing that needs to change is
+         VERSION — the new worker deletes qc-*-v66 caches on
+         activate and re-populates the shell cache with the
+         new index.html.
 
          STALE COPY TO FIX LATER IN index.html
          -------------------------------------
          openCoachInfoModal() still describes Follow mode as
-         using "a tight 2-word lookahead". After these fixes it
-         is a 1-word lookahead. The copy is now slightly stale;
-         update it when convenient. The SW does not depend on it.
-
-         SW-SIDE IMPACT
-         --------------
-         None required. The four fixes are pure JavaScript in
-         the client. The SW's fetch strategy, cache names, and
-         bypass rules are all unchanged. The only thing that
-         needs to change is VERSION — the new worker will then
-         delete qc-*-v65 caches on activate and re-populate the
-         shell cache with the new index.html.
+         using "a tight 2-word lookahead". After v66+v67 it is:
+           • a 1-word lookahead (v66 fix C), AND
+           • exact-match-only in Follow mode (v67 fix F), with
+             a pre-lookahead fuzzy rescue of the current word
+             (v67 fix E).
+         The copy is stale; update it when convenient. The SW
+         does not depend on it.
 
    PREVIOUS RELEASES (kept for context — all still accurate)
    ============================================================
+
+   v66 — SW-only version bump for the initial Follow-mode fixes
+         A/B/C/D:
+           A. markSkippedWord() now returns immediately when
+              followOnly is true — Follow mode never paints
+              .skipped (yellow + line-through).
+           B. isPlausiblePronunciationAttempt() — removed the
+              dead `return false;` at the top, so the fuzzy
+              rescue can run. (Note: this fix was ultimately
+              superseded by v67's E, which fires the rescue
+              BEFORE lookahead instead of after.)
+           C. gradeFull() — `const LOOKAHEAD = followOnly ? 1
+              : 2;`. Follow mode capped to 1-word lookahead;
+              Tajweed mode kept at 2.
+           D. Call-site guard on the 4-token flush branch —
+              `if(!followOnly) markSkippedWord(ptr);`.
 
    v65 — SW-only bugfix to networkFresh() (the Tajweed-annotation
          handler). Cached successful responses under their full
@@ -147,9 +177,15 @@
          FOLLOW_WRONG_LIMIT = 3, FOLLOW_PIN_STOP_MS = 7000.
          Pointer pins on the 3rd unrecognised word and stops
          the mic after 7 s if it is still not recited.
-       Follow mode NO LONGER paints skipped words yellow and NO
-       LONGER jumps more than 1 word ahead of the reciter (see
-       the v66 header block above — fixes A / B / C / D).
+       Follow mode NO LONGER paints skipped words yellow (v66,
+       fixes A/D), NO LONGER jumps more than 1 word ahead (v66,
+       fix C), and NO LONGER jumps ahead on a fuzzy match of
+       the next word (v67, fixes E/F/G).
+       A Follow-mode token advances the pointer by exactly ONE
+       word if it matches the current word — exact OR plausible
+       pronunciation — and is buffered otherwise. A multi-word
+       skip can only fire when the next word is an EXACT match
+       AND the token is dissimilar to the current word.
      • Recitation modes permanently locked to STRICT matching.
      • Tajweed mode — rule-aware checks covering FOUR rules:
          madd duration (normal / permissible / necessary),
@@ -214,17 +250,17 @@
        /robots.txt also bypassed so AI policy is always fresh.
      - Push notifications with inline SVG icon.
 
-   NOTE ON DEPLOY: after shipping v66, fully close the PWA (or
+   NOTE ON DEPLOY: after shipping v67, fully close the PWA (or
    close every tab showing the site) and reopen it. The browser
    fetches sw.js on navigation; the new worker's install calls
    skipWaiting() and its activate calls clients.claim(), so the
-   next open runs the new code path. Caches qc-*-v65 and older
+   next open runs the new code path. Caches qc-*-v66 and older
    are deleted on activate; qc-audio (downloads) is preserved.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v66';
+const VERSION = 'v67';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -272,10 +308,11 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     // 1. Shell — awaited (mandatory for offline open). The
-    //    `cache:'reload'` marker below guarantees the v66 worker
+    //    `cache:'reload'` marker below guarantees the v67 worker
     //    stores the *new* index.html containing the Follow-mode
-    //    fixes A/B/C/D, while keeping the AI-blocker, meta tags
-    //    and hidden policy modal intact in source.
+    //    fixes E/F/G (on top of v66's A/B/C/D), while keeping
+    //    the AI-blocker, meta tags and hidden policy modal
+    //    intact in source.
     try{
       const cache = await caches.open(SHELL_CACHE);
       await Promise.all(SHELL_URLS.map(async url => {

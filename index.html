@@ -8299,10 +8299,8 @@ const FULL_LOOKAHEAD = 5;
 function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
-  /* ── Fix C ────────────────────────────────────────────────
-     Look-ahead is capped to 1 word in Follow mode so a "skip
-     and catch-up" cannot jump more than 2 words at once. In
-     Tajweed mode the 2-word look-ahead is preserved. */
+  /* ── Fix C (kept) ─────────────────────────────────────────
+     Follow-mode lookahead is capped to 1 word. */
   const LOOKAHEAD = followOnly ? 1 : 2;
 
   const outerBatchCtx = batchTimingCtx;
@@ -8324,6 +8322,7 @@ function gradeFull(tokens, startIdx){
       if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){ used++; continue; }
       if(heard.length < 2 && heard !== words[ptr].norm && words[ptr].norm.length > 1){ used++; continue; }
 
+      /* ── Exact match on current word — unchanged ───────── */
       if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         const _w = words[ptr];
@@ -8347,6 +8346,7 @@ function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
+      /* ── Split-token — unchanged ───────────────────────── */
       if(trySplitTokenMatch(heard, rawTok)){
         const combined = normArCached(pendingHeard.join('') + rawTok);
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8357,18 +8357,56 @@ function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
+      /* ── Fix E: Follow-mode fuzzy rescue of the CURRENT word
+         fires BEFORE lookahead. A plausible pronunciation of
+         words[ptr] is committed as correct and the pointer
+         advances 1 — no jump. ─────────────────────────────── */
+      if(followOnly && !pendingHeard.length){
+        const curW = words[ptr];
+        if(curW && isPlausiblePronunciationAttempt(heard, hPhon, curW)){
+          const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+          commitCorrect(ptr, seg);
+          lastDirectCommitIdx = -1;
+          lastDirectCommitAt  = 0;
+          lastCommitBatchId   = -1;
+          prevWordAudio       = null;
+          advancePast(1);
+          pendingHeard.length = 0;
+          consecutiveReds = 0;
+          noteFollowProgress();
+          used++;
+          continue;
+        }
+      }
+
+      /* ── Lookahead ─────────────────────────────────────────
+         Fix F: In Follow mode, ONLY exact matches fire. The
+         fuzzy isMatchWord / isPlausiblePronunciationAttempt
+         checks are gone — those were causing the pointer to
+         skip the current word whenever the ASR misheard it as
+         the next word. Tajweed mode keeps fuzzy lookahead. ── */
       let found = -1;
       const maxK = Math.min(LOOKAHEAD, words.length - ptr - 1);
       for(let k = 1; k <= maxK; k++){
         const target = words[ptr + k];
         if(heard === target.norm){ found = k; break; }
-        if(k === 1 && (isMatchWord(heard, hPhon, null, target) ||
-                       (followOnly && isPlausiblePronunciationAttempt(heard, hPhon, target)))){
+        if(!followOnly && k === 1 && isMatchWord(heard, hPhon, null, target)){
           found = k; break;
         }
-        if(k >= 2 && hPhon.length >= 4 && hPhon === target.phon){ found = k; break; }
+        if(!followOnly && k >= 2 && hPhon.length >= 4 && hPhon === target.phon){
+          found = k; break;
+        }
       }
       if(found > 0){
+        /* ── Fix G: Even with an exact ptr+1 match, don't jump
+           if the token could also be the current word. Buffer
+           and let it get resolved later. ─────────────────── */
+        if(followOnly && found === 1 && words[ptr] &&
+           isPlausiblePronunciationAttempt(heard, hPhon, words[ptr])){
+          pendingHeard.push(rawTok);
+          used++;
+          continue;
+        }
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         let skipStart = ptr;
         if(pendingHeard.length){
@@ -8388,22 +8426,8 @@ function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      const followAttemptWord = words[ptr];
-      if(followOnly && !pendingHeard.length && followAttemptWord &&
-         isPlausiblePronunciationAttempt(heard, hPhon, followAttemptWord)){
-       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-       commitCorrect(ptr, seg);
-        lastDirectCommitIdx = -1;
-        lastDirectCommitAt = 0;
-        lastCommitBatchId = -1;
-        prevWordAudio = null;
-        advancePast(1);
-        pendingHeard.length = 0;
-        consecutiveReds = 0;
-        noteFollowProgress();
-        used++;
-        continue;
-      }
+      /* The old follow-mode fuzzy rescue block that used to
+         sit here has been moved above (fix E). Removed. */
 
       const mergedN = tryMergedTokenMatch(heard, hPhon);
       if(mergedN > 0){
@@ -8477,9 +8501,7 @@ function gradeFull(tokens, startIdx){
         if(consecutiveReds < 2) advancePast(1);
       } else {
         consecutiveReds = 0;
-        /* ── Fix D ──────────────────────────────────────────
-           Call-site guard: never even call markSkippedWord
-           in Follow mode on the 4-token flush path. */
+        /* ── Fix D (kept): call-site guard. ─────────────── */
         if(!followOnly) markSkippedWord(ptr);
         advancePast(1);
       }
