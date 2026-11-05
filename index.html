@@ -2956,7 +2956,7 @@ function lev(a, b){
   return r;
 }
 
-function matchStrictness(){ return 'strict'; }
+function matchStrictness(){ return followOnly ? 'follow' : 'strict'; }
 
 const TOL_TABLE = {
   strict:   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2]
@@ -2972,7 +2972,8 @@ function confidenceFloor(){ return CONF_FLOOR_TABLE.strict; }
 const NOISE_LIMIT_TABLE = { strict: 2 };
 function noiseLimit(){ return NOISE_LIMIT_TABLE.strict; }
 
-// Updated: Tajweed mode is more lenient to accommodate elongations
+// Updated: Follow mode is a memorisation aid → more lenient.
+// Tajweed mode is strict.
 function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   const wNorm = w.norm;
   const la = hNorm.length, lb = wNorm.length;
@@ -2980,10 +2981,10 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   if(hNorm === wNorm) return true;
   const L = la > lb ? la : lb;
   if(L < 2) return false;
-  
-  const extraTol = followOnly ? 0 : 1;
+
+  const extraTol = followOnly ? 1 : 0;
   const tol = toleranceFor(L) + extraTol;
-  
+
   const lenDiff = la > lb ? la - lb : lb - la;
   if(lenDiff > tol + 2) return false;
   if(lev(hNorm, wNorm) <= tol) return true;
@@ -2992,7 +2993,7 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   }
   if(la >= 4 && lb >= 4){
     const S = la < lb ? la : lb;
-    const prefixThreshold = followOnly ? 0.85 : 0.70;
+    const prefixThreshold = followOnly ? 0.70 : 0.85;
     if(S / L >= prefixThreshold){
       if(hNorm.startsWith(wNorm) || wNorm.startsWith(hNorm)) return true;
       if(hNorm.endsWith(wNorm)   || wNorm.endsWith(hNorm))   return true;
@@ -3001,7 +3002,7 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   return false;
 }
 
-// Updated: Looser phonetic check for Tajweed mode
+// Updated: Follow mode is more lenient; Tajweed mode is stricter.
 function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
@@ -3010,17 +3011,17 @@ function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(heardLen < 2 && targetLen > 1) return false;
 
   const ratio = heardLen / targetLen;
-  const minRatio = followOnly ? 0.35 : 0.25;
-  const maxRatio = followOnly ? 2.5 : 3.5;
+  const minRatio = followOnly ? 0.25 : 0.35;
+  const maxRatio = followOnly ? 3.5  : 2.5;
   if(ratio < minRatio || ratio > maxRatio) return false;
 
   const L   = Math.max(heardLen, targetLen);
   const tol = toleranceFor(L);
 
-  if(lev(heard, w.norm) <= tol + (followOnly ? 2 : 3)) return true;
+  if(lev(heard, w.norm) <= tol + (followOnly ? 3 : 2)) return true;
 
   if(hPhon.length >= 2 && w.phon.length >= 2 &&
-     lev(hPhon, w.phon) <= tol + (followOnly ? 1 : 2)) return true;
+     lev(hPhon, w.phon) <= tol + (followOnly ? 2 : 1)) return true;
 
   return false;
 }
@@ -8284,13 +8285,14 @@ function recordMistake(i, kind, heardRaw){
 async function grade(tokens, startIdx){
   const start = startIdx || 0;
   if(!words.length || ptr >= words.length) return tokens.length - start;
-  if(matchStrictness() === 'strict') return await gradeFull(tokens, start);
-  return await gradeFollowOnly(tokens, start);
+  if(followOnly) return await gradeFollowOnly(tokens, start);
+  return await gradeFull(tokens, start);
 }
 
-const FOLLOW_LOOKAHEAD = 1;
-const FOLLOW_WRONG_LIMIT = 3;
-const FOLLOW_PIN_STOP_MS = 10000;
+const FOLLOW_LOOKAHEAD   = 2;
+const FOLLOW_FORCE_AFTER = 3;
+const FOLLOW_WRONG_LIMIT = 5;
+const FOLLOW_PIN_STOP_MS = 15000;
 
 let followWrongTokens = 0;
 let followPinTimer    = null;
@@ -8311,18 +8313,18 @@ function noteFollowWrongToken(){
   followPinPtr = ptr;
   const w = words[ptr];
   const label = w ? escapeHtml(w.raw.replace(TASHKEEL, '')) : '';
-  addFeedback('⚠️ Three words in a row not recognised — waiting on <b>' + label + '</b> for 10 s…', false, true);
+  addFeedback('⚠️ Several words in a row not recognised — waiting on <b>' + label + '</b> for 15 s…', false, true);
   followPinTimer = setTimeout(() => {
     followPinTimer = null;
     if(!wantMic) return;
     if(ptr !== followPinPtr) return;
-    addFeedback('⏹️ That word was not recited within 10 s — microphone stopped.', true);
+    addFeedback('⏹️ That word was not recited within 15 s — microphone stopped.', true);
     stopReciting(true);
     setStatus('Paused (word not recognised)', 'idle', 'Tap Start reciting to resume');
   }, FOLLOW_PIN_STOP_MS);
 }
 
-// Updated: Widened acoustic tolerance for Tajweed mode
+// Updated: Follow mode is more lenient; Tajweed mode is stricter.
 function isAcousticWordShapeMatch(w, seg) {
   if (!seg || !w || seg.durationMs < 60) return false;
   const samples = rmsAnalyser.samplesIn(seg.start, seg.end);
@@ -8330,32 +8332,32 @@ function isAcousticWordShapeMatch(w, seg) {
 
   const expectedMs = Math.max(100, w.norm.length * 100);
   const ratio = seg.durationMs / expectedMs;
-  const minRatio = followOnly ? 0.4 : 0.2;
-  const maxRatio = followOnly ? 2.5 : 4.0;
+  const minRatio = followOnly ? 0.20 : 0.40;
+  const maxRatio = followOnly ? 4.00 : 2.50;
   if (ratio < minRatio || ratio > maxRatio) return false; 
 
   const vr = rmsAnalyser.vowelRun(seg.start, seg.end);
-  const minVowelRatio = followOnly ? 0.3 : 0.15;
+  const minVowelRatio = followOnly ? 0.15 : 0.30;
   if (vr.durationMs < expectedMs * minVowelRatio) return false;
 
   let maxRms = 0;
   for (let i = 0; i < samples.length; i++) if (samples[i].rms > maxRms) maxRms = samples[i].rms;
-  if (maxRms < rmsAnalyser.minRms() * (followOnly ? 1.2 : 1.0)) return false;
+  if (maxRms < rmsAnalyser.minRms() * (followOnly ? 1.0 : 1.2)) return false;
 
   return true;
 }
 
-// Updated: Widened MFA tolerance for Tajweed mode
+// Updated: Follow mode more lenient; Tajweed mode stricter.
 async function runMFAInference(w, seg, heard) {
   if (!seg || !w || !heard) return false;
 
   const T = getBaseMsPerLetter();
   const expectedMs = Math.max(60, w.norm.length * (T || 110));
   const ratio = seg.durationMs / expectedMs;
-  const durationOk = followOnly ? (ratio > 0.55 && ratio < 1.70) : (ratio > 0.35 && ratio < 2.80);
+  const durationOk = followOnly ? (ratio > 0.35 && ratio < 2.80) : (ratio > 0.55 && ratio < 1.70);
 
   const L    = Math.max(heard.length, w.norm.length);
-  const tol  = toleranceFor(L) + (followOnly ? 1 : 2);
+  const tol  = toleranceFor(L) + (followOnly ? 2 : 1);
   const normOk = heard === w.norm || lev(heard, w.norm) <= tol;
 
   const hPhon = phonArCached(heard);
@@ -8365,9 +8367,12 @@ async function runMFAInference(w, seg, heard) {
   return durationOk && (normOk || phonOk);
 }
 
+// Rewritten: adds explicit lookahead and force-advance so the pointer
+// can never get stuck on a mis-heard ASR token.
 async function gradeFollowOnly(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
+
   for(let ti = start; ti < tokens.length; ti++){
     if(ptr >= words.length){ used++; continue; }
     const rawTok = tokens[ti];
@@ -8375,24 +8380,24 @@ async function gradeFollowOnly(tokens, startIdx){
     if(!heard){ used++; continue; }
     const hPhon = phonArCached(rawTok);
 
-    // Ignore repeats of the previous word
+    /* 1. Ignore stutter / repeat of the previous word */
     if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){ used++; continue; }
 
-    // Exact match on current word
+    /* 2. Direct match on current word — fast path */
     if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
       commitCorrect(ptr, seg); advancePast(1);
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // Split-token match
+    /* 3. Split token (user recited current word across two ASR tokens) */
     if(trySplitTokenMatch(heard, rawTok)){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
       commitCorrect(ptr, seg); advancePast(1);
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // Merged token match (e.g. reciting two words in one breath)
+    /* 4. Merged tokens (user recited two words in one breath) */
     const mergedN = tryMergedTokenMatch(heard, hPhon);
     if(mergedN > 0){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8401,32 +8406,66 @@ async function gradeFollowOnly(tokens, startIdx){
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // ── PRIORITY 2: MFA (duration + phonetic alignment) ──
+    /* 5. Lookahead — skip 1–2 mis-heard ASR tokens */
+    let found = -1;
+    const maxK = Math.min(FOLLOW_LOOKAHEAD, words.length - ptr - 1);
+    for(let k = 1; k <= maxK; k++){
+      const target = words[ptr + k];
+      if(heard === target.norm || isMatchWord(heard, hPhon, null, target)){
+        found = k; break;
+      }
+    }
+    if(found > 0){
+      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+      commitManyCorrect(ptr, ptr + found + 1, seg);
+      advancePast(found + 1);
+      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
+    }
+
+    /* 6. Quick plausible-pronunciation fallback (only from a clean slate) */
+    if(!pendingHeard.length && isPlausiblePronunciationAttempt(heard, hPhon, words[ptr])){
+      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+      commitCorrect(ptr, seg); advancePast(1);
+      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
+    }
+
+    /* 7. MFA (duration + phonetic alignment) */
     const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-    if (await runMFAInference(words[ptr], seg, heard)) {
-        commitCorrect(ptr, seg);
-        advancePast(1);
-        pendingHeard.length = 0;
-        noteFollowProgress();
-        addFeedback('🛡️ <b>MFA</b> detected this word correctly.', false, false, true);
-        used++;
-        continue;
+    if(await runMFAInference(words[ptr], seg, heard)){
+      commitCorrect(ptr, seg); advancePast(1);
+      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // ── PRIORITY 3: RMS ACOUSTIC SHAPE ──
-    if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
-        commitCorrect(ptr, seg);
-        advancePast(1);
-        pendingHeard.length = 0;
-        noteFollowProgress();
-        used++;
-        continue;
+    /* 8. RMS acoustic-shape fallback */
+    if(seg && isAcousticWordShapeMatch(words[ptr], seg)){
+      commitCorrect(ptr, seg); advancePast(1);
+      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // ── PRIORITY 4: WAIT / SKIP ──
-    noteFollowWrongToken();
+    /* 9. Last resort — accumulate, then force-advance so we never freeze */
     pendingHeard.push(rawTok);
-    if(pendingHeard.length > 5) pendingHeard.length = 0;
+
+    if(pendingHeard.length >= FOLLOW_FORCE_AFTER){
+      const combinedRaw  = pendingHeard.join(' ');
+      const combinedNorm = normArCached(combinedRaw);
+      const combinedPhon = phonArCached(combinedRaw);
+      const curW = words[ptr];
+
+      if(curW && (combinedNorm === curW.norm ||
+                  isMatchWord(combinedNorm, combinedPhon, null, curW) ||
+                  isPlausiblePronunciationAttempt(combinedNorm, combinedPhon, curW))){
+        commitCorrect(ptr, seg);
+      } else {
+        // Give up on this word and keep the flow going
+        commitCorrect(ptr, seg);
+      }
+      advancePast(1);
+      pendingHeard.length = 0;
+      noteFollowProgress();
+    } else {
+      // Only start the “pin” timer when we're actually waiting
+      noteFollowWrongToken();
+    }
     used++;
   }
   return used;
