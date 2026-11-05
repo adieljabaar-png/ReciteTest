@@ -8248,20 +8248,24 @@ function gradeFollowOnly(tokens, startIdx){
     if(!heard){ used++; continue; }
     const hPhon = phonArCached(rawTok);
 
+    // Ignore repeats of the previous word
     if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){ used++; continue; }
 
+    // Exact match on current word
     if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
       commitCorrect(ptr, seg); advancePast(1);
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
+    // Split-token match
     if(trySplitTokenMatch(heard, rawTok)){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
       commitCorrect(ptr, seg); advancePast(1);
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
+    // Merged token match (e.g. reciting two words in one breath)
     const mergedN = tryMergedTokenMatch(heard, hPhon);
     if(mergedN > 0){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8270,22 +8274,8 @@ function gradeFollowOnly(tokens, startIdx){
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    let found = -1;
-    const maxK = Math.min(FOLLOW_LOOKAHEAD, words.length - ptr - 1);
-    for(let k = 1; k <= maxK; k++){
-      const target = words[ptr + k];
-      if(heard === target.norm){ found = k; break; }
-      if(k === 1 && isMatchWord(heard, hPhon, null, target)){ found = k; break; }
-      if(k >= 2 && hPhon.length >= 4 && hPhon === target.phon){ found = k; break; }
-    }
-    if(found > 0){
-      for(let k = 0; k < found; k++) markSkippedWord(ptr + k);
-      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-      commitCorrect(ptr + found, seg);
-      advancePast(found + 1);
-      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
-    }
-
+    // ── FIX: Lookahead removed. The pointer must wait ──
+    
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if(pendingHeard.length > 5) pendingHeard.length = 0;
@@ -8301,7 +8291,7 @@ function gradeFull(tokens, startIdx){
   let used = 0;
   /* ── Fix C (kept) ─────────────────────────────────────────
      Follow-mode lookahead is capped to 1 word. */
-  const LOOKAHEAD = followOnly ? 1 : 2;
+  const LOOKAHEAD = followOnly ? 0 : 2;
 
   const outerBatchCtx = batchTimingCtx;
   batchTimingCtx = {
@@ -8460,7 +8450,7 @@ function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      const w = words[ptr];
+const w = words[ptr];
       const hasPending = pendingHeard.length > 0;
       const plausibleAttempt = w &&
                                isPlausiblePronunciationAttempt(heard, hPhon, w);
@@ -8471,7 +8461,17 @@ function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
+      /* ── FIX: Prevent skipping in Follow mode ── */
+      if (followOnly) {
+         if (pendingHeard.length >= 4) pendingHeard.length = 0;
+         noteFollowWrongToken();
+         used++;
+         continue;
+      }
+      /* ────────────────────────────────────────── */
+
       let markedThisTime = false;
+
       if(!followOnly && plausible &&
          !w.el.classList.contains('error') &&
          !w.el.classList.contains('skipped')){
