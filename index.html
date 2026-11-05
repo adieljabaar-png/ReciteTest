@@ -2972,7 +2972,8 @@ function confidenceFloor(){ return CONF_FLOOR_TABLE.strict; }
 const NOISE_LIMIT_TABLE = { strict: 2 };
 function noiseLimit(){ return NOISE_LIMIT_TABLE.strict; }
 
-// Updated: Tajweed mode is more lenient to accommodate elongations
+// Follow +1 (memorisation aid must flow with the reciter),
+// Tajweed +0 (used for accuracy — plus audio checks already exist).
 function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   const wNorm = w.norm;
   const la = hNorm.length, lb = wNorm.length;
@@ -2981,7 +2982,7 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   const L = la > lb ? la : lb;
   if(L < 2) return false;
   
-  const extraTol = followOnly ? 0 : 1;
+  const extraTol = followOnly ? 1 : 0;
   const tol = toleranceFor(L) + extraTol;
   
   const lenDiff = la > lb ? la - lb : lb - la;
@@ -3001,7 +3002,7 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   return false;
 }
 
-// Updated: Looser phonetic check for Tajweed mode
+// Looser plausible check — Follow only (gated on voiced audio by caller).
 function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
@@ -3773,7 +3774,7 @@ let hudPending = false;
 
 let advanceTimes = [];
 let currentPaceWPS = 0;
-let adaptiveSilenceMs = 10000; // Increased to 10s
+let adaptiveSilenceMs = 10000;
 let pendingJumpTarget = -1;
 
 const REC_BUF_MAX = 24;
@@ -3796,7 +3797,7 @@ const SPEECH_KEEPALIVE_MS = 40000;
 let micStream = null;
 let lastMicError = null;
 
-/* ── Upgraded RMS + FFT analyser (Fix 1 infrastructure) ──── */
+/* ── Upgraded RMS + FFT analyser ──────────────────────────── */
 const rmsAnalyser = (function(){
   const samples = [];
   const MAX_AGE_MS = 8000;
@@ -5243,8 +5244,8 @@ function markStrict1Error(w, kind, detail){
   }
 }
 
-// Updated: Keeps the 'correct' class so the word stays green, adds 'warned'
-// for the yellow dotted underline visual hint, and does not count as an error.
+// Keeps the 'correct' class so the word stays green; adds 'warned' for
+// the yellow dotted underline visual hint; does not count as an error.
 function markStrict1Warning(w, kind, detail){
   if (!w) return;
   if (w.el.classList.contains('warned') || w.el.classList.contains('error')) return;
@@ -7706,7 +7707,6 @@ function noteAdvance(n){
   if(advanceTimes.length >= 4){ const span = advanceTimes[advanceTimes.length - 1] - advanceTimes[0]; if(span > 300) currentPaceWPS = (advanceTimes.length - 1) / (span / 1000); }
   updateAdaptiveParams();
 }
-// Increased timer values to 10s+
 function updateAdaptiveParams(){
   const p = currentPaceWPS;
   if(p <= 0){ adaptiveSilenceMs = 10000; return; }
@@ -8021,8 +8021,6 @@ function renderVerses(ayahs, translations){
   const inner = document.createElement('div'); inner.className = 'mushaf-inner';
   words=[]; lastCurrentEl = null; longPressTriggered = false;
 
-  // NEW — mark cached recognizer stale so the next startReciting()
-  // rebuilds it with a fresh Quran grammar window from the new surah.
   if(speechRecognition){ speechRecognition.__dead = true; }
 
   function pushWord(tok, surahId, ayahNum, parent){
@@ -8322,7 +8320,8 @@ function noteFollowWrongToken(){
   }, FOLLOW_PIN_STOP_MS);
 }
 
-// Updated: Widened acoustic tolerance for Tajweed mode
+// Used ONLY in Tajweed mode, gated on Tajweed-coloured words with a madd
+// or ghunnah context. Follow mode never calls this.
 function isAcousticWordShapeMatch(w, seg) {
   if (!seg || !w || seg.durationMs < 60) return false;
   const samples = rmsAnalyser.samplesIn(seg.start, seg.end);
@@ -8330,22 +8329,23 @@ function isAcousticWordShapeMatch(w, seg) {
 
   const expectedMs = Math.max(100, w.norm.length * 100);
   const ratio = seg.durationMs / expectedMs;
-  const minRatio = followOnly ? 0.4 : 0.2;
-  const maxRatio = followOnly ? 2.5 : 4.0;
+  const minRatio = 0.2;
+  const maxRatio = 4.0;
   if (ratio < minRatio || ratio > maxRatio) return false; 
 
   const vr = rmsAnalyser.vowelRun(seg.start, seg.end);
-  const minVowelRatio = followOnly ? 0.3 : 0.15;
+  const minVowelRatio = 0.15;
   if (vr.durationMs < expectedMs * minVowelRatio) return false;
 
   let maxRms = 0;
   for (let i = 0; i < samples.length; i++) if (samples[i].rms > maxRms) maxRms = samples[i].rms;
-  if (maxRms < rmsAnalyser.minRms() * (followOnly ? 1.2 : 1.0)) return false;
+  if (maxRms < rmsAnalyser.minRms() * 1.0) return false;
 
   return true;
 }
 
-// Updated: Widened MFA tolerance for Tajweed mode
+// MFA — 3-letter targets use zero tolerance for both norm and phon;
+// longer targets use toleranceFor(L) + 1. Both modes.
 async function runMFAInference(w, seg, heard) {
   if (!seg || !w || !heard) return false;
 
@@ -8354,8 +8354,8 @@ async function runMFAInference(w, seg, heard) {
   const ratio = seg.durationMs / expectedMs;
   const durationOk = followOnly ? (ratio > 0.55 && ratio < 1.70) : (ratio > 0.35 && ratio < 2.80);
 
-  const L    = Math.max(heard.length, w.norm.length);
-  const tol  = toleranceFor(L) + (followOnly ? 1 : 2);
+  const L = Math.max(heard.length, w.norm.length);
+  const tol = (w.norm.length === 3) ? 0 : (toleranceFor(L) + 1);
   const normOk = heard === w.norm || lev(heard, w.norm) <= tol;
 
   const hPhon = phonArCached(heard);
@@ -8375,8 +8375,13 @@ async function gradeFollowOnly(tokens, startIdx){
     if(!heard){ used++; continue; }
     const hPhon = phonArCached(rawTok);
 
-    // Ignore repeats of the previous word
-    if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){ used++; continue; }
+    // Ignore repeats of the previous word. The match is on words[ptr-1] —
+    // a *different* word from words[ptr] — so any prefix buffer we were
+    // building for the current word is stale.
+    if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){
+      pendingHeard.length = 0;
+      used++; continue;
+    }
 
     // Exact match on current word
     if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
@@ -8392,7 +8397,7 @@ async function gradeFollowOnly(tokens, startIdx){
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // Merged token match (e.g. reciting two words in one breath)
+    // Merged token match
     const mergedN = tryMergedTokenMatch(heard, hPhon);
     if(mergedN > 0){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8413,17 +8418,7 @@ async function gradeFollowOnly(tokens, startIdx){
         continue;
     }
 
-    // ── PRIORITY 3: RMS ACOUSTIC SHAPE ──
-    if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
-        commitCorrect(ptr, seg);
-        advancePast(1);
-        pendingHeard.length = 0;
-        noteFollowProgress();
-        used++;
-        continue;
-    }
-
-    // ── PRIORITY 4: WAIT / SKIP ──
+    // ── PRIORITY 3: WAIT / SKIP ──
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if(pendingHeard.length > 5) pendingHeard.length = 0;
@@ -8434,10 +8429,18 @@ async function gradeFollowOnly(tokens, startIdx){
 
 const FULL_LOOKAHEAD = 5;
 
+/* ════════════════════════════════════════════════════════════════════════
+   gradeFull — Tajweed mode.
+   Priority 5 (RMS) is now gated on Tajweed-coloured words that actually
+   need a vowel-run duration check (madd or ghunnah context). All other
+   words fall through to priorities 6–8 as before.
+
+   LOOKAHEAD stays 0 for both modes — Tajweed never skips a word.
+   ════════════════════════════════════════════════════════════════════════ */
 async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
-  const LOOKAHEAD = followOnly ? 0 : 2;
+  const LOOKAHEAD = 0;
 
   const outerBatchCtx = batchTimingCtx;
   batchTimingCtx = {
@@ -8455,9 +8458,15 @@ async function gradeFull(tokens, startIdx){
       if(ptr >= words.length){ used++; continue; }
       const hPhon = phonArCached(rawTok);
 
-      if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){ used++; continue; }
+      // Ignore repeats of the previous word (a *different* word matched).
+      if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){
+        pendingHeard.length = 0;
+        used++; continue;
+      }
+      // 1-char noise filter — token doesn't match any word, buffer untouched.
       if(heard.length < 2 && heard !== words[ptr].norm && words[ptr].norm.length > 1){ used++; continue; }
 
+      // ── Priority 1: exact / isMatchWord ──
       if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         const _w = words[ptr];
@@ -8478,9 +8487,11 @@ async function gradeFull(tokens, startIdx){
         runStrict1Checks(ptr, heard, { timingReliable: true });
         advancePast(1);
         pendingHeard.length = 0; consecutiveReds = 0;
+        noteFollowProgress();
         used++; continue;
       }
 
+      // ── Priority 2: trySplitTokenMatch ──
       if(trySplitTokenMatch(heard, rawTok)){
         const combined = normArCached(pendingHeard.join('') + rawTok);
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8488,65 +8499,11 @@ async function gradeFull(tokens, startIdx){
         runStrict1Checks(ptr, combined, { timingReliable: false });
         advancePast(1);
         pendingHeard.length = 0; consecutiveReds = 0;
+        noteFollowProgress();
         used++; continue;
       }
 
-      if(followOnly && !pendingHeard.length){
-        const curW = words[ptr];
-        if(curW && isPlausiblePronunciationAttempt(heard, hPhon, curW)){
-          const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-          commitCorrect(ptr, seg);
-          lastDirectCommitIdx = -1;
-          lastDirectCommitAt  = 0;
-          lastCommitBatchId   = -1;
-          prevWordAudio       = null;
-          advancePast(1);
-          pendingHeard.length = 0;
-          consecutiveReds = 0;
-          noteFollowProgress();
-          used++;
-          continue;
-        }
-      }
-
-      let found = -1;
-      const maxK = Math.min(LOOKAHEAD, words.length - ptr - 1);
-      for(let k = 1; k <= maxK; k++){
-        const target = words[ptr + k];
-        if(heard === target.norm){ found = k; break; }
-        if(!followOnly && k === 1 && isMatchWord(heard, hPhon, null, target)){
-          found = k; break;
-        }
-        if(!followOnly && k >= 2 && hPhon.length >= 4 && hPhon === target.phon){
-          found = k; break;
-        }
-      }
-      if(found > 0){
-        if(followOnly && found === 1 && words[ptr] &&
-           isPlausiblePronunciationAttempt(heard, hPhon, words[ptr])){
-          pendingHeard.push(rawTok);
-          used++;
-          continue;
-        }
-        const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-        let skipStart = ptr;
-        if(pendingHeard.length){
-          const buffered = normArCached(pendingHeard.join(''));
-          const target   = words[ptr].norm;
-          if(buffered.length >= target.length * 0.40 &&
-             target.startsWith(buffered)){
-            commitCorrect(ptr, seg);
-            skipStart = ptr + 1;
-          }
-        }
-        for(let k = skipStart; k < ptr + found; k++) markSkippedWord(k);
-        commitCorrect(ptr + found, seg);
-        runStrict1Checks(ptr + found, heard, { timingReliable: false });
-        advancePast(found + 1);
-        pendingHeard.length = 0; consecutiveReds = 0;
-        used++; continue;
-      }
-
+      // ── Priority 3: tryMergedTokenMatch ──
       const mergedN = tryMergedTokenMatch(heard, hPhon);
       if(mergedN > 0){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8565,69 +8522,87 @@ async function gradeFull(tokens, startIdx){
         });
         advancePast(mergedN);
         pendingHeard.length = 0; consecutiveReds = 0;
+        noteFollowProgress();
         used++; continue;
       }
 
+      // ── Compute the audio segment ONCE ──
+      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+
+      // ── Priority 4: MFA (transcript + audio) — FIRES ON FIRST FAILURE ──
+      if (await runMFAInference(words[ptr], seg, heard)) {
+        commitCorrect(ptr, seg);
+        runStrict1Checks(ptr, heard, { timingReliable: false });
+        advancePast(1);
+        pendingHeard.length = 0;
+        noteFollowProgress();
+        consecutiveReds = 0;
+        used++; continue;
+      }
+
+      // ── Priority 5: RMS (audio-only) — ONLY for Tajweed-coloured words
+      //    whose rule needs a vowel-run duration check (madd / ghunnah). ──
+      const _wRms = words[ptr];
+      const _needsVowelRun = !followOnly && _wRms.tjRules &&
+        (_wRms.tjRules.madd || _wRms.tjRules.hasGhunnahContext);
+      if (_needsVowelRun && seg && isAcousticWordShapeMatch(_wRms, seg)) {
+        commitCorrect(ptr, seg);
+        runStrict1Checks(ptr, heard, { timingReliable: false });
+        advancePast(1);
+        pendingHeard.length = 0;
+        noteFollowProgress();
+        consecutiveReds = 0;
+        used++; continue;
+      }
+
+      // ── Priority 6: prefix buffer (only genuine prefixes, max 2 deep) ──
       if(isStrongPartialPrefix(heard)){
         if(pendingHeard.length === 1 &&
            heard.startsWith(normArCached(pendingHeard[0]))){
           pendingHeard[0] = rawTok;
-        } else if(pendingHeard.length < 4){
+        } else if(pendingHeard.length < 2){
           pendingHeard.push(rawTok);
         }
         used++; continue;
       }
+      // Not a prefix — clear stale buffer
+      pendingHeard.length = 0;
 
+      // ── Priority 7: plausible (Follow only, with voiced-audio gate) ──
+      if(followOnly){
+        const curW = words[ptr];
+        if(curW && isPlausiblePronunciationAttempt(heard, hPhon, curW)){
+          const voiced = seg && seg.durationMs > 40 &&
+                         rmsAnalyser.voiceDurationMs(seg.start, seg.end) > 20;
+          if(voiced){
+            commitCorrect(ptr, seg);
+            lastDirectCommitIdx = -1;
+            lastDirectCommitAt  = 0;
+            lastCommitBatchId   = -1;
+            prevWordAudio       = null;
+            advancePast(1);
+            pendingHeard.length = 0;
+            consecutiveReds = 0;
+            noteFollowProgress();
+            used++; continue;
+          }
+        }
+      }
+
+      // ── Priority 8: miss handling ──
+      // Neither mode advances. The pointer stays on the misread word until
+      // the reciter corrects it; Priority 1/4/5 will then clear and advance.
       const w = words[ptr];
-      const hasPending = pendingHeard.length > 0;
-      const plausibleAttempt = w &&
-                               isPlausiblePronunciationAttempt(heard, hPhon, w);
-      const plausible = !hasPending && !!plausibleAttempt;
 
-      if(!plausible && pendingHeard.length < 4){
-        pendingHeard.push(rawTok);
-        used++; continue;
-      }
-
-      // ── PRIORITY 2: MFA (duration + phonetic alignment) ──
-      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-
-      if (await runMFAInference(words[ptr], seg, heard)) {
-          commitCorrect(ptr, seg);
-          runStrict1Checks(ptr, heard, { timingReliable: false });
-          advancePast(1);
-          pendingHeard.length = 0;
-          noteFollowProgress();
-          consecutiveReds = 0;
-          addFeedback('🛡️ <b>MFA</b> confirmed this word.', false, false, true);
-          used++;
-          continue;
-      }
-
-      // ── PRIORITY 3: RMS ACOUSTIC SHAPE ──
-      if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
-          commitCorrect(ptr, seg);
-          runStrict1Checks(ptr, heard, { timingReliable: false });
-          advancePast(1);
-          pendingHeard.length = 0;
-          noteFollowProgress();
-          consecutiveReds = 0;
-          addFeedback('🔊 <b>RMS</b> confirmed this word.', false, false, true);
-          used++;
-          continue;
-      }
-
-      /* ── PRIORITY 4: WAIT / SKIP ── */
       if (followOnly) {
-         if (pendingHeard.length >= 4) pendingHeard.length = 0;
-         noteFollowWrongToken();
-         used++;
-         continue;
+        noteFollowWrongToken();
+        used++;
+        continue;
       }
 
-      let markedThisTime = false;
-
-      if(!followOnly && plausible &&
+      // Tajweed: flag red + beep, do NOT advance.
+      const plausibleAttempt = w && isPlausiblePronunciationAttempt(heard, hPhon, w);
+      if(plausibleAttempt && w &&
          !w.el.classList.contains('error') &&
          !w.el.classList.contains('skipped')){
         if(seg) w.audio = seg;
@@ -8644,32 +8619,19 @@ async function gradeFull(tokens, startIdx){
         mistakes.push(m); appendMistake(m);
         scheduleHUD();
         if(beepOn) beepThrottled('error');
-        markedThisTime = true;
       }
+      noteFollowWrongToken();
 
       lastDirectCommitIdx = -1;
       lastDirectCommitAt  = 0;
       lastCommitBatchId   = -1;
       prevWordAudio       = null;
-
-      if(markedThisTime){
-        consecutiveReds++;
-        if(consecutiveReds < 2){
-          advancePast(1);
-          // Run the Tajweed rule checks on the misread word so any rules
-          // it also failed (madd, ghunnah, laam-shamsiyyah, silent letter,
-          // extra syllable) are recorded and explained in the mistakes list.
-          runStrict1Checks(ptr - 1, heard, { skipTiming: true, breakChain: true });
-        }
-      } else {
-        consecutiveReds = 0;
-        if(!followOnly) markSkippedWord(ptr);
-        advancePast(1);
-      }
+      consecutiveReds     = 0;
       pendingHeard.length = 0;
       used++;
     }
 
+    // batch-level Madd/Ghunnah length check (unchanged)
     const ctx = batchTimingCtx;
     if(ctx && ctx.startTime > 0 && ctx.wordCount > 1 && ctx.cumulativeRequired > 0 &&
        ctx.contributions.length > 0){
@@ -8754,6 +8716,7 @@ function stopReciting(silent){
   wantMic=false; micPaused = false;
   disarmSpeechKeepalive(); pendingJumpTarget = -1;
   cancelFollowPinTimer();
+  pendingHeard.length = 0;          // no prefix survives a stop→start cycle
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
   prevWordAudio = null;
   setMicButton(); recRunning = false; speechStarting = false;
@@ -9255,7 +9218,7 @@ function openCoachInfoModal(){
     '<h3><span class="fnum">2</span> 👂 Follow mode (memorisation aid)</h3>' +
     '<ul>' +
       '<li><b>Follow</b> is designed to assist you with <b>memorisation of the Holy Qur\'an</b>. The highlight moves forward with you as you recite.</li>' +
-      '<li>Follow mode always uses a fixed <b>strict word-matching</b> with a tight <b>2-word lookahead</b>.</li>' +
+      '<li>Follow mode uses a relaxed word-matching tolerance (+1) so a slight ASR mis-transcription of one letter does not stall the flow.</li>' +
       '<li><b>Nothing is marked red and no mistakes are counted</b>.</li>' +
     '</ul>' +
   '</div>' +
@@ -9264,7 +9227,8 @@ function openCoachInfoModal(){
     '<ul>' +
       '<li><b>Tajweed</b> is designed to highlight every mispronunciation.</li>' +
       '<li>On a mispronounced word the coach <b>beeps</b> and <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
-      '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> measured on the actual vowel run — not on ASR commit timing — and compared against your rolling <b>mora baseline</b> (pace).<br>• <b>Ghunnah</b> verified by both the transcript <i>and</i> the audio spectrum (nasal formant at 250–400 Hz).<br>• <b>Laam Shamsiyyah</b> checked by the onset spectral centroid (solar lām voiced → low onset centroid).<br>• <b>Hamzat al-Wasl</b> flagged when a glottal re-attack (silence gap) is detected before the word.<br>• <b>Emphatic letter substitution</b> (ص → س, ط → ت, ق → ك, ح → ه…) surfaced as a warning even if the ASR autocorrected.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped normalised form.</li>' +
+      '<li>Tajweed uses a stricter word-matching tolerance (+0) and a tight MFA gate (3-letter words require an exact match) so mispronunciations surface reliably.</li>' +
+      '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> measured on the actual vowel run.<br>• <b>Ghunnah</b> verified by both transcript and audio spectrum.<br>• <b>Laam Shamsiyyah</b> checked by onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> flagged when a glottal re-attack is detected.<br>• <b>Emphatic letter substitution</b> (ص → س, ط → ت…) surfaced as a warning.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped form.</li>' +
       '<li><b>Rule-ready chip:</b> a small chip near the mode pills shows whether the Tajweed rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules unavailable</b>.</li>' +
     '</ul>' +
   '</div>' +
