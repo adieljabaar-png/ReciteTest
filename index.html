@@ -5199,10 +5199,19 @@ const TAJWEED_ERROR_NAMES = {
   'emphatic-غ': 'Ghayn (غ) sounded as Qāf (ق)'
 };
 
+/* Edit 1 applied: allow multiple different Tajweed rules to be recorded per word.
+ * The old guard `if (w.el.classList.contains('error')) return;` prevented any
+ * additional rule failures on an already-misread word from being logged, which
+ * defeats the point of "explained with the Tajweed rules that failed".
+ * Now a per-word Set tracks which rules have already fired so the same rule
+ * cannot double-fire, while DIFFERENT rules can each add their own row. */
 function markStrict1Error(w, kind, detail){
   if (!w) return;
-  if (w.el.classList.contains('error')) return;
-  w.el.className = 'w error';
+  if (w._tajweedErrs && w._tajweedErrs.has(kind)) return;
+  if (!w._tajweedErrs) w._tajweedErrs = new Set();
+  w._tajweedErrs.add(kind);
+
+  if (!w.el.classList.contains('error')) w.el.className = 'w error';
   errors++;
 
   const tajweedName = TAJWEED_ERROR_NAMES[kind] || ('Tajweed — ' + kind);
@@ -8071,6 +8080,8 @@ function renderVerses(ayahs, translations){
   resetProgress(true);
 }
 
+/* Edit 6 applied: also clear the per-word Tajweed error Set so each new session
+ * starts fresh and re-evaluates every word from scratch. */
 function resetProgress(fullReset){
   ptr=0; errors=0; finished=false; recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
@@ -8082,7 +8093,7 @@ function resetProgress(fullReset){
     resetPaceSamples();
   }
   lastCurrentEl = null; longPressTriggered = false; hudPending = false;
-  words.forEach(w=>{ w.el.className='w'; w.audio = null; });
+  words.forEach(w=>{ w.el.className='w'; w.audio = null; w._tajweedErrs = null; });
   pageEl.querySelectorAll('.ayah').forEach(a=>a.classList.remove('done','playing'));
   document.body.classList.remove('listen-mode');
   updateCurrent(); updateHUD(); applyFollowOnlyUI(); applyHideTextUI();
@@ -8324,63 +8335,44 @@ function isAcousticWordShapeMatch(w, seg) {
   return true;
 }
 
-/* ── Engine 3 & 4: Phoneme & MFA (Async Fallback) ── */
-async function runPhonemeInference(w, seg, heard) {
-  if (!seg || !w) return false;
-  
-  // 1. If you have a Wav2Vec2 API endpoint, call it here:
-  // const response = await fetch('/api/phoneme', { body: audioBlob });
-  // return response.score > 0.8;
-
-  // 2. Browser Fallback: Deep Phoneme comparison
-  // Wav2Vec2 detects the actual phonemes spoken. 
-  // Here we simulate it by comparing the strict phonetic maps.
-  const targetPhon = w.phon;
-  const heardPhon = phonArCached(heard);
-  
-  if (!targetPhon || !heardPhon) return false;
-  
-  // Allow 1 phonetic substitution (e.g., heavy vs light letter)
-  const dist = lev(heardPhon, targetPhon);
-  return dist <= 1 && heardPhon.length >= 2;
-}
-
+/* Edit 2 applied: replaced the combined `runPhonemeInference` + old
+ * `runMFAInference` + `checkHeavyEngines` block with a single calibrated
+ * MFA engine. The Phoneme engine has been removed entirely because:
+ *   • It collapsed emphatic letters into their plain counterparts
+ *     (ص→س, ط→ت, ق→ك …) BEFORE comparison, so it could not detect the very
+ *     heavy/light substitutions it claimed to detect.
+ *   • Its acceptance threshold was identical to `isMatchWord` (which already
+ *     runs at Priority 1), so it almost never fired.
+ *   • It bypassed `runStrict1Checks`, silently treating a word as correct
+ *     without running any Tajweed verification — the opposite of what
+ *     Tajweed mode needs.
+ * The new MFA engine uses the reciter's calibrated pace from
+ * `getBaseMsPerLetter()` (falling back to 110 ms/letter while the pace
+ * samples are still warming up) and one tolerance step looser than ASR,
+ * so it can actually rescue partially-mispronounced words. */
 async function runMFAInference(w, seg, heard) {
-  if (!seg || !w) return false;
+  if (!seg || !w || !heard) return false;
 
-  // 1. If you have an MFA backend, call it here:
-  // const response = await fetch('/api/mfa', { body: audioBlob });
-  // return response.alignmentScore > 0.7;
-
-  // 2. Browser Fallback: Check if the audio duration matches the exact phoneme count
-  // MFA precisely maps timestamps to phonemes. If the duration is exactly right,
-  // we can infer the alignment likely succeeded.
-  const expectedMs = w.norm.length * 110; // Average ms per Arabic letter
+  // Duration — use the reciter's calibrated per-letter pace
+  const T = getBaseMsPerLetter();
+  const expectedMs = Math.max(60, w.norm.length * (T || 110));
   const ratio = seg.durationMs / expectedMs;
-  const durationMatch = ratio > 0.7 && ratio < 1.4;
+  const durationOk = ratio > 0.55 && ratio < 1.70;
 
-  // Combine duration with phonetic identity
-  return durationMatch && (heard === w.norm || lev(heard, w.norm) <= 1);
+  // Transcript — one step looser than ASR so MFA can actually rescue.
+  const L    = Math.max(heard.length, w.norm.length);
+  const tol  = toleranceFor(L) + 1;
+  const normOk = heard === w.norm || lev(heard, w.norm) <= tol;
+
+  // Phonetic — same tolerance band.
+  const hPhon = phonArCached(heard);
+  const phonOk = w.phon.length >= 2 && hPhon.length >= 2 &&
+                 lev(hPhon, w.phon) <= tol;
+
+  return durationOk && (normOk || phonOk);
 }
 
-async function checkHeavyEngines(w, heard, seg) {
-  if (!w) return { matched: false, engine: null };
-
-  // 3. Phoneme Check (Wav2Vec2)
-  const phonemePassed = await runPhonemeInference(w, seg, heard);
-  if (phonemePassed) {
-    return { matched: true, engine: 'Phoneme (Wav2Vec2)' };
-  }
-
-  // 4. Forced Alignment Check (MFA)
-  const mfaPassed = await runMFAInference(w, seg, heard);
-  if (mfaPassed) {
-    return { matched: true, engine: 'Forced Alignment (MFA)' };
-  }
-
-  return { matched: false, engine: null };
-}
-
+/* Edit 3 applied: Follow mode now uses ASR → MFA → RMS (Phoneme removed). */
 async function gradeFollowOnly(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -8417,26 +8409,25 @@ async function gradeFollowOnly(tokens, startIdx){
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // ── PRIORITY 2: RMS ACOUSTIC MATCH (Synchronous & Immediate) ──
+    // ── PRIORITY 2: MFA (duration + phonetic alignment) ──
     const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-    if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
+    if (await runMFAInference(words[ptr], seg, heard)) {
         commitCorrect(ptr, seg);
         advancePast(1);
-        pendingHeard.length = 0; 
-        noteFollowProgress(); 
-        used++; 
+        pendingHeard.length = 0;
+        noteFollowProgress();
+        addFeedback('🛡️ <b>MFA</b> detected this word correctly.', false, false, true);
+        used++;
         continue;
     }
 
-    // ── PRIORITY 3: PHONEME & MFA FALLBACK ──
-    const rescue = await checkHeavyEngines(words[ptr], heard, seg);
-    if (rescue.matched) {
+    // ── PRIORITY 3: RMS ACOUSTIC SHAPE ──
+    if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
         commitCorrect(ptr, seg);
         advancePast(1);
-        pendingHeard.length = 0; 
-        noteFollowProgress(); 
-        addFeedback('🛡️ <b>' + rescue.engine + '</b> detected this word correctly.', false, false, true);
-        used++; 
+        pendingHeard.length = 0;
+        noteFollowProgress();
+        used++;
         continue;
     }
 
@@ -8451,6 +8442,14 @@ async function gradeFollowOnly(tokens, startIdx){
 
 const FULL_LOOKAHEAD = 5;
 
+/* Edit 4 applied: Tajweed mode uses ASR → MFA → RMS, and EVERY success path
+ * (including the MFA and RMS rescues) now calls `runStrict1Checks` so the
+ * Tajweed rules are verified for the word that was accepted. Edit 5 applied:
+ * on a misread word the code now calls `runStrict1Checks` with
+ * `{ skipTiming: true, breakChain: true }` after the pointer advances, so
+ * each distinct Tajweed rule that the misread word also violates is
+ * recorded as its own mistakes-list row — the "explained in detail" behaviour.
+ */
 async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -8606,29 +8605,31 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      // ── PRIORITY 2: RMS ACOUSTIC MATCH (Synchronous & Immediate) ──
+      // ── PRIORITY 2: MFA (duration + phonetic alignment) ──
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-      
-      if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
+
+      if (await runMFAInference(words[ptr], seg, heard)) {
           commitCorrect(ptr, seg);
+          runStrict1Checks(ptr, heard, { timingReliable: false });
           advancePast(1);
           pendingHeard.length = 0;
           noteFollowProgress();
           consecutiveReds = 0;
-          used++; 
+          addFeedback('🛡️ <b>MFA</b> confirmed this word.', false, false, true);
+          used++;
           continue;
       }
 
-      // ── PRIORITY 3: PHONEME & MFA (Asynchronous Fallback) ──
-      const rescue = await checkHeavyEngines(words[ptr], heard, seg);
-      if (rescue.matched) {
+      // ── PRIORITY 3: RMS ACOUSTIC SHAPE ──
+      if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
           commitCorrect(ptr, seg);
+          runStrict1Checks(ptr, heard, { timingReliable: false });
           advancePast(1);
           pendingHeard.length = 0;
           noteFollowProgress();
           consecutiveReds = 0;
-          addFeedback('🛡️ <b>' + rescue.engine + '</b> detected this word correctly.', false, false, true);
-          used++; 
+          addFeedback('🔊 <b>RMS</b> confirmed this word.', false, false, true);
+          used++;
           continue;
       }
 
@@ -8645,6 +8646,7 @@ async function gradeFull(tokens, startIdx){
       if(!followOnly && plausible &&
          !w.el.classList.contains('error') &&
          !w.el.classList.contains('skipped')){
+        if(seg) w.audio = seg;
         w.el.classList.add('error');
         w.el.classList.remove('current','correct','corrected','model','located','warned');
         errors++;
@@ -8668,7 +8670,13 @@ async function gradeFull(tokens, startIdx){
 
       if(markedThisTime){
         consecutiveReds++;
-        if(consecutiveReds < 2) advancePast(1);
+        if(consecutiveReds < 2){
+          advancePast(1);
+          // Run the Tajweed rule checks on the misread word so any rules
+          // it also failed (madd, ghunnah, laam-shamsiyyah, silent letter,
+          // extra syllable) are recorded and explained in the mistakes list.
+          runStrict1Checks(ptr - 1, heard, { skipTiming: true, breakChain: true });
+        }
       } else {
         consecutiveReds = 0;
         if(!followOnly) markSkippedWord(ptr);

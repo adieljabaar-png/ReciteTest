@@ -1,36 +1,65 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v70 — SW-only user-data-safety release. No routing change,
-         no API change, no cache-key change, no strategy change.
-         One behavioural fix + explicit safety docs:
+   v71 — SW-only version bump matching the current index.html.
+         No routing change, no API change, no cache-key change,
+         no strategy change. The one behavioural change this
+         release tracks lives entirely in the client:
 
-           L. CLEAR_CACHES NO LONGER WIPES DOWNLOADED AUDIO
-              BY DEFAULT.
-              The message handler used to iterate caches.keys()
-              and delete every cache — including qc-audio, which
-              holds hundreds of MB of everyayah.com MP3s the
-              user spent real bandwidth and battery downloading.
-              It now deletes only non-persistent caches unless
-              the client explicitly passes includeAudio: true
-              (which should only be wired to a "Delete all
-              downloads" user confirmation).
+           O. PHONEME (Wav2Vec2) ENGINE REMOVED FROM THE CLIENT.
+              The recitation pipeline in index.html now reads:
 
-           M. USER-DATA SAFETY CONTRACT DOCUMENTED IN HEADER.
-              See the block below. All future edits to this SW
-              must respect it. The activate sweep already
-              conformed; the CLEAR_CACHES handler did not.
+                  ASR → MFA → RMS
 
-           N. activate() CACHE FILTER REWRITTEN WITH EXPLICIT
-              BRANCH COMMENTS.
-              No behaviour change — every branch was already
-              correct. The filter is now self-documenting so a
-              future contributor can see at a glance that
-              caches not created by this SW are never deleted.
+              (previously: ASR → RMS → Phoneme → MFA).
 
-         Client-side: v70 pairs with the v68 multi-engine
-         recitation pipeline (ASR → RMS → Phoneme Wav2Vec2 →
-         MFA). No client change is required for v70.
+              Why the Phoneme engine was removed:
+                • Its PHON map collapsed every emphatic letter
+                  into its plain counterpart (ص→س, ط→ت, ق→ك,
+                  ح→ه …) BEFORE comparison. Heavy/light
+                  substitutions — the very errors the engine
+                  claimed to detect — became invisible.
+                • Its acceptance threshold was identical to
+                  isMatchWord (which already runs at Priority
+                  1), so it almost never fired.
+                • It bypassed runStrict1Checks, silently
+                  marking a word as correct without running any
+                  Tajweed verification. That is the opposite of
+                  what Tajweed mode needs.
+
+           P. MFA ENGINE RE-CALIBRATED AND REORDERED.
+              runMFAInference now uses the reciter's measured
+              pace (getBaseMsPerLetter(), falling back to
+              110 ms/letter while the pace samples warm up)
+              instead of a hard-coded 110 ms. Its transcript
+              tolerance is one step LOOSER than ASR
+              (toleranceFor(L) + 1) so it can actually rescue
+              partially-mispronounced words — previously it
+              was stricter than ASR on long words and could
+              never fire. In both modes MFA now runs BEFORE
+              RMS (was: RMS before MFA).
+
+           Q. TAJWEED CHECKS NOW RUN ON EVERY SUCCESS PATH.
+              ASR, MFA and RMS each call runStrict1Checks after
+              commitCorrect. A misread word is followed by a
+              non-timing Tajweed sweep
+              (runStrict1Checks(ptr-1, heard,
+                                 { skipTiming: true,
+                                   breakChain: true }))
+              so each rule the word also violated is recorded
+              as its own mistakes-list row. markStrict1Error
+              uses a per-word Set (w._tajweedErrs) instead of
+              the old `error`-class guard so different rules
+              can each fire once per word, and resetProgress()
+              clears that Set so a fresh session re-evaluates
+              every word.
+
+           None of these touch the SW. The only thing this
+           worker does for v71 is bump the version string so
+           activate() sweeps qc-*-v70 and older. qc-audio
+           (downloaded Quran MP3s) is preserved — every release
+           has preserved it, and the safety contract below
+           requires that this one does too.
 
    ============================================================
    USER-DATA SAFETY CONTRACT  (read before editing this file)
@@ -78,6 +107,20 @@
    PREVIOUS RELEASES (kept for context — all still accurate)
    ============================================================
 
+   v70 — SW-only user-data-safety release. No routing change,
+         no API change, no cache-key change, no strategy change.
+         One behavioural fix + explicit safety docs:
+           L. CLEAR_CACHES NO LONGER WIPES DOWNLOADED AUDIO
+              BY DEFAULT. The message handler now deletes only
+              non-persistent caches unless the client passes
+              includeAudio: true.
+           M. USER-DATA SAFETY CONTRACT DOCUMENTED IN HEADER.
+           N. activate() CACHE FILTER REWRITTEN WITH EXPLICIT
+              BRANCH COMMENTS.
+         Client-side: v70 paired with the v68 multi-engine
+         recitation pipeline (ASR → RMS → Phoneme Wav2Vec2 →
+         MFA).
+
    v69 — SW-only hardening: offline reinstall no longer wipes
          the shell (falls back to previous qc-shell-* cache when
          network fetch fails during install); same fallback for
@@ -93,16 +136,18 @@
          reaches the client on the next online navigation after
          the v68 worker activates.
          THE CLIENT-SIDE CHANGE THAT PROMPTED THAT BUMP:
-         index.html introduced the ASYNCHRONOUS MULTI-ENGINE
-         RECITATION PIPELINE:
+         index.html introduced the (now-superseded) asynchronous
+         multi-engine recitation pipeline:
            • Phoneme Recognition (Wav2Vec2)
            • Forced Alignment (MFA)
-         Priority cascade in gradeFull / gradeFollowOnly:
+         Priority cascade at that time in gradeFull / gradeFollowOnly:
            1. ASR Match (Instant)
            2. RMS Acoustic Match (Instant)
            3. Phoneme (Wav2Vec2) & MFA (Asynchronous Fallback)
            4. Wait / Skip
-         SW-side impact of v68: none.
+         SW-side impact of v68: none. Superseded by v71 (below),
+         which removed the Phoneme engine and reordered the
+         remaining cascade to ASR → MFA → RMS.
 
    v67 — SW-only version bump for THREE FOLLOW-UP FIXES (E, F, G)
          to the Follow-mode recitation path, layered on top of
@@ -147,12 +192,16 @@
          – No UI affordance opens it. The only way to read the
            policy is to view source.
      • Recitation Coach — Multi-Engine Pipeline:
-         – ASR (Instant) → RMS (Instant) → Phoneme (Wav2Vec2) →
-           MFA. If ANY engine marks the word correct, it turns
-           green. Follow mode uses a 1-word exact lookahead.
+         ASR (Instant) → MFA (Forced Alignment) → RMS Acoustic.
+         If ANY engine marks the word correct, the word turns
+         green AND runStrict1Checks runs on that word in Tajweed
+         mode. Follow mode uses a 1-word exact lookahead and
+         never invokes the (removed) Phoneme engine.
      • Tajweed mode — rule-aware checks covering FOUR rules:
          madd duration, ghunnah nasal presence, ghunnah length,
-         silent-letter not pronounced.
+         silent-letter not pronounced. Every success path
+         (ASR / MFA / RMS) verifies these rules; a misread word
+         is additionally swept for non-timing rule failures.
      • Two English text translations selectable in the UI:
          Abdullah Yusuf Ali · Saheeh International.
      • 20 Qari reciters (RECITER_ORDER).
@@ -181,17 +230,17 @@
      1. /robots.txt  — bypassed below so it is never stale.
      2. index.html   — meta tags + pre-body blocker + overlay.
 
-   NOTE ON DEPLOY: after shipping v70, fully close the PWA (or
+   NOTE ON DEPLOY: after shipping v71, fully close the PWA (or
    close every tab showing the site) and reopen it. The browser
    fetches sw.js on navigation; the new worker's install calls
    skipWaiting() and its activate calls clients.claim(), so the
-   next open runs the new code path. Caches qc-*-v69 and older
+   next open runs the new code path. Caches qc-*-v70 and older
    are deleted on activate; qc-audio (downloads) is preserved.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v70';
+const VERSION = 'v71';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -286,8 +335,8 @@ async function cacheShellWithFallback(){
 
   await Promise.all(SHELL_URLS.map(async url => {
     // Try fresh network first. cache:'reload' guarantees the new
-    // worker stores the *new* index.html containing the multi-engine
-    // (ASR + RMS + Phoneme + MFA) asynchronous pipeline.
+    // worker stores the *new* index.html containing the v71
+    // recitation pipeline (ASR → MFA → RMS, Phoneme removed).
     try{
       const res = await fetchWithTimeout(url, SHELL_FETCH_TIMEOUT_MS, { cache: 'reload' });
       if(res && (res.ok || res.type === 'opaque')){
