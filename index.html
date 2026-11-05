@@ -8238,6 +8238,28 @@ function noteFollowWrongToken(){
   }, FOLLOW_PIN_STOP_MS);
 }
 
+function isAcousticWordShapeMatch(w, seg) {
+  if (!seg || !w || seg.durationMs < 60) return false;
+  const samples = rmsAnalyser.samplesIn(seg.start, seg.end);
+  if (samples.length < 3) return false;
+
+  // 1. Length check: Average Arabic letter (with tashkeel) takes ~80-150ms.
+  const expectedMs = Math.max(100, w.norm.length * 100);
+  const ratio = seg.durationMs / expectedMs;
+  if (ratio < 0.4 || ratio > 2.5) return false; 
+
+  // 2. Voiced speech check: Ensure there is a sustained vowel run (not just a noise click)
+  const vr = rmsAnalyser.vowelRun(seg.start, seg.end);
+  if (vr.durationMs < expectedMs * 0.3) return false;
+
+  // 3. Energy check: Must be louder than the background noise floor
+  let maxRms = 0;
+  for (let i = 0; i < samples.length; i++) if (samples[i].rms > maxRms) maxRms = samples[i].rms;
+  if (maxRms < rmsAnalyser.minRms() * 1.2) return false;
+
+  return true;
+}
+
 function gradeFollowOnly(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -8276,6 +8298,17 @@ function gradeFollowOnly(tokens, startIdx){
 
     // ── FIX: Lookahead removed. The pointer must wait ──
     
+    // ── HYBRID RMS RESCUE ──
+    if (followOnly) {
+       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+       if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
+           commitCorrect(ptr, seg);
+           advancePast(1);
+           pendingHeard.length = 0; noteFollowProgress(); used++; continue;
+       }
+    }
+    // ───────────────────────
+
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if(pendingHeard.length > 5) pendingHeard.length = 0;
@@ -8460,6 +8493,21 @@ const w = words[ptr];
         pendingHeard.push(rawTok);
         used++; continue;
       }
+
+      /* ── HYBRID RMS RESCUE (Follow Mode Only) ── */
+      if (followOnly) {
+         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+         if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
+             // ASR failed, but RMS acoustic shape matches the word perfectly!
+             commitCorrect(ptr, seg);
+             advancePast(1);
+             pendingHeard.length = 0;
+             noteFollowProgress();
+             used++;
+             continue;
+         }
+      }
+      /* ────────────────────────────────────────── */
 
       /* ── FIX: Prevent skipping in Follow mode ── */
       if (followOnly) {
