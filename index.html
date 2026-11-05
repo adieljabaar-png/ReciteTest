@@ -2997,8 +2997,12 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   return false;
 }
 
+/* ── Fix B ──────────────────────────────────────────────────
+   Removed the dead `return false;` that was at the top of this
+   function. The fuzzy rescue now actually fires — a slightly
+   misrecognised pronunciation of words[ptr] can be committed
+   as correct before the lookahead ever skips a word. */
 function isPlausiblePronunciationAttempt(heard, hPhon, w){
-  return false;
   if(!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
   const targetLen = w.norm.length;
@@ -8166,7 +8170,13 @@ function commitManyCorrect(start, end, seg){
     words[i].el.className = baseCls + (warned ? ' warned' : '');
   }
 }
+
+/* ── Fix A ──────────────────────────────────────────────────
+   Guard added: in Follow mode, markSkippedWord is now a strict
+   no-op. No yellow .skipped painting ever occurs in Follow mode
+   — the highlight simply advances. */
 function markSkippedWord(i){
+  if(followOnly) return;
   const w = words[i]; if(!w) return;
   const el = w.el;
   if(el.classList.contains('error')) return;
@@ -8289,7 +8299,11 @@ const FULL_LOOKAHEAD = 5;
 function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
-  const LOOKAHEAD = 2;
+  /* ── Fix C ────────────────────────────────────────────────
+     Look-ahead is capped to 1 word in Follow mode so a "skip
+     and catch-up" cannot jump more than 2 words at once. In
+     Tajweed mode the 2-word look-ahead is preserved. */
+  const LOOKAHEAD = followOnly ? 1 : 2;
 
   const outerBatchCtx = batchTimingCtx;
   batchTimingCtx = {
@@ -8463,7 +8477,10 @@ function gradeFull(tokens, startIdx){
         if(consecutiveReds < 2) advancePast(1);
       } else {
         consecutiveReds = 0;
-        if(followOnly) markSkippedWord(ptr);
+        /* ── Fix D ──────────────────────────────────────────
+           Call-site guard: never even call markSkippedWord
+           in Follow mode on the 4-token flush path. */
+        if(!followOnly) markSkippedWord(ptr);
         advancePast(1);
       }
       pendingHeard.length = 0;
