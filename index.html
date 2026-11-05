@@ -1083,7 +1083,8 @@ body.listen-mode.hide-text-mode .w{color: var(--text) !important;background: tra
 .w.error{background:rgba(255,90,106,.22);color:#ff9aa4;text-decoration:underline wavy var(--bad);text-underline-offset:8px;animation:shake .32s ease;}
 .w.skipped{background:rgba(255,176,32,.16);color:#ffcf6b;text-decoration:line-through;text-decoration-color:var(--warn);}
 .w.model{background:rgba(255,176,32,.3);color:#fff}
-.w.warned{color:var(--warn) !important;text-decoration:underline dotted var(--warn);text-underline-offset:6px;background:rgba(255,176,32,.08);}
+/* Update: Removed forced yellow text color so .w.correct keeps it green */
+.w.warned{text-decoration:underline dotted var(--warn);text-underline-offset:6px;background:rgba(255,176,32,.08);}
 .w-deco{display:inline-block;padding:0 3px;opacity:.9;pointer-events:none;cursor:default;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
 @keyframes locatePulse{0%{background:rgba(79,140,255,.55);box-shadow:0 0 0 0 rgba(79,140,255,.6);color:#fff}100%{background:transparent;box-shadow:0 0 0 18px rgba(79,140,255,0);color:var(--text)}}
@@ -2971,6 +2972,7 @@ function confidenceFloor(){ return CONF_FLOOR_TABLE.strict; }
 const NOISE_LIMIT_TABLE = { strict: 2 };
 function noiseLimit(){ return NOISE_LIMIT_TABLE.strict; }
 
+// Updated: Tajweed mode is more lenient to accommodate elongations
 function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   const wNorm = w.norm;
   const la = hNorm.length, lb = wNorm.length;
@@ -2978,7 +2980,10 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   if(hNorm === wNorm) return true;
   const L = la > lb ? la : lb;
   if(L < 2) return false;
-  const tol = toleranceFor(L);
+  
+  const extraTol = followOnly ? 0 : 1;
+  const tol = toleranceFor(L) + extraTol;
+  
   const lenDiff = la > lb ? la - lb : lb - la;
   if(lenDiff > tol + 2) return false;
   if(lev(hNorm, wNorm) <= tol) return true;
@@ -2987,7 +2992,8 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   }
   if(la >= 4 && lb >= 4){
     const S = la < lb ? la : lb;
-    if(S / L >= 0.85){
+    const prefixThreshold = followOnly ? 0.85 : 0.70;
+    if(S / L >= prefixThreshold){
       if(hNorm.startsWith(wNorm) || wNorm.startsWith(hNorm)) return true;
       if(hNorm.endsWith(wNorm)   || wNorm.endsWith(hNorm))   return true;
     }
@@ -2995,6 +3001,7 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   return false;
 }
 
+// Updated: Looser phonetic check for Tajweed mode
 function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
@@ -3003,15 +3010,17 @@ function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(heardLen < 2 && targetLen > 1) return false;
 
   const ratio = heardLen / targetLen;
-  if(ratio < 0.35 || ratio > 2.5) return false;
+  const minRatio = followOnly ? 0.35 : 0.25;
+  const maxRatio = followOnly ? 2.5 : 3.5;
+  if(ratio < minRatio || ratio > maxRatio) return false;
 
   const L   = Math.max(heardLen, targetLen);
   const tol = toleranceFor(L);
 
-  if(lev(heard, w.norm) <= tol + 2) return true;
+  if(lev(heard, w.norm) <= tol + (followOnly ? 2 : 3)) return true;
 
   if(hPhon.length >= 2 && w.phon.length >= 2 &&
-     lev(hPhon, w.phon) <= tol + 1) return true;
+     lev(hPhon, w.phon) <= tol + (followOnly ? 1 : 2)) return true;
 
   return false;
 }
@@ -3764,7 +3773,7 @@ let hudPending = false;
 
 let advanceTimes = [];
 let currentPaceWPS = 0;
-let adaptiveSilenceMs = 6000;
+let adaptiveSilenceMs = 10000; // Increased to 10s
 let pendingJumpTarget = -1;
 
 const REC_BUF_MAX = 24;
@@ -5199,12 +5208,6 @@ const TAJWEED_ERROR_NAMES = {
   'emphatic-غ': 'Ghayn (غ) sounded as Qāf (ق)'
 };
 
-/* Edit 1 applied: allow multiple different Tajweed rules to be recorded per word.
- * The old guard `if (w.el.classList.contains('error')) return;` prevented any
- * additional rule failures on an already-misread word from being logged, which
- * defeats the point of "explained with the Tajweed rules that failed".
- * Now a per-word Set tracks which rules have already fired so the same rule
- * cannot double-fire, while DIFFERENT rules can each add their own row. */
 function markStrict1Error(w, kind, detail){
   if (!w) return;
   if (w._tajweedErrs && w._tajweedErrs.has(kind)) return;
@@ -5240,10 +5243,17 @@ function markStrict1Error(w, kind, detail){
   }
 }
 
+// Updated: Keeps the 'correct' class so the word stays green, adds 'warned'
+// for the yellow dotted underline visual hint, and does not count as an error.
 function markStrict1Warning(w, kind, detail){
   if (!w) return;
   if (w.el.classList.contains('warned') || w.el.classList.contains('error')) return;
-  w.el.className = 'w warned';
+  
+  w.el.classList.add('warned');
+  if (!w.el.classList.contains('correct') && !w.el.classList.contains('corrected')) {
+      w.el.classList.add('correct');
+  }
+
   if (!silentWarned){
     silentWarned = true;
     addFeedback('⚠️ <b>' + w.raw.replace(TASHKEEL,'') + '</b> — ' + detail, false, true);
@@ -7696,16 +7706,17 @@ function noteAdvance(n){
   if(advanceTimes.length >= 4){ const span = advanceTimes[advanceTimes.length - 1] - advanceTimes[0]; if(span > 300) currentPaceWPS = (advanceTimes.length - 1) / (span / 1000); }
   updateAdaptiveParams();
 }
+// Increased timer values to 10s+
 function updateAdaptiveParams(){
   const p = currentPaceWPS;
-  if(p <= 0){ adaptiveSilenceMs = 6000; return; }
-  if     (p < 0.6){ adaptiveSilenceMs = 9000; }
-  else if(p < 1.2){ adaptiveSilenceMs = 8000; }
-  else if(p < 2.0){ adaptiveSilenceMs = 7000; }
-  else if(p < 3.2){ adaptiveSilenceMs = 6000; }
-  else            { adaptiveSilenceMs = 6000; }
+  if(p <= 0){ adaptiveSilenceMs = 10000; return; }
+  if     (p < 0.6){ adaptiveSilenceMs = 12000; }
+  else if(p < 1.2){ adaptiveSilenceMs = 11000; }
+  else if(p < 2.0){ adaptiveSilenceMs = 10000; }
+  else if(p < 3.2){ adaptiveSilenceMs = 10000; }
+  else            { adaptiveSilenceMs = 10000; }
 }
-function resetPace(){ advanceTimes = []; currentPaceWPS = 0; adaptiveSilenceMs = 6000; pendingJumpTarget = -1; }
+function resetPace(){ advanceTimes = []; currentPaceWPS = 0; adaptiveSilenceMs = 10000; pendingJumpTarget = -1; }
 
 function enterReaderFullscreen(){
   if(readerFullscreen) return;
@@ -7834,9 +7845,9 @@ function applyHideTextUI(){
   if(hideText && followOnly){
     document.body.classList.add('hide-text-mode');
     words.forEach(w => {
-      if(w.el.classList.contains('correct') || w.el.classList.contains('corrected')){
+      if(w.el.classList.contains('correct') || w.el.classList.contains('corrected') || w.el.classList.contains('warned')){
         w.el.classList.add('revealed');
-        w.el.classList.remove('correct','corrected');
+        w.el.classList.remove('correct','corrected','warned');
       } else if(w.el.classList.contains('skipped')){
         w.el.classList.add('revealed');
       }
@@ -8080,8 +8091,6 @@ function renderVerses(ayahs, translations){
   resetProgress(true);
 }
 
-/* Edit 6 applied: also clear the per-word Tajweed error Set so each new session
- * starts fresh and re-evaluates every word from scratch. */
 function resetProgress(fullReset){
   ptr=0; errors=0; finished=false; recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
@@ -8281,7 +8290,7 @@ async function grade(tokens, startIdx){
 
 const FOLLOW_LOOKAHEAD = 1;
 const FOLLOW_WRONG_LIMIT = 3;
-const FOLLOW_PIN_STOP_MS = 7000;
+const FOLLOW_PIN_STOP_MS = 10000;
 
 let followWrongTokens = 0;
 let followPinTimer    = null;
@@ -8302,69 +8311,53 @@ function noteFollowWrongToken(){
   followPinPtr = ptr;
   const w = words[ptr];
   const label = w ? escapeHtml(w.raw.replace(TASHKEEL, '')) : '';
-  addFeedback('⚠️ Three words in a row not recognised — waiting on <b>' + label + '</b> for 7 s…', false, true);
+  addFeedback('⚠️ Three words in a row not recognised — waiting on <b>' + label + '</b> for 10 s…', false, true);
   followPinTimer = setTimeout(() => {
     followPinTimer = null;
     if(!wantMic) return;
     if(ptr !== followPinPtr) return;
-    addFeedback('⏹️ That word was not recited within 7 s — microphone stopped.', true);
+    addFeedback('⏹️ That word was not recited within 10 s — microphone stopped.', true);
     stopReciting(true);
     setStatus('Paused (word not recognised)', 'idle', 'Tap Start reciting to resume');
   }, FOLLOW_PIN_STOP_MS);
 }
 
+// Updated: Widened acoustic tolerance for Tajweed mode
 function isAcousticWordShapeMatch(w, seg) {
   if (!seg || !w || seg.durationMs < 60) return false;
   const samples = rmsAnalyser.samplesIn(seg.start, seg.end);
   if (samples.length < 3) return false;
 
-  // 1. Length check: Average Arabic letter (with tashkeel) takes ~80-150ms.
   const expectedMs = Math.max(100, w.norm.length * 100);
   const ratio = seg.durationMs / expectedMs;
-  if (ratio < 0.4 || ratio > 2.5) return false; 
+  const minRatio = followOnly ? 0.4 : 0.2;
+  const maxRatio = followOnly ? 2.5 : 4.0;
+  if (ratio < minRatio || ratio > maxRatio) return false; 
 
-  // 2. Voiced speech check: Ensure there is a sustained vowel run (not just a noise click)
   const vr = rmsAnalyser.vowelRun(seg.start, seg.end);
-  if (vr.durationMs < expectedMs * 0.3) return false;
+  const minVowelRatio = followOnly ? 0.3 : 0.15;
+  if (vr.durationMs < expectedMs * minVowelRatio) return false;
 
-  // 3. Energy check: Must be louder than the background noise floor
   let maxRms = 0;
   for (let i = 0; i < samples.length; i++) if (samples[i].rms > maxRms) maxRms = samples[i].rms;
-  if (maxRms < rmsAnalyser.minRms() * 1.2) return false;
+  if (maxRms < rmsAnalyser.minRms() * (followOnly ? 1.2 : 1.0)) return false;
 
   return true;
 }
 
-/* Edit 2 applied: replaced the combined `runPhonemeInference` + old
- * `runMFAInference` + `checkHeavyEngines` block with a single calibrated
- * MFA engine. The Phoneme engine has been removed entirely because:
- *   • It collapsed emphatic letters into their plain counterparts
- *     (ص→س, ط→ت, ق→ك …) BEFORE comparison, so it could not detect the very
- *     heavy/light substitutions it claimed to detect.
- *   • Its acceptance threshold was identical to `isMatchWord` (which already
- *     runs at Priority 1), so it almost never fired.
- *   • It bypassed `runStrict1Checks`, silently treating a word as correct
- *     without running any Tajweed verification — the opposite of what
- *     Tajweed mode needs.
- * The new MFA engine uses the reciter's calibrated pace from
- * `getBaseMsPerLetter()` (falling back to 110 ms/letter while the pace
- * samples are still warming up) and one tolerance step looser than ASR,
- * so it can actually rescue partially-mispronounced words. */
+// Updated: Widened MFA tolerance for Tajweed mode
 async function runMFAInference(w, seg, heard) {
   if (!seg || !w || !heard) return false;
 
-  // Duration — use the reciter's calibrated per-letter pace
   const T = getBaseMsPerLetter();
   const expectedMs = Math.max(60, w.norm.length * (T || 110));
   const ratio = seg.durationMs / expectedMs;
-  const durationOk = ratio > 0.55 && ratio < 1.70;
+  const durationOk = followOnly ? (ratio > 0.55 && ratio < 1.70) : (ratio > 0.35 && ratio < 2.80);
 
-  // Transcript — one step looser than ASR so MFA can actually rescue.
   const L    = Math.max(heard.length, w.norm.length);
-  const tol  = toleranceFor(L) + 1;
+  const tol  = toleranceFor(L) + (followOnly ? 1 : 2);
   const normOk = heard === w.norm || lev(heard, w.norm) <= tol;
 
-  // Phonetic — same tolerance band.
   const hPhon = phonArCached(heard);
   const phonOk = w.phon.length >= 2 && hPhon.length >= 2 &&
                  lev(hPhon, w.phon) <= tol;
@@ -8372,7 +8365,6 @@ async function runMFAInference(w, seg, heard) {
   return durationOk && (normOk || phonOk);
 }
 
-/* Edit 3 applied: Follow mode now uses ASR → MFA → RMS (Phoneme removed). */
 async function gradeFollowOnly(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -8442,14 +8434,6 @@ async function gradeFollowOnly(tokens, startIdx){
 
 const FULL_LOOKAHEAD = 5;
 
-/* Edit 4 applied: Tajweed mode uses ASR → MFA → RMS, and EVERY success path
- * (including the MFA and RMS rescues) now calls `runStrict1Checks` so the
- * Tajweed rules are verified for the word that was accepted. Edit 5 applied:
- * on a misread word the code now calls `runStrict1Checks` with
- * `{ skipTiming: true, breakChain: true }` after the pointer advances, so
- * each distinct Tajweed rule that the misread word also violates is
- * recorded as its own mistakes-list row — the "explained in detail" behaviour.
- */
 async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -8525,7 +8509,43 @@ async function gradeFull(tokens, startIdx){
         }
       }
 
-     
+      let found = -1;
+      const maxK = Math.min(LOOKAHEAD, words.length - ptr - 1);
+      for(let k = 1; k <= maxK; k++){
+        const target = words[ptr + k];
+        if(heard === target.norm){ found = k; break; }
+        if(!followOnly && k === 1 && isMatchWord(heard, hPhon, null, target)){
+          found = k; break;
+        }
+        if(!followOnly && k >= 2 && hPhon.length >= 4 && hPhon === target.phon){
+          found = k; break;
+        }
+      }
+      if(found > 0){
+        if(followOnly && found === 1 && words[ptr] &&
+           isPlausiblePronunciationAttempt(heard, hPhon, words[ptr])){
+          pendingHeard.push(rawTok);
+          used++;
+          continue;
+        }
+        const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+        let skipStart = ptr;
+        if(pendingHeard.length){
+          const buffered = normArCached(pendingHeard.join(''));
+          const target   = words[ptr].norm;
+          if(buffered.length >= target.length * 0.40 &&
+             target.startsWith(buffered)){
+            commitCorrect(ptr, seg);
+            skipStart = ptr + 1;
+          }
+        }
+        for(let k = skipStart; k < ptr + found; k++) markSkippedWord(k);
+        commitCorrect(ptr + found, seg);
+        runStrict1Checks(ptr + found, heard, { timingReliable: false });
+        advancePast(found + 1);
+        pendingHeard.length = 0; consecutiveReds = 0;
+        used++; continue;
+      }
 
       const mergedN = tryMergedTokenMatch(heard, hPhon);
       if(mergedN > 0){
@@ -8643,7 +8663,7 @@ async function gradeFull(tokens, startIdx){
         }
       } else {
         consecutiveReds = 0;
-       
+        if(!followOnly) markSkippedWord(ptr);
         advancePast(1);
       }
       pendingHeard.length = 0;
