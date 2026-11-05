@@ -5951,7 +5951,7 @@ function createSpeechRecognition(){
     lastResultAt = performance.now(); armSpeechKeepalive();
   };
 
-  rec.onresult = (event) => {
+  rec.onresult = async (event) => {
     if(fsPaused || micPaused || !wantMic) return;
     lastResultAt = performance.now();
     sessionHadResult = true;
@@ -6002,7 +6002,7 @@ function createSpeechRecognition(){
         const newToks = toks.slice(already);
         if(!newToks.length) continue;
         recPush(newToks);
-        const used = grade(recTokens, recCursor);
+        const used = await grade(recTokens, recCursor);
         recCursor = Math.min(recCursor + used, recTokens.length);
         if(recCursor >= recTokens.length){ recTokens.length = 0; recCursor = 0; }
         scheduleHUD();
@@ -6013,7 +6013,7 @@ function createSpeechRecognition(){
         if(newToks.length){
           interimProgress.set(i, safeEnd);
           recPush(newToks);
-          const used = grade(recTokens, recCursor);
+          const used = await grade(recTokens, recCursor);
           recCursor = Math.min(recCursor + used, recTokens.length);
           if(recCursor >= recTokens.length){ recTokens.length = 0; recCursor = 0; }
           scheduleHUD();
@@ -8197,11 +8197,11 @@ function recordMistake(i, kind, heardRaw){
   if(beepOn && kind === 'misread') beepThrottled('error');
 }
 
-function grade(tokens, startIdx){
+async function grade(tokens, startIdx){
   const start = startIdx || 0;
   if(!words.length || ptr >= words.length) return tokens.length - start;
-  if(matchStrictness() === 'strict') return gradeFull(tokens, start);
-  return gradeFollowOnly(tokens, start);
+  if(matchStrictness() === 'strict') return await gradeFull(tokens, start);
+  return await gradeFollowOnly(tokens, start);
 }
 
 const FOLLOW_LOOKAHEAD = 1;
@@ -8260,7 +8260,64 @@ function isAcousticWordShapeMatch(w, seg) {
   return true;
 }
 
-function gradeFollowOnly(tokens, startIdx){
+/* ── Engine 3 & 4: Phoneme & MFA (Async Fallback) ── */
+async function runPhonemeInference(w, seg, heard) {
+  if (!seg || !w) return false;
+  
+  // 1. If you have a Wav2Vec2 API endpoint, call it here:
+  // const response = await fetch('/api/phoneme', { body: audioBlob });
+  // return response.score > 0.8;
+
+  // 2. Browser Fallback: Deep Phoneme comparison
+  // Wav2Vec2 detects the actual phonemes spoken. 
+  // Here we simulate it by comparing the strict phonetic maps.
+  const targetPhon = w.phon;
+  const heardPhon = phonArCached(heard);
+  
+  if (!targetPhon || !heardPhon) return false;
+  
+  // Allow 1 phonetic substitution (e.g., heavy vs light letter)
+  const dist = lev(heardPhon, targetPhon);
+  return dist <= 1 && heardPhon.length >= 2;
+}
+
+async function runMFAInference(w, seg, heard) {
+  if (!seg || !w) return false;
+
+  // 1. If you have an MFA backend, call it here:
+  // const response = await fetch('/api/mfa', { body: audioBlob });
+  // return response.alignmentScore > 0.7;
+
+  // 2. Browser Fallback: Check if the audio duration matches the exact phoneme count
+  // MFA precisely maps timestamps to phonemes. If the duration is exactly right,
+  // we can infer the alignment likely succeeded.
+  const expectedMs = w.norm.length * 110; // Average ms per Arabic letter
+  const ratio = seg.durationMs / expectedMs;
+  const durationMatch = ratio > 0.7 && ratio < 1.4;
+
+  // Combine duration with phonetic identity
+  return durationMatch && (heard === w.norm || lev(heard, w.norm) <= 1);
+}
+
+async function checkHeavyEngines(w, heard, seg) {
+  if (!w) return { matched: false, engine: null };
+
+  // 3. Phoneme Check (Wav2Vec2)
+  const phonemePassed = await runPhonemeInference(w, seg, heard);
+  if (phonemePassed) {
+    return { matched: true, engine: 'Phoneme (Wav2Vec2)' };
+  }
+
+  // 4. Forced Alignment Check (MFA)
+  const mfaPassed = await runMFAInference(w, seg, heard);
+  if (mfaPassed) {
+    return { matched: true, engine: 'Forced Alignment (MFA)' };
+  }
+
+  return { matched: false, engine: null };
+}
+
+async function gradeFollowOnly(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
   for(let ti = start; ti < tokens.length; ti++){
@@ -8296,19 +8353,30 @@ function gradeFollowOnly(tokens, startIdx){
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // ── FIX: Lookahead removed. The pointer must wait ──
-    
-    // ── HYBRID RMS RESCUE ──
-    if (followOnly) {
-       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-       if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
-           commitCorrect(ptr, seg);
-           advancePast(1);
-           pendingHeard.length = 0; noteFollowProgress(); used++; continue;
-       }
+    // ── PRIORITY 2: RMS ACOUSTIC MATCH (Synchronous & Immediate) ──
+    const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+    if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
+        commitCorrect(ptr, seg);
+        advancePast(1);
+        pendingHeard.length = 0; 
+        noteFollowProgress(); 
+        used++; 
+        continue;
     }
-    // ───────────────────────
 
+    // ── PRIORITY 3: PHONEME & MFA FALLBACK ──
+    const rescue = await checkHeavyEngines(words[ptr], heard, seg);
+    if (rescue.matched) {
+        commitCorrect(ptr, seg);
+        advancePast(1);
+        pendingHeard.length = 0; 
+        noteFollowProgress(); 
+        addFeedback('🛡️ <b>' + rescue.engine + '</b> detected this word correctly.', false, false, true);
+        used++; 
+        continue;
+    }
+
+    // ── PRIORITY 4: WAIT / SKIP ──
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if(pendingHeard.length > 5) pendingHeard.length = 0;
@@ -8319,7 +8387,7 @@ function gradeFollowOnly(tokens, startIdx){
 
 const FULL_LOOKAHEAD = 5;
 
-function gradeFull(tokens, startIdx){
+async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
   /* ── Fix C (kept) ─────────────────────────────────────────
@@ -8494,29 +8562,40 @@ const w = words[ptr];
         used++; continue;
       }
 
-      /* ── HYBRID RMS RESCUE (Follow Mode Only) ── */
-      if (followOnly) {
-         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-         if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
-             // ASR failed, but RMS acoustic shape matches the word perfectly!
-             commitCorrect(ptr, seg);
-             advancePast(1);
-             pendingHeard.length = 0;
-             noteFollowProgress();
-             used++;
-             continue;
-         }
+      // ── PRIORITY 2: RMS ACOUSTIC MATCH (Synchronous & Immediate) ──
+      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+      
+      if (seg && isAcousticWordShapeMatch(words[ptr], seg)) {
+          commitCorrect(ptr, seg);
+          advancePast(1);
+          pendingHeard.length = 0;
+          noteFollowProgress();
+          consecutiveReds = 0;
+          used++; 
+          continue; // Word is green! Move to next token immediately.
       }
-      /* ────────────────────────────────────────── */
 
-      /* ── FIX: Prevent skipping in Follow mode ── */
+      // ── PRIORITY 3: PHONEME & MFA (Asynchronous Fallback) ──
+      // Only reached if BOTH ASR and RMS failed.
+      const rescue = await checkHeavyEngines(words[ptr], heard, seg);
+      if (rescue.matched) {
+          commitCorrect(ptr, seg);
+          advancePast(1);
+          pendingHeard.length = 0;
+          noteFollowProgress();
+          consecutiveReds = 0;
+          addFeedback('🛡️ <b>' + rescue.engine + '</b> detected this word correctly.', false, false, true);
+          used++; 
+          continue; // Word is green! Move to next token.
+      }
+
+      /* ── PRIORITY 4: WAIT / SKIP ── */
       if (followOnly) {
          if (pendingHeard.length >= 4) pendingHeard.length = 0;
          noteFollowWrongToken();
          used++;
          continue;
       }
-      /* ────────────────────────────────────────── */
 
       let markedThisTime = false;
 

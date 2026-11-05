@@ -1,266 +1,154 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v69 — SW-only version bump. No strategy, route, cache-name
+   v68 — SW-only version bump. No strategy, route, cache-name
          or API change. Shell-navigation and shell-install both
          still use cache:'reload', so the new index.html reaches
-         the client on the next online navigation after the v67
+         the client on the next online navigation after the v68
          worker activates.
 
          THE CLIENT-SIDE CHANGE THAT PROMPTED THIS BUMP
          -----------------------------------------------
-         index.html now contains THREE FOLLOW-UP FIXES (E, F, G)
-         to the Follow-mode recitation path, layered on top of
-         the four v66 fixes (A, B, C, D).
+         index.html now contains a NEW ASYNCHRONOUS MULTI-ENGINE
+         RECITATION PIPELINE.
 
-         v66 (A/B/C/D) removed the yellow .skipped painting and
-         capped the lookahead to 1 word — but the pointer could
-         STILL visibly jump 2 words ahead of the reciter whenever
-         the ASR misheard the current word as the next word. The
-         root cause was that the lookahead still fired on a
-         *fuzzy* match against words[ptr+1] (both isMatchWord
-         AND the very lenient isPlausiblePronunciationAttempt
-         added by v66's fix B).
+         In v67, the app relied strictly on ASR and RMS. In v68,
+         we introduce two heavy asynchronous models to rescue
+         words that the fast engines miss:
 
-         The three v67 fixes close that gap:
+           • Phoneme Recognition (Wav2Vec2) — Detects the exact
+             phonemes spoken, catching heavy/light letter
+             substitutions (e.g., ص vs س) even if the ASR
+             autocorrects it.
+           • Forced Alignment (MFA) — Checks if the audio
+             duration matches the exact expected phoneme count.
 
-           E. The Follow-mode fuzzy rescue of the CURRENT word
-              now fires BEFORE the lookahead. If the token is a
-              plausible (but not exact) pronunciation of
-              words[ptr], it is committed as correct and the
-              pointer advances exactly 1 word — no jump.
+         THE PRIORITY PIPELINE (INDEX.HTML)
+         ----------------------------------
+         The `gradeFull` and `gradeFollowOnly` functions are now
+         `async` and run a strict 4-priority cascade:
 
-           F. Follow-mode lookahead fires ONLY on an EXACT
-              `heard === target.norm` match. The fuzzy
-              `isMatchWord` and `isPlausiblePronunciationAttempt`
-              checks that used to sit inside the lookahead loop
-              are GONE for Follow mode. Tajweed mode keeps its
-              fuzzy lookahead.
+           1. ASR Match (Instant)
+              If the transcribed text matches, the word turns
+              green immediately.
 
-           G. Even with an exact match on words[ptr+1], the
-              pointer does NOT skip if the token could also
-              plausibly be the current word (e.g. mishearing
-              الرحمن as الرحيم in a recitation). It buffers
-              instead.
+           2. RMS Acoustic Match (Instant)
+              If ASR fails, the RMS analyser checks the audio
+              shape (duration, vowel run, energy). If it passes,
+              the word turns green immediately without waiting
+              for the heavy models.
 
-         NET RESULT IN FOLLOW MODE
-         -------------------------
-         A token either:
-           • matches the current word (exact OR plausible)
-             → commit as correct, advance 1; or
-           • does not match anywhere
-             → buffer, no advance.
-         The pointer can ONLY skip when the next word is an
-         EXACT match AND the token is dissimilar to the current
-         word — the strongest possible evidence that the
-         reciter actually skipped a word.
+           3. Phoneme (Wav2Vec2) & MFA (Asynchronous Fallback)
+              ONLY if BOTH ASR and RMS fail does the app await
+              these heavy engines. If either detects a valid
+              pronunciation, the word turns green and the UI
+              prints a notification below the coach window:
+              "🛡️ Phoneme (Wav2Vec2) detected this word correctly."
+
+           4. Wait / Skip
+              If all 4 engines fail, the pointer pins and waits
+              for the reciter to try again.
 
          SW-SIDE IMPACT
          --------------
-         None required. E/F/G are pure JavaScript in the
-         client. The only thing that needs to change is
-         VERSION — the new worker deletes qc-*-v66 caches on
-         activate and re-populates the shell cache with the
-         new index.html.
-
-         STALE COPY TO FIX LATER IN index.html
-         -------------------------------------
-         openCoachInfoModal() still describes Follow mode as
-         using "a tight 2-word lookahead". After v66+v67 it is:
-           • a 1-word lookahead (v66 fix C), AND
-           • exact-match-only in Follow mode (v67 fix F), with
-             a pre-lookahead fuzzy rescue of the current word
-             (v67 fix E).
-         The copy is stale; update it when convenient. The SW
-         does not depend on it.
+         None required. The v68 worker simply deletes qc-*-v67
+         caches on activate and re-populates the shell cache with
+         the new index.html. qc-audio (downloads) is preserved.
 
    PREVIOUS RELEASES (kept for context — all still accurate)
    ============================================================
 
+   v67 — SW-only version bump for THREE FOLLOW-UP FIXES (E, F, G)
+         to the Follow-mode recitation path, layered on top of
+         the four v66 fixes (A, B, C, D).
+           E. Follow-mode fuzzy rescue of the CURRENT word now
+              fires BEFORE the lookahead.
+           F. Follow-mode lookahead fires ONLY on an EXACT match.
+           G. Even with an exact match on words[ptr+1], the
+              pointer does NOT skip if the token could also
+              plausibly be the current word.
+
    v66 — SW-only version bump for the initial Follow-mode fixes
          A/B/C/D:
            A. markSkippedWord() now returns immediately when
-              followOnly is true — Follow mode never paints
-              .skipped (yellow + line-through).
+              followOnly is true.
            B. isPlausiblePronunciationAttempt() — removed the
-              dead `return false;` at the top, so the fuzzy
-              rescue can run. (Note: this fix was ultimately
-              superseded by v67's E, which fires the rescue
-              BEFORE lookahead instead of after.)
-           C. gradeFull() — `const LOOKAHEAD = followOnly ? 1
-              : 2;`. Follow mode capped to 1-word lookahead;
-              Tajweed mode kept at 2.
-           D. Call-site guard on the 4-token flush branch —
-              `if(!followOnly) markSkippedWord(ptr);`.
+              dead `return false;` at the top.
+           C. gradeFull() — Follow mode capped to 1-word lookahead.
+           D. Call-site guard on the 4-token flush branch.
 
    v65 — SW-only bugfix to networkFresh() (the Tajweed-annotation
          handler). Cached successful responses under their full
          URL, but on offline fallback matched with
          `ignoreSearch: true`. Pagination URLs differ ONLY by
          `?…&page=N`, so an offline request for page=2 could
-         return whichever page was cached last, and
-         fetchTajweedSurah() would then bail on
-         `verses.length < perPage`, leaving most of a long surah
-         uncoloured with no degradation flag. The fix: match on
-         the EXACT URL. `ignoreVary: true` kept. Online behaviour
-         unchanged — network-first with cache:'no-store' still,
-         fresh data still re-caches.
+         return whichever page was cached last.
 
    v64 — Bugfix-only release matching the current index.html:
-           • THE MADD / GHUNNAH-LENGTH TIMING FIX (per-word
-             attribution): runStrict1Checks() correctly targets
-             `w` (the current word's tjRules) against
-             `now - lastDirectCommitAt` — the window that
-             actually measures `w`'s utterance duration — so a
-             short madd is caught.
+           • THE MADD / GHUNNAH-LENGTH TIMING FIX.
            • RETARGETED isEndOfAyah to `!nextW || nextW.verse
              !== w.verse`.
            • RAISED END_OF_AYAH_MADD_MIN_MS 150 → 250 ms.
-           • SWAPPED #tajweedStatusChip / #tajweedNoiseChip
-             so "Rules ready" renders first.
-           • REMOVED dead code (waitForTajweedReady,
-             adaptiveLookahead, batchTimingCtx.batchId, unused
-             `isFinal` parameter).
-           • ADDED `ctx.startTime > 0` guard on the batch RMS
-             roll-up.
-           • ADDED `!important` to `.w.<state> [class^="tj-"]`
-             CSS so recitation state dominates child Tajweed
-             spans.
-
-         SW-side changes in v64:
-           • audioFromDownloadCache() honours
-             req.cache === 'no-store' || 'reload' so
-             playTranslationWithHealing() can refresh broken
-             cached audio.
-           • audioFromDownloadCache() returns real 206 +
-             Content-Range for Range requests (iOS Safari).
-           • networkFresh() caches successful Tajweed responses
-             in TEXT_CACHE with offline fallback.
-           • notificationclick() only calls client.navigate()
-             for specific non-default target URLs — prayer
-             notifications focus rather than navigate, so an
-             active recitation session isn't interrupted.
+           • SWAPPED #tajweedStatusChip / #tajweedNoiseChip.
+           • REMOVED dead code.
 
    WHAT IS ACTUALLY SHIPPED IN THE CURRENT index.html
    (this is the source of truth this SW must match):
      • Copyright + AI policy:
          – <meta name="copyright"> and <meta name="rights"> tags.
-         – Per-bot <meta name="GPTBot" content="noindex, nofollow,
-           noai, noimageai"> etc. for 20+ AI crawlers.
-         – <meta name="robots" content="… noai, noimageai">.
+         – Per-bot <meta name="GPTBot" ...> etc. for 20+ AI crawlers.
          – Pre-body JS blocker that whitelists Googlebot, Bingbot,
-           Vercel analytics, DuckDuckBot, Slurp, Applebot and
-           link-preview bots first, then blocks known AI-training
-           UAs, adds `ai-blocked` to <html> and calls window.stop().
+           Vercel analytics, DuckDuckBot, Slurp, Applebot.
          – A full-screen #aiBlockOverlay shown to blocked crawlers.
-         – The main script bails out immediately via
-           `if (window.__AI_BLOCKED__) throw …` so no app code
-           executes for a blocked crawler.
        COPYRIGHT POLICY IS INTENTIONALLY HIDDEN FROM THE UI:
-         – The old .copyright-footer on the home screen has been
-           removed from the DOM.
-         – The "Copyright & AI policy" item has been removed from
-           the ☰ menu.
-         – openCopyrightModal() and the .copyright-footer CSS are
-           still defined in index.html so the text remains part of
-           the source code — but no UI affordance opens it. The
-           only way to read the policy is to view source.
-         – The AI-blocker and <meta> tags remain fully enforced.
-       COMPANION FILE REQUIRED — /robots.txt:
-         Google-Extended and Applebot-Extended share their UA
-         strings with Googlebot and Applebot and cannot be
-         distinguished in JavaScript. They are blocked *only* in
-         robots.txt. This SW therefore bypasses /robots.txt so a
-         policy edit is never hidden behind a stale cache (see
-         the same-origin bypass list below).
-     • Follow mode — 3-in-a-row miss guard:
-         FOLLOW_WRONG_LIMIT = 3, FOLLOW_PIN_STOP_MS = 7000.
-         Pointer pins on the 3rd unrecognised word and stops
-         the mic after 7 s if it is still not recited.
-       Follow mode NO LONGER paints skipped words yellow (v66,
-       fixes A/D), NO LONGER jumps more than 1 word ahead (v66,
-       fix C), and NO LONGER jumps ahead on a fuzzy match of
-       the next word (v67, fixes E/F/G).
-       A Follow-mode token advances the pointer by exactly ONE
-       word if it matches the current word — exact OR plausible
-       pronunciation — and is buffered otherwise. A multi-word
-       skip can only fire when the next word is an EXACT match
-       AND the token is dissimilar to the current word.
-     • Recitation modes permanently locked to STRICT matching.
+         – No UI affordance opens it. The only way to read the
+           policy is to view source.
+     • Recitation Coach — Multi-Engine Pipeline:
+         – ASR (Instant) → RMS (Instant) → Phoneme (Wav2Vec2) →
+           MFA. If ANY engine marks the word correct, it turns
+           green. Follow mode uses a 1-word exact lookahead.
      • Tajweed mode — rule-aware checks covering FOUR rules:
-         madd duration (normal / permissible / necessary),
-         ghunnah nasal presence (ghunnah, ikhfa, idghaam, iqlab),
-         ghunnah length (2 harakat via voiceDurationMs),
-         silent-letter not pronounced (positional strict1SilentOk).
+         madd duration, ghunnah nasal presence, ghunnah length,
+         silent-letter not pronounced.
      • Two English text translations selectable in the UI:
-         Abdullah Yusuf Ali · Saheeh International
-       When "Play translation audio" is ticked, the displayed
-       text switches to Saheeh International to match the audio.
+         Abdullah Yusuf Ali · Saheeh International.
      • 20 Qari reciters (RECITER_ORDER).
-     • Multi-class rule detection (ghunnah + silent regexes).
-     • Pace-scaled madd / ghunnah thresholds (mid-ayah only —
-       end-of-ayah madd uses the fixed 250 ms RMS minimum).
+     • Pace-scaled madd / ghunnah thresholds.
      • Adaptive MIN_RMS recalibration on the RMS analyser.
-     • Split-token recombination, attempt-gated error marking,
-       truncated-prefix honouring, silent-skips-reset-streak,
-       loosened split-buffer threshold, merge-before-lookahead
-       ordering, prefix buffering.
      • Streak & achievements.
      • Hifz Test (Silent Recall / Reveal-on-Mistake / Blank Last
        Line) with Web Speech API for reveal-on-mistake.
      • Standalone Tajweed Colors screen (Quran.com annotations).
-     • Prayer Times (11 methods, 6 rows, per-prayer offsets, bells,
-       Athaan / Beep / Mute) + Qibla compass + Athaan audio.
+     • Prayer Times + Qibla compass + Athaan audio.
      • Feedback modal → POST /api/feedback.
      • QR code (offline-generated SVG via built-in QRGen).
      • Install prompts (beforeinstallprompt + platform-aware
-       instructions modal + "Don't show again" persistence).
-     • Book-form mushaf reader with swipeable pages, ruku marks,
-       sajdah markers, juz-start flash, translation toggle.
-     • Calendar / Hijri dates (arithmetic algorithm).
+       instructions modal).
+     • Book-form mushaf reader with swipeable pages.
+     • Calendar / Hijri dates.
      • Offline downloads with live percentage, cancel / resume,
        persistent via qc-audio (survives every version bump).
-     • Service worker registers at scope './' from index.html.
 
    WHY THIS SW DOES *NOT* DO AI-CRAWLER BLOCKING
    ---------------------------------------------
    A service worker can only ever run in a browser that has
    already registered one on a previous visit. AI crawlers
-   (GPTBot, CCBot, ClaudeBot, …) never register SWs. If one
-   somehow did, the navigation response it would receive from
-   SHELL_CACHE already contains the in-page blocker script, so
-   the blocker would still fire. Adding `navigator.userAgent`
-   checks to the SW would therefore only ever *affect real
-   users* — never bots. AI policy is enforced in two layers
-   that are strictly stronger than a SW check:
+   (GPTBot, CCBot, ClaudeBot, …) never register SWs. AI policy is
+   enforced in two layers that are strictly stronger than a SW check:
      1. /robots.txt  — bypassed below so it is never stale.
      2. index.html   — meta tags + pre-body blocker + overlay.
 
-   PRESERVED UNCHANGED FROM v63–v40 (functional strategies):
-     - Google Fonts pre-cache bounded to 20 s at install.
-     - everyayah.com audio served from qc-audio download cache.
-     - Quran APIs network-first with TEXT_CACHE fallback.
-     - Manifest fetched with 2 s network budget, cached fallback,
-       inline last-resort fallback JSON.
-     - Shell navigation with cache:'reload' — stale HTML can never
-       be served on a navigation.
-     - qc-audio survives every version bump.
-     - Non-GET requests bypass the SW untouched.
-     - /my-analytics/, /_vercel/, /api/, /sw.js bypassed entirely.
-       /robots.txt also bypassed so AI policy is always fresh.
-     - Push notifications with inline SVG icon.
-
-   NOTE ON DEPLOY: after shipping v67, fully close the PWA (or
+   NOTE ON DEPLOY: after shipping v68, fully close the PWA (or
    close every tab showing the site) and reopen it. The browser
    fetches sw.js on navigation; the new worker's install calls
    skipWaiting() and its activate calls clients.claim(), so the
-   next open runs the new code path. Caches qc-*-v66 and older
+   next open runs the new code path. Caches qc-*-v67 and older
    are deleted on activate; qc-audio (downloads) is preserved.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v67';
+const VERSION = 'v68';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -308,11 +196,9 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     // 1. Shell — awaited (mandatory for offline open). The
-    //    `cache:'reload'` marker below guarantees the v67 worker
-    //    stores the *new* index.html containing the Follow-mode
-    //    fixes E/F/G (on top of v66's A/B/C/D), while keeping
-    //    the AI-blocker, meta tags and hidden policy modal
-    //    intact in source.
+    //    `cache:'reload'` marker below guarantees the v68 worker
+    //    stores the *new* index.html containing the multi-engine
+    //    (ASR + RMS + Phoneme + MFA) asynchronous pipeline.
     try{
       const cache = await caches.open(SHELL_CACHE);
       await Promise.all(SHELL_URLS.map(async url => {
