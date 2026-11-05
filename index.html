@@ -8525,43 +8525,7 @@ async function gradeFull(tokens, startIdx){
         }
       }
 
-      let found = -1;
-      const maxK = Math.min(LOOKAHEAD, words.length - ptr - 1);
-      for(let k = 1; k <= maxK; k++){
-        const target = words[ptr + k];
-        if(heard === target.norm){ found = k; break; }
-        if(!followOnly && k === 1 && isMatchWord(heard, hPhon, null, target)){
-          found = k; break;
-        }
-        if(!followOnly && k >= 2 && hPhon.length >= 4 && hPhon === target.phon){
-          found = k; break;
-        }
-      }
-      if(found > 0){
-        if(followOnly && found === 1 && words[ptr] &&
-           isPlausiblePronunciationAttempt(heard, hPhon, words[ptr])){
-          pendingHeard.push(rawTok);
-          used++;
-          continue;
-        }
-        const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-        let skipStart = ptr;
-        if(pendingHeard.length){
-          const buffered = normArCached(pendingHeard.join(''));
-          const target   = words[ptr].norm;
-          if(buffered.length >= target.length * 0.40 &&
-             target.startsWith(buffered)){
-            commitCorrect(ptr, seg);
-            skipStart = ptr + 1;
-          }
-        }
-        for(let k = skipStart; k < ptr + found; k++) markSkippedWord(k);
-        commitCorrect(ptr + found, seg);
-        runStrict1Checks(ptr + found, heard, { timingReliable: false });
-        advancePast(found + 1);
-        pendingHeard.length = 0; consecutiveReds = 0;
-        used++; continue;
-      }
+     
 
       const mergedN = tryMergedTokenMatch(heard, hPhon);
       if(mergedN > 0){
@@ -8679,7 +8643,7 @@ async function gradeFull(tokens, startIdx){
         }
       } else {
         consecutiveReds = 0;
-        if(!followOnly) markSkippedWord(ptr);
+       
         advancePast(1);
       }
       pendingHeard.length = 0;
