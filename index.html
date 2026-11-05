@@ -2732,18 +2732,16 @@ const PHON_LOOSE = Object.assign({}, PHON, {
   '\u062D':'\u0647','\u062E':'\u0647','\u063A':'\u0642','\u0639':'\u0621'
 });
 
-/* Emphatic → light substitution map — used by emphaticViolation()
-   to catch ASR autocorrect swallowing heavy letters (Fix 2). */
 const EMPHATIC_FAMILY = {
-  '\u0635': '\u0633', // ص → س
-  '\u0636': '\u062F', // ض → د
-  '\u0637': '\u062A', // ط → ت
-  '\u0638': '\u0630', // ظ → ذ
-  '\u0642': '\u0643', // ق → ك
-  '\u062D': '\u0647', // ح → ه
-  '\u062E': '\u0647', // خ → ه
-  '\u0639': '\u0621', // ع → ء
-  '\u063A': '\u0642'  // غ → ق
+  '\u0635': '\u0633',
+  '\u0636': '\u062F',
+  '\u0637': '\u062A',
+  '\u0638': '\u0630',
+  '\u0642': '\u0643',
+  '\u062D': '\u0647',
+  '\u062E': '\u0647',
+  '\u0639': '\u0621',
+  '\u063A': '\u0642'
 };
 
 function phonNormAr(s){
@@ -2997,11 +2995,6 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   return false;
 }
 
-/* ── Fix B ──────────────────────────────────────────────────
-   Removed the dead `return false;` that was at the top of this
-   function. The fuzzy rescue now actually fires — a slightly
-   misrecognised pronunciation of words[ptr] can be committed
-   as correct before the lookahead ever skips a word. */
 function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
@@ -4904,9 +4897,6 @@ function getBaseMsPerLetter(){
 
 function resetPaceSamples(){ paceSamples.length = 0; }
 
-/* Mora-relative required duration for a mid-ayah madd letter. Used only
-   as a fallback when rmsAvailable is false; the primary path in
-   runStrict1Checks() computes this directly from vowelRun(). */
 function maddRequiredMs(kind){
   const T_mora = getBaseMsPerLetter();
   if (T_mora !== null){
@@ -4944,7 +4934,6 @@ let silentWarned        = false;
 
 let batchTimingCtx = null;
 
-/* ── Extended parseTajweedWordRules (Fix 4A, 4B) ─────────── */
 function parseTajweedWordRules(decoratedHtml){
   const rules = {
     madd: null,
@@ -5017,7 +5006,6 @@ function strict1MaddOk(prevW, deltaMs){
   return deltaMs >= need;
 }
 
-/* ── Hybrid Ghunnah check (Fix 3) ────────────────────────── */
 function strict1GhunnahOk(w, heard){
   if (!w || !w.tjRules || !w.tjRules.hasGhunnahContext) return true;
   if (!STRICT_FEATURES.ghunnah()) return true;
@@ -5057,7 +5045,6 @@ function strict1GhunnahOk(w, heard){
   return true;
 }
 
-/* ── New acoustic helpers (Fix 2, 3, 4) ──────────────────── */
 function emphaticViolation(heardNorm, targetNorm){
   const viol = [];
   for (let i = 0; i < targetNorm.length; i++){
@@ -5165,7 +5152,6 @@ function strict1SilentOk(w, heard){
   return dFull >= best;
 }
 
-/* ── Extended error names (Fix 2, 3, 4) ───────────────────── */
 const TAJWEED_ERROR_NAMES = {
   'madd-normal':            'Madd (normal) — too short',
   'madd-permissible':       'Madd (permissible) — too short',
@@ -5255,7 +5241,6 @@ function markStrict1Warning(w, kind, detail){
   }
 }
 
-/* ── Full runStrict1Checks rewrite (Fix 1, 3, 4A, 4B, 4C) ── */
 let prevWordAudio = null;
 
 function runStrict1Checks(idx, heard, opts){
@@ -5936,14 +5921,93 @@ function scoreAlternativeToks(toks, startPtr){
   return score;
 }
 
+/* ── Grammar builder — biases the browser's ASR model to the current Quran window ── */
+function buildSpeechGrammar(){
+  // Chrome/Edge expose SpeechGrammarList; Safari/Firefox ignore it silently.
+  const SGL = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+  if(!SGL || !words.length) return null;
+  try{
+    const list = new SGL();
+    const rules = [];
+
+    // Rule 1 — unique word tokens in the rolling window from ptr
+    const end   = Math.min(words.length, ptr + 40);
+    const slice = words.slice(ptr, end);
+    if(!slice.length) return null;
+
+    const sanitizeForGrammar = (s) => String(s || '')
+      .replace(TASHKEEL, '')
+      .replace(/[^\u0621-\u064A\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const seen   = new Set();
+    const unique = [];
+    for(const w of slice){
+      const tok = sanitizeForGrammar(w.raw);
+      if(!tok || seen.has(tok)) continue;
+      seen.add(tok);
+      const safe = tok.replace(/[<>&|=*+?()\[\]{};:#]/g, '');
+      if(safe) unique.push(safe);
+    }
+    if(unique.length){
+      rules.push('public <word> = ' + unique.join(' | '));
+    }
+
+    // Rule 2 — whole ayahs starting at ptr (up to 3 verses)
+    const verseMap = new Map();
+    for(const w of slice){
+      if(!verseMap.has(w.verse)) verseMap.set(w.verse, []);
+      verseMap.get(w.verse).push(sanitizeForGrammar(w.raw));
+    }
+    const phrases = [];
+    for(const arr of [...verseMap.values()].slice(0, 3)){
+      const phrase = arr.join(' ')
+        .replace(/[<>&|=*+?()\[\]{};:#]/g, '')
+        .replace(/\s+/g, ' ').trim();
+      if(phrase) phrases.push(phrase);
+    }
+    if(phrases.length){
+      rules.push('public <ayah> = ' + phrases.join(' | '));
+    }
+
+    if(!rules.length) return null;
+    const jsgf = '#JSGF V1.0; grammar quran; ' + rules.join(' ; ') + ' ;';
+    list.addFromString(jsgf, 1);
+    return list;
+  }catch(e){
+    console.warn('[Grammar] build failed:', e);
+    return null;
+  }
+}
+
 function createSpeechRecognition(){
   if(!SPEECH_SUPPORTED) return null;
-  if(speechRecognition) return speechRecognition;
+
+  // Only reuse the cached instance if it hasn't been marked stale.
+  if(speechRecognition && !speechRecognition.__dead) return speechRecognition;
+  if(speechRecognition){
+    try{ speechRecognition.abort(); }catch(_){}
+    speechRecognition = null;
+  }
+
   const rec = new SpeechRecognitionCtor();
-  rec.lang = SPEECH_LANG;
-  rec.continuous = true;
-  rec.interimResults = true;
-  rec.maxAlternatives = 3;
+  rec.lang             = SPEECH_LANG;   // ar-SA — best Quranic branch
+  rec.continuous       = true;
+  rec.interimResults   = true;
+  rec.maxAlternatives  = 5;             // was 3 — more candidates for scoring
+
+  // Attach Quran-specific grammar. Chrome/Edge use it to bias the
+  // acoustic model toward the current surah's vocabulary; Safari and
+  // Firefox quietly ignore the property, so this is a pure win.
+  try{
+    const grammar = buildSpeechGrammar();
+    if(grammar) rec.grammars = grammar;
+    rec.__hasGrammar = !!grammar;
+  }catch(e){
+    console.warn('[Grammar] attach failed:', e);
+    rec.__hasGrammar = false;
+  }
 
   rec.onstart = () => {
     speechStarting = false; recRunning = true;
@@ -7937,6 +8001,10 @@ function renderVerses(ayahs, translations){
   const inner = document.createElement('div'); inner.className = 'mushaf-inner';
   words=[]; lastCurrentEl = null; longPressTriggered = false;
 
+  // NEW — mark cached recognizer stale so the next startReciting()
+  // rebuilds it with a fresh Quran grammar window from the new surah.
+  if(speechRecognition){ speechRecognition.__dead = true; }
+
   function pushWord(tok, surahId, ayahNum, parent){
     const span=document.createElement('span');
     span.className='w'; span.textContent=tok;
@@ -8171,10 +8239,6 @@ function commitManyCorrect(start, end, seg){
   }
 }
 
-/* ── Fix A ──────────────────────────────────────────────────
-   Guard added: in Follow mode, markSkippedWord is now a strict
-   no-op. No yellow .skipped painting ever occurs in Follow mode
-   — the highlight simply advances. */
 function markSkippedWord(i){
   if(followOnly) return;
   const w = words[i]; if(!w) return;
@@ -8390,8 +8454,6 @@ const FULL_LOOKAHEAD = 5;
 async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
-  /* ── Fix C (kept) ─────────────────────────────────────────
-     Follow-mode lookahead is capped to 1 word. */
   const LOOKAHEAD = followOnly ? 0 : 2;
 
   const outerBatchCtx = batchTimingCtx;
@@ -8413,7 +8475,6 @@ async function gradeFull(tokens, startIdx){
       if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){ used++; continue; }
       if(heard.length < 2 && heard !== words[ptr].norm && words[ptr].norm.length > 1){ used++; continue; }
 
-      /* ── Exact match on current word — unchanged ───────── */
       if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         const _w = words[ptr];
@@ -8437,7 +8498,6 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      /* ── Split-token — unchanged ───────────────────────── */
       if(trySplitTokenMatch(heard, rawTok)){
         const combined = normArCached(pendingHeard.join('') + rawTok);
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8448,10 +8508,6 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      /* ── Fix E: Follow-mode fuzzy rescue of the CURRENT word
-         fires BEFORE lookahead. A plausible pronunciation of
-         words[ptr] is committed as correct and the pointer
-         advances 1 — no jump. ─────────────────────────────── */
       if(followOnly && !pendingHeard.length){
         const curW = words[ptr];
         if(curW && isPlausiblePronunciationAttempt(heard, hPhon, curW)){
@@ -8470,12 +8526,6 @@ async function gradeFull(tokens, startIdx){
         }
       }
 
-      /* ── Lookahead ─────────────────────────────────────────
-         Fix F: In Follow mode, ONLY exact matches fire. The
-         fuzzy isMatchWord / isPlausiblePronunciationAttempt
-         checks are gone — those were causing the pointer to
-         skip the current word whenever the ASR misheard it as
-         the next word. Tajweed mode keeps fuzzy lookahead. ── */
       let found = -1;
       const maxK = Math.min(LOOKAHEAD, words.length - ptr - 1);
       for(let k = 1; k <= maxK; k++){
@@ -8489,9 +8539,6 @@ async function gradeFull(tokens, startIdx){
         }
       }
       if(found > 0){
-        /* ── Fix G: Even with an exact ptr+1 match, don't jump
-           if the token could also be the current word. Buffer
-           and let it get resolved later. ─────────────────── */
         if(followOnly && found === 1 && words[ptr] &&
            isPlausiblePronunciationAttempt(heard, hPhon, words[ptr])){
           pendingHeard.push(rawTok);
@@ -8516,9 +8563,6 @@ async function gradeFull(tokens, startIdx){
         pendingHeard.length = 0; consecutiveReds = 0;
         used++; continue;
       }
-
-      /* The old follow-mode fuzzy rescue block that used to
-         sit here has been moved above (fix E). Removed. */
 
       const mergedN = tryMergedTokenMatch(heard, hPhon);
       if(mergedN > 0){
@@ -8551,7 +8595,7 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-const w = words[ptr];
+      const w = words[ptr];
       const hasPending = pendingHeard.length > 0;
       const plausibleAttempt = w &&
                                isPlausiblePronunciationAttempt(heard, hPhon, w);
@@ -8572,11 +8616,10 @@ const w = words[ptr];
           noteFollowProgress();
           consecutiveReds = 0;
           used++; 
-          continue; // Word is green! Move to next token immediately.
+          continue;
       }
 
       // ── PRIORITY 3: PHONEME & MFA (Asynchronous Fallback) ──
-      // Only reached if BOTH ASR and RMS failed.
       const rescue = await checkHeavyEngines(words[ptr], heard, seg);
       if (rescue.matched) {
           commitCorrect(ptr, seg);
@@ -8586,7 +8629,7 @@ const w = words[ptr];
           consecutiveReds = 0;
           addFeedback('🛡️ <b>' + rescue.engine + '</b> detected this word correctly.', false, false, true);
           used++; 
-          continue; // Word is green! Move to next token.
+          continue;
       }
 
       /* ── PRIORITY 4: WAIT / SKIP ── */
@@ -8628,7 +8671,6 @@ const w = words[ptr];
         if(consecutiveReds < 2) advancePast(1);
       } else {
         consecutiveReds = 0;
-        /* ── Fix D (kept): call-site guard. ─────────────── */
         if(!followOnly) markSkippedWord(ptr);
         advancePast(1);
       }
@@ -8699,7 +8741,7 @@ async function startReciting(){
   try{ bumpStreak(); }catch(_){}
 
   try{
-    if(!speechRecognition || speechRecognition.__dead) speechRecognition = createSpeechRecognition();
+    speechRecognition = createSpeechRecognition();
     if(!speechRecognition){ addFeedback('⚠️ Could not create speech recognizer.', true); wantMic = false; releaseMicStream(); setMicButton(); return; }
     if(speechStarting){}
     else { try{ speechStarting = true; speechRecognition.start(); }catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') throw e; } }

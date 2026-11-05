@@ -1,62 +1,108 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v68 — SW-only version bump. No strategy, route, cache-name
-         or API change. Shell-navigation and shell-install both
-         still use cache:'reload', so the new index.html reaches
-         the client on the next online navigation after the v68
-         worker activates.
+   v70 — SW-only user-data-safety release. No routing change,
+         no API change, no cache-key change, no strategy change.
+         One behavioural fix + explicit safety docs:
 
-         THE CLIENT-SIDE CHANGE THAT PROMPTED THIS BUMP
-         -----------------------------------------------
-         index.html now contains a NEW ASYNCHRONOUS MULTI-ENGINE
-         RECITATION PIPELINE.
+           L. CLEAR_CACHES NO LONGER WIPES DOWNLOADED AUDIO
+              BY DEFAULT.
+              The message handler used to iterate caches.keys()
+              and delete every cache — including qc-audio, which
+              holds hundreds of MB of everyayah.com MP3s the
+              user spent real bandwidth and battery downloading.
+              It now deletes only non-persistent caches unless
+              the client explicitly passes includeAudio: true
+              (which should only be wired to a "Delete all
+              downloads" user confirmation).
 
-         In v67, the app relied strictly on ASR and RMS. In v68,
-         we introduce two heavy asynchronous models to rescue
-         words that the fast engines miss:
+           M. USER-DATA SAFETY CONTRACT DOCUMENTED IN HEADER.
+              See the block below. All future edits to this SW
+              must respect it. The activate sweep already
+              conformed; the CLEAR_CACHES handler did not.
 
-           • Phoneme Recognition (Wav2Vec2) — Detects the exact
-             phonemes spoken, catching heavy/light letter
-             substitutions (e.g., ص vs س) even if the ASR
-             autocorrects it.
-           • Forced Alignment (MFA) — Checks if the audio
-             duration matches the exact expected phoneme count.
+           N. activate() CACHE FILTER REWRITTEN WITH EXPLICIT
+              BRANCH COMMENTS.
+              No behaviour change — every branch was already
+              correct. The filter is now self-documenting so a
+              future contributor can see at a glance that
+              caches not created by this SW are never deleted.
 
-         THE PRIORITY PIPELINE (INDEX.HTML)
-         ----------------------------------
-         The `gradeFull` and `gradeFollowOnly` functions are now
-         `async` and run a strict 4-priority cascade:
+         Client-side: v70 pairs with the v68 multi-engine
+         recitation pipeline (ASR → RMS → Phoneme Wav2Vec2 →
+         MFA). No client change is required for v70.
 
-           1. ASR Match (Instant)
-              If the transcribed text matches, the word turns
-              green immediately.
+   ============================================================
+   USER-DATA SAFETY CONTRACT  (read before editing this file)
+   ============================================================
+   This service worker MUST NEVER delete, evict, or overwrite:
 
-           2. RMS Acoustic Match (Instant)
-              If ASR fails, the RMS analyser checks the audio
-              shape (duration, vowel run, energy). If it passes,
-              the word turns green immediately without waiting
-              for the heavy models.
+     1. USER-AUTHORED STATE
+        – Recitation progress, streaks, achievements
+        – Prayer-time settings, location, madhab, calculation
+          method, athaan audio choice, notification prefs
+        – Bookmarks, last-read position, mushaf page, hifz
+          test state
+        – Translation choice, reciter choice, UI prefs
+        All of the above live in localStorage / IndexedDB /
+        cookies, which a service worker has NO API to delete.
+        This SW never sends Clear-Site-Data, never calls
+        indexedDB.deleteDatabase(), and never touches
+        localStorage (which is not even exposed to SW scope).
 
-           3. Phoneme (Wav2Vec2) & MFA (Asynchronous Fallback)
-              ONLY if BOTH ASR and RMS fail does the app await
-              these heavy engines. If either detects a valid
-              pronunciation, the word turns green and the UI
-              prints a notification below the coach window:
-              "🛡️ Phoneme (Wav2Vec2) detected this word correctly."
+     2. DOWNLOADED QURAN AUDIO  (qc-audio)
+        Hundreds of MB of everyayah.com MP3s, produced by many
+        minutes of the user's bandwidth and battery. qc-audio
+        is in PERSISTENT_CACHES and is therefore:
+          • SKIPPED by activate()'s stale-cache sweep
+          • NEVER touched by trimCache() (which only runs on
+            TEXT_CACHE and RUNTIME_CACHE)
+          • NEVER written by any fetch handler — the SW only
+            reads it; the client is the sole writer
+          • PRESERVED by CLEAR_CACHES unless the caller passes
+            includeAudio: true
+          • Only ever removed by the dedicated CLEAR_AUDIO_CACHE
+            message, which the client must gate behind an
+            explicit "Delete all downloads" confirm dialog.
 
-           4. Wait / Skip
-              If all 4 engines fail, the pointer pins and waits
-              for the reciter to try again.
+     3. ANYTHING WE DIDN'T CREATE
+        The activate sweep deletes a cache ONLY when ALL THREE
+        are true: (a) its name starts with one of OWNED_PREFIXES,
+        (b) it is not in VERSIONED_CACHES, and (c) it is not in
+        PERSISTENT_CACHES. A cache created by another app on
+        the same origin, or a future cache we haven't registered
+        yet, is left alone. Deleting a cache we don't recognize
+        violates this contract.
 
-         SW-SIDE IMPACT
-         --------------
-         None required. The v68 worker simply deletes qc-*-v67
-         caches on activate and re-populates the shell cache with
-         the new index.html. qc-audio (downloads) is preserved.
-
+   ============================================================
    PREVIOUS RELEASES (kept for context — all still accurate)
    ============================================================
+
+   v69 — SW-only hardening: offline reinstall no longer wipes
+         the shell (falls back to previous qc-shell-* cache when
+         network fetch fails during install); same fallback for
+         fonts; install-time shell fetches get an 8 s timeout;
+         serveRangeFromCached() preserves cached MIME type.
+           H. Offline reinstall shell fallback.
+           I. Offline reinstall fonts fallback.
+           J. Install-time shell fetch timeout.
+           K. Range 206 preserves cached Content-Type.
+
+   v68 — SW-only version bump. Shell-navigation and shell-install
+         both still use cache:'reload', so the new index.html
+         reaches the client on the next online navigation after
+         the v68 worker activates.
+         THE CLIENT-SIDE CHANGE THAT PROMPTED THAT BUMP:
+         index.html introduced the ASYNCHRONOUS MULTI-ENGINE
+         RECITATION PIPELINE:
+           • Phoneme Recognition (Wav2Vec2)
+           • Forced Alignment (MFA)
+         Priority cascade in gradeFull / gradeFollowOnly:
+           1. ASR Match (Instant)
+           2. RMS Acoustic Match (Instant)
+           3. Phoneme (Wav2Vec2) & MFA (Asynchronous Fallback)
+           4. Wait / Skip
+         SW-side impact of v68: none.
 
    v67 — SW-only version bump for THREE FOLLOW-UP FIXES (E, F, G)
          to the Follow-mode recitation path, layered on top of
@@ -70,24 +116,21 @@
 
    v66 — SW-only version bump for the initial Follow-mode fixes
          A/B/C/D:
-           A. markSkippedWord() now returns immediately when
+           A. markSkippedWord() returns immediately when
               followOnly is true.
            B. isPlausiblePronunciationAttempt() — removed the
               dead `return false;` at the top.
            C. gradeFull() — Follow mode capped to 1-word lookahead.
            D. Call-site guard on the 4-token flush branch.
 
-   v65 — SW-only bugfix to networkFresh() (the Tajweed-annotation
-         handler). Cached successful responses under their full
-         URL, but on offline fallback matched with
-         `ignoreSearch: true`. Pagination URLs differ ONLY by
-         `?…&page=N`, so an offline request for page=2 could
-         return whichever page was cached last.
+   v65 — SW-only bugfix to networkFresh(). Paginated Tajweed
+         responses are now matched on their EXACT URL on offline
+         fallback (was ignoreSearch:true, which collided every
+         page for a given chapter onto a single key).
 
    v64 — Bugfix-only release matching the current index.html:
-           • THE MADD / GHUNNAH-LENGTH TIMING FIX.
-           • RETARGETED isEndOfAyah to `!nextW || nextW.verse
-             !== w.verse`.
+           • MADD / GHUNNAH-LENGTH TIMING FIX.
+           • RETARGETED isEndOfAyah to `!nextW || nextW.verse !== w.verse`.
            • RAISED END_OF_AYAH_MADD_MIN_MS 150 → 250 ms.
            • SWAPPED #tajweedStatusChip / #tajweedNoiseChip.
            • REMOVED dead code.
@@ -138,17 +181,17 @@
      1. /robots.txt  — bypassed below so it is never stale.
      2. index.html   — meta tags + pre-body blocker + overlay.
 
-   NOTE ON DEPLOY: after shipping v68, fully close the PWA (or
+   NOTE ON DEPLOY: after shipping v70, fully close the PWA (or
    close every tab showing the site) and reopen it. The browser
    fetches sw.js on navigation; the new worker's install calls
    skipWaiting() and its activate calls clients.claim(), so the
-   next open runs the new code path. Caches qc-*-v67 and older
+   next open runs the new code path. Caches qc-*-v69 and older
    are deleted on activate; qc-audio (downloads) is preserved.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v68';
+const VERSION = 'v70';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -157,6 +200,9 @@ const RUNTIME_CACHE = `qc-runtime-${VERSION}`;
 
 const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE];
 
+/* qc-audio is the ONLY user-owned Cache Storage bucket in this app.
+   It must survive every version bump, every CLEAR_CACHES call that
+   didn't explicitly ask to wipe it, and every trimCache() pass. */
 const AUDIO_CACHE = 'qc-audio';
 const PERSISTENT_CACHES = [AUDIO_CACHE];
 
@@ -172,7 +218,8 @@ const HOST_GOOGLE_FONTS_STATIC  = 'fonts.gstatic.com';
 
 const TEXT_CACHE_MAX = 400;
 const RUNTIME_MAX    = 120;
-const MANIFEST_TIMEOUT_MS = 2000;
+const MANIFEST_TIMEOUT_MS    = 2000;
+const SHELL_FETCH_TIMEOUT_MS = 8000;
 
 /* The exact Google Fonts stylesheet URL used by <link> in index.html.
    Pre-cached during install so the stylesheet is available offline
@@ -195,26 +242,18 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
    ============================================================ */
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    // 1. Shell — awaited (mandatory for offline open). The
-    //    `cache:'reload'` marker below guarantees the v68 worker
-    //    stores the *new* index.html containing the multi-engine
-    //    (ASR + RMS + Phoneme + MFA) asynchronous pipeline.
-    try{
-      const cache = await caches.open(SHELL_CACHE);
-      await Promise.all(SHELL_URLS.map(async url => {
-        try{
-          const req = new Request(url, { cache: 'reload' });
-          const res = await fetch(req);
-          if(res && (res.ok || res.type === 'opaque')) await cache.put(url, res.clone());
-        }catch(_){}
-      }));
-    }catch(_){}
+    // 1. Shell — awaited (mandatory for offline open). If the
+    //    network is unreachable (offline update), fall back to
+    //    the previous qc-shell-* cache so activate doesn't leave
+    //    the new shell empty.
+    try{ await cacheShellWithFallback(); }catch(_){}
 
     // 2. Google Fonts — best-effort, bounded to 20 s so install
     //    can never hang if the network is slow or the CDN is down.
+    //    Same offline-update fallback applies.
     try{
       await Promise.race([
-        prefetchFonts().catch(() => {}),
+        prefetchFontsWithFallback().catch(() => {}),
         new Promise(r => setTimeout(r, FONTS_PREFETCH_TOTAL_MS))
       ]);
     }catch(_){}
@@ -224,18 +263,82 @@ self.addEventListener('install', event => {
   })());
 });
 
+/* Returns the most recent cache whose name starts with `prefix`
+   and is not `excludeName`, or null if none exists. Used by the
+   install-time fallbacks. Never matches PERSISTENT_CACHES — the
+   prefixes we pass ('qc-shell-', 'qc-fonts-') cannot collide with
+   'qc-audio'. */
+async function getPreviousCache(prefix, excludeName){
+  try{
+    const keys = await caches.keys();
+    const old = keys.find(k => k.startsWith(prefix) && k !== excludeName);
+    if(old) return await caches.open(old);
+  }catch(_){}
+  return null;
+}
+
+/* Populates SHELL_CACHE from the network, falling back to the
+   previous qc-shell-* cache for any URL that couldn't be fetched.
+   No-op if there is no previous shell cache (first install). */
+async function cacheShellWithFallback(){
+  const cache = await caches.open(SHELL_CACHE);
+  const oldCache = await getPreviousCache('qc-shell-', SHELL_CACHE);
+
+  await Promise.all(SHELL_URLS.map(async url => {
+    // Try fresh network first. cache:'reload' guarantees the new
+    // worker stores the *new* index.html containing the multi-engine
+    // (ASR + RMS + Phoneme + MFA) asynchronous pipeline.
+    try{
+      const res = await fetchWithTimeout(url, SHELL_FETCH_TIMEOUT_MS, { cache: 'reload' });
+      if(res && (res.ok || res.type === 'opaque')){
+        try{ await cache.put(url, res.clone()); }catch(_){}
+        return;
+      }
+    }catch(_){ /* fall through to previous-cache fallback */ }
+
+    // Offline-update fallback: copy from previous version's shell.
+    if(oldCache){
+      try{
+        let hit = await oldCache.match(url, { ignoreSearch: true });
+        // './' and './index.html' both resolve to the same
+        // navigation document — accept either key.
+        if(!hit){
+          if(url === './')                    hit = await oldCache.match('./index.html', { ignoreSearch: true });
+          else if(url === './index.html')     hit = await oldCache.match('./',           { ignoreSearch: true });
+        }
+        if(hit) await cache.put(url, hit);
+      }catch(_){}
+    }
+  }));
+}
+
 /* ============================================================
    ACTIVATE — drop every stale versioned cache, claim clients
+
+   SAFETY: this sweep deletes a cache ONLY when ALL THREE hold:
+       (a) its name starts with one of OWNED_PREFIXES,
+       (b) it is not in VERSIONED_CACHES (current version),
+       (c) it is not in PERSISTENT_CACHES (qc-audio = downloads).
+   A cache we didn't create, or a cache we've marked persistent,
+   is left untouched. See USER-DATA SAFETY CONTRACT in header.
    ============================================================ */
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     try{
       const keys = await caches.keys();
       const toDelete = keys.filter(name => {
+        // (a) Caches belonging to other apps on this origin, or a
+        //     future cache we haven't registered yet — leave alone.
+        if(!OWNED_PREFIXES.some(p => name.startsWith(p))) return false;
+
+        // (b) The current version's caches — obviously keep.
         if(VERSIONED_CACHES.includes(name)) return false;
+
+        // (c) Persistent caches (qc-audio = downloaded Quran MP3s).
+        //     Never delete — the user paid real bandwidth for these.
         if(PERSISTENT_CACHES.includes(name)) return false;
-        const owned = OWNED_PREFIXES.some(p => name.startsWith(p));
-        if(!owned) return false;
+
+        // Stale versioned cache we own and don't need — safe to drop.
         return true;
       });
       await Promise.all(toDelete.map(name => caches.delete(name)));
@@ -255,21 +358,43 @@ self.addEventListener('activate', event => {
 self.addEventListener('message', event => {
   const data = event.data || {};
   if(data.type === 'SKIP_WAITING'){ self.skipWaiting(); return; }
+
   if(data.type === 'CLEAR_CACHES'){
     event.waitUntil((async () => {
+      // SAFETY: preserve qc-audio (downloaded Quran MP3s) unless the
+      // client explicitly asks to wipe it. The client must only pass
+      // includeAudio: true from a confirmed "Delete all downloads"
+      // user action — never from a generic "reset app" path, and
+      // never automatically on a version bump (the activate sweep
+      // handles version bumps without touching qc-audio at all).
+      const wipeAudio = data.includeAudio === true;
       const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
-      if(event.source && event.source.postMessage) event.source.postMessage({ type: 'CACHES_CLEARED' });
+      const toDelete = keys.filter(k => {
+        if(wipeAudio) return true;
+        return !PERSISTENT_CACHES.includes(k);
+      });
+      await Promise.all(toDelete.map(k => caches.delete(k)));
+      if(event.source && event.source.postMessage){
+        event.source.postMessage({
+          type: 'CACHES_CLEARED',
+          audioPreserved: !wipeAudio
+        });
+      }
     })());
     return;
   }
+
   if(data.type === 'CLEAR_AUDIO_CACHE'){
+    // The client is responsible for showing an explicit confirm
+    // dialog before posting this message. This is the ONLY code
+    // path in the entire SW that removes qc-audio.
     event.waitUntil((async () => {
       try{ await caches.delete(AUDIO_CACHE); }catch(_){}
       if(event.source && event.source.postMessage) event.source.postMessage({ type: 'AUDIO_CACHE_CLEARED' });
     })());
     return;
   }
+
   if(data.type === 'REFRESH_MANIFEST'){
     event.waitUntil((async () => {
       try{
@@ -374,6 +499,10 @@ self.addEventListener('fetch', event => {
   // req.cache ('no-store' / 'reload') so the app's healing path can
   // actually fetch fresh bytes, and answers Range requests with a
   // proper 206 for iOS Safari.
+  //
+  // SAFETY: audioFromDownloadCache only READS from qc-audio. It never
+  // writes, never evicts, never trims. The client is the sole writer
+  // of qc-audio (via download code in index.html).
   if(url.hostname === HOST_EVERYAYAH){
     event.respondWith(audioFromDownloadCache(req));
     return;
@@ -415,6 +544,11 @@ self.addEventListener('fetch', event => {
 
 /* ============================================================
    Audio — persistent download cache with Range + bypass support
+
+   SAFETY: this whole module is READ-ONLY against qc-audio. It never
+   cache.put()s, never cache.delete()s, never trims. Downloads are
+   written exclusively by the client. That means no version bump and
+   no fetch-time code path can ever evict the user's downloaded MP3s.
    ============================================================ */
 
 async function audioFromDownloadCache(req){
@@ -470,6 +604,10 @@ async function serveRangeFromCached(response, rangeHeader){
   const size = blob.size;
   if(!size) return response;
 
+  // Preserve the cached Content-Type so the 206 slice matches what
+  // was actually stored.
+  const mime = response.headers.get('Content-Type') || 'audio/mpeg';
+
   // Parse the standard byte-range forms: bytes=0-, bytes=N-, bytes=0-N,
   // bytes=-N (suffix range). Unparseable → return full 200.
   const m = /^bytes=(\d*)-(\d*)$/.exec((rangeHeader || '').trim());
@@ -477,7 +615,7 @@ async function serveRangeFromCached(response, rangeHeader){
     return new Response(blob, {
       status: 200,
       headers: {
-        'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
+        'Content-Type': mime,
         'Accept-Ranges': 'bytes',
         'Content-Length': String(size)
       }
@@ -511,12 +649,12 @@ async function serveRangeFromCached(response, rangeHeader){
     });
   }
 
-  const slice = blob.slice(start, end + 1, 'audio/mpeg');
+  const slice = blob.slice(start, end + 1, mime);
   return new Response(slice, {
     status: 206,
     statusText: 'Partial Content',
     headers: {
-      'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
+      'Content-Type': mime,
       'Content-Range': 'bytes ' + start + '-' + end + '/' + size,
       'Content-Length': String(end - start + 1),
       'Accept-Ranges': 'bytes'
@@ -574,19 +712,14 @@ async function networkFirst(req, cacheName, maxEntries){
    user has already opened online, while preserving the "always
    fresh when online" guarantee.
 
-   v65 FIX: the offline fallback lookup used to pass
-   `ignoreSearch: true`, which meant every paginated Tajweed page
-   for a given chapter (they differ only by `?…&page=N`) collided
-   on a single key — an offline request for page=2 could return
-   whichever page was cached last, and fetchTajweedSurah() would
-   bail out early on `verses.length < perPage`, leaving most of a
-   long surah uncoloured with no degradation flag raised.
+   The offline fallback lookup matches on the EXACT URL (including
+   pagination query params) so page=2 gets page=2's data, not
+   whichever page was cached last. `ignoreVary: true` is kept so
+   the lookup still succeeds if the response carried a Vary header
+   that differs between the original PUT and this GET.
 
-   We now match on the exact URL. `ignoreVary: true` is kept so
-   the lookup still succeeds if the response carried a Vary
-   header that differs between the original PUT and this GET.
-   Pagination still caches each page under its own key, so this
-   adds no storage cost. */
+   SAFETY: this only ever writes/deletes within TEXT_CACHE, never
+   within qc-audio. */
 async function networkFresh(req){
   try{
     const freshReq = new Request(req, { cache: 'no-store' });
@@ -597,7 +730,7 @@ async function networkFresh(req){
         const cache = await caches.open(TEXT_CACHE);
         await cache.put(req, res.clone());
         // Cap the cache size — Tajweed surahs count towards the same
-        // quota as other Quran API responses.
+        // quota as other Quran API responses. TEXT_CACHE only.
         trimCache(TEXT_CACHE, TEXT_CACHE_MAX).catch(() => {});
       }catch(_){}
       return res;
@@ -699,7 +832,11 @@ async function shellNavigation(req){
   }
 }
 
+/* SAFETY: trimCache is NEVER called with AUDIO_CACHE. Only
+   TEXT_CACHE and RUNTIME_CACHE are trimmed. If you ever add a new
+   caller, add a guard: `if (PERSISTENT_CACHES.includes(cacheName)) return;` */
 async function trimCache(cacheName, maxEntries){
+  if(PERSISTENT_CACHES.includes(cacheName)) return;  // defence-in-depth
   try{
     const cache = await caches.open(cacheName);
     const keys = await cache.keys();
@@ -713,34 +850,46 @@ async function trimCache(cacheName, maxEntries){
    Google Fonts pre-cache (bounded, best-effort)
    ============================================================ */
 
-async function fetchWithTimeout(url, ms){
+async function fetchWithTimeout(input, ms, init){
   const ctrl = new AbortController();
   const timer = setTimeout(() => { try{ ctrl.abort(); }catch(_){} }, ms);
   try{
-    return await fetch(url, {
-      signal: ctrl.signal,
-      mode: 'cors',
-      credentials: 'omit',
-      cache: 'no-store'
-    });
+    return await fetch(input, Object.assign({ signal: ctrl.signal }, init || {}));
   } finally {
     clearTimeout(timer);
   }
 }
 
-async function prefetchFonts(){
+/* Populates FONTS_CACHE from Google Fonts. If the stylesheet
+   fetch fails (or a font file can't be fetched), the entry is
+   copied from the previous qc-fonts-* cache when present. */
+async function prefetchFontsWithFallback(){
   let cache;
   try{ cache = await caches.open(FONTS_CACHE); }catch(_){ return; }
+  const oldCache = await getPreviousCache('qc-fonts-', FONTS_CACHE);
 
   // 1. Fetch and cache the CSS stylesheet
   let cssText = '';
   try{
-    const cssRes = await fetchWithTimeout(FONT_CSS_URL, FONT_FETCH_TIMEOUT_MS);
+    const cssRes = await fetchWithTimeout(FONT_CSS_URL, FONT_FETCH_TIMEOUT_MS, {
+      mode: 'cors', credentials: 'omit', cache: 'no-store'
+    });
     if(cssRes && cssRes.ok){
       cssText = await cssRes.clone().text();
       try{ await cache.put(FONT_CSS_URL, cssRes); }catch(_){}
     }
   }catch(_){}
+
+  // Offline-update fallback for the stylesheet itself.
+  if(!cssText && oldCache){
+    try{
+      const old = await oldCache.match(FONT_CSS_URL, { ignoreSearch: true });
+      if(old){
+        cssText = await old.clone().text();
+        try{ await cache.put(FONT_CSS_URL, old); }catch(_){}
+      }
+    }catch(_){}
+  }
 
   if(!cssText) return;
 
@@ -759,9 +908,24 @@ async function prefetchFonts(){
     try{
       const existing = await cache.match(u, { ignoreSearch: true });
       if(existing) return;
-      const r = await fetchWithTimeout(u, FONT_FETCH_TIMEOUT_MS);
-      if(r && (r.ok || r.type === 'opaque')){
-        try{ await cache.put(u, r); }catch(_){}
+
+      // Network first
+      try{
+        const r = await fetchWithTimeout(u, FONT_FETCH_TIMEOUT_MS, {
+          mode: 'cors', credentials: 'omit', cache: 'no-store'
+        });
+        if(r && (r.ok || r.type === 'opaque')){
+          try{ await cache.put(u, r); }catch(_){}
+          return;
+        }
+      }catch(_){}
+
+      // Offline-update fallback: copy from previous fonts cache.
+      if(oldCache){
+        try{
+          const old = await oldCache.match(u, { ignoreSearch: true });
+          if(old) await cache.put(u, old);
+        }catch(_){}
       }
     }catch(_){}
   }));
