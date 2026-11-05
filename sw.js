@@ -1,7 +1,7 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v73 — SW-only version bump matching the current index.html.
+   v74 — SW-only version bump matching the current index.html.
          No routing change, no API change, no cache-key change,
          no strategy change. The one behavioural change this
          release tracks lives entirely in the client:
