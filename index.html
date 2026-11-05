@@ -2998,6 +2998,7 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
 }
 
 function isPlausiblePronunciationAttempt(heard, hPhon, w){
+  return false;
   if(!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
   const targetLen = w.norm.length;
