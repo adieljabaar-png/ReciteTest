@@ -985,24 +985,6 @@ background-repeat:no-repeat;background-position:right 5px center;
 .toggles{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
 .toggles::-webkit-scrollbar{display:none}
 
-/* NEW: Reveal text button */
-.toggle.hide-text-reveal{
-  cursor:pointer;font-weight:700;
-  transition:background .2s,border-color .2s,color .2s,box-shadow .2s;
-  -webkit-appearance:none;font-family:inherit;
-}
-.toggle.hide-text-reveal.active{
-  border-color:rgba(47,208,122,.75);
-  background:rgba(47,208,122,.16);
-  color:#fff;
-  box-shadow:0 4px 14px rgba(47,208,122,.28);
-}
-body.light-mode .toggle.hide-text-reveal.active{
-  background:rgba(31,154,90,.15);
-  border-color:rgba(31,154,90,.7);
-  color:#1a2233;
-}
-
 .barwrap{height:5px;background:#0b101b;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,#4f8cff,#2fd07a);transition:width .3s}
 .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
@@ -1105,27 +1087,29 @@ body.listen-mode.hide-text-mode .w{color: var(--text) !important;background: tra
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
 @keyframes locatePulse{0%{background:rgba(79,140,255,.55);box-shadow:0 0 0 0 rgba(79,140,255,.6);color:#fff}100%{background:transparent;box-shadow:0 0 0 18px rgba(79,140,255,0);color:var(--text)}}
 .w.located{animation:locatePulse .9s ease}
-body.hide-text-mode:not(.viewer-open) .w:not(.revealed){color: transparent !important;background: transparent !important;box-shadow: none !important;text-decoration-color: transparent !important;text-shadow: none !important;transition: color .25s ease, background .25s ease, box-shadow .25s ease;}
-body.hide-text-mode:not(.viewer-open) .w.revealed{color: var(--text) !important;background: transparent !important;box-shadow: none !important;text-decoration: none !important;transition: color .3s ease;}
-body.hide-text-mode:not(.viewer-open) .w.skipped.revealed{color:#ffcf6b !important;background:rgba(255,176,32,.18) !important;box-shadow:none !important;text-decoration:line-through !important;text-decoration-color:var(--warn);border-radius:7px;}
-body.hide-text-mode:not(.viewer-open) .w.current{color: transparent !important;background: transparent !important;box-shadow: none !important;}
-body.hide-text-mode:not(.viewer-open) .w.pressing{background: rgba(79,140,255,.3) !important;box-shadow: 0 0 0 3px rgba(79,140,255,.5) !important;}
+
+/* Hide-text mode now works everywhere (including fullscreen viewer). */
+body.hide-text-mode .w:not(.revealed){color: transparent !important;background: transparent !important;box-shadow: none !important;text-decoration-color: transparent !important;text-shadow: none !important;transition: color .25s ease, background .25s ease, box-shadow .25s ease;}
+body.hide-text-mode .w.revealed{color: var(--text) !important;background: transparent !important;box-shadow: none !important;text-decoration: none !important;transition: color .3s ease;}
+body.hide-text-mode .w.skipped.revealed{color:#ffcf6b !important;background:rgba(255,176,32,.18) !important;box-shadow:none !important;text-decoration:line-through !important;text-decoration-color:var(--warn);border-radius:7px;}
+body.hide-text-mode .w.current{color: transparent !important;background: transparent !important;box-shadow: none !important;}
+body.hide-text-mode .w.pressing{background: rgba(79,140,255,.3) !important;box-shadow: 0 0 0 3px rgba(79,140,255,.5) !important;}
 body.hide-text-mode:not(.viewer-open) .mushaf::after{content: "🙈 Text hidden — recite from memory. Words appear as you go.";display:block;direction:ltr;font-family:-apple-system,sans-serif;font-size:.72rem;color:var(--muted);text-align:center;padding:16px 8px 4px;letter-spacing:.02em;opacity:.75;}
 
-/* NEW: Reveal-all-text override while in hidden mode */
-body.hide-text-mode.reveal-all-text:not(.viewer-open) .w:not(.revealed){
+/* Reveal-all-text override (works everywhere too) */
+body.hide-text-mode.reveal-all-text .w:not(.revealed){
   color: var(--text) !important;
   background: transparent !important;
   box-shadow: none !important;
   text-decoration-color: transparent !important;
   text-shadow: none !important;
 }
-body.hide-text-mode.reveal-all-text:not(.viewer-open) .w.current{
+body.hide-text-mode.reveal-all-text .w.current{
   color: #fff !important;
   background: linear-gradient(180deg,#5c96ff,#3a72e6) !important;
   box-shadow: 0 0 0 3px rgba(79,140,255,.2), 0 4px 12px rgba(79,140,255,.3) !important;
 }
-body.hide-text-mode.reveal-all-text:not(.viewer-open) .w.skipped{
+body.hide-text-mode.reveal-all-text .w.skipped{
   color:#ffcf6b !important;
   background:rgba(255,176,32,.18) !important;
   text-decoration:line-through !important;
@@ -1133,6 +1117,24 @@ body.hide-text-mode.reveal-all-text:not(.viewer-open) .w.skipped{
 }
 body.hide-text-mode.reveal-all-text:not(.viewer-open) .mushaf::after{
   display:none !important;
+}
+
+/* Viewer-specific hide-text overrides (must out-rank viewer-read-mode's inherit rule) */
+body.viewer-read-mode.hide-text-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w:not(.revealed){
+  color:transparent !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  text-decoration:none !important;
+  -webkit-text-stroke:0 !important;
+}
+body.viewer-read-mode.hide-text-mode.reveal-all-text .qv-slot .mushaf.mushaf-book .mushaf-book-content .w:not(.revealed){
+  color:inherit !important;
+  -webkit-text-stroke:0 !important;
+}
+body.viewer-read-mode.hide-text-mode.reveal-all-text .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.current:not(.revealed){
+  color:#fff !important;
+  background:linear-gradient(180deg,#5c96ff,#3a72e6) !important;
+  box-shadow:0 0 0 3px rgba(79,140,255,.2), 0 4px 12px rgba(79,140,255,.3) !important;
 }
 
 .ayah-num{display:inline-block;font-family:-apple-system,sans-serif;font-size:.42em;vertical-align:middle;color:#cbd6ea;background:#1c2740;border:1px solid #2b3a55;border-radius:999px;padding:2px 9px;margin:0 8px;direction:ltr;}
@@ -1226,6 +1228,43 @@ max-width:calc(100vw - 16px);
 .fs-controls .fs-sep{width:1px;height:24px;background:rgba(255,255,255,.12);margin:0 1px;flex-shrink:0;}
 .fs-controls #fsMic.active-mic{color:var(--good);background:rgba(47,208,122,.15);border-color:rgba(47,208,122,.5);animation: fsMicPulse 1.6s infinite;}
 @keyframes fsMicPulse{0%,100%{box-shadow:0 0 0 0 rgba(47,208,122,.35)}50%{box-shadow:0 0 0 8px rgba(47,208,122,0)}}
+
+/* Reveal-text tab — sits inline with ⏸ ▶ ⏹ and hides after 3 s with the toolbar */
+.fs-controls .fs-text-tab{
+  width:auto;min-width:0;padding:0 12px;height:36px;
+  border-radius:999px;flex-shrink:0;white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--gold,#d4af37);
+  background:rgba(212,175,55,.10);
+  border:1px solid rgba(212,175,55,.45);
+  transition:background .2s, border-color .2s, color .2s, transform .12s, box-shadow .2s;
+}
+.fs-controls .fs-text-tab:active{ transform:scale(.95) }
+.fs-controls .fs-text-tab.active{
+  background:rgba(212,175,55,.22);
+  border-color:rgba(212,175,55,.75);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(212,175,55,.32);
+}
+body.light-mode .fs-controls .fs-text-tab{
+  color:#a67c00;background:rgba(166,124,0,.08);border-color:rgba(166,124,0,.40);
+}
+body.light-mode .fs-controls .fs-text-tab.active{
+  background:rgba(166,124,0,.20);border-color:rgba(166,124,0,.70);color:#1a2233;
+}
+@media (max-width:420px){
+  .fs-controls{gap:3px;padding:6px 8px}
+  .fs-controls button{width:40px;height:40px;font-size:.9rem}
+  .fs-controls .fs-text-tab{padding:0 9px;font-size:.58rem;height:32px;letter-spacing:.04em}
+  .fs-controls .fs-sep{height:20px;margin:0}
+}
+@media (max-width:360px){
+  .fs-controls{gap:2px;padding:5px 6px}
+  .fs-controls button{width:36px;height:36px;font-size:.85rem}
+  .fs-controls .fs-text-tab{padding:0 7px;font-size:.55rem;height:30px;letter-spacing:.03em}
+}
+
 .fs-badge{position:fixed;top:calc(var(--safe-top) + 12px);left:50%;transform:translateX(-50%);z-index:200;background:rgba(17,24,39,.85);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:.03em;opacity:0;pointer-events:none;transition:opacity .3s;max-width:80vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .fs-badge.visible{opacity:1}
 .fs-badge .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:6px;vertical-align:middle;}
@@ -2281,9 +2320,6 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     <label class="toggle hide-text" id="hideTextChip" hidden>
       <input type="checkbox" id="chkHideText"> 🙈 Hide text
     </label>
-    <button class="toggle hide-text-reveal" id="revealTextBtn" type="button" hidden>
-      👁️ Reveal text
-    </button>
   </div>
   <div class="barwrap"><div class="bar" id="bar"></div></div>
   <section class="hud">
@@ -2445,6 +2481,7 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
   <button id="fsPause" aria-label="Pause">⏸</button>
   <button id="fsContinue" aria-label="Continue">▶</button>
   <button id="fsStop" aria-label="Stop">⏹</button>
+  <button id="fsReveal" class="fs-text-tab" type="button" style="display:none" aria-label="Reveal text">Reveal text</button>
   <span class="fs-sep"></span>
   <button id="fsMinimize" aria-label="Minimise fullscreen">⤡</button>
 </div>
@@ -2505,7 +2542,7 @@ const selMatch       = document.getElementById('selMatch');
 const matchChip      = document.getElementById('matchChip');
 const chkHideText    = document.getElementById('chkHideText');
 const hideTextChip   = document.getElementById('hideTextChip');
-const revealTextBtn  = document.getElementById('revealTextBtn');
+const fsRevealBtn    = document.getElementById('fsReveal');
 const modeFollowBtn  = document.getElementById('modeFollowBtn');
 const modeTajweedBtn = document.getElementById('modeTajweedBtn');
 const supportBox     = document.getElementById('support');
@@ -5704,23 +5741,14 @@ async function openTajweedScreen(){
   });
 })();
 
-/* ── NEW: Follow-mode match dropdown + Reveal-text button wiring ─── */
-(function wireFollowMatchAndReveal(){
+/* Match-strictness dropdown (Follow mode) */
+(function wireFollowMatch(){
   if(selMatch){
     selMatch.addEventListener('change', () => {
       matchLevel = (selMatch.value === 'lenient') ? 'lenient' : 'strict';
       try { localStorage.setItem('qc.matchLevel', matchLevel); } catch (e) {}
       lenientSkipVerse = null;
       showToast('🎯 Follow match: <b>' + (matchLevel === 'lenient' ? 'Lenient' : 'Strict') + '</b>');
-    });
-  }
-  if(revealTextBtn){
-    revealTextBtn.addEventListener('click', () => {
-      revealAllText = !revealAllText;
-      document.body.classList.toggle('reveal-all-text', revealAllText);
-      revealTextBtn.classList.toggle('active', revealAllText);
-      revealTextBtn.textContent = revealAllText ? '🙈 Hide text' : '👁️ Reveal text';
-      if (navigator.vibrate) navigator.vibrate(12);
     });
   }
 })();
@@ -7811,7 +7839,7 @@ function exitReaderFullscreen(){
   if(nativeFullscreenElement()){ try{ if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }catch(e){} }
   updateFullscreenIcon(); scrollCurrentIntoView(true);
 }
-function showFsControls(){ if(viewerOpen) return; fsControls.classList.add('visible'); showFsBadge(); clearTimeout(fsControlsTimer); fsControlsTimer = setTimeout(hideFsControls, 2800); }
+function showFsControls(){ if(viewerOpen) return; fsControls.classList.add('visible'); showFsBadge(); clearTimeout(fsControlsTimer); fsControlsTimer = setTimeout(hideFsControls, 3000); }
 function hideFsControls(){ fsControls.classList.remove('visible'); clearTimeout(fsControlsTimer); }
 let fsBadgeTimer = null;
 function showFsBadge(){ if(viewerOpen) return; fsBadge.classList.add('visible'); clearTimeout(fsBadgeTimer); fsBadgeTimer = setTimeout(hideFsBadge, 2800); }
@@ -7870,10 +7898,32 @@ fsContinueBtn.addEventListener('click', () => {
 fsStopBtn.addEventListener('click', () => { fsPaused = false; stopEverything(); setStatus('Ready','idle'); fsPauseBtn.disabled = false; fsContinueBtn.disabled = true; updateFsMicBtn(); showFsControls(); });
 fsMinimizeBtn.addEventListener('click', () => exitReaderFullscreen());
 fsContinueBtn.disabled = true;
+
+/* Reveal-text tab inside the fullscreen toolbar */
+function syncRevealButtons(){
+  if(!fsRevealBtn) return;
+  const show = !!(hideText && followOnly);
+  fsRevealBtn.style.display = show ? '' : 'none';
+  fsRevealBtn.textContent = revealAllText ? 'Hide text' : 'Reveal text';
+  fsRevealBtn.classList.toggle('active', revealAllText);
+  fsRevealBtn.setAttribute('aria-label', revealAllText ? 'Hide revealed text' : 'Reveal text');
+  fsRevealBtn.title = revealAllText ? 'Hide text again' : 'Reveal the next ayah';
+}
+if(fsRevealBtn){
+  fsRevealBtn.addEventListener('click', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    revealAllText = !revealAllText;
+    document.body.classList.toggle('reveal-all-text', revealAllText);
+    syncRevealButtons();
+    if(navigator.vibrate) navigator.vibrate(12);
+    showFsControls();
+  });
+}
 function syncFsButtons(){
   if(fsPaused || (!wantMic && !playing)){ fsPauseBtn.disabled = true; fsContinueBtn.disabled = !fsPaused; }
   else { fsPauseBtn.disabled = false; fsContinueBtn.disabled = true; }
   updateFsMicBtn();
+  syncRevealButtons();
 }
 
 let updatingMutex = false;
@@ -7886,7 +7936,6 @@ function applyMutexUI(){
   if(matchChip) matchChip.hidden = !followOnly;
   if(selMatch)  selMatch.value  = matchLevel;
   if(hideTextChip) hideTextChip.hidden = !followOnly;
-  if(revealTextBtn) revealTextBtn.hidden = !(followOnly && hideText);
 
   const tjNoiseChip = document.getElementById('tajweedNoiseChip');
   if(tjNoiseChip) tjNoiseChip.hidden = followOnly;
@@ -7895,6 +7944,7 @@ function applyMutexUI(){
   if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
   applyHideTextUI();
   updateTajweedStatusChip();
+  syncRevealButtons();
 }
 function setRecitationMode(modeName){
   const newFollow = (modeName === 'follow');
@@ -7934,13 +7984,9 @@ function applyHideTextUI(){
     document.body.classList.remove('hide-text-mode');
     revealAllText = false;
     document.body.classList.remove('reveal-all-text');
-    if(revealTextBtn){
-      revealTextBtn.classList.remove('active');
-      revealTextBtn.textContent = '👁️ Reveal text';
-    }
     words.forEach(w => w.el.classList.remove('revealed'));
   }
-  if(revealTextBtn) revealTextBtn.hidden = !(hideText && followOnly);
+  syncRevealButtons();
 }
 function applyFollowOnlyUI(){
   if(followOnly){
@@ -8514,7 +8560,7 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 5. Plausible-enough — the main “close enough” fallback. */
+    /* 5. Plausible-enough — the main "close enough" fallback. */
     if (isFollowPlausible(heard, hPhon, w)) {
       commitCorrect(ptr, null);
       advancePast(1);
@@ -9378,7 +9424,7 @@ function openCoachInfoModal(){
     '<h3><span class="fnum">4</span> 🙈 Hide text &amp; Reveal text</h3>' +
     '<ul>' +
       '<li><b>Hide text</b> (available in Follow mode) hides the whole mushaf so you can recite from memory. Words become visible as you recite them.</li>' +
-      '<li>While hidden mode is active, a <b>👁️ Reveal text</b> tab appears next to the Hide text checkbox. Tapping it temporarily shows the entire page; tapping it again hides it once more.</li>' +
+      '<li>While hidden mode is active, a small <b>Reveal text</b> tab appears inside the fullscreen toolbar (alongside ⏸ ▶ ⏹). Tapping it temporarily shows the entire page; tapping again hides it once more. The tab fades away with the rest of the toolbar after 3 seconds.</li>' +
     '</ul>' +
   '</div>' +
   '<div class="feature">' +
