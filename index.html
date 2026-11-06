@@ -6272,7 +6272,26 @@ function armSpeechKeepalive(){
     speechKeepaliveTimer = null;
     if(!wantMic || fsPaused || speechFatalError || micPaused) return;
     if(!speechRecognition) return;
-    if(!speechStarting){ try{ speechRecognition.stop(); }catch(e){} }
+    if(!speechStarting){
+
+      // ── 40 s mic reset: clear recognition buffers ──
+      recReset();
+
+      // ── 40 s mic reset: clear memoisation caches ──
+      _normCache.clear();
+      _phonCache.clear();
+      _phonLooseCache.clear();
+      _levCache.clear();
+
+      // ── 40 s mic reset: clear stale per-word / session state ──
+      prevWordAudio       = null;
+      lastDirectCommitIdx = -1;
+      lastDirectCommitAt  = 0;
+      lastCommitBatchId   = -1;
+      words.forEach(w => { w.audio = null; });
+
+      try{ speechRecognition.stop(); }catch(e){}
+    }
     armSpeechKeepalive();
   }, SPEECH_KEEPALIVE_MS);
 }
