@@ -1821,7 +1821,6 @@ body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{
   border-radius: 4px;
 }
 
-/* ── NEW — tap-to-explain visual affordance ── */
 .w[title] { cursor: help; }
 .w[title]:active { filter: brightness(1.25); }
 body.light-mode .w[title]:active { filter: brightness(0.85); }
@@ -5967,7 +5966,6 @@ function scoreAlternativeToks(toks, startPtr){
   return score;
 }
 
-/* ───────── FIX 1 — webkitSpeechRecognitionPhrase only ───────── */
 function buildPhraseObjects(rec) {
   if (!rec) return false;
   if (!window.webkitSpeechRecognitionPhrase) return false;
@@ -8294,7 +8292,6 @@ function recordMistake(i, kind, heardRaw){
   if(beepOn && kind === 'misread') beepThrottled('error');
 }
 
-/* ───────── FIX 2 — grade() dispatcher ───────── */
 async function grade(tokens, startIdx){
   const start = startIdx || 0;
   if(!words.length || ptr >= words.length) return tokens.length - start;
@@ -8335,8 +8332,6 @@ function noteFollowWrongToken(){
     setStatus('Paused (word not recognised)', 'idle', 'Tap Start reciting to resume');
   }, FOLLOW_PIN_STOP_MS);
 }
-
-/* ───────── FIX 3 — fast, RMS-free Follow-mode grader ───────── */
 
 function isFollowMFAMatch(w, heard, hPhon) {
   if (!w || !heard) return false;
@@ -8387,7 +8382,7 @@ function gradeFollowFast(tokens, startIdx) {
     const hPhon = phonArCached(rawTok);
     const w     = words[ptr];
 
-    /* 1. ASR direct match (current word) */
+    /* 1. ASR direct match on the CURRENT word → advance 1. */
     if (heard === w.norm || isMatchWord(heard, hPhon, null, w)) {
       commitCorrect(ptr, null);
       advancePast(1);
@@ -8396,7 +8391,9 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 2. Split-token match (pendingHeard + rawTok) */
+    /* 2. Split-token match: pendingHeard + rawTok together form the
+       CURRENT word → advance 1. The user pronounced this word across
+       two ASR fragments; nothing was skipped. */
     if (trySplitTokenMatch(heard, rawTok)) {
       commitCorrect(ptr, null);
       advancePast(1);
@@ -8405,7 +8402,9 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 3. Merged-token match */
+    /* 3. Merged-token match: ONE ASR token that covers 2–3 consecutive
+       words starting at ptr. The audio contained all of them — this is
+       NOT a skip. Every word advanced past was inside the heard audio. */
     const mergedN = tryMergedTokenMatch(heard, hPhon);
     if (mergedN > 0) {
       commitManyCorrect(ptr, ptr + mergedN, null);
@@ -8415,7 +8414,7 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 4. MFA (phonetic, no RMS) */
+    /* 4. MFA phonetic match on the CURRENT word → advance 1. */
     if (isFollowMFAMatch(w, heard, hPhon)) {
       commitCorrect(ptr, null);
       advancePast(1);
@@ -8424,30 +8423,8 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 5. Four-word look-ahead: user has clearly moved past ptr */
-    let exactAhead = -1;
-    const lookEnd  = Math.min(words.length, ptr + 5);
-
-    for (let k = ptr + 1; k < lookEnd; k++) {
-      if (isMatchWord(heard, hPhon, null, words[k])) {
-        exactAhead = k;
-        break;
-      }
-    }
-
-    if (exactAhead > 0) {
-      /* Advance to the heard word. Intermediate words are marked
-         green because the user has already recited them (ASR just
-         missed them) — this is NOT "skipping a mispronounced word",
-         it is catching up to the reciter. */
-      commitManyCorrect(ptr, exactAhead + 1, null);
-      advancePast(exactAhead - ptr + 1);
-      noteFollowProgress();
-      pendingHeard.length = 0;
-      used++; continue;
-    }
-
-    /* 6. Plausible-enough — only after ASR AND MFA have both failed */
+    /* 5. Plausible-enough — the word was pronounced, just not cleanly
+       transcribed → advance 1. Never more than one. */
     if (isFollowPlausible(heard, hPhon, w)) {
       commitCorrect(ptr, null);
       advancePast(1);
@@ -8456,7 +8433,8 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 7. Genuinely wrong — wait for the user to pronounce this word */
+    /* 6. Not this word — STAY on words[ptr] and wait for the reciter
+       to actually pronounce it. Never jump forward. */
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if (pendingHeard.length > 5) pendingHeard.length = 0;
