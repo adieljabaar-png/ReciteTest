@@ -4763,7 +4763,6 @@ async function applyTajweedColorsToCoach(){
       w.tjRules = parseTajweedWordRules(tWord.html);
       w.normNoSilent = tWord.normNoSilent || w.norm;
       if (w.tjRules) w.tjRules.normNoSilent = w.normNoSilent;
-      /* ── NEW — expose the rule as a hover tooltip and screen-reader label ── */
       if (w.tjRules && w.tjRules.allRules && w.tjRules.allRules.length){
         const tip = buildRuleTooltip(w.tjRules.allRules, ' · ');
         if (tip){
@@ -4918,7 +4917,6 @@ let silentWarned        = false;
 
 let batchTimingCtx = null;
 
-/* ── NEW — Tajweed rule explanations, shown on tap / hover / proactive feedback ── */
 const TAJWEED_RULE_INFO = {
   ham_wasl:             { name: 'Hamzat al-Wasl',            desc: 'connecting hamza — silent when joining speech' },
   laam_shamsiyah:       { name: 'Laam Shamsiyyah',           desc: 'solar lām — assimilated into the following sun letter' },
@@ -4954,7 +4952,7 @@ function parseTajweedWordRules(decoratedHtml){
     laamShamsiyyahPositions: [],
     hamWasl: false,
     silentPositionsInNorm: [],
-    allRules: []                    /* ── NEW ── */
+    allRules: []
   };
   if (!decoratedHtml) return rules;
 
@@ -5005,7 +5003,6 @@ function parseTajweedWordRules(decoratedHtml){
 
   if (decoratedHtml.indexOf('tj-ham_wasl') !== -1) rules.hamWasl = true;
 
-  /* ── NEW — collect every rule class present on the word, for tap-to-explain ── */
   const seen = new Set();
   const classRe = /class="([^"]*)"/g;
   let cm;
@@ -5019,7 +5016,6 @@ function parseTajweedWordRules(decoratedHtml){
   return rules;
 }
 
-/* ── NEW — proactive rule explanation (throttled — one every 2 s max) ── */
 let _lastRuleExplainAt = 0;
 const RULE_EXPLAIN_THROTTLE_MS = 2000;
 function maybeExplainRules(w){
@@ -5259,7 +5255,7 @@ function markStrict1Error(w, kind, detail){
     kind: 'tajweed-' + kind,
     tajweedType: kind,
     tajweedName: tajweedName,
-    tajweedExplanation: tajweedExplanation     /* ── NEW ── */
+    tajweedExplanation: tajweedExplanation
   };
   mistakes.push(m); appendMistake(m); scheduleHUD();
   if (beepOn) beepThrottled('error');
@@ -5971,34 +5967,33 @@ function scoreAlternativeToks(toks, startPtr){
   return score;
 }
 
+/* ───────── FIX 1 — webkitSpeechRecognitionPhrase only ───────── */
 function buildPhraseObjects(rec) {
-  if(!rec) return false;
-  const PhraseCtor = window.SpeechRecognitionPhrase || window.webkitSpeechRecognitionPhrase;
-  if(!PhraseCtor || !('phrases' in rec) || !words.length) return false;
+  if (!rec) return false;
+  if (!window.webkitSpeechRecognitionPhrase) return false;
+  if (!('phrases' in rec)) return false;
+  if (!words.length) return false;
 
   const end = Math.min(words.length, ptr + 50);
-  const slice = words.slice(ptr, end);
-  if(!slice.length) return false;
-
   const seen = new Set();
-  const phraseObjects = [];
+  const phrases = [];
 
-  for (const w of slice) {
-    const clean = String(w.raw || '')
+  for (let i = ptr; i < end; i++) {
+    const clean = String(words[i].raw || '')
       .replace(TASHKEEL, '')
       .replace(/[^\u0621-\u064A\s]/g, '')
       .trim();
     if (!clean || seen.has(clean)) continue;
     seen.add(clean);
-    try{
-      phraseObjects.push(new PhraseCtor(clean, 8.0));
-    }catch(_){}
+    try {
+      phrases.push(new window.webkitSpeechRecognitionPhrase(clean, 8.0));
+    } catch (_) {}
   }
 
-  if (!phraseObjects.length) return false;
+  if (!phrases.length) return false;
 
   try {
-    rec.phrases = phraseObjects;
+    rec.phrases = phrases;
     rec.__lastPhrasePtr = ptr;
     return true;
   } catch (e) {
@@ -8004,10 +7999,9 @@ function installWordDelegates(){
   pageEl.addEventListener('selectstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
   pageEl.addEventListener('dragstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
 
-  /* ── NEW — tap a Tajweed-coloured word → show the rule name + explanation ── */
   pageEl.addEventListener('click', (e) => {
-    if(followOnly) return;                    // Tajweed mode only
-    if(longPressTriggered) return;            // long-press was for jump-to-word
+    if(followOnly) return;
+    if(longPressTriggered) return;
     const target = e.target.closest ? e.target.closest('.w') : null;
     if(!target || !pageEl.contains(target)) return;
     const idx = parseInt(target.dataset.idx, 10);
@@ -8210,7 +8204,6 @@ function appendMistake(m){
   mistakeCountBadge.textContent = String(mistakes.length);
   const li = document.createElement('li');
 
-  /* ── NEW — full explanation on the badge's title / aria-label ── */
   const kindBadge = m.tajweedName
     ? '<span class="tj-kind" title="' +
         escapeHtml(m.tajweedExplanation || m.tajweedName) +
@@ -8265,7 +8258,7 @@ function commitCorrect(i, seg){
   const warned = w.el.classList.contains('warned');
   const baseCls = (hideText && followOnly) ? 'w revealed' : 'w correct';
   w.el.className = baseCls + (warned ? ' warned' : '');
-  maybeExplainRules(w);                              /* ── NEW ── */
+  maybeExplainRules(w);
 }
 function commitManyCorrect(start, end, seg){
   const toReveal = hideText && followOnly;
@@ -8276,7 +8269,7 @@ function commitManyCorrect(start, end, seg){
     const warned = words[i].el.classList.contains('warned');
     words[i].el.className = baseCls + (warned ? ' warned' : '');
   }
-  if(stop > start) maybeExplainRules(words[stop - 1]);   /* ── NEW ── */
+  if(stop > start) maybeExplainRules(words[stop - 1]);
 }
 
 function markSkippedWord(i){
@@ -8301,11 +8294,12 @@ function recordMistake(i, kind, heardRaw){
   if(beepOn && kind === 'misread') beepThrottled('error');
 }
 
+/* ───────── FIX 2 — grade() dispatcher ───────── */
 async function grade(tokens, startIdx){
   const start = startIdx || 0;
   if(!words.length || ptr >= words.length) return tokens.length - start;
-  if(matchStrictness() === 'strict') return await gradeFull(tokens, start);
-  return await gradeFollowOnly(tokens, start);
+  if(followOnly) return gradeFollowFast(tokens, start);
+  return await gradeFull(tokens, start);
 }
 
 const FOLLOW_LOOKAHEAD = 1;
@@ -8340,6 +8334,136 @@ function noteFollowWrongToken(){
     stopReciting(true);
     setStatus('Paused (word not recognised)', 'idle', 'Tap Start reciting to resume');
   }, FOLLOW_PIN_STOP_MS);
+}
+
+/* ───────── FIX 3 — fast, RMS-free Follow-mode grader ───────── */
+
+function isFollowMFAMatch(w, heard, hPhon) {
+  if (!w || !heard) return false;
+  if (heard === w.norm) return true;
+
+  const L = Math.max(heard.length, w.norm.length);
+  const tol = (w.norm.length === 3) ? 0 : (toleranceFor(L) + 1);
+
+  if (lev(heard, w.norm) <= tol) return true;
+  if (w.phon.length >= 2 && hPhon.length >= 2 &&
+      lev(hPhon, w.phon) <= tol) return true;
+
+  return false;
+}
+
+function isFollowPlausible(heard, hPhon, w) {
+  if (!w || !heard || !w.norm) return false;
+
+  const heardLen  = heard.length;
+  const targetLen = w.norm.length;
+  if (targetLen === 0) return false;
+  if (heardLen < 1 && targetLen > 1) return false;
+
+  const ratio = heardLen / targetLen;
+  if (ratio < 0.20 || ratio > 4.0) return false;
+
+  const L   = Math.max(heardLen, targetLen);
+  const tol = toleranceFor(L) + 2;
+
+  if (lev(heard, w.norm) <= tol) return true;
+  if (hPhon.length >= 2 && w.phon.length >= 2 &&
+      lev(hPhon, w.phon) <= tol) return true;
+
+  return false;
+}
+
+function gradeFollowFast(tokens, startIdx) {
+  const start = startIdx || 0;
+  let used = 0;
+
+  for (let ti = start; ti < tokens.length; ti++) {
+    if (ptr >= words.length) { used++; continue; }
+
+    const rawTok = tokens[ti];
+    const heard  = normArCached(rawTok);
+    if (!heard) { used++; continue; }
+
+    const hPhon = phonArCached(rawTok);
+    const w     = words[ptr];
+
+    /* 1. ASR direct match (current word) */
+    if (heard === w.norm || isMatchWord(heard, hPhon, null, w)) {
+      commitCorrect(ptr, null);
+      advancePast(1);
+      noteFollowProgress();
+      pendingHeard.length = 0;
+      used++; continue;
+    }
+
+    /* 2. Split-token match (pendingHeard + rawTok) */
+    if (trySplitTokenMatch(heard, rawTok)) {
+      commitCorrect(ptr, null);
+      advancePast(1);
+      noteFollowProgress();
+      pendingHeard.length = 0;
+      used++; continue;
+    }
+
+    /* 3. Merged-token match */
+    const mergedN = tryMergedTokenMatch(heard, hPhon);
+    if (mergedN > 0) {
+      commitManyCorrect(ptr, ptr + mergedN, null);
+      advancePast(mergedN);
+      noteFollowProgress();
+      pendingHeard.length = 0;
+      used++; continue;
+    }
+
+    /* 4. MFA (phonetic, no RMS) */
+    if (isFollowMFAMatch(w, heard, hPhon)) {
+      commitCorrect(ptr, null);
+      advancePast(1);
+      noteFollowProgress();
+      pendingHeard.length = 0;
+      used++; continue;
+    }
+
+    /* 5. Four-word look-ahead: user has clearly moved past ptr */
+    let exactAhead = -1;
+    const lookEnd  = Math.min(words.length, ptr + 5);
+
+    for (let k = ptr + 1; k < lookEnd; k++) {
+      if (isMatchWord(heard, hPhon, null, words[k])) {
+        exactAhead = k;
+        break;
+      }
+    }
+
+    if (exactAhead > 0) {
+      /* Advance to the heard word. Intermediate words are marked
+         green because the user has already recited them (ASR just
+         missed them) — this is NOT "skipping a mispronounced word",
+         it is catching up to the reciter. */
+      commitManyCorrect(ptr, exactAhead + 1, null);
+      advancePast(exactAhead - ptr + 1);
+      noteFollowProgress();
+      pendingHeard.length = 0;
+      used++; continue;
+    }
+
+    /* 6. Plausible-enough — only after ASR AND MFA have both failed */
+    if (isFollowPlausible(heard, hPhon, w)) {
+      commitCorrect(ptr, null);
+      advancePast(1);
+      noteFollowProgress();
+      pendingHeard.length = 0;
+      used++; continue;
+    }
+
+    /* 7. Genuinely wrong — wait for the user to pronounce this word */
+    noteFollowWrongToken();
+    pendingHeard.push(rawTok);
+    if (pendingHeard.length > 5) pendingHeard.length = 0;
+    used++;
+  }
+
+  return used;
 }
 
 function isAcousticWordShapeMatch(w, seg) {
@@ -8381,60 +8505,6 @@ async function runMFAInference(w, seg, heard) {
                  lev(hPhon, w.phon) <= tol;
 
   return durationOk && (normOk || phonOk);
-}
-
-async function gradeFollowOnly(tokens, startIdx){
-  const start = startIdx || 0;
-  let used = 0;
-  for(let ti = start; ti < tokens.length; ti++){
-    if(ptr >= words.length){ used++; continue; }
-    const rawTok = tokens[ti];
-    const heard  = normArCached(rawTok);
-    if(!heard){ used++; continue; }
-    const hPhon = phonArCached(rawTok);
-
-    if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){
-      pendingHeard.length = 0;
-      used++; continue;
-    }
-
-    if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
-      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-      commitCorrect(ptr, seg); advancePast(1);
-      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
-    }
-
-    if(trySplitTokenMatch(heard, rawTok)){
-      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-      commitCorrect(ptr, seg); advancePast(1);
-      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
-    }
-
-    const mergedN = tryMergedTokenMatch(heard, hPhon);
-    if(mergedN > 0){
-      const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-      commitManyCorrect(ptr, ptr + mergedN, seg);
-      advancePast(mergedN);
-      pendingHeard.length = 0; noteFollowProgress(); used++; continue;
-    }
-
-    const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
-    if (await runMFAInference(words[ptr], seg, heard)) {
-        commitCorrect(ptr, seg);
-        advancePast(1);
-        pendingHeard.length = 0;
-        noteFollowProgress();
-        addFeedback('🛡️ <b>MFA</b> detected this word correctly.', false, false, true);
-        used++;
-        continue;
-    }
-
-    noteFollowWrongToken();
-    pendingHeard.push(rawTok);
-    if(pendingHeard.length > 5) pendingHeard.length = 0;
-    used++;
-  }
-  return used;
 }
 
 const FULL_LOOKAHEAD = 5;
@@ -8562,13 +8632,6 @@ async function gradeFull(tokens, startIdx){
       }
       pendingHeard.length = 0;
 
-      /* ── NEW — Priority 7: plausible pronunciation — BOTH modes ──
-         When ASR and MFA both fail to recognise a word, but the audio
-         clearly contains a spoken utterance that approximately matches
-         the target, accept it and advance. This prevents Tajweed mode
-         from stalling on every ASR hiccup. Audio-driven rule checks
-         (ghunnah, laam, silent, extra-syllable) still run on the
-         accepted word via runStrict1Checks({skipTiming: true}). ── */
       {
         const curW = words[ptr];
         if(curW && isPlausiblePronunciationAttempt(heard, hPhon, curW)){
