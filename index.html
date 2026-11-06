@@ -984,6 +984,25 @@ background-repeat:no-repeat;background-position:right 5px center;
 .toggle.match-select select option{background:#1b2436;color:#fff}
 .toggles{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
 .toggles::-webkit-scrollbar{display:none}
+
+/* NEW: Reveal text button */
+.toggle.hide-text-reveal{
+  cursor:pointer;font-weight:700;
+  transition:background .2s,border-color .2s,color .2s,box-shadow .2s;
+  -webkit-appearance:none;font-family:inherit;
+}
+.toggle.hide-text-reveal.active{
+  border-color:rgba(47,208,122,.75);
+  background:rgba(47,208,122,.16);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(47,208,122,.28);
+}
+body.light-mode .toggle.hide-text-reveal.active{
+  background:rgba(31,154,90,.15);
+  border-color:rgba(31,154,90,.7);
+  color:#1a2233;
+}
+
 .barwrap{height:5px;background:#0b101b;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,#4f8cff,#2fd07a);transition:width .3s}
 .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
@@ -1092,6 +1111,30 @@ body.hide-text-mode:not(.viewer-open) .w.skipped.revealed{color:#ffcf6b !importa
 body.hide-text-mode:not(.viewer-open) .w.current{color: transparent !important;background: transparent !important;box-shadow: none !important;}
 body.hide-text-mode:not(.viewer-open) .w.pressing{background: rgba(79,140,255,.3) !important;box-shadow: 0 0 0 3px rgba(79,140,255,.5) !important;}
 body.hide-text-mode:not(.viewer-open) .mushaf::after{content: "🙈 Text hidden — recite from memory. Words appear as you go.";display:block;direction:ltr;font-family:-apple-system,sans-serif;font-size:.72rem;color:var(--muted);text-align:center;padding:16px 8px 4px;letter-spacing:.02em;opacity:.75;}
+
+/* NEW: Reveal-all-text override while in hidden mode */
+body.hide-text-mode.reveal-all-text:not(.viewer-open) .w:not(.revealed){
+  color: var(--text) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-decoration-color: transparent !important;
+  text-shadow: none !important;
+}
+body.hide-text-mode.reveal-all-text:not(.viewer-open) .w.current{
+  color: #fff !important;
+  background: linear-gradient(180deg,#5c96ff,#3a72e6) !important;
+  box-shadow: 0 0 0 3px rgba(79,140,255,.2), 0 4px 12px rgba(79,140,255,.3) !important;
+}
+body.hide-text-mode.reveal-all-text:not(.viewer-open) .w.skipped{
+  color:#ffcf6b !important;
+  background:rgba(255,176,32,.18) !important;
+  text-decoration:line-through !important;
+  text-decoration-color:var(--warn) !important;
+}
+body.hide-text-mode.reveal-all-text:not(.viewer-open) .mushaf::after{
+  display:none !important;
+}
+
 .ayah-num{display:inline-block;font-family:-apple-system,sans-serif;font-size:.42em;vertical-align:middle;color:#cbd6ea;background:#1c2740;border:1px solid #2b3a55;border-radius:999px;padding:2px 9px;margin:0 8px;direction:ltr;}
 .loading{direction:ltr;text-align:center;color:var(--muted);font-family:-apple-system,sans-serif;font-size:.9rem;font-weight:400;padding:42px 20px;line-height:1.6;}
 .loading .err{color:var(--bad);font-weight:600;display:block;margin-bottom:8px}
@@ -2224,9 +2267,10 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">👂 Follow</button>
     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">🎵 Tajweed</button>
     <label class="toggle match-select" id="matchChip" hidden>
-      🤝 Match
-      <select id="selMatch" aria-label="Pronunciation matching strictness" disabled>
+      🎯 Follow
+      <select id="selMatch" aria-label="Follow matching strictness">
         <option value="strict" selected>Strict</option>
+        <option value="lenient">Lenient</option>
       </select>
     </label>
     <span class="toggle" id="tajweedStatusChip" hidden
@@ -2237,6 +2281,9 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     <label class="toggle hide-text" id="hideTextChip" hidden>
       <input type="checkbox" id="chkHideText"> 🙈 Hide text
     </label>
+    <button class="toggle hide-text-reveal" id="revealTextBtn" type="button" hidden>
+      👁️ Reveal text
+    </button>
   </div>
   <div class="barwrap"><div class="bar" id="bar"></div></div>
   <section class="hud">
@@ -2458,6 +2505,7 @@ const selMatch       = document.getElementById('selMatch');
 const matchChip      = document.getElementById('matchChip');
 const chkHideText    = document.getElementById('chkHideText');
 const hideTextChip   = document.getElementById('hideTextChip');
+const revealTextBtn  = document.getElementById('revealTextBtn');
 const modeFollowBtn  = document.getElementById('modeFollowBtn');
 const modeTajweedBtn = document.getElementById('modeTajweedBtn');
 const supportBox     = document.getElementById('support');
@@ -2806,10 +2854,17 @@ function gregorianToHijri(date){
   return jdnToHijri(jdn);
 }
 
-let matchLevel = 'strict';
+let matchLevel = (function () {
+  try {
+    const v = localStorage.getItem('qc.matchLevel');
+    if (v === 'strict' || v === 'lenient') return v;
+  } catch (e) {}
+  return 'strict';
+})();
 
 let followOnly = localStorage.getItem('qc.followOnly') !== '0';
 let hideText   = localStorage.getItem('qc.hideText') === '1';
+let revealAllText = false;
 let beepOn     = !followOnly;
 let theme      = localStorage.getItem('qc.theme') || 'dark';
 
@@ -2928,18 +2983,23 @@ function lev(a, b){
   return r;
 }
 
-function matchStrictness(){ return 'strict'; }
+function matchStrictness(){ return matchLevel; }
 
 const TOL_TABLE = {
-  strict:   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2]
+  strict:  [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
+  lenient: [0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3]
 };
 function toleranceFor(L){
-  const t = TOL_TABLE.strict;
+  const key = followOnly ? matchLevel : 'strict';
+  const t = TOL_TABLE[key] || TOL_TABLE.strict;
   return L >= t.length ? t[t.length - 1] : t[L];
 }
 
-const CONF_FLOOR_TABLE = { strict: 0.35 };
-function confidenceFloor(){ return CONF_FLOOR_TABLE.strict; }
+const CONF_FLOOR_TABLE = { strict: 0.35, lenient: 0.20 };
+function confidenceFloor(){
+  const key = followOnly ? matchLevel : 'strict';
+  return CONF_FLOOR_TABLE[key] || 0.35;
+}
 
 const NOISE_LIMIT_TABLE = { strict: 2 };
 function noiseLimit(){ return NOISE_LIMIT_TABLE.strict; }
@@ -2952,7 +3012,7 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   const L = la > lb ? la : lb;
   if(L < 2) return false;
   
-  const extraTol = followOnly ? 1 : 0;
+  const extraTol = followOnly ? (matchLevel === 'lenient' ? 2 : 1) : 0;
   const tol = toleranceFor(L) + extraTol;
   
   const lenDiff = la > lb ? la - lb : lb - la;
@@ -4067,7 +4127,7 @@ function recPush(newToks){
   const overflow = recTokens.length - REC_BUF_MAX - recCursor;
   if(overflow > 0){ recTokens.splice(0, overflow); recCursor = Math.max(0, recCursor - overflow); }
 }
-function recReset(){ recTokens = []; recCursor = 0; pendingHeard = []; consecutiveReds = 0; interimProgress.clear(); followWrongTokens = 0; cancelFollowPinTimer(); }
+function recReset(){ recTokens = []; recCursor = 0; pendingHeard = []; consecutiveReds = 0; interimProgress.clear(); followWrongTokens = 0; lenientSkipVerse = null; cancelFollowPinTimer(); }
 
 function showScreen(name){
   currentScreenName = name;
@@ -5644,6 +5704,27 @@ async function openTajweedScreen(){
   });
 })();
 
+/* ── NEW: Follow-mode match dropdown + Reveal-text button wiring ─── */
+(function wireFollowMatchAndReveal(){
+  if(selMatch){
+    selMatch.addEventListener('change', () => {
+      matchLevel = (selMatch.value === 'lenient') ? 'lenient' : 'strict';
+      try { localStorage.setItem('qc.matchLevel', matchLevel); } catch (e) {}
+      lenientSkipVerse = null;
+      showToast('🎯 Follow match: <b>' + (matchLevel === 'lenient' ? 'Lenient' : 'Strict') + '</b>');
+    });
+  }
+  if(revealTextBtn){
+    revealTextBtn.addEventListener('click', () => {
+      revealAllText = !revealAllText;
+      document.body.classList.toggle('reveal-all-text', revealAllText);
+      revealTextBtn.classList.toggle('active', revealAllText);
+      revealTextBtn.textContent = revealAllText ? '🙈 Hide text' : '👁️ Reveal text';
+      if (navigator.vibrate) navigator.vibrate(12);
+    });
+  }
+})();
+
 function urlBase64ToUint8Array(base64String){
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -5720,6 +5801,7 @@ async function resumeRecitationSession(modeKey){
     localStorage.setItem('qc.followOnly', followOnly ? '1' : '0');
     lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
     prevWordAudio = null;
+    lenientSkipVerse = null;
     applyMutexUI(); applyFollowOnlyUI();
     showScreen('coach'); coachLoaded = false; coachLoading = true;
     try{ await loadSurah(data.surah, true); coachLoaded = true; }
@@ -7800,15 +7882,17 @@ function applyMutexUI(){
   beepOn = !followOnly;
   if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly); modeFollowBtn.setAttribute('aria-pressed', followOnly ? 'true' : 'false'); }
   if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly); modeTajweedBtn.setAttribute('aria-pressed', !followOnly ? 'true' : 'false'); }
-  if(matchChip) matchChip.hidden = true;
+
+  if(matchChip) matchChip.hidden = !followOnly;
+  if(selMatch)  selMatch.value  = matchLevel;
   if(hideTextChip) hideTextChip.hidden = !followOnly;
+  if(revealTextBtn) revealTextBtn.hidden = !(followOnly && hideText);
 
   const tjNoiseChip = document.getElementById('tajweedNoiseChip');
   if(tjNoiseChip) tjNoiseChip.hidden = followOnly;
 
   if(chkHideText) chkHideText.checked = hideText;
   if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
-  if(selMatch) selMatch.value = 'strict';
   applyHideTextUI();
   updateTajweedStatusChip();
 }
@@ -7821,7 +7905,7 @@ function setRecitationMode(modeName){
   pendingHeard.length = 0; consecutiveReds = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
-  followWrongTokens = 0; cancelFollowPinTimer();
+  followWrongTokens = 0; lenientSkipVerse = null; cancelFollowPinTimer();
   applyMutexUI(); applyFollowOnlyUI();
   if(followOnly){
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
@@ -7848,8 +7932,15 @@ function applyHideTextUI(){
     });
   } else {
     document.body.classList.remove('hide-text-mode');
+    revealAllText = false;
+    document.body.classList.remove('reveal-all-text');
+    if(revealTextBtn){
+      revealTextBtn.classList.remove('active');
+      revealTextBtn.textContent = '👁️ Reveal text';
+    }
     words.forEach(w => w.el.classList.remove('revealed'));
   }
+  if(revealTextBtn) revealTextBtn.hidden = !(hideText && followOnly);
 }
 function applyFollowOnlyUI(){
   if(followOnly){
@@ -8304,6 +8395,7 @@ const FOLLOW_WRONG_LIMIT = 3;
 const FOLLOW_PIN_STOP_MS = 10000;
 
 let followWrongTokens = 0;
+let lenientSkipVerse  = null;
 let followPinTimer    = null;
 let followPinPtr      = -1;
 
@@ -8371,6 +8463,7 @@ function isFollowPlausible(heard, hPhon, w) {
 function gradeFollowFast(tokens, startIdx) {
   const start = startIdx || 0;
   let used = 0;
+  const isLenient = (matchLevel === 'lenient');
 
   for (let ti = start; ti < tokens.length; ti++) {
     if (ptr >= words.length) { used++; continue; }
@@ -8392,8 +8485,7 @@ function gradeFollowFast(tokens, startIdx) {
     }
 
     /* 2. Split-token match: pendingHeard + rawTok together form the
-       CURRENT word → advance 1. The user pronounced this word across
-       two ASR fragments; nothing was skipped. */
+       CURRENT word → advance 1. */
     if (trySplitTokenMatch(heard, rawTok)) {
       commitCorrect(ptr, null);
       advancePast(1);
@@ -8403,8 +8495,7 @@ function gradeFollowFast(tokens, startIdx) {
     }
 
     /* 3. Merged-token match: ONE ASR token that covers 2–3 consecutive
-       words starting at ptr. The audio contained all of them — this is
-       NOT a skip. Every word advanced past was inside the heard audio. */
+       words starting at ptr. */
     const mergedN = tryMergedTokenMatch(heard, hPhon);
     if (mergedN > 0) {
       commitManyCorrect(ptr, ptr + mergedN, null);
@@ -8414,8 +8505,8 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 4. MFA phonetic match on the CURRENT word → advance 1. */
-    if (isFollowMFAMatch(w, heard, hPhon)) {
+    /* 4. MFA phonetic match on the CURRENT word — SKIPPED in Lenient mode. */
+    if (!isLenient && isFollowMFAMatch(w, heard, hPhon)) {
       commitCorrect(ptr, null);
       advancePast(1);
       noteFollowProgress();
@@ -8423,8 +8514,7 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 5. Plausible-enough — the word was pronounced, just not cleanly
-       transcribed → advance 1. Never more than one. */
+    /* 5. Plausible-enough — the main “close enough” fallback. */
     if (isFollowPlausible(heard, hPhon, w)) {
       commitCorrect(ptr, null);
       advancePast(1);
@@ -8433,8 +8523,20 @@ function gradeFollowFast(tokens, startIdx) {
       used++; continue;
     }
 
-    /* 6. Not this word — STAY on words[ptr] and wait for the reciter
-       to actually pronounce it. Never jump forward. */
+    /* 6. LENIENT: one graceful skip per ayah, always marked GREEN. */
+    if (isLenient) {
+      const verseKey = w.verse;
+      if (lenientSkipVerse !== verseKey) {
+        lenientSkipVerse = verseKey;
+        commitCorrect(ptr, null);
+        advancePast(1);
+        noteFollowProgress();
+        pendingHeard.length = 0;
+        used++; continue;
+      }
+    }
+
+    /* 7. Not this word — STAY on words[ptr] and wait. */
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if (pendingHeard.length > 5) pendingHeard.length = 0;
@@ -8754,6 +8856,7 @@ function stopReciting(silent){
   if(wantMic && !suppressProgressSave) saveProgressNow();
   wantMic=false; micPaused = false;
   disarmSpeechKeepalive(); pendingJumpTarget = -1;
+  lenientSkipVerse = null;
   cancelFollowPinTimer();
   pendingHeard.length = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
@@ -9148,8 +9251,6 @@ prevSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum>1) flipSura
 nextSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum<114) flipSurah(1); });
 surahButton.addEventListener('click',openSurahPicker);
 
-if(selMatch) selMatch.value = 'strict';
-
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
     if(wantMic && !finished && !fsPaused) resumeMic();
@@ -9258,8 +9359,8 @@ function openCoachInfoModal(){
     '<h3><span class="fnum">2</span> 👂 Follow mode (memorisation aid)</h3>' +
     '<ul>' +
       '<li><b>Follow</b> is designed to assist you with <b>memorisation of the Holy Qur\'an</b>. The highlight moves forward with you as you recite.</li>' +
-      '<li>Follow mode uses a relaxed word-matching tolerance (+1) so a slight ASR mis-transcription of one letter does not stall the flow.</li>' +
-      '<li><b>Nothing is marked red and no mistakes are counted</b>.</li>' +
+      '<li>A small dropdown next to the Follow pill lets you pick the matching strictness:<br>• <b>Strict</b> — balanced matching with MFA phonetic tolerance.<br>• <b>Lenient</b> — relaxed matching that skips the MFA check entirely, so the highlight moves faster. A close-enough word is accepted and marked green; if a word cannot be recognised at all, the system will skip <b>one word per ayah</b> to keep you moving. Nothing is ever marked yellow — skipped words stay green.</li>' +
+      '<li><b>Nothing is marked red and no mistakes are counted</b> in Follow mode.</li>' +
     '</ul>' +
   '</div>' +
   '<div class="feature">' +
@@ -9274,7 +9375,14 @@ function openCoachInfoModal(){
     '</ul>' +
   '</div>' +
   '<div class="feature">' +
-    '<h3><span class="fnum">4</span> Progress — Follow &amp; Tajweed memory</h3>' +
+    '<h3><span class="fnum">4</span> 🙈 Hide text &amp; Reveal text</h3>' +
+    '<ul>' +
+      '<li><b>Hide text</b> (available in Follow mode) hides the whole mushaf so you can recite from memory. Words become visible as you recite them.</li>' +
+      '<li>While hidden mode is active, a <b>👁️ Reveal text</b> tab appears next to the Hide text checkbox. Tapping it temporarily shows the entire page; tapping it again hides it once more.</li>' +
+    '</ul>' +
+  '</div>' +
+  '<div class="feature">' +
+    '<h3><span class="fnum">5</span> Progress — Follow &amp; Tajweed memory</h3>' +
     '<ul>' +
       '<li>Whichever mode you are in, the coach automatically remembers the <b>last surah, ayah and word</b> you reached.</li>' +
       '<li>Tap <b>Progress</b> on the Home screen, then choose <b>Follow</b> or <b>Tajweed</b>.</li>' +
