@@ -8352,7 +8352,11 @@ async function runMFAInference(w, seg, heard) {
   const T = getBaseMsPerLetter();
   const expectedMs = Math.max(60, w.norm.length * (T || 110));
   const ratio = seg.durationMs / expectedMs;
-  const durationOk = followOnly ? (ratio > 0.55 && ratio < 1.70) : (ratio > 0.35 && ratio < 2.80);
+  // Follow mode is a memorisation aid — use the wider window so a
+  // slightly off-length utterance still recovers via MFA instead of
+  // stalling the pointer. (Was 0.55–1.70 in Follow, which fired far
+  // less often than the 0.35–2.80 window used in Tajweed.)
+  const durationOk = ratio > 0.35 && ratio < 2.80;
 
   const L = Math.max(heard.length, w.norm.length);
   const tol = (w.norm.length === 3) ? 0 : (toleranceFor(L) + 1);
@@ -8458,8 +8462,15 @@ async function gradeFull(tokens, startIdx){
       if(ptr >= words.length){ used++; continue; }
       const hPhon = phonArCached(rawTok);
 
-      // Ignore repeats of the previous word (a *different* word matched).
-      if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){
+      // Does this token match the word we're currently on?
+      const matchesCurrent = heard === words[ptr].norm ||
+                             isMatchWord(heard, hPhon, null, words[ptr]);
+
+      // Ignore repeats of the previous word — but only when the token
+      // does NOT also match the current word. Near-identical pairs
+      // (الرحمن/الرحيم, يعلمون/تعلمون, …) previously matched the previous
+      // word and were discarded, stalling the pointer in Follow mode.
+      if(ptr > 0 && !matchesCurrent && isMatchWord(heard, hPhon, null, words[ptr - 1])){
         pendingHeard.length = 0;
         used++; continue;
       }
@@ -8467,7 +8478,7 @@ async function gradeFull(tokens, startIdx){
       if(heard.length < 2 && heard !== words[ptr].norm && words[ptr].norm.length > 1){ used++; continue; }
 
       // ── Priority 1: exact / isMatchWord ──
-      if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
+      if(matchesCurrent){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         const _w = words[ptr];
         let emphViol = null;
