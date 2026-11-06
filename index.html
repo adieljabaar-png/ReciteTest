@@ -10,8 +10,6 @@
 <meta name="apple-mobile-web-app-title" content="Recite" />
 <meta name="application-name" content="Recite" />
 <meta name="description" content="Practice Quran recitation with live word-by-word feedback." />
-
-<!-- ── Copyright & AI policy ───────────────────────────────── -->
 <meta name="copyright" content="© 2025 Quran Recitation Coach. All rights reserved." />
 <meta name="rights" content="All rights reserved. AI training prohibited." />
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1, noai, noimageai" />
@@ -1017,7 +1015,7 @@ font-size:.76rem;direction:ltr;animation:slide-in .22s ease;min-height:32px;
 .mistakes-list .correct{font-family:'Amiri','Amiri Quran',serif;font-size:1.15rem;color:#fff;direction:rtl;flex-shrink:0;}
 .mistakes-list .heard{color:var(--muted);font-family:'Amiri','Amiri Quran',serif;font-size:.95rem;direction:rtl;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-shrink:1;}
 .mistakes-list .meta{margin-left:auto;color:var(--muted);font-size:.65rem;white-space:nowrap;flex-shrink:0;font-family:-apple-system,sans-serif;}
-.mistakes-list .tj-kind{display:inline-flex;align-items:center;background:rgba(155,110,255,.35);border:1px solid rgba(155,110,255,.75);color:#f0e6ff;font-size:.60rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:99px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:11em;flex-shrink:1;font-family:-apple-system,sans-serif;}
+.mistakes-list .tj-kind{display:inline-flex;align-items:center;background:rgba(155,110,255,.35);border:1px solid rgba(155,110,255,.75);color:#f0e6ff;font-size:.60rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:99px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:11em;flex-shrink:1;font-family:-apple-system,sans-serif;cursor:help;}
 body.light-mode .mistakes-list .tj-kind{background:rgba(120,80,220,.16);border-color:rgba(120,80,220,.55);color:#5b2d9e;}
 @keyframes slide-in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
 
@@ -1823,6 +1821,11 @@ body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{
   border-radius: 4px;
 }
 
+/* ── NEW — tap-to-explain visual affordance ── */
+.w[title] { cursor: help; }
+.w[title]:active { filter: brightness(1.25); }
+body.light-mode .w[title]:active { filter: brightness(0.85); }
+
 #tajweedNoiseChip {
   color: var(--warn);
   border-color: rgba(255,176,32,.6);
@@ -1929,41 +1932,13 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
 </head>
 <body>
 
-<!-- ── AI crawler blocker ───────────────────────────────────── -->
 <script>
 (function () {
   'use strict';
-
-  var SAFE_BOTS = [
-    'googlebot', 'google-inspectiontool', 'storebot-google',
-    'bingbot', 'msnbot',
-    'vercel', 'vercel-screenshot', 'vercel-analytics', 'vercelbot',
-    'duckduckbot', 'yandex', 'baiduspider', 'slurp',
-    'applebot', 'facebookexternalhit'
-  ];
-
-  var AI_BOTS = [
-    'gptbot', 'chatgpt-user', 'oai-searchbot',
-    'ccbot',
-    'google-cloudvertexbot', 'googleother',
-    'anthropic-ai', 'claudebot', 'claude-web',
-    'perplexitybot',
-    'cohere-ai', 'cohere-ai-training',
-    'bytespider',
-    'imagesiftbot', 'img2dataset',
-    'omgilibot', 'omgili', 'diffbot', 'youbot',
-    'timpibot',
-    'amazonbot',
-    'meta-externalagent', 'meta-externalfetcher',
-    'facebookbot'
-  ];
-
+  var SAFE_BOTS = ['googlebot', 'google-inspectiontool', 'storebot-google', 'bingbot', 'msnbot', 'vercel', 'vercel-screenshot', 'vercel-analytics', 'vercelbot', 'duckduckbot', 'yandex', 'baiduspider', 'slurp', 'applebot', 'facebookexternalhit'];
+  var AI_BOTS = ['gptbot', 'chatgpt-user', 'oai-searchbot', 'ccbot', 'google-cloudvertexbot', 'googleother', 'anthropic-ai', 'claudebot', 'claude-web', 'perplexitybot', 'cohere-ai', 'cohere-ai-training', 'bytespider', 'imagesiftbot', 'img2dataset', 'omgilibot', 'omgili', 'diffbot', 'youbot', 'timpibot', 'amazonbot', 'meta-externalagent', 'meta-externalfetcher', 'facebookbot'];
   var ua = (navigator.userAgent || '').toLowerCase();
-
-  for (var i = 0; i < SAFE_BOTS.length; i++) {
-    if (ua.indexOf(SAFE_BOTS[i]) !== -1) return;
-  }
-
+  for (var i = 0; i < SAFE_BOTS.length; i++) if (ua.indexOf(SAFE_BOTS[i]) !== -1) return;
   for (var j = 0; j < AI_BOTS.length; j++) {
     if (ua.indexOf(AI_BOTS[j]) !== -1) {
       window.__AI_BLOCKED__ = true;
@@ -2691,7 +2666,6 @@ const SPEECH_LANG = 'ar-SA';
 
 const TASHKEEL = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\uFEFF\u0640]/g;
 
-/* ── Feature flags ───────────────────────────────────────── */
 const STRICT_FEATURES = {
   madd:      () => localStorage.getItem('qc.strictMadd')           !== '0',
   ghunnah:   () => localStorage.getItem('qc.strictGhunnah')        !== '0',
@@ -2971,8 +2945,6 @@ function confidenceFloor(){ return CONF_FLOOR_TABLE.strict; }
 const NOISE_LIMIT_TABLE = { strict: 2 };
 function noiseLimit(){ return NOISE_LIMIT_TABLE.strict; }
 
-// Follow +1 (memorisation aid must flow with the reciter),
-// Tajweed +0 (used for accuracy — plus audio checks already exist).
 function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   const wNorm = w.norm;
   const la = hNorm.length, lb = wNorm.length;
@@ -3001,7 +2973,6 @@ function isMatchWord(hNorm, hPhon, _hPhonLoose, w){
   return false;
 }
 
-// Looser plausible check — Follow only (gated on voiced audio by caller).
 function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
@@ -3511,7 +3482,6 @@ async function handleAudioDownloadTap(surahNumber, type){
   else downloadTranslationSurahAudio(surahNumber);
 }
 
-/* ── QR generator (unchanged) ─────────────────────────────── */
 const QRGen = (function(){
   'use strict';
   const EXP = new Uint8Array(512);
@@ -3742,7 +3712,6 @@ const QRGen = (function(){
   return { encode: encode, toSvg: toSvg };
 })();
 
-/* ── App-wide recitation state ────────────────────────────── */
 let words=[], ptr=0, errors=0, finished=false;
 let mode = 'page';
 let pageNum = 1;
@@ -3796,7 +3765,6 @@ const SPEECH_KEEPALIVE_MS = 40000;
 let micStream = null;
 let lastMicError = null;
 
-/* ── Upgraded RMS + FFT analyser ──────────────────────────── */
 const rmsAnalyser = (function(){
   const samples = [];
   const MAX_AGE_MS = 8000;
@@ -4539,7 +4507,6 @@ function finishHifzTest(){
   bg.querySelector('#hifzResultClose').addEventListener('click', close);
 }
 
-/* ── Tajweed Colors screen (standalone) ──────────────────── */
 const TJ_API_BASE = 'https://api.quran.com/api/v4';
 
 const TJ_ALL_RULES = [
@@ -4796,6 +4763,14 @@ async function applyTajweedColorsToCoach(){
       w.tjRules = parseTajweedWordRules(tWord.html);
       w.normNoSilent = tWord.normNoSilent || w.norm;
       if (w.tjRules) w.tjRules.normNoSilent = w.normNoSilent;
+      /* ── NEW — expose the rule as a hover tooltip and screen-reader label ── */
+      if (w.tjRules && w.tjRules.allRules && w.tjRules.allRules.length){
+        const tip = buildRuleTooltip(w.tjRules.allRules, ' · ');
+        if (tip){
+          w.el.title = tip;
+          w.el.setAttribute('aria-label', w.raw.replace(TASHKEEL, '') + ' — ' + tip);
+        }
+      }
       appliedCount++;
     });
 
@@ -4829,7 +4804,7 @@ function removeTajweedColorsFromCoach(){
     tjPill.setAttribute('aria-label', 'Tajweed mode');
   }
   if (!coachTajweedApplied) return;
-  words.forEach(w => { w.el.textContent = w.raw; w.tjRules = null; w.normNoSilent = null; });
+  words.forEach(w => { w.el.textContent = w.raw; w.tjRules = null; w.normNoSilent = null; w.el.removeAttribute('title'); w.el.removeAttribute('aria-label'); });
   coachTajweedApplied = false;
 }
 
@@ -4943,6 +4918,29 @@ let silentWarned        = false;
 
 let batchTimingCtx = null;
 
+/* ── NEW — Tajweed rule explanations, shown on tap / hover / proactive feedback ── */
+const TAJWEED_RULE_INFO = {
+  ham_wasl:             { name: 'Hamzat al-Wasl',            desc: 'connecting hamza — silent when joining speech' },
+  laam_shamsiyah:       { name: 'Laam Shamsiyyah',           desc: 'solar lām — assimilated into the following sun letter' },
+  madda_normal:         { name: 'Madd (normal)',             desc: 'elongated 2 morae' },
+  madda_permissible:    { name: 'Madd (permissible)',        desc: 'elongated 2, 4 or 6 morae' },
+  madda_necessary:      { name: 'Madd (necessary)',          desc: 'elongated 6 morae — obligatory' },
+  qalqalah:             { name: 'Qalqalah',                  desc: 'echo / bounce on ق ط ب ج د' },
+  ghunnah:              { name: 'Ghunnah',                   desc: 'nasalisation held ~2 counts on ن or م' },
+  ikhfa:                { name: 'Ikhfa',                     desc: 'partial nasalisation before certain letters' },
+  idghaam_ghunnah:      { name: 'Idghaam (with ghunnah)',    desc: 'merging with nasalisation' },
+  idghaam_no_ghunnah:   { name: 'Idghaam (no ghunnah)',      desc: 'merging without nasalisation' },
+  iqlab:                { name: 'Iqlab',                     desc: 'ن becomes م before ب' },
+  silent:               { name: 'Silent',                    desc: 'silent letter — not pronounced' }
+};
+function buildRuleTooltip(rules, sep){
+  if(!rules || !rules.length) return '';
+  return rules.map(r => {
+    const info = TAJWEED_RULE_INFO[r];
+    return info ? (info.name + ' — ' + info.desc) : r;
+  }).join(sep || '\n');
+}
+
 function parseTajweedWordRules(decoratedHtml){
   const rules = {
     madd: null,
@@ -4955,7 +4953,8 @@ function parseTajweedWordRules(decoratedHtml){
     normNoSilent: null,
     laamShamsiyyahPositions: [],
     hamWasl: false,
-    silentPositionsInNorm: []
+    silentPositionsInNorm: [],
+    allRules: []                    /* ── NEW ── */
   };
   if (!decoratedHtml) return rules;
 
@@ -5006,7 +5005,35 @@ function parseTajweedWordRules(decoratedHtml){
 
   if (decoratedHtml.indexOf('tj-ham_wasl') !== -1) rules.hamWasl = true;
 
+  /* ── NEW — collect every rule class present on the word, for tap-to-explain ── */
+  const seen = new Set();
+  const classRe = /class="([^"]*)"/g;
+  let cm;
+  while ((cm = classRe.exec(decoratedHtml)) !== null){
+    cm[1].split(/\s+/).forEach(c => {
+      if (c.startsWith('tj-') && TAJWEED_RULE_INFO[c.slice(3)]) seen.add(c.slice(3));
+    });
+  }
+  rules.allRules = Array.from(seen);
+
   return rules;
+}
+
+/* ── NEW — proactive rule explanation (throttled — one every 2 s max) ── */
+let _lastRuleExplainAt = 0;
+const RULE_EXPLAIN_THROTTLE_MS = 2000;
+function maybeExplainRules(w){
+  if(followOnly) return;
+  if(!w || !w.tjRules || !w.tjRules.allRules || !w.tjRules.allRules.length) return;
+  const now = performance.now();
+  if(now - _lastRuleExplainAt < RULE_EXPLAIN_THROTTLE_MS) return;
+  _lastRuleExplainAt = now;
+  const explanation = buildRuleTooltip(w.tjRules.allRules, ' · ');
+  if(!explanation) return;
+  addFeedback(
+    '🎵 <b>' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</b> — ' + escapeHtml(explanation),
+    false, true
+  );
 }
 
 function strict1MaddOk(prevW, deltaMs){
@@ -5218,6 +5245,11 @@ function markStrict1Error(w, kind, detail){
   errors++;
 
   const tajweedName = TAJWEED_ERROR_NAMES[kind] || ('Tajweed — ' + kind);
+  const rule = kind.split('-')[0];
+  const ruleInfo = TAJWEED_RULE_INFO[rule];
+  const tajweedExplanation = ruleInfo
+    ? (ruleInfo.name + ' — ' + ruleInfo.desc)
+    : tajweedName;
 
   const m = {
     idx: mistakeCounter++,
@@ -5226,7 +5258,8 @@ function markStrict1Error(w, kind, detail){
     verse: w.verse,
     kind: 'tajweed-' + kind,
     tajweedType: kind,
-    tajweedName: tajweedName
+    tajweedName: tajweedName,
+    tajweedExplanation: tajweedExplanation     /* ── NEW ── */
   };
   mistakes.push(m); appendMistake(m); scheduleHUD();
   if (beepOn) beepThrottled('error');
@@ -5243,8 +5276,6 @@ function markStrict1Error(w, kind, detail){
   }
 }
 
-// Keeps the 'correct' class so the word stays green; adds 'warned' for
-// the yellow dotted underline visual hint; does not count as an error.
 function markStrict1Warning(w, kind, detail){
   if (!w) return;
   if (w.el.classList.contains('warned') || w.el.classList.contains('error')) return;
@@ -5940,9 +5971,6 @@ function scoreAlternativeToks(toks, startPtr){
   return score;
 }
 
-/* ── Contextual biasing — uses the modern SpeechRecognitionPhrase API
-   to bias the ASR model toward the current Quran window.
-   Chrome/Edge 142+ support this; other browsers gracefully ignore it. ── */
 function buildPhraseObjects(rec) {
   if(!rec) return false;
   const PhraseCtor = window.SpeechRecognitionPhrase || window.webkitSpeechRecognitionPhrase;
@@ -5982,7 +6010,6 @@ function buildPhraseObjects(rec) {
 function createSpeechRecognition(){
   if(!SPEECH_SUPPORTED) return null;
 
-  // Only reuse the cached instance if it hasn't been marked stale.
   if(speechRecognition && !speechRecognition.__dead) return speechRecognition;
   if(speechRecognition){
     try{ speechRecognition.abort(); }catch(_){}
@@ -5990,13 +6017,11 @@ function createSpeechRecognition(){
   }
 
   const rec = new SpeechRecognitionCtor();
-  rec.lang             = SPEECH_LANG;   // ar-SA — best Quranic branch
+  rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
   rec.interimResults   = true;
-  rec.maxAlternatives  = 5;             // was 3 — more candidates for scoring
+  rec.maxAlternatives  = 5;
 
-  // Attach contextual biasing phrases using the modern SpeechRecognitionPhrase API.
-  // Chrome/Edge 142+ apply this bias to the acoustic model; other browsers ignore it.
   const phrasesAttached = buildPhraseObjects(rec);
   rec.__hasPhrases = phrasesAttached;
 
@@ -6004,7 +6029,6 @@ function createSpeechRecognition(){
     speechStarting = false; recRunning = true;
     lastSpeechResultIndex = -1; interimProgress.clear();
     lastResultAt = performance.now(); armSpeechKeepalive();
-    // Refresh contextual biasing phrases when recognition (re)starts
     buildPhraseObjects(rec);
   };
 
@@ -6080,7 +6104,6 @@ function createSpeechRecognition(){
       }
     }
 
-    // Refresh contextual biasing window as the pointer advances
     if(Math.abs(ptr - (rec.__lastPhrasePtr || 0)) >= 8){
       buildPhraseObjects(rec);
     }
@@ -7980,6 +8003,22 @@ function installWordDelegates(){
   pageEl.addEventListener('contextmenu', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
   pageEl.addEventListener('selectstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
   pageEl.addEventListener('dragstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
+
+  /* ── NEW — tap a Tajweed-coloured word → show the rule name + explanation ── */
+  pageEl.addEventListener('click', (e) => {
+    if(followOnly) return;                    // Tajweed mode only
+    if(longPressTriggered) return;            // long-press was for jump-to-word
+    const target = e.target.closest ? e.target.closest('.w') : null;
+    if(!target || !pageEl.contains(target)) return;
+    const idx = parseInt(target.dataset.idx, 10);
+    if(!Number.isFinite(idx)) return;
+    const w = words[idx];
+    if(!w || !w.tjRules || !w.tjRules.allRules || !w.tjRules.allRules.length) return;
+    const tip = buildRuleTooltip(w.tjRules.allRules, ' · ');
+    if(!tip) return;
+    showToast('🎵 <b>' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</b><br>' + escapeHtml(tip), 5000);
+  });
+
   if(IS_TOUCH){
     pageEl.addEventListener('touchstart', e => { if(e.touches.length !== 1) return; const idx = wordIdxFromEvent(e); if(idx < 0) return; const span = e.target.closest('.w'); beginWordPress(span, idx, e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
     pageEl.addEventListener('touchmove', e => { if(e.touches.length !== 1) return; if(!wordPress.active) return; moveWordPress(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
@@ -8171,8 +8210,11 @@ function appendMistake(m){
   mistakeCountBadge.textContent = String(mistakes.length);
   const li = document.createElement('li');
 
+  /* ── NEW — full explanation on the badge's title / aria-label ── */
   const kindBadge = m.tajweedName
-    ? '<span class="tj-kind" title="' + escapeHtml(m.tajweedName) + '">' +
+    ? '<span class="tj-kind" title="' +
+        escapeHtml(m.tajweedExplanation || m.tajweedName) +
+      '" aria-label="' + escapeHtml(m.tajweedExplanation || m.tajweedName) + '">' +
         escapeHtml(m.tajweedName) +
       '</span>'
     : '';
@@ -8223,6 +8265,7 @@ function commitCorrect(i, seg){
   const warned = w.el.classList.contains('warned');
   const baseCls = (hideText && followOnly) ? 'w revealed' : 'w correct';
   w.el.className = baseCls + (warned ? ' warned' : '');
+  maybeExplainRules(w);                              /* ── NEW ── */
 }
 function commitManyCorrect(start, end, seg){
   const toReveal = hideText && followOnly;
@@ -8233,6 +8276,7 @@ function commitManyCorrect(start, end, seg){
     const warned = words[i].el.classList.contains('warned');
     words[i].el.className = baseCls + (warned ? ' warned' : '');
   }
+  if(stop > start) maybeExplainRules(words[stop - 1]);   /* ── NEW ── */
 }
 
 function markSkippedWord(i){
@@ -8298,8 +8342,6 @@ function noteFollowWrongToken(){
   }, FOLLOW_PIN_STOP_MS);
 }
 
-// Used ONLY in Tajweed mode, gated on Tajweed-coloured words with a madd
-// or ghunnah context. Follow mode never calls this.
 function isAcousticWordShapeMatch(w, seg) {
   if (!seg || !w || seg.durationMs < 60) return false;
   const samples = rmsAnalyser.samplesIn(seg.start, seg.end);
@@ -8322,18 +8364,12 @@ function isAcousticWordShapeMatch(w, seg) {
   return true;
 }
 
-// MFA — 3-letter targets use zero tolerance for both norm and phon;
-// longer targets use toleranceFor(L) + 1. Both modes.
 async function runMFAInference(w, seg, heard) {
   if (!seg || !w || !heard) return false;
 
   const T = getBaseMsPerLetter();
   const expectedMs = Math.max(60, w.norm.length * (T || 110));
   const ratio = seg.durationMs / expectedMs;
-  // Follow mode is a memorisation aid — use the wider window so a
-  // slightly off-length utterance still recovers via MFA instead of
-  // stalling the pointer. (Was 0.55–1.70 in Follow, which fired far
-  // less often than the 0.35–2.80 window used in Tajweed.)
   const durationOk = ratio > 0.35 && ratio < 2.80;
 
   const L = Math.max(heard.length, w.norm.length);
@@ -8357,29 +8393,23 @@ async function gradeFollowOnly(tokens, startIdx){
     if(!heard){ used++; continue; }
     const hPhon = phonArCached(rawTok);
 
-    // Ignore repeats of the previous word. The match is on words[ptr-1] —
-    // a *different* word from words[ptr] — so any prefix buffer we were
-    // building for the current word is stale.
     if(ptr > 0 && isMatchWord(heard, hPhon, null, words[ptr - 1])){
       pendingHeard.length = 0;
       used++; continue;
     }
 
-    // Exact match on current word
     if(heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr])){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
       commitCorrect(ptr, seg); advancePast(1);
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // Split-token match
     if(trySplitTokenMatch(heard, rawTok)){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
       commitCorrect(ptr, seg); advancePast(1);
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // Merged token match
     const mergedN = tryMergedTokenMatch(heard, hPhon);
     if(mergedN > 0){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8388,7 +8418,6 @@ async function gradeFollowOnly(tokens, startIdx){
       pendingHeard.length = 0; noteFollowProgress(); used++; continue;
     }
 
-    // ── PRIORITY 2: MFA (duration + phonetic alignment) ──
     const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
     if (await runMFAInference(words[ptr], seg, heard)) {
         commitCorrect(ptr, seg);
@@ -8400,7 +8429,6 @@ async function gradeFollowOnly(tokens, startIdx){
         continue;
     }
 
-    // ── PRIORITY 3: WAIT / SKIP ──
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if(pendingHeard.length > 5) pendingHeard.length = 0;
@@ -8411,14 +8439,6 @@ async function gradeFollowOnly(tokens, startIdx){
 
 const FULL_LOOKAHEAD = 5;
 
-/* ════════════════════════════════════════════════════════════════════════
-   gradeFull — Tajweed mode.
-   Priority 5 (RMS) is now gated on Tajweed-coloured words that actually
-   need a vowel-run duration check (madd or ghunnah context). All other
-   words fall through to priorities 6–8 as before.
-
-   LOOKAHEAD stays 0 for both modes — Tajweed never skips a word.
-   ════════════════════════════════════════════════════════════════════════ */
 async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -8440,22 +8460,15 @@ async function gradeFull(tokens, startIdx){
       if(ptr >= words.length){ used++; continue; }
       const hPhon = phonArCached(rawTok);
 
-      // Does this token match the word we're currently on?
       const matchesCurrent = heard === words[ptr].norm ||
                              isMatchWord(heard, hPhon, null, words[ptr]);
 
-      // Ignore repeats of the previous word — but only when the token
-      // does NOT also match the current word. Near-identical pairs
-      // (الرحمن/الرحيم, يعلمون/تعلمون, …) previously matched the previous
-      // word and were discarded, stalling the pointer in Follow mode.
       if(ptr > 0 && !matchesCurrent && isMatchWord(heard, hPhon, null, words[ptr - 1])){
         pendingHeard.length = 0;
         used++; continue;
       }
-      // 1-char noise filter — token doesn't match any word, buffer untouched.
       if(heard.length < 2 && heard !== words[ptr].norm && words[ptr].norm.length > 1){ used++; continue; }
 
-      // ── Priority 1: exact / isMatchWord ──
       if(matchesCurrent){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         const _w = words[ptr];
@@ -8480,7 +8493,6 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      // ── Priority 2: trySplitTokenMatch ──
       if(trySplitTokenMatch(heard, rawTok)){
         const combined = normArCached(pendingHeard.join('') + rawTok);
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8492,7 +8504,6 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      // ── Priority 3: tryMergedTokenMatch ──
       const mergedN = tryMergedTokenMatch(heard, hPhon);
       if(mergedN > 0){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -8515,10 +8526,8 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      // ── Compute the audio segment ONCE ──
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
 
-      // ── Priority 4: MFA (transcript + audio) — FIRES ON FIRST FAILURE ──
       if (await runMFAInference(words[ptr], seg, heard)) {
         commitCorrect(ptr, seg);
         runStrict1Checks(ptr, heard, { timingReliable: false });
@@ -8529,8 +8538,6 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      // ── Priority 5: RMS (audio-only) — ONLY for Tajweed-coloured words
-      //    whose rule needs a vowel-run duration check (madd / ghunnah). ──
       const _wRms = words[ptr];
       const _needsVowelRun = !followOnly && _wRms.tjRules &&
         (_wRms.tjRules.madd || _wRms.tjRules.hasGhunnahContext);
@@ -8544,7 +8551,6 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      // ── Priority 6: prefix buffer (only genuine prefixes, max 2 deep) ──
       if(isStrongPartialPrefix(heard)){
         if(pendingHeard.length === 1 &&
            heard.startsWith(normArCached(pendingHeard[0]))){
@@ -8554,17 +8560,25 @@ async function gradeFull(tokens, startIdx){
         }
         used++; continue;
       }
-      // Not a prefix — clear stale buffer
       pendingHeard.length = 0;
 
-      // ── Priority 7: plausible (Follow only, with voiced-audio gate) ──
-      if(followOnly){
+      /* ── NEW — Priority 7: plausible pronunciation — BOTH modes ──
+         When ASR and MFA both fail to recognise a word, but the audio
+         clearly contains a spoken utterance that approximately matches
+         the target, accept it and advance. This prevents Tajweed mode
+         from stalling on every ASR hiccup. Audio-driven rule checks
+         (ghunnah, laam, silent, extra-syllable) still run on the
+         accepted word via runStrict1Checks({skipTiming: true}). ── */
+      {
         const curW = words[ptr];
         if(curW && isPlausiblePronunciationAttempt(heard, hPhon, curW)){
           const voiced = seg && seg.durationMs > 40 &&
                          rmsAnalyser.voiceDurationMs(seg.start, seg.end) > 20;
           if(voiced){
             commitCorrect(ptr, seg);
+            if(!followOnly){
+              runStrict1Checks(ptr, heard, { timingReliable: false, skipTiming: true });
+            }
             lastDirectCommitIdx = -1;
             lastDirectCommitAt  = 0;
             lastCommitBatchId   = -1;
@@ -8578,9 +8592,6 @@ async function gradeFull(tokens, startIdx){
         }
       }
 
-      // ── Priority 8: miss handling ──
-      // Neither mode advances. The pointer stays on the misread word until
-      // the reciter corrects it; Priority 1/4/5 will then clear and advance.
       const w = words[ptr];
 
       if (followOnly) {
@@ -8589,7 +8600,6 @@ async function gradeFull(tokens, startIdx){
         continue;
       }
 
-      // Tajweed: flag red + beep, do NOT advance.
       const plausibleAttempt = w && isPlausiblePronunciationAttempt(heard, hPhon, w);
       if(plausibleAttempt && w &&
          !w.el.classList.contains('error') &&
@@ -8620,7 +8630,6 @@ async function gradeFull(tokens, startIdx){
       used++;
     }
 
-    // batch-level Madd/Ghunnah length check (unchanged)
     const ctx = batchTimingCtx;
     if(ctx && ctx.startTime > 0 && ctx.wordCount > 1 && ctx.cumulativeRequired > 0 &&
        ctx.contributions.length > 0){
@@ -8705,7 +8714,7 @@ function stopReciting(silent){
   wantMic=false; micPaused = false;
   disarmSpeechKeepalive(); pendingJumpTarget = -1;
   cancelFollowPinTimer();
-  pendingHeard.length = 0;          // no prefix survives a stop→start cycle
+  pendingHeard.length = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
   prevWordAudio = null;
   setMicButton(); recRunning = false; speechStarting = false;
@@ -9200,6 +9209,7 @@ function openCoachInfoModal(){
       '<li>The top of the coach screen always shows two pill tabs — <b>Follow</b> and <b>Tajweed</b>. One is always active; tapping the other switches mode instantly.</li>' +
       '<li>Both modes use your browser\'s <b>built-in speech recognition</b> — no custom model download. An internet connection is required.</li>' +
       '<li>Hold any word for 3 seconds to start reciting from that point.</li>' +
+      '<li><b>Tap any coloured word</b> to see the Tajweed rule name and a short explanation.</li>' +
       '<li>On Android phones the coach stays <b>silent and vibration-free while listening</b> so the microphone never picks up its own tones.</li>' +
     '</ul>' +
   '</div>' +
@@ -9218,6 +9228,7 @@ function openCoachInfoModal(){
       '<li>On a mispronounced word the coach <b>beeps</b> and <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
       '<li>Tajweed uses a stricter word-matching tolerance (+0) and a tight MFA gate (3-letter words require an exact match) so mispronunciations surface reliably.</li>' +
       '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> measured on the actual vowel run.<br>• <b>Ghunnah</b> verified by both transcript and audio spectrum.<br>• <b>Laam Shamsiyyah</b> checked by onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> flagged when a glottal re-attack is detected.<br>• <b>Emphatic letter substitution</b> (ص → س, ط → ت…) surfaced as a warning.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped form.</li>' +
+      '<li><b>Every coloured word explains itself.</b> Tap any coloured word to see the Tajweed rule name and a short description. The same explanation appears automatically in the feedback panel when a coloured word is recited correctly.</li>' +
       '<li><b>Rule-ready chip:</b> a small chip near the mode pills shows whether the Tajweed rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules unavailable</b>.</li>' +
     '</ul>' +
   '</div>' +
