@@ -1083,7 +1083,6 @@ body.listen-mode.hide-text-mode .w{color: var(--text) !important;background: tra
 .w.error{background:rgba(255,90,106,.22);color:#ff9aa4;text-decoration:underline wavy var(--bad);text-underline-offset:8px;animation:shake .32s ease;}
 .w.skipped{background:rgba(255,176,32,.16);color:#ffcf6b;text-decoration:line-through;text-decoration-color:var(--warn);}
 .w.model{background:rgba(255,176,32,.3);color:#fff}
-/* Update: Removed forced yellow text color so .w.correct keeps it green */
 .w.warned{text-decoration:underline dotted var(--warn);text-underline-offset:6px;background:rgba(255,176,32,.08);}
 .w-deco{display:inline-block;padding:0 3px;opacity:.9;pointer-events:none;cursor:default;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
@@ -5941,63 +5940,42 @@ function scoreAlternativeToks(toks, startPtr){
   return score;
 }
 
-/* ── Grammar builder — biases the browser's ASR model to the current Quran window ── */
-function buildSpeechGrammar(){
-  // Chrome/Edge expose SpeechGrammarList; Safari/Firefox ignore it silently.
-  const SGL = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-  if(!SGL || !words.length) return null;
-  try{
-    const list = new SGL();
-    const rules = [];
+/* ── Contextual biasing — uses the modern SpeechRecognitionPhrase API
+   to bias the ASR model toward the current Quran window.
+   Chrome/Edge 142+ support this; other browsers gracefully ignore it. ── */
+function buildPhraseObjects(rec) {
+  if(!rec) return false;
+  const PhraseCtor = window.SpeechRecognitionPhrase || window.webkitSpeechRecognitionPhrase;
+  if(!PhraseCtor || !('phrases' in rec) || !words.length) return false;
 
-    // Rule 1 — unique word tokens in the rolling window from ptr
-    const end   = Math.min(words.length, ptr + 40);
-    const slice = words.slice(ptr, end);
-    if(!slice.length) return null;
+  const end = Math.min(words.length, ptr + 50);
+  const slice = words.slice(ptr, end);
+  if(!slice.length) return false;
 
-    const sanitizeForGrammar = (s) => String(s || '')
+  const seen = new Set();
+  const phraseObjects = [];
+
+  for (const w of slice) {
+    const clean = String(w.raw || '')
       .replace(TASHKEEL, '')
       .replace(/[^\u0621-\u064A\s]/g, '')
-      .replace(/\s+/g, ' ')
       .trim();
+    if (!clean || seen.has(clean)) continue;
+    seen.add(clean);
+    try{
+      phraseObjects.push(new PhraseCtor(clean, 8.0));
+    }catch(_){}
+  }
 
-    const seen   = new Set();
-    const unique = [];
-    for(const w of slice){
-      const tok = sanitizeForGrammar(w.raw);
-      if(!tok || seen.has(tok)) continue;
-      seen.add(tok);
-      const safe = tok.replace(/[<>&|=*+?()\[\]{};:#]/g, '');
-      if(safe) unique.push(safe);
-    }
-    if(unique.length){
-      rules.push('public <word> = ' + unique.join(' | '));
-    }
+  if (!phraseObjects.length) return false;
 
-    // Rule 2 — whole ayahs starting at ptr (up to 3 verses)
-    const verseMap = new Map();
-    for(const w of slice){
-      if(!verseMap.has(w.verse)) verseMap.set(w.verse, []);
-      verseMap.get(w.verse).push(sanitizeForGrammar(w.raw));
-    }
-    const phrases = [];
-    for(const arr of [...verseMap.values()].slice(0, 3)){
-      const phrase = arr.join(' ')
-        .replace(/[<>&|=*+?()\[\]{};:#]/g, '')
-        .replace(/\s+/g, ' ').trim();
-      if(phrase) phrases.push(phrase);
-    }
-    if(phrases.length){
-      rules.push('public <ayah> = ' + phrases.join(' | '));
-    }
-
-    if(!rules.length) return null;
-    const jsgf = '#JSGF V1.0; grammar quran; ' + rules.join(' ; ') + ' ;';
-    list.addFromString(jsgf, 1);
-    return list;
-  }catch(e){
-    console.warn('[Grammar] build failed:', e);
-    return null;
+  try {
+    rec.phrases = phraseObjects;
+    rec.__lastPhrasePtr = ptr;
+    return true;
+  } catch (e) {
+    console.warn('[Speech] Failed to set phrases:', e);
+    return false;
   }
 }
 
@@ -6017,22 +5995,17 @@ function createSpeechRecognition(){
   rec.interimResults   = true;
   rec.maxAlternatives  = 5;             // was 3 — more candidates for scoring
 
-  // Attach Quran-specific grammar. Chrome/Edge use it to bias the
-  // acoustic model toward the current surah's vocabulary; Safari and
-  // Firefox quietly ignore the property, so this is a pure win.
-  try{
-    const grammar = buildSpeechGrammar();
-    if(grammar) rec.grammars = grammar;
-    rec.__hasGrammar = !!grammar;
-  }catch(e){
-    console.warn('[Grammar] attach failed:', e);
-    rec.__hasGrammar = false;
-  }
+  // Attach contextual biasing phrases using the modern SpeechRecognitionPhrase API.
+  // Chrome/Edge 142+ apply this bias to the acoustic model; other browsers ignore it.
+  const phrasesAttached = buildPhraseObjects(rec);
+  rec.__hasPhrases = phrasesAttached;
 
   rec.onstart = () => {
     speechStarting = false; recRunning = true;
     lastSpeechResultIndex = -1; interimProgress.clear();
     lastResultAt = performance.now(); armSpeechKeepalive();
+    // Refresh contextual biasing phrases when recognition (re)starts
+    buildPhraseObjects(rec);
   };
 
   rec.onresult = async (event) => {
@@ -6105,6 +6078,11 @@ function createSpeechRecognition(){
         const tail = toks.slice(-4).join(' ');
         if(statusHint && tail) statusHint.textContent = '… ' + tail;
       }
+    }
+
+    // Refresh contextual biasing window as the pointer advances
+    if(Math.abs(ptr - (rec.__lastPhrasePtr || 0)) >= 8){
+      buildPhraseObjects(rec);
     }
   };
 

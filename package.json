@@ -1,17 +1,14 @@
 {
-  "name": "quran-recitation-coach-whisper",
+  "name": "quran-recitation-coach",
   "version": "1.0.0",
   "private": true,
-  "description": "Practice Quran recitation with live word-by-word feedback - powered by tarteel-ai/whisper-tiny-ar-quran ONNX",
   "scripts": {
-    "dev": "npx serve . -l 8000",
-    "start": "npx serve .",
-    "download:quran-model": "bash ./download-model.sh"
+    "dev": "vercel dev",
+    "deploy": "vercel --prod",
+    "download:quran-model": "pip install huggingface_hub && huggingface_hub download omartariq612/tarteel-ai-whisper-tiny-ar-quran-onnx --local-dir ./public/models/quran-tiny-onnx --include 'onnx/*' '*.json'"
   },
-  "devDependencies": {
-    "serve": "^14.2.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+  "dependencies": {
+    "@vercel/kv": "^2.0.0",
+    "web-push": "^3.6.7"
   }
 }
