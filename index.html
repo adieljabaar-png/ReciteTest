@@ -2760,7 +2760,8 @@ const STRICT_FEATURES = {
 };
 
 function normAr(s){
-  return String(s).replace(TASHKEEL,'')
+  return String(s).normalize('NFKC')
+    .replace(TASHKEEL,'')
     .replace(/\u0671/g,'\u0627')
     .replace(/[\u0622\u0623\u0625\u0672\u0673]/g,'\u0627')
     .replace(/\u0629/g,'\u0647')
@@ -6048,7 +6049,9 @@ function scoreAlternativeToks(toks, startPtr){
   let score = 0;
   let ti = 0;
   let wi = startPtr;
-  const maxAhead = Math.min(6, words.length - startPtr);
+
+const maxAhead = followOnly ? 12 : Math.min(6, words.length - startPtr);
+
   while(ti < toks.length && wi < startPtr + maxAhead){
     const rawTok = toks[ti];
     const heard = normArCached(rawTok);
@@ -6076,9 +6079,10 @@ function scoreAlternativeToks(toks, startPtr){
   return score;
 }
 
-function buildPhraseObjects(rec) {
+   function buildPhraseObjects(rec) {
   if (!rec) return false;
-  if (!window.webkitSpeechRecognitionPhrase) return false;
+  const PhraseCtor = window.SpeechRecognitionPhrase || window.webkitSpeechRecognitionPhrase;
+  if (!PhraseCtor) return false;
   if (!('phrases' in rec)) return false;
   if (!words.length) return false;
 
@@ -6088,13 +6092,14 @@ function buildPhraseObjects(rec) {
 
   for (let i = ptr; i < end; i++) {
     const clean = String(words[i].raw || '')
+      .normalize('NFKC')
       .replace(TASHKEEL, '')
       .replace(/[^\u0621-\u064A\s]/g, '')
       .trim();
     if (!clean || seen.has(clean)) continue;
     seen.add(clean);
     try {
-      phrases.push(new window.webkitSpeechRecognitionPhrase(clean, 8.0));
+      phrases.push(new PhraseCtor(clean, 6.0));
     } catch (_) {}
   }
 
@@ -6107,6 +6112,164 @@ function buildPhraseObjects(rec) {
   } catch (e) {
     console.warn('[Speech] Failed to set phrases:', e);
     return false;
+  }
+}
+
+/* ── Speech result pipeline (throttle + serialization) ──────── */
+let pendingSpeechEvent = null;
+let speechResultTimer = null;
+let speechInFlight = false;
+const speechQueue = [];
+const SPEECH_THROTTLE_MS = 200;
+
+function resetSpeechPipeline() {
+  speechQueue.length = 0;
+  pendingSpeechEvent = null;
+  if (speechResultTimer) { clearTimeout(speechResultTimer); speechResultTimer = null; }
+}
+
+function scheduleSpeechResult(event) {
+  if (!event || !wantMic || fsPaused || micPaused) return;
+
+  // Snapshot the event so queued items remain valid after the handler returns.
+  let hasFinal = false;
+  const snapshot = [];
+  for (let i = event.resultIndex; i < event.results.length; i++) {
+    const result = event.results[i];
+    if (!result) continue;
+    const alts = [];
+    for (let a = 0; a < result.length; a++) {
+      const alt = result[a];
+      alts.push({
+        transcript: alt.transcript || '',
+        confidence: (typeof alt.confidence === 'number' ? alt.confidence : 0)
+      });
+    }
+    snapshot.push({ index: i, isFinal: !!result.isFinal, alternatives: alts });
+    if (result.isFinal) hasFinal = true;
+  }
+  if (!snapshot.length) return;
+
+  const snap = { resultIndex: event.resultIndex, results: snapshot };
+
+  if (hasFinal) {
+    // Flush any pending interim first, then process the final immediately.
+    if (pendingSpeechEvent) {
+      speechQueue.push(pendingSpeechEvent);
+      pendingSpeechEvent = null;
+    }
+    if (speechResultTimer) { clearTimeout(speechResultTimer); speechResultTimer = null; }
+    speechQueue.push(snap);
+    processSpeechQueue();
+    return;
+  }
+
+  // Interim — throttle to once per 200 ms, keeping only the latest.
+  pendingSpeechEvent = snap;
+  if (speechResultTimer) return;
+  speechResultTimer = setTimeout(() => {
+    speechResultTimer = null;
+    const ev = pendingSpeechEvent;
+    pendingSpeechEvent = null;
+    if (!ev || !wantMic || fsPaused || micPaused) return;
+    speechQueue.push(ev);
+    processSpeechQueue();
+  }, SPEECH_THROTTLE_MS);
+}
+
+async function processSpeechQueue() {
+  if (speechInFlight) return;
+  if (!speechQueue.length) return;
+  speechInFlight = true;
+  try {
+    while (speechQueue.length) {
+      const snap = speechQueue.shift();
+      if (!wantMic || fsPaused || micPaused) continue;
+      try { await runSpeechResultProcessing(snap); }
+      catch (e) { console.warn('[Speech] process error:', e); }
+    }
+  } finally {
+    speechInFlight = false;
+    if (speechQueue.length) processSpeechQueue();
+  }
+}
+
+async function runSpeechResultProcessing(snap) {
+  if (!snap || fsPaused || micPaused || !wantMic) return;
+  lastResultAt = performance.now();
+  sessionHadResult = true;
+  confirmMicAudio();
+  resetSilenceTimer(true);
+
+  currentBatchId++;
+
+  for (let ri = 0; ri < snap.results.length; ri++) {
+    const result = snap.results[ri];
+    const i = result.index;
+    const isFinal = result.isFinal;
+    const alternatives = result.alternatives;
+    if (!alternatives || !alternatives.length) continue;
+
+    const floor = confidenceFloor();
+    const useScoring = alternatives.length > 1;
+    let bestAlt = null;
+    let bestTranscript = '';
+    let bestWeighted = -1;
+
+    for (let ai = 0; ai < alternatives.length; ai++) {
+      const cand = alternatives[ai];
+      const tr = (cand.transcript || '').trim();
+      if (!tr) continue;
+      const conf = (typeof cand.confidence === 'number') ? cand.confidence : 0;
+      if (isFinal && conf > 0 && conf < floor) continue;
+      const candToks = tr.split(/\s+/).filter(Boolean);
+      if (!candToks.length) continue;
+      const rawScore = useScoring ? scoreAlternativeToks(candToks, ptr) : 0;
+      // Change F: phonetic alignment weighted more heavily than raw ASR confidence.
+      const weighted = (rawScore * 3) + (conf * 1.5);
+      if (weighted > bestWeighted) {
+        bestWeighted = weighted;
+        bestAlt = cand;
+        bestTranscript = tr;
+      }
+    }
+
+    if (!bestAlt || !bestTranscript) continue;
+    const toks = bestTranscript.split(/\s+/).filter(Boolean);
+    if (!toks.length) continue;
+
+    if (isFinal) {
+      const already = interimProgress.get(i) || 0;
+      interimProgress.delete(i);
+      if (i <= lastSpeechResultIndex) continue;
+      lastSpeechResultIndex = i;
+      const newToks = toks.slice(already);
+      if (!newToks.length) continue;
+      recPush(newToks);
+      const used = await grade(recTokens, recCursor);
+      recCursor = Math.min(recCursor + used, recTokens.length);
+      if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
+      scheduleHUD();
+    } else {
+      const already = interimProgress.get(i) || 0;
+      const safeEnd = Math.max(already, toks.length - 1);
+      const newToks = toks.slice(already, safeEnd);
+      if (newToks.length) {
+        interimProgress.set(i, safeEnd);
+        recPush(newToks);
+        const used = await grade(recTokens, recCursor);
+        recCursor = Math.min(recCursor + used, recTokens.length);
+        if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
+        scheduleHUD();
+      }
+      const tail = toks.slice(-4).join(' ');
+      if (statusHint && tail) statusHint.textContent = '… ' + tail;
+    }
+  }
+
+  // Refresh contextual-biasing phrases as the reciter advances.
+  if (speechRecognition && Math.abs(ptr - (speechRecognition.__lastPhrasePtr || 0)) >= 8) {
+    buildPhraseObjects(speechRecognition);
   }
 }
 
@@ -6123,94 +6286,22 @@ function createSpeechRecognition(){
   rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
   rec.interimResults   = true;
-  rec.maxAlternatives  = 5;
+
 
   const phrasesAttached = buildPhraseObjects(rec);
   rec.__hasPhrases = phrasesAttached;
 
-  rec.onstart = () => {
+ 
+      
+   
+ rec.onstart = () => {
     speechStarting = false; recRunning = true;
     lastSpeechResultIndex = -1; interimProgress.clear();
     lastResultAt = performance.now(); armSpeechKeepalive();
     buildPhraseObjects(rec);
   };
 
-  rec.onresult = async (event) => {
-    if(fsPaused || micPaused || !wantMic) return;
-    lastResultAt = performance.now();
-    sessionHadResult = true;
-    confirmMicAudio();
-    resetSilenceTimer(true);
-
-    currentBatchId++;
-
-    for(let i = event.resultIndex; i < event.results.length; i++){
-      const result = event.results[i];
-      if(!result || result.length === 0) continue;
-
-      const floor = confidenceFloor();
-      const useScoring = result.length > 1;
-      let bestAlt = null;
-      let bestTranscript = '';
-      let bestWeighted = -1;
-
-      for(let a = 0; a < result.length; a++){
-        const cand = result[a];
-        if(!cand) continue;
-        const tr = (cand.transcript || '').trim();
-        if(!tr) continue;
-        const conf = (typeof cand.confidence === 'number') ? cand.confidence : 0;
-        if(result.isFinal && conf > 0 && conf < floor) continue;
-        const candToks = tr.split(/\s+/).filter(Boolean);
-        if(!candToks.length) continue;
-        const rawScore = useScoring ? scoreAlternativeToks(candToks, ptr) : 0;
-        const weighted = rawScore * 2 + conf;
-        if(weighted > bestWeighted){
-          bestWeighted = weighted;
-          bestAlt = cand;
-          bestTranscript = tr;
-        }
-      }
-
-      if(!bestAlt || !bestTranscript) continue;
-      const transcript = bestTranscript;
-
-      const toks = transcript.split(/\s+/).filter(Boolean);
-      if(!toks.length) continue;
-
-      if(result.isFinal){
-        const already = interimProgress.get(i) || 0;
-        interimProgress.delete(i);
-        if(i <= lastSpeechResultIndex) continue;
-        lastSpeechResultIndex = i;
-        const newToks = toks.slice(already);
-        if(!newToks.length) continue;
-        recPush(newToks);
-        const used = await grade(recTokens, recCursor);
-        recCursor = Math.min(recCursor + used, recTokens.length);
-        if(recCursor >= recTokens.length){ recTokens.length = 0; recCursor = 0; }
-        scheduleHUD();
-      } else {
-        const already = interimProgress.get(i) || 0;
-        const safeEnd = Math.max(already, toks.length - 1);
-        const newToks = toks.slice(already, safeEnd);
-        if(newToks.length){
-          interimProgress.set(i, safeEnd);
-          recPush(newToks);
-          const used = await grade(recTokens, recCursor);
-          recCursor = Math.min(recCursor + used, recTokens.length);
-          if(recCursor >= recTokens.length){ recTokens.length = 0; recCursor = 0; }
-          scheduleHUD();
-        }
-        const tail = toks.slice(-4).join(' ');
-        if(statusHint && tail) statusHint.textContent = '… ' + tail;
-      }
-    }
-
-    if(Math.abs(ptr - (rec.__lastPhrasePtr || 0)) >= 8){
-      buildPhraseObjects(rec);
-    }
-  };
+  rec.onresult = (event) => scheduleSpeechResult(event);
 
   rec.onerror = (event) => {
     const err = event && event.error ? event.error : 'unknown';
@@ -6272,26 +6363,7 @@ function armSpeechKeepalive(){
     speechKeepaliveTimer = null;
     if(!wantMic || fsPaused || speechFatalError || micPaused) return;
     if(!speechRecognition) return;
-    if(!speechStarting){
-
-      // ── 40 s mic reset: clear recognition buffers ──
-      recReset();
-
-      // ── 40 s mic reset: clear memoisation caches ──
-      _normCache.clear();
-      _phonCache.clear();
-      _phonLooseCache.clear();
-      _levCache.clear();
-
-      // ── 40 s mic reset: clear stale per-word / session state ──
-      prevWordAudio       = null;
-      lastDirectCommitIdx = -1;
-      lastDirectCommitAt  = 0;
-      lastCommitBatchId   = -1;
-      words.forEach(w => { w.audio = null; });
-
-      try{ speechRecognition.stop(); }catch(e){}
-    }
+    if(!speechStarting){ try{ speechRecognition.stop(); }catch(e){} }
     armSpeechKeepalive();
   }, SPEECH_KEEPALIVE_MS);
 }
@@ -8310,9 +8382,20 @@ function jumpToWordAndListen(idx){
   updateCurrent(); updateHUD(); applyFollowOnlyUI(); applyHideTextUI(); scrollCurrentIntoView(true); scheduleSaveProgress();
   if(wantMic){ pendingJumpTarget = -1; setStatus('Listening', 'listening', contextLabel()); addFeedback('🎯 Jumped — listening from here.', false, true); }
   else { startReciting(); addFeedback('🎯 Jumped — listening from here.', false, true); }
+} 
+
+function scheduleHUD(){
+  if(hudPending) return;
+  hudPending = true;
+  requestAnimationFrame(() => {
+    hudPending = false;
+    updateHUD();
+    if (wordPress.active) return;
+    scrollCurrentIntoView(false);
+    schedulePositionAudioOverlay();
+  });
 }
 
-function scheduleHUD(){ if(hudPending) return; hudPending = true; requestAnimationFrame(() => { hudPending = false; updateHUD(); }); }
 function updateCurrent(){
   if(lastCurrentEl) lastCurrentEl.classList.remove('current');
   if(viewerOpen && viewerMode === 'audio'){ lastCurrentEl = null; return; }
@@ -8325,8 +8408,9 @@ function updateCurrent(){
   const el=words[ptr].el;
   el.classList.add('current');
   lastCurrentEl = el;
-  scheduleAutoScroll();
+  // Scrolling is folded into scheduleHUD's single rAF to avoid double repaint.
 }
+
 function jumpToCurrent(){
   const el = words[ptr] && words[ptr].el; if(!el) return;
   el.classList.add('pressing'); setTimeout(() => el.classList.remove('pressing'), 450);
@@ -8900,9 +8984,12 @@ async function startReciting(){
   requestWakeLock(); resetSilenceTimer(true); scheduleSaveProgress();
   try{ bumpStreak(); }catch(_){}
 
+resetSpeechPipeline();
+
   try{
     speechRecognition = createSpeechRecognition();
-    if(!speechRecognition){ addFeedback('⚠️ Could not create speech recognizer.', true); wantMic = false; releaseMicStream(); setMicButton(); return; }
+  if(!speechRecognition){ addFeedback('⚠️ Could not create speech recognizer.', true); wantMic = false; releaseMicStream(); setMicButton(); return; }
+    speechRecognition.maxAlternatives = followOnly ? 3 : 6;
     if(speechStarting){}
     else { try{ speechStarting = true; speechRecognition.start(); }catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') throw e; } }
     recRunning = true; lastResultAt = performance.now(); sessionHadResult = false; micWarningShown = false;
@@ -8920,6 +9007,7 @@ async function startReciting(){
 function stopReciting(silent){
   if(wantMic && !suppressProgressSave) saveProgressNow();
   wantMic=false; micPaused = false;
+resetSpeechPipeline();
   disarmSpeechKeepalive(); pendingJumpTarget = -1;
   lenientSkipVerse = null;
   cancelFollowPinTimer();
