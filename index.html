@@ -54,6 +54,9 @@
     --safe-bottom:env(safe-area-inset-bottom,0px);
     --safe-left:env(safe-area-inset-left,0px);
     --safe-right:env(safe-area-inset-right,0px);
+    --gold: #d4af37; 
+    --gold-light: #f5d76e; 
+    --gold-glow: rgba(212, 175, 55, 0.6); 
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   [hidden]{display:none !important}
@@ -397,29 +400,89 @@ body.light-mode .progress-menu{background:linear-gradient(180deg,#ffffff,#eef2f8
 .coach-bar{
 display:flex;align-items:center;gap:14px;width:100%;
 padding:16px 18px;height:auto;
-background:linear-gradient(135deg, #2a5ccc 0%, #4f8cff 60%, #6fa3ff 100%);
-border:none;border-radius:20px;color:#fff;
-box-shadow:0 12px 32px rgba(79,140,255,.36), inset 0 1px 0 rgba(255,255,255,.18);
+background:linear-gradient(180deg, var(--gold-light), var(--gold));
+border:1px solid #ffeaa7;
+border-radius:20px;color:#111827;
+box-shadow:0 12px 32px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,.4);
 transition:transform .15s, box-shadow .25s, filter .2s;
 text-align:left;cursor:pointer;position:relative;overflow:hidden;
 font-family:inherit;font-weight:600;-webkit-appearance:none;
 }
 .coach-bar::after{
 content:'';position:absolute;inset:0;pointer-events:none;
-background:radial-gradient(220px 100px at 100% 0%, rgba(255,255,255,.18), transparent 60%);
+background:radial-gradient(220px 100px at 100% 0%, rgba(255,255,255,.4), transparent 60%);
 }
 .coach-bar:active{transform:scale(.985);filter:brightness(1.06)}
 .coach-icon{
-font-size:1.45rem;background:rgba(255,255,255,.20);
-border:1px solid rgba(255,255,255,.30);
+font-size:1.45rem;background:rgba(0,0,0,.08);
+border:1px solid rgba(0,0,0,.12);
 width:52px;height:52px;border-radius:15px;
 display:inline-flex;align-items:center;justify-content:center;
 flex-shrink:0;position:relative;
 }
 .coach-text{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;position:relative}
-.coach-text strong{font-size:1.05rem;font-weight:800;letter-spacing:.005em}
-.coach-text small{font-size:.74rem;opacity:.9;font-weight:600}
-.coach-chev{font-size:1.6rem;opacity:.8;font-weight:300;position:relative}
+.coach-text strong{font-size:1.05rem;font-weight:800;letter-spacing:.005em;color:#111827;}
+.coach-text small{font-size:.74rem;opacity:.9;font-weight:600;color:#333;}
+.coach-chev{font-size:1.6rem;opacity:.8;font-weight:300;position:relative;color:#111827;}
+
+.recite-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px 0;
+  width: 100%;
+}
+.gold-control-main {
+  flex: 1;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  color: #111827;
+  border: 1px solid #ffeaa7;
+  box-shadow: 0 0 20px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,.4);
+  font-weight: 800;
+  font-size: .95rem;
+  height: 54px;
+  border-radius: 999px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .12s, filter .12s;
+}
+.gold-control-main:active {
+  transform: scale(0.97);
+  filter: brightness(1.05);
+}
+.gold-control-main.on {
+  animation: pulseGold 1.5s infinite;
+}
+.gold-control-small {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  color: #111827;
+  border: 1px solid #ffeaa7;
+  box-shadow: 0 0 15px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,.4);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform .12s, filter .12s;
+}
+.gold-control-small:active {
+  transform: scale(0.92);
+  filter: brightness(1.05);
+}
+@keyframes pulseGold {
+  0% { box-shadow: 0 0 10px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,.4); }
+  50% { box-shadow: 0 0 25px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,.4); }
+  100% { box-shadow: 0 0 10px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,.4); }
+}
+
 .sub-header{display:flex;align-items:center;gap:10px;padding:2px 0 8px;}
 .sub-header h1{flex:1;margin:0;font-size:1.2rem;font-weight:800;letter-spacing:.005em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sub-header .sub-note{font-size:.7rem;color:var(--muted);font-weight:600;letter-spacing:.02em;white-space:nowrap;}
@@ -1779,9 +1842,6 @@ body.light-mode .tj-fs-close{
 .coach-bar{
   border-color: var(--gold) !important;
 }
-.coach-bar{
-  border: 1px solid var(--gold) !important;
-}
 
 .surah-row,
 .reciter-trigger,
@@ -2083,32 +2143,10 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
       <span class="tile-title">Prayer Times</span>
       <span class="tile-sub">Five daily prayers · Qibla direction · Alarms</span>
     </button>
-  </div>
-
-  <div class="streak-bar" id="streakBar" role="button" tabindex="0" aria-label="View your streak and achievements">
-    <span class="streak-fire">🔥</span>
-    <div class="streak-info">
-      <span class="streak-count" id="streakCount">0</span>
-      <span class="streak-label">day streak</span>
-    </div>
-    <div class="streak-badges" id="streakBadges"></div>
-    <span class="streak-best">Best: <b id="streakBest">0</b></span>
-  </div>
-
-  <div class="home-feature-tabs">
-    <button class="feature-tab" id="tileHifz" type="button">
-      <span class="ft-icon">🧠</span>
-      <div class="ft-text">
-        <strong>Hifz Test</strong>
-        <small>Memorize &amp; test</small>
-      </div>
-    </button>
-    <button class="feature-tab" id="tileTajweed" type="button">
-      <span class="ft-icon">🎨</span>
-      <div class="ft-text">
-        <strong>Tajweed Colors</strong>
-        <small>Authoritative · any surah</small>
-      </div>
+    <button class="tile" id="tileDashboard" type="button">
+      <span class="tile-icon">📊</span>
+      <span class="tile-title">Dashboard</span>
+      <span class="tile-sub">Stats, Progress &amp; Tools</span>
     </button>
   </div>
 
@@ -2120,6 +2158,33 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     </span>
     <span class="coach-chev">›</span>
   </button>
+
+  <section class="islamic-dates" id="islamicDates" aria-label="Important Islamic dates">
+    <div class="islamic-dates-header">
+      <span class="ico">🕌</span>
+      <span>Important Islamic Dates</span>
+    </div>
+    <ul class="islamic-dates-list" id="islamicDatesList"></ul>
+  </section>
+
+</div>
+
+<div class="app screen" id="screenDashboard" hidden>
+  <div class="sub-header">
+    <button id="backFromDashboard" class="back-pill" type="button">Back</button>
+    <h1>Dashboard</h1>
+    <span class="sub-note">Overview</span>
+  </div>
+  
+  <div class="streak-bar" id="streakBar" role="button" tabindex="0" aria-label="View your streak and achievements">
+    <span class="streak-fire">🔥</span>
+    <div class="streak-info">
+      <span class="streak-count" id="streakCount">0</span>
+      <span class="streak-label">day streak</span>
+    </div>
+    <div class="streak-badges" id="streakBadges"></div>
+    <span class="streak-best">Best: <b id="streakBest">0</b></span>
+  </div>
 
   <div class="progress-section" id="progressSection">
     <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
@@ -2142,15 +2207,24 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     </div>
   </div>
 
-  <section class="islamic-dates" id="islamicDates" aria-label="Important Islamic dates">
-    <div class="islamic-dates-header">
-      <span class="ico">🕌</span>
-      <span>Important Islamic Dates</span>
-    </div>
-    <ul class="islamic-dates-list" id="islamicDatesList"></ul>
-  </section>
-
+  <div class="home-feature-tabs">
+    <button class="feature-tab" id="tileHifz" type="button">
+      <span class="ft-icon">🧠</span>
+      <div class="ft-text">
+        <strong>Hifz Test</strong>
+        <small>Memorize &amp; test</small>
+      </div>
+    </button>
+    <button class="feature-tab" id="tileTajweed" type="button">
+      <span class="ft-icon">🎨</span>
+      <div class="ft-text">
+        <strong>Tajweed Colors</strong>
+        <small>Authoritative · any surah</small>
+      </div>
+    </button>
+  </div>
 </div>
+
 <div class="app screen" id="screenSurahIndex" hidden>
   <div class="sub-header">
     <button id="backFromIndex" class="back-pill" type="button" aria-label="Back to home">Back</button>
@@ -2260,26 +2334,23 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     <span class="label" id="statusLabel">Loading…</span>
     <span class="hint" id="statusHint"></span>
   </div>
-
-  <!-- 2. PROGRESS / MISTAKES / ACCURACY moved up under the Ready/Listening bar -->
-  <section class="hud">
-    <div class="stat"><span id="statProgress">0%</span><small>Progress</small></div>
-    <div class="stat"><span id="statErrors">—</span><small>Mistakes</small></div>
-    <div class="stat"><span id="statAcc">—</span><small>Accuracy</small></div>
-  </section>
-
-  <!-- 3. Arabic script removed. Arrows removed. Stop/Restart text-only beside the picker. -->
   <section class="panel hide-immersive">
     <div class="row" id="surahNavRow" hidden>
+      <button id="btnPrevSurah" class="ghost icon" aria-label="Next surah">◀</button>
       <div class="surah-info">
         <span class="surah-en" id="surahEn">—</span>
+        <span class="surah-ar" id="surahAr">—</span>
         <span class="surah-count" id="surahCount"></span>
       </div>
-      <button id="btnSurah" class="ghost" style="padding:0 10px;font-size:.82rem">📖 Surah</button>
-      <button id="btnStop"  class="ghost" style="padding:0 10px;font-size:.78rem">Stop</button>
-      <button id="btnReset" class="ghost" style="padding:0 10px;font-size:.78rem">Restart</button>
+      <button id="btnNextSurah" class="ghost icon" aria-label="Previous surah">▶</button>
+      <button id="btnSurah" class="ghost" style="padding:0 12px">📖 Surah</button>
     </div>
   </section>
+  <div class="recite-controls">
+    <button id="btnStop" class="gold-control-small" aria-label="Stop">⏹</button>
+    <button id="btnMic" class="gold-control-main">Start Reciting 🎤</button>
+    <button id="btnReset" class="gold-control-small" aria-label="Restart">↺</button>
+  </div>
   <div class="toggles hide-immersive">
     <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">👂 Follow</button>
     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">🎵 Tajweed</button>
@@ -2293,6 +2364,11 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     </label>
   </div>
   <div class="barwrap"><div class="bar" id="bar"></div></div>
+  <section class="hud">
+    <div class="stat"><span id="statProgress">0%</span><small>Progress</small></div>
+    <div class="stat"><span id="statErrors">—</span><small>Mistakes</small></div>
+    <div class="stat"><span id="statAcc">—</span><small>Accuracy</small></div>
+  </section>
   <section class="mistakes-panel hide-immersive" id="mistakesPanel" hidden>
     <div class="mistakes-header">
       <span>📋 Mistakes</span>
@@ -2301,12 +2377,10 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     </div>
     <ol class="mistakes-list" id="mistakesList"></ol>
   </section>
-  <div class="btn-row"><button id="btnMic" class="primary">🎤 Start reciting</button></div>
   <section class="mushaf" id="pageEl" aria-label="Quran text">
     <div class="mushaf-inner"><div class="loading">Loading…</div></div>
   </section>
   <div class="legend hide-immersive">
-    <span><i style="background:#4f8cff"></i>current</span>
     <span><i style="background:#2fd07a"></i>correct</span>
     <span><i style="background:#ff5a6a"></i>misread</span>
     <span>· Scrolls automatically as you recite</span>
@@ -2495,8 +2569,11 @@ const micButton      = document.getElementById('btnMic');
 const stopButton     = document.getElementById('btnStop');
 const resetButton    = document.getElementById('btnReset');
 const surahButton    = document.getElementById('btnSurah');
+const prevSurahBtn   = document.getElementById('btnPrevSurah');
+const nextSurahBtn   = document.getElementById('btnNextSurah');
 const surahNavRow    = document.getElementById('surahNavRow');
 const surahEnEl      = document.getElementById('surahEn');
+const surahArEl      = document.getElementById('surahAr');
 const surahCountEl   = document.getElementById('surahCount');
 const fullscreenBtn  = document.getElementById('btnFullscreen');
 const themeBtn       = document.getElementById('btnTheme');
@@ -2533,6 +2610,7 @@ const screenCoach        = document.getElementById('screenCoach');
 const screenPrayer       = document.getElementById('screenPrayer');
 const screenHifz         = document.getElementById('screenHifz');
 const screenTajweed      = document.getElementById('screenTajweed');
+const screenDashboard    = document.getElementById('screenDashboard');
 
 const homeThemeBtn   = document.getElementById('homeThemeBtn');
 const homeMenuWrap   = document.getElementById('homeMenuWrap');
@@ -2555,11 +2633,13 @@ const tileSurahIndex = document.getElementById('tileSurahIndex');
 const tileJuzIndex   = document.getElementById('tileJuzIndex');
 const tilePlayAudio  = document.getElementById('tilePlayAudio');
 const tileBookmarks  = document.getElementById('tileBookmarks');
+const tileDashboard  = document.getElementById('tileDashboard');
 const openCoachBtn   = document.getElementById('openCoachBtn');
 const backFromIndex  = document.getElementById('backFromIndex');
 const backFromJuz    = document.getElementById('backFromJuz');
 const backFromBookmarks = document.getElementById('backFromBookmarks');
 const backFromAudio  = document.getElementById('backFromAudio');
+const backFromDashboard = document.getElementById('backFromDashboard');
 const btnBackHome    = document.getElementById('btnBackHome');
 const hijriEn        = document.getElementById('hijriEn');
 const hijriAr        = document.getElementById('hijriAr');
@@ -3699,7 +3779,7 @@ function recReset(){
 /* ── Screen router ────────────────────────────────────────── */
 function showScreen(name){
   currentScreenName = name;
-  const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed };
+  const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed, dashboard: screenDashboard };
   Object.entries(map).forEach(([k, el]) => { if(!el) return; el.hidden = (k !== name); });
   if(name !== 'coach' && readerFullscreen) exitReaderFullscreen();
   if(name === 'home') refreshProgressMenu();
@@ -6025,8 +6105,10 @@ function applyFollowOnlyUI(){
 function applyModeUI(){
   document.body.classList.add('surah-mode');
   surahNavRow.hidden = false;
-  if(surahMeta){ surahEnEl.textContent = surahMeta.englishName; surahCountEl.textContent = surahMeta.numberOfAyahs + ' ayahs'; }
-  else { surahEnEl.textContent = 'Surah ' + surahNum; surahCountEl.textContent = ''; }
+  if(surahMeta){ surahEnEl.textContent = surahMeta.englishName; surahArEl.textContent = surahMeta.name; surahCountEl.textContent = surahMeta.numberOfAyahs + ' ayahs'; }
+  else { surahEnEl.textContent = 'Surah ' + surahNum; surahArEl.textContent = ''; surahCountEl.textContent = ''; }
+  prevSurahBtn.disabled = (surahNum >= 114);
+  nextSurahBtn.disabled = (surahNum <= 1);
 }
 
 /* ── Load surah / render words ──────────────────────────── */
@@ -6409,7 +6491,7 @@ function installWordDelegates(){
 
 /* ── Mic button / recite / stop / finish ───────────────── */
 function setMicButton(){
-  micButton.textContent = wantMic ? '⏹ Stop reciting' : '🎤 Start reciting';
+  micButton.innerHTML = wantMic ? '⏹ Stop' : 'Start Reciting 🎤';
   micButton.classList.toggle('on',wantMic);
   syncFsButtons();
 }
@@ -8819,11 +8901,13 @@ tilePlayAudio.addEventListener('click', () => {
   renderAudioSurahList();
 });
 tileBookmarks.addEventListener('click', () => { showScreen('bookmarks'); renderBookmarksScreen(); });
+if(tileDashboard) tileDashboard.addEventListener('click', () => { showScreen('dashboard'); });
 openCoachBtn.addEventListener('click', () => openCoachScreen());
 backFromIndex.addEventListener('click', () => showScreen('home'));
 backFromJuz.addEventListener('click', () => showScreen('home'));
 backFromBookmarks.addEventListener('click', () => showScreen('home'));
 backFromAudio.addEventListener('click', () => showScreen('home'));
+if(backFromDashboard) backFromDashboard.addEventListener('click', () => showScreen('home'));
 btnBackHome.addEventListener('click', () => { if(readerFullscreen) exitReaderFullscreen(); stopEverything(true); releaseMicStream(); showScreen('home'); });
 
 /* ── Home menu wiring + modals ─────────────────────────── */
@@ -8927,7 +9011,7 @@ function openCopyrightModal(){
   const startBtn = document.getElementById('hifzStartBtn');
   const stopBtn  = document.getElementById('hifzStopBtn');
   const finishBtn = document.getElementById('hifzFinishBtn');
-  if(back) back.addEventListener('click', () => { stopHifzTest(true); showScreen('home'); });
+  if(back) back.addEventListener('click', () => { stopHifzTest(true); showScreen('dashboard'); });
   if(sel)  sel.addEventListener('change', refreshHifzAyahMax);
   if(fromEl) fromEl.addEventListener('change', refreshHifzAyahMax);
   if(toEl)   toEl.addEventListener('change', refreshHifzAyahMax);
@@ -8942,35 +9026,21 @@ function openCopyrightModal(){
   const sel   = document.getElementById('tajweedSurahSelect');
   const fsBtn = document.getElementById('tajweedFullscreenBtn');
   const chips = document.querySelectorAll('.tj-chip');
-  if(back) back.addEventListener('click', () => { if(document.body.classList.contains('tj-fs-open')) toggleTajweedFullscreen(); showScreen('home'); });
+  if(back) back.addEventListener('click', () => { if(document.body.classList.contains('tj-fs-open')) toggleTajweedFullscreen(); showScreen('dashboard'); });
   if(fsBtn) fsBtn.addEventListener('click', toggleTajweedFullscreen);
   if(sel) sel.addEventListener('change', () => { const n = parseInt(sel.value, 10); if(Number.isFinite(n) && n >= 1 && n <= 114) loadTajweedSurah(n); });
   chips.forEach(chip => { chip.addEventListener('click', () => toggleTajweedRule(chip.dataset.rule, chip)); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && document.body.classList.contains('tj-fs-open')){ toggleTajweedFullscreen(); } });
 })();
-/* ══════ FIX 4 — Rules-ready chip now repopulates on tap ══════ */
 (function wireTajweedStatusChip(){
   const chip = document.getElementById('tajweedStatusChip');
   if(!chip) return;
   chip.addEventListener('click', (e) => {
     e.stopPropagation();
     if(followOnly) return;
-    if(coachTajweedDegraded){
-      /* Wipe the cache for this surah so we don't re-apply stale / bad data. */
-      showToast('🔄 Retrying Tajweed rule annotations…', 3000);
-      coachTajweedCache.delete(surahNum);
-      coachTajweedDegraded = false;
-      coachTajweedReady = false;
-      applyTajweedColorsToCoach();
-    }
-    else if(coachTajweedReady){
-      /* Re-run apply: repopulates from cache, overwrites every word span. */
-      showToast('🔄 Re-loading Tajweed rules…', 2000);
-      applyTajweedColorsToCoach();
-    }
-    else {
-      showToast('⏳ Fetching Tajweed annotations from Quran.com…', 3000);
-    }
+    if(coachTajweedDegraded){ showToast('⚠️ Tajweed annotations could not be fully aligned — some rule checks may be disabled. Check your connection, then switch surah or reload.', 5000); }
+    else if(coachTajweedReady){ showToast('✓ Tajweed rules active: madd length, ghunnah length & letters, qalqalah, silent letters.', 4200); }
+    else { showToast('⏳ Fetching Tajweed annotations from Quran.com…', 3000); }
   });
 })();
 function urlBase64ToUint8Array(base64String){
@@ -9011,8 +9081,8 @@ resetButton.addEventListener('click',()=>{
   fsPaused=false; syncFsButtons();
   feedbackEl.innerHTML='<div class="line">Restarted.</div>';
 });
-/* NOTE: "Current" tab (jumpButton) removed entirely. Prev/Next arrows removed.
-   Keyboard ← → still navigates via flipNav() in the keydown handler. */
+prevSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum<114) flipSurah(1); });
+nextSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum>1) flipSurah(-1); });
 surahButton.addEventListener('click',openSurahPicker);
 
 /* ── Surah picker (modal) ─────────────────────────────── */
@@ -9072,7 +9142,7 @@ function openCoachInfoModal(){
       '<li><b>Tajweed</b> is designed to highlight every mispronunciation.</li>' +
       '<li>On a mispronounced word the coach <b>beeps</b> and <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
       '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> — Haraka-based bounds: Tabee\'i [1.7–2.3], Wajib/Ja\'iz [3.6–5.4], Lazim [5.5–6.5] × Haraka.<br>• <b>Ghunnah</b> — nasal formant band 250–600 Hz verified in both transcript and spectrum.<br>• <b>Qalqalah</b> — plosive-burst detector catches missing bounce.<br>• <b>Laam Shamsiyyah</b> — onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> — glottal re-attack detection.<br>• <b>Idghaam (no ghunnah)</b> — nasalisation-overrun check.<br>• <b>Emphatic letters</b> (ص→س, ط→ت…) surfaced as warnings on every commit path.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped form.</li>' +
-      '<li><b>Rule-ready chip:</b> shows whether rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules unavailable</b>. Tap the chip to repopulate (or retry if degraded).</li>' +
+      '<li><b>Rule-ready chip:</b> shows whether rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules unavailable</b>.</li>' +
     '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">4</span> 🙈 Hide text &amp; Reveal text</h3><ul>' +
       '<li><b>Hide text</b> (available in Follow mode) hides the whole mushaf so you can recite from memory. Words become visible as you recite them.</li>' +
