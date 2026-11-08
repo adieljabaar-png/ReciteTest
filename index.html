@@ -2814,21 +2814,25 @@ const MUQATTAAT_BY_SURAH = {
   68: [['ن', ['ن']]]
 };
 
+/* ═══════════════════════════════════════════════════════════════════
+   MUQATTAAT LETTER NAMES (lenient — expanded with ASR variants so
+   the pointer reliably sticks to these disconnected-letter words)
+   ═══════════════════════════════════════════════════════════════════ */
 const LETTER_NAMES = {
-  'ا': ['الف', 'ألف', 'اليف'],
-  'ل': ['لام', 'لم'],
-  'م': ['ميم', 'مم'],
-  'ص': ['صاد', 'صا'],
-  'ر': ['راء', 'را'],
-  'ك': ['كاف', 'كا'],
-  'ه': ['هاء', 'ها', 'حاء', 'حا'],
-  'ح': ['حاء', 'حا', 'هاء', 'ها'],
-  'ي': ['ياء', 'يا'],
-  'ع': ['عين'],
-  'ط': ['طاء', 'طا'],
-  'س': ['سين'],
-  'ق': ['قاف', 'قا', 'كاف', 'كا'],
-  'ن': ['نون']
+  'ا': ['الف', 'ألف', 'اليف', 'أليف', 'الفا', 'ألفا', 'الفي'],
+  'ل': ['لام', 'لم', 'لامو', 'لامي'],
+  'م': ['ميم', 'مم', 'ميمو', 'ميمي'],
+  'ص': ['صاد', 'صا', 'صادي', 'صادو'],
+  'ر': ['راء', 'را', 'راي', 'راءو'],
+  'ك': ['كاف', 'كا', 'كافي', 'كافو'],
+  'ه': ['هاء', 'ها', 'حاء', 'حا', 'هاي', 'هاءو'],
+  'ح': ['حاء', 'حا', 'هاء', 'ها', 'حاي', 'حاءو'],
+  'ي': ['ياء', 'يا', 'يائي', 'ياءو'],
+  'ع': ['عين', 'عيني', 'عينو'],
+  'ط': ['طاء', 'طا', 'طائي', 'طاءو'],
+  'س': ['سين', 'سيني', 'سينو'],
+  'ق': ['قاف', 'قا', 'كاف', 'كا', 'قافي', 'قافو'],
+  'ن': ['نون', 'نوني', 'نونو']
 };
 
 /* ── User-agent / platform detection ──────────────────────── */
@@ -3253,6 +3257,34 @@ function detectMuqattaat(surahId, ayahNum, nrm){
   return entry[1].slice();
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   NEW HELPER — isSingleLetterName(heard, letters)
+   Returns true when the heard token equals (after normalization) any
+   single letter name belonging to the given letters array. Used to
+   block premature whole-word completion on Muqattaat words such as
+   الم where the first letter-name (الف) shares a phon with الم.
+   ═══════════════════════════════════════════════════════════════════ */
+function isSingleLetterName(heard, letters){
+  if(!heard || !letters || !letters.length) return false;
+  for(let i = 0; i < letters.length; i++){
+    const names = LETTER_NAMES[letters[i]] || [];
+    for(let j = 0; j < names.length; j++){
+      if(heard === normArCached(names[j])) return true;
+    }
+  }
+  return false;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MUQATTAAT PROGRESS — Rewritten (Fix A + Fix B)
+   ─ Fix A: guard the whole-word phon path so a single letter-name
+     (الف, لام, ميم …) never completes the whole Muqattaat word.
+   ─ Fix B: per-letter matching is now much more lenient.
+     * names ≥ 3 chars accept |Δlen| ≤ 3 and lev ≤ 2
+     * names ≤ 2 chars keep the tight |Δlen| ≤ 2 / lev ≤ 1 gate
+     * phon fallback (hPhon and hPhonLoose) mirrors the same tolerances
+     * concatenation fallback runs span from remaining … down to 1
+   ═══════════════════════════════════════════════════════════════════ */
 function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
   if(!w || !w.isMuqattaat) return 'no-match';
   if(!heard) return 'no-match';
@@ -3263,35 +3295,49 @@ function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
   /* 1. Exact whole-word */
   if(heard === w.norm) return 'complete';
 
-  /* 2. Lenient whole-word phon match — strict length-ratio guard */
+  /* 2. Lenient whole-word phon match — but never when the heard token is
+        itself a single letter name of any letter in this word, otherwise
+        e.g. 'الف' would prematurely complete 'الم'. */
   if(heard.length >= 2 && w.phon && hPhon &&
-     w.phon.length >= 2 && hPhon.length >= 2){
+     w.phon.length >= 2 && hPhon.length >= 2 &&
+     !isSingleLetterName(heard, letters)){
     const ratio = Math.min(hPhon.length, w.phon.length) / Math.max(hPhon.length, w.phon.length);
     if(ratio >= 0.75 && lev(hPhon, w.phon) <= 1) return 'complete';
   }
 
-  /* 3. Per-letter match at cursor */
+  /* 3. Per-letter match at cursor — lenient */
   const target = letters[cursor];
   const names  = LETTER_NAMES[target] || [];
   for(let i = 0; i < names.length; i++){
     const name = names[i];
     const nn   = normArCached(name);
     if(!nn || nn.length < 2) continue;
-    if(heard === nn){ w.muqattaatCursor = cursor + 1; return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial'; }
-    if(heard.length >= 2 && Math.abs(heard.length - nn.length) <= 2 && lev(heard, nn) <= 1){
+    const lenDiff = Math.abs(heard.length - nn.length);
+    const tol     = (nn.length >= 3) ? 2 : 1;
+    const lenTol  = (nn.length >= 3) ? 3 : 2;
+    if(heard === nn){
+      w.muqattaatCursor = cursor + 1;
+      return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial';
+    }
+    if(lenDiff <= lenTol && lev(heard, nn) <= tol){
       w.muqattaatCursor = cursor + 1;
       return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial';
     }
     const namePhon = phonArCached(name);
     if(hPhon && namePhon && hPhon.length >= 2 && namePhon.length >= 2 &&
-       Math.abs(hPhon.length - namePhon.length) <= 2 && lev(hPhon, namePhon) <= 1){
+       Math.abs(hPhon.length - namePhon.length) <= lenTol && lev(hPhon, namePhon) <= tol){
+      w.muqattaatCursor = cursor + 1;
+      return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial';
+    }
+    if(hPhonLoose && namePhon && hPhonLoose.length >= 2 && namePhon.length >= 2 &&
+       Math.abs(hPhonLoose.length - namePhon.length) <= lenTol && lev(hPhonLoose, namePhon) <= tol){
       w.muqattaatCursor = cursor + 1;
       return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial';
     }
   }
 
-  /* 4. Concatenation fallback — multiple letters in one token */
-  for(let span = letters.length - cursor; span >= 2; span--){
+  /* 4. Concatenation fallback — span from remaining down to 1 */
+  for(let span = letters.length - cursor; span >= 1; span--){
     let concat = '';
     let concatPhon = '';
     let valid = true;
@@ -3303,7 +3349,10 @@ function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
     }
     if(!valid || !concat) continue;
     if(heard.length >= 2){
-      if(heard === concat){ w.muqattaatCursor = cursor + span; return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial'; }
+      if(heard === concat){
+        w.muqattaatCursor = cursor + span;
+        return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial';
+      }
       if(Math.abs(heard.length - concat.length) <= 2 && lev(heard, concat) <= 1){
         w.muqattaatCursor = cursor + span;
         return (w.muqattaatCursor >= letters.length) ? 'complete' : 'partial';
@@ -5606,6 +5655,9 @@ function gradeFollowFast(tokens, startIdx){
         pendingHeard.length = 0;
         used++; continue;
       }
+      /* Fix C — bounded stuck escape: non-complete counts as a wrong
+         token so the existing 3-token / 10 s pin-and-stop timer applies. */
+      noteFollowWrongToken();
       used++; continue;   /* partial or no-match → stay on word, no error */
     }
 
@@ -5710,12 +5762,13 @@ async function gradeFull(tokens, startIdx){
       if(!heard){ used++; continue; }
       if(ptr >= words.length){ used++; continue; }
       const hPhon = phonArCached(rawTok);
+      const hPhonLoose = phonLooseArCached(rawTok);
 
       /* ── Muqatta'at: letter-wise progress, no flagging ── */
       {
         const mqW = words[ptr];
         if (mqW && mqW.isMuqattaat) {
-          const mr = tryMuqattaatProgress(heard, hPhon, null, mqW);
+          const mr = tryMuqattaatProgress(heard, hPhon, hPhonLoose, mqW);
           if (mr === 'complete') {
             const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
             commitCorrect(ptr, seg);
@@ -5723,7 +5776,15 @@ async function gradeFull(tokens, startIdx){
             advancePast(1);
             pendingHeard.length = 0; consecutiveReds = 0;
             noteFollowProgress();
+            mqW._muqStuckCount = 0;
             used++; continue;
+          }
+          /* Fix C — soft warning after 6 consecutive non-completes on the
+             same Muqattaat word (Tajweed has no pin timer; this is a hint). */
+          mqW._muqStuckCount = (mqW._muqStuckCount || 0) + 1;
+          if (mqW._muqStuckCount === 6) {
+            const names = (mqW.muqattaatLetters || []).map(l => (LETTER_NAMES[l] || [l])[0]).join(' · ');
+            addFeedback('⚠️ Muqattaat not recognised — try the letter names one by one: ' + escapeHtml(names), false, true);
           }
           used++; continue;
         }
@@ -6368,7 +6429,7 @@ function renderVerses(ayahs, translations){
     span.dataset.idx = String(myIndex);
     parent.appendChild(span);
     const nrm = normArCached(tok);
-    const w = { raw: tok, norm: nrm, phon: phonArCached(tok), phonLoose: phonLooseArCached(tok), len: nrm.length, el: span, surah: surahId, ayah: ayahNum, verse: surahId + ':' + ayahNum, tjRules: null, normNoSilent: null };
+    const w = { raw: tok, norm: nrm, phon: phonArCached(tok), phonLoose: phonLooseArCached(tok), len: nrm.length, el: span, surah: surahId, ayah: ayahNum, verse: surahId + ':' + ayahNum, tjRules: null, normNoSilent: null, _muqStuckCount: 0 };
     const muq = detectMuqattaat(surahId, ayahNum, nrm);
     if(muq){ w.isMuqattaat = true; w.muqattaatLetters = muq; w.muqattaatCursor = 0; }
     words.push(w);
@@ -6594,7 +6655,7 @@ function resetProgress(fullReset){
     resetPaceSamples();
   }
   lastCurrentEl = null; longPressTriggered = false; hudPending = false;
-  words.forEach(w=>{ w.el.className='w'; w.audio = null; w._tajweedErrs = null; w.muqattaatCursor = 0; });
+  words.forEach(w=>{ w.el.className='w'; w.audio = null; w._tajweedErrs = null; w.muqattaatCursor = 0; w._muqStuckCount = 0; });
   pageEl.querySelectorAll('.ayah').forEach(a=>a.classList.remove('done','playing'));
   document.body.classList.remove('listen-mode');
   updateCurrent(); updateHUD(); applyFollowOnlyUI(); applyHideTextUI();
@@ -6607,7 +6668,7 @@ function jumpToWordAndListen(idx){
   errors = 0; mistakes = []; mistakeCounter = 0; completedVerses = new Set(); recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
-  words.forEach(w => { w.el.classList.remove('correct','error','skipped','corrected','model','current','located','warned'); w.muqattaatCursor = 0; });
+  words.forEach(w => { w.el.classList.remove('correct','error','skipped','corrected','model','current','located','warned'); w.muqattaatCursor = 0; w._muqStuckCount = 0; });
   pageEl.querySelectorAll('.ayah').forEach(a => a.classList.remove('done','playing'));
   mistakesList.innerHTML = ''; mistakesPanel.hidden = true; mistakeCountBadge.textContent = '0';
   resetPace();
