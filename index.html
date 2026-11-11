@@ -1028,8 +1028,7 @@ body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{background:rgba(12
 .toggle.hide-text.active{border-color:rgba(255,176,32,.7);background:rgba(255,176,32,.12);color:#fff;}
 body.light-mode .toggle.hide-text.active{background:rgba(198,138,0,.12);border-color:rgba(198,138,0,.6);color:#7a5500;}
 .toggle.disabled{opacity:.4;pointer-events:none}
-.toggles{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
-.toggles::-webkit-scrollbar{display:none}
+.toggles{display:flex;gap:7px;flex-wrap:wrap;padding-bottom:3px}
 
 .barwrap{height:5px;background:#0b101b;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,#4f8cff,#2fd07a);transition:width .3s}
@@ -1957,20 +1956,6 @@ body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{
 .w[title]:active { filter: brightness(1.25); }
 body.light-mode .w[title]:active { filter: brightness(0.85); }
 
-#tajweedNoiseChip {
-  color: var(--warn);
-  border-color: rgba(255,176,32,.6);
-  background: rgba(255,176,32,.1);
-  cursor: default;
-  user-select: none;
-  pointer-events: none;
-}
-body.light-mode #tajweedNoiseChip {
-  color: #7a5500;
-  border-color: rgba(198,138,0,.6);
-  background: rgba(198,138,0,.1);
-}
-
 #tajweedStatusChip{
   cursor: pointer;
   user-select: none;
@@ -2059,6 +2044,348 @@ html.ai-blocked #aiBlockOverlay code { background: rgba(255,255,255,.06); paddin
   text-underline-offset: 2px;
 }
 body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
+
+/* ── Size upgrade: larger tab text + icons across all screens ── */
+.home-menu-item                       { font-size: .95rem; }
+.home-menu-item .hmi-ico              { width: 38px; height: 38px; font-size: 1.1rem; }
+.home-menu-item.has-sub .hmi-ico      { width: 40px; height: 40px; font-size: 1.15rem; }
+.home-menu-item .hmi-text strong      { font-size: .95rem; }
+.home-menu-item .hmi-text small       { font-size: .72rem; }
+
+.tile-title                           { font-size: 1rem !important; }
+.tile-sub                             { font-size: .72rem !important; }
+.tile-icon                            { width: 46px !important; height: 46px !important; font-size: 1.55rem !important; }
+
+.ft-icon                              { width: 48px; height: 48px; font-size: 1.6rem; }
+.ft-text strong                       { font-size: .92rem; }
+.ft-text small                        { font-size: .7rem; }
+
+.pt-icon                              { width: 52px; height: 52px; font-size: 1.4rem; }
+.pt-text strong                       { font-size: 1.05rem; }
+.pt-text small                        { font-size: .78rem; }
+
+.pi-icon                              { width: 42px; height: 42px; font-size: 1.15rem; }
+.pi-text strong                       { font-size: .94rem; }
+.pi-text small                        { font-size: .72rem; }
+
+.back-pill                            { height: 40px; min-height: 40px; font-size: .84rem; }
+
+.rt-icon                              { width: 44px; height: 44px; font-size: 1.2rem; }
+.rt-label                             { font-size: .66rem; }
+.rt-value                             { font-size: .96rem; }
+.reciter-item                         { min-height: 50px; font-size: .92rem; }
+.reciter-item .ri-num                 { font-size: .76rem; }
+
+.surah-row .num                       { width: 44px; height: 44px; font-size: .84rem; }
+.surah-row .en                        { font-size: 1rem; }
+.surah-row .sub                       { font-size: .72rem; }
+.surah-row .ar                        { font-size: 1.35rem; }
+.surah-row .playbtn                   { width: 46px; height: 46px; font-size: 1.1rem; }
+.surah-row .dlbtn                     { width: 38px; height: 38px; font-size: .86rem; }
+
+.toggle.mode-pill,
+.toggle.hide-text                     { font-size: .85rem; padding: 11px 14px; min-height: 44px; }
+
+.gold-control-main                    { height: 58px; font-size: 1.02rem; }
+.gold-control-small                   { width: 58px; height: 58px; font-size: 1.3rem; }
+
+.qv-btn                               { width: 48px; height: 48px; font-size: 1.08rem; }
+.qv-play                              { width: 58px; height: 58px; font-size: 1.22rem; }
+.qv-btn.qv-back                       { height: 42px; font-size: .82rem; }
+
+.fs-controls button                   { width: 48px; height: 48px; font-size: 1.12rem; }
+.fs-controls .fs-text-tab             { font-size: .72rem; height: 38px; padding: 0 14px; }
+
+.ps-tab                               { font-size: .8rem; height: 40px; }
+
+.prayer-row .pr-name                  { font-size: 1.05rem; }
+.prayer-row .pr-time                  { font-size: 1.08rem; }
+.pr-bell                              { width: 34px; height: 34px; font-size: .92rem; }
+.prayer-settings-btn                  { width: 48px; height: 48px; font-size: 1.22rem; }
+
+.tj-chip                              { font-size: .74rem; padding: 6px 11px; }
+
+.hifz-mode .hm-icon                   { width: 44px; height: 44px; font-size: 1.55rem; }
+.hifz-mode strong                     { font-size: .92rem; }
+.hifz-mode small                      { font-size: .73rem; }
+
+#homeMenuBtn                          { width: 54px; height: 54px; font-size: 1.8rem; }
+#homeThemeBtn                         { width: 44px; height: 44px; font-size: 1.15rem; }
+
+.hijri-main                           { font-size: 1.22rem; }
+.hijri-sub                            { font-size: .66rem; }
+
+.islamic-dates-list .name             { font-size: .88rem; }
+.islamic-dates-list .hijri            { font-size: .72rem; }
+.islamic-dates-list .greg             { font-size: .78rem; }
+
+.juz-row .juz-num                     { width: 42px; height: 42px; font-size: .84rem; }
+.juz-row .juz-name                    { font-size: .92rem; }
+.juz-row .juz-range                   { font-size: .72rem; }
+
+.bookmark-row .bm-num                 { font-size: .78rem; }
+.bookmark-row .bm-en                  { font-size: .92rem; }
+.bookmark-row .bm-ar                  { font-size: 1.15rem; }
+
+.cal-cell                             { min-height: 48px; }
+.cal-cell .hnum                       { font-size: 1rem; }
+.cal-cell .gnum                       { font-size: .64rem; }
+
+.streak-fire                          { font-size: 1.6rem; }
+.streak-count                         { font-size: 1.22rem; }
+.streak-label                         { font-size: .7rem; }
+
+/* ── Progress tab inside Coach toggles ── */
+.toggles .progress-section {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.toggles .progress-trigger {
+  padding: 9px 11px;
+  min-height: 42px;
+  border-radius: 11px;
+  background: #111827;
+  border: 1px solid var(--line);
+  box-shadow: none;
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  transition: transform .12s, background .2s, border-color .2s, color .2s;
+  border-color: var(--gold) !important;
+}
+.toggles .progress-trigger:hover {
+  background: rgba(79,140,255,.08);
+}
+.toggles .progress-trigger .pt-icon {
+  font-size: 1rem;
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 0;
+}
+.toggles .progress-trigger .pt-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.toggles .progress-trigger .pt-text strong {
+  font-size: .75rem;
+  font-weight: 700;
+  color: inherit;
+}
+.toggles .progress-trigger .pt-chev {
+  font-size: .8rem;
+  margin-left: 2px;
+  transition: transform .2s;
+}
+.toggles .progress-section.open .pt-chev {
+  transform: rotate(180deg);
+}
+.toggles .progress-menu {
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  z-index: 100;
+}
+body.light-mode .toggles .progress-trigger {
+  background: #eef2f8;
+}
+
+/* ── Duah of the Day Card (legacy, unused) ── */
+.daily-duah-card {
+  background: linear-gradient(135deg, rgba(201,162,39,.10), rgba(20,28,46,.72));
+  border: 1px solid var(--gold);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.28);
+  position: relative;
+  overflow: hidden;
+}
+.daily-duah-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(201,162,39,.15), transparent 60%);
+  pointer-events: none;
+}
+.duah-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--gold-light);
+}
+.duah-icon { font-size: 1.1rem; }
+.duah-content { position: relative; z-index: 1; }
+.duah-arabic {
+  font-family: 'Amiri', 'Amiri Quran', serif;
+  font-size: 1.6rem;
+  line-height: 2.2;
+  color: var(--text);
+  text-align: center;
+  margin: 0 0 12px 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,.3);
+}
+.duah-translation {
+  font-size: .85rem;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+  margin: 0 0 10px 0;
+  font-style: italic;
+}
+.duah-reference {
+  font-size: .7rem;
+  color: var(--gold);
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.duah-share-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: .65rem;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 2;
+  transition: background .2s, border-color .2s;
+}
+.duah-share-btn:hover { border-color: var(--gold); background: rgba(201,162,39,.15); }
+body.light-mode .daily-duah-card { background: linear-gradient(135deg, rgba(166,124,0,.1), rgba(255,255,255,.8)); }
+
+/* ── Share Card (Dashboard) ─────────────────────────────── */
+.share-card{
+  background:linear-gradient(135deg, rgba(201,162,39,.12), rgba(20,28,46,.88));
+  border:1px solid var(--gold);
+  border-radius:20px;
+  padding:16px;
+  margin-top:14px;
+  box-shadow:0 8px 22px rgba(0,0,0,.28);
+  position:relative;
+  overflow:hidden;
+}
+.share-card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at top right, rgba(201,162,39,.16), transparent 60%);
+}
+.share-card-inner{position:relative;z-index:1;}
+
+.share-brand-top{
+  display:flex;align-items:center;gap:8px;
+  padding-bottom:10px;margin-bottom:12px;
+  border-bottom:1px solid rgba(201,162,39,.28);
+}
+.share-brand-logo{font-size:1.2rem;line-height:1;}
+.share-brand-name{font-size:1rem;font-weight:800;color:var(--gold-light);letter-spacing:.02em;}
+.share-brand-tag{
+  font-size:.6rem;color:var(--muted);font-weight:800;
+  text-transform:uppercase;letter-spacing:.12em;margin-left:auto;
+}
+
+.share-header{text-align:center;margin-bottom:12px;}
+.share-city{font-size:1.08rem;font-weight:800;color:var(--text);line-height:1.2;}
+.share-dates{font-size:.7rem;color:var(--muted);font-weight:600;margin-top:3px;line-height:1.4;}
+
+.share-prayers{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;
+}
+.share-prayer{
+  text-align:center;padding:7px 2px;border-radius:10px;
+  background:rgba(79,140,255,.08);border:1px solid rgba(79,140,255,.22);
+  transition:background .2s, border-color .2s;
+}
+.share-prayer .sp-name{
+  display:block;font-size:.55rem;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.04em;line-height:1.2;
+}
+.share-prayer .sp-time{
+  display:block;font-size:.74rem;font-weight:800;color:var(--text);
+  margin-top:3px;font-variant-numeric:tabular-nums;line-height:1.2;
+}
+.share-prayer.is-sunrise{
+  background:rgba(255,176,32,.10);border-color:rgba(255,176,32,.35);
+}
+.share-prayer.is-sunrise .sp-name{color:var(--warn);}
+.share-prayer.is-sunrise .sp-time{color:var(--warn);}
+
+.share-divider{
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(201,162,39,.55), transparent);
+  margin:12px 0;position:relative;
+}
+.share-divider::after{
+  content:'';
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(45deg);
+  width:8px;height:8px;background:var(--gold);border-radius:1px;
+}
+
+.share-block{margin:2px 0;}
+.share-block-title{
+  font-size:.66rem;font-weight:800;color:var(--gold-light);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;
+  text-align:center;
+}
+.share-arabic{
+  font-family:'Amiri','Amiri Quran',serif;
+  font-size:1.32rem;line-height:2;color:var(--text);text-align:center;
+  margin:0 0 8px;direction:rtl;
+}
+.share-translation{
+  font-size:.78rem;line-height:1.55;color:var(--muted);text-align:center;
+  margin:0 0 6px;font-style:italic;
+}
+.share-reference{
+  font-size:.62rem;color:var(--gold);font-weight:800;text-align:center;
+  margin:0;text-transform:uppercase;letter-spacing:.06em;
+}
+
+.share-footer{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  flex-wrap:wrap;padding-top:12px;margin-top:12px;
+  border-top:1px solid rgba(201,162,39,.28);
+  font-size:.7rem;color:var(--muted);font-weight:600;text-align:center;
+}
+.share-footer b{color:var(--gold-light);}
+.share-footer a{
+  color:var(--accent);text-decoration:underline;
+  text-decoration-style:dotted;text-underline-offset:2px;word-break:break-all;
+}
+
+.share-actions{
+  display:flex;gap:8px;margin-top:14px;position:relative;z-index:1;
+}
+.share-actions .ps-btn{flex:1;height:46px;font-size:.84rem;}
+
+body.light-mode .share-card{
+  background:linear-gradient(135deg, rgba(166,124,0,.10), rgba(255,255,255,.88));
+}
+body.light-mode .share-prayer{background:rgba(42,111,224,.07);border-color:rgba(42,111,224,.22);}
+body.light-mode .share-prayer .sp-name{color:#5a6884;}
+body.light-mode .share-arabic{color:#1a2233;}
+
+@media (max-width:420px){
+  .share-prayers{grid-template-columns:repeat(3,1fr);}
+  .share-prayer .sp-time{font-size:.78rem;}
+}
 </style>
 </head>
 <body>
@@ -2200,27 +2527,6 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
     <span class="streak-best">Best: <b id="streakBest">0</b></span>
   </div>
 
-  <div class="progress-section" id="progressSection">
-    <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
-      <span class="pt-icon">📊</span>
-      <span class="pt-text">
-        <strong>Progress</strong>
-        <small>Resume a saved session</small>
-      </span>
-      <span class="pt-chev">▾</span>
-    </button>
-    <div class="progress-menu" id="progressMenu" role="menu" hidden>
-      <button class="progress-item" id="progressFollow" type="button" role="menuitem">
-        <span class="pi-icon">👂</span>
-        <span class="pi-text"><strong>Follow</strong><small id="progressFollowSub">No saved session</small></span>
-      </button>
-      <button class="progress-item" id="progressTajweed" type="button" role="menuitem">
-        <span class="pi-icon">🎵</span>
-        <span class="pi-text"><strong>Tajweed</strong><small id="progressTajweedSub">No saved session</small></span>
-      </button>
-    </div>
-  </div>
-
   <div class="home-feature-tabs">
     <button class="feature-tab" id="tileHifz" type="button">
       <span class="ft-icon">🧠</span>
@@ -2237,6 +2543,53 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
       </div>
     </button>
   </div>
+
+  <!-- ── Share Card: prayer times + duah + hadith ── -->
+  <section class="share-card" id="shareCard" aria-label="Daily share card">
+    <div class="share-card-inner">
+
+      <div class="share-brand-top">
+        <span class="share-brand-logo">📖</span>
+        <span class="share-brand-name">Recite</span>
+        <span class="share-brand-tag">Quran Recitation Coach</span>
+      </div>
+
+      <div class="share-header">
+        <div class="share-city" id="shareCityName">—</div>
+        <div class="share-dates" id="shareDates">—</div>
+      </div>
+
+      <div class="share-prayers" id="sharePrayers"></div>
+
+      <div class="share-divider" role="separator"></div>
+
+      <div class="share-block">
+        <div class="share-block-title">🤲 Duah of the Day</div>
+        <p class="share-arabic" id="shareDuahArabic" dir="rtl"></p>
+        <p class="share-translation" id="shareDuahTranslation"></p>
+        <p class="share-reference" id="shareDuahRef"></p>
+      </div>
+
+      <div class="share-divider" role="separator"></div>
+
+      <div class="share-block">
+        <div class="share-block-title">📜 Hadith of the Day</div>
+        <p class="share-arabic" id="shareHadithArabic" dir="rtl"></p>
+        <p class="share-translation" id="shareHadithTranslation"></p>
+        <p class="share-reference" id="shareHadithRef"></p>
+      </div>
+
+      <div class="share-footer">
+        <span>from <b>Recite</b>,</span>
+        <a href="https://recite-hazel.vercel.app/" target="_blank" rel="noopener">https://recite-hazel.vercel.app/</a>
+      </div>
+    </div>
+
+    <div class="share-actions">
+      <button class="ps-btn primary" id="shareCardShareBtn" type="button">🖼️ Share image</button>
+      <button class="ps-btn primary" id="shareCardTextBtn" type="button">📝 Share text</button>
+    </div>
+  </section>
 </div>
 
 <div class="app screen" id="screenSurahIndex" hidden>
@@ -2367,15 +2720,36 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
   </section>
   <div class="barwrap"><div class="bar" id="bar"></div></div>
   <div class="toggles hide-immersive">
-    <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">👂 Follow</button>
-    <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">🎵 Tajweed</button>
+    <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
+    <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">Tajweed</button>
+    
+    <!-- MOVED PROGRESS TAB -->
+    <div class="progress-section" id="progressSection">
+     
+    <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
+  <span class="pt-text">
+    <strong>Progress</strong>
+    <small style="display:none;">Resume</small>
+  </span>
+  <span class="pt-chev">▾</span>
+</button>
+      <div class="progress-menu" id="progressMenu" role="menu" hidden>
+        <button class="progress-item" id="progressFollow" type="button" role="menuitem">
+          <span class="pi-icon">👂</span>
+          <span class="pi-text"><strong>Follow</strong><small id="progressFollowSub">No saved session</small></span>
+        </button>
+        <button class="progress-item" id="progressTajweed" type="button" role="menuitem">
+          <span class="pi-icon">🎵</span>
+          <span class="pi-text"><strong>Tajweed</strong><small id="progressTajweedSub">No saved session</small></span>
+        </button>
+      </div>
+    </div>
+
     <span class="toggle" id="tajweedStatusChip" hidden
           role="status" aria-live="polite" aria-atomic="true"></span>
-    <span class="toggle" id="tajweedNoiseChip" hidden>
-      ⚠️ Background noise may affect Tajweed accuracy
-    </span>
+    
     <label class="toggle hide-text" id="hideTextChip" hidden>
-      <input type="checkbox" id="chkHideText"> 🙈 Hide text
+      <input type="checkbox" id="chkHideText"> Hide text
     </label>
   </div>
   <div class="recite-controls">
@@ -2591,7 +2965,6 @@ const surahNavRow    = document.getElementById('surahNavRow');
 const surahEnEl      = document.getElementById('surahEn');
 const surahArEl      = document.getElementById('surahAr');
 const surahCountEl   = document.getElementById('surahCount');
-const fullscreenBtn  = document.getElementById('btnFullscreen');
 const themeBtn       = document.getElementById('btnTheme');
 const infoBtn        = document.getElementById('btnInfo');
 const chkHideText    = document.getElementById('chkHideText');
@@ -2814,10 +3187,6 @@ const MUQATTAAT_BY_SURAH = {
   68: [['ن', ['ن']]]
 };
 
-/* ═══════════════════════════════════════════════════════════════════
-   MUQATTAAT LETTER NAMES (lenient — expanded with ASR variants so
-   the pointer reliably sticks to these disconnected-letter words)
-   ═══════════════════════════════════════════════════════════════════ */
 const LETTER_NAMES = {
   'ا': ['الف', 'ألف', 'اليف', 'أليف', 'الفا', 'ألفا', 'الفي'],
   'ل': ['لام', 'لم', 'لامو', 'لامي'],
@@ -2835,7 +3204,6 @@ const LETTER_NAMES = {
   'ن': ['نون', 'نوني', 'نونو']
 };
 
-/* ── User-agent / platform detection ──────────────────────── */
 const UA = navigator.userAgent || '';
 const IS_IOS = /iPad|iPhone|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IS_HUAWEI  = /Huawei|HUAWEI|HarmonyOS|Honor|HONOR/i.test(UA);
@@ -2855,16 +3223,20 @@ const SPEECH_LANG = 'ar-SA';
 
 const TASHKEEL = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\uFEFF\u0640]/g;
 
+/* ── FIX #2 ────────────────────────────────────────────────────
+   silent was `=== '1'` (default OFF) while every sibling uses
+   `!== '0'` (default ON). That meant checkExtraSyllable() never
+   ran on a first-time user. Now it matches the other five flags.
+   ────────────────────────────────────────────────────────────── */
 const STRICT_FEATURES = {
   madd:      () => localStorage.getItem('qc.strictMadd')           !== '0',
   ghunnah:   () => localStorage.getItem('qc.strictGhunnah')        !== '0',
   laam:      () => localStorage.getItem('qc.strictLaamShamsiyyah') !== '0',
   emphatics: () => localStorage.getItem('qc.strictEmphatics')      !== '0',
-  silent:    () => localStorage.getItem('qc.strictSilent')         === '1',
+  silent:    () => localStorage.getItem('qc.strictSilent')         !== '0',
   hamWasl:   () => localStorage.getItem('qc.strictHamWasl')        !== '0'
 };
 
-/* ── Arabic normalization ─────────────────────────────────── */
 function normAr(s){
   return String(s).normalize('NFKC')
     .replace(TASHKEEL,'')
@@ -2886,7 +3258,6 @@ function cleanTranslation(s){
   return t;
 }
 
-/* ── Phonetic substitution maps ───────────────────────────── */
 const PHON = {
   '\u0621':'\u0627','\u0622':'\u0627','\u0623':'\u0627','\u0625':'\u0627','\u0671':'\u0627',
   '\u0624':'\u0648','\u0626':'\u064A','\u0629':'\u0647','\u0649':'\u064A',
@@ -2894,8 +3265,23 @@ const PHON = {
   '\u0642':'\u0643','\u062B':'\u0633','\u06CC':'\u064A','\u06D2':'\u064A',
   '\u06C0':'\u0647','\u06C1':'\u0647','\u06D5':'\u0647'
 };
+
+/* ── PHON_LOOSE (Follow-mode tolerant phonetic map) ──────────
+   Requested equivalences for Follow mode:
+     • ط ≡ ت     (both → ت)  — already in PHON; kept explicit
+     • ظ ≡ ذ     (both → ز)  — already in PHON; kept explicit
+     • غ ≡ ح     (both → ه)  — NEW: غ was previously → ق, breaking match
+   Also collapses the whole ح/خ/غ/ه group to ه so any transcription
+   variance inside that family still lets the pointer advance.          */
 const PHON_LOOSE = Object.assign({}, PHON, {
-  '\u062D':'\u0647','\u062E':'\u0647','\u063A':'\u0642','\u0639':'\u0621'
+  '\u062D':'\u0647',   // ح → ه
+  '\u062E':'\u0647',   // خ → ه
+  '\u063A':'\u0647',   // غ → ه   (was ق — now غ ≡ ح in Follow mode)
+  '\u0639':'\u0621',   // ع → ء
+  // ── Explicit equivalences required for Follow-mode tolerance ──
+  '\u0637':'\u062A',   // ط ≡ ت
+  '\u0638':'\u0632',   // ظ ≡ ذ  (both collapse to ز)
+  '\u0630':'\u0632'    // ذ ≡ ظ  (both collapse to ز)
 });
 
 const EMPHATIC_FAMILY = {
@@ -2954,7 +3340,6 @@ function phonLooseArCached(s){
   return v;
 }
 
-/* ── Hijri calendar (arithmetic, tabular) ─────────────────── */
 function gregorianToJDN(y, m, d){
   const a  = Math.floor((14 - m) / 12);
   const yy = y + 4800 - a;
@@ -3000,7 +3385,6 @@ function gregorianToHijri(date){
   return jdnToHijri(jdn);
 }
 
-/* ── Persistent settings ──────────────────────────────────── */
 const matchLevel = 'strict';
 
 let followOnly   = localStorage.getItem('qc.followOnly') !== '0';
@@ -3018,7 +3402,6 @@ if(!isFinite(lastNonZeroVolume) || lastNonZeroVolume <= 0) lastNonZeroVolume = 1
 
 let reciter = localStorage.getItem('qc.reciter') || FALLBACK_RECITER;
 
-/* ── Reciter catalogue ────────────────────────────────────── */
 const RECITER_LABELS = {
   'Alafasy_128kbps':                 'Mishary Rashid Alafasy',
   'Abdul_Basit_Murattal_64kbps':     'Abdul Basit (Murattal)',
@@ -3061,7 +3444,6 @@ const TRANSLATION_AUDIO_OPTIONS = [
   }
 ];
 
-/* ── Levenshtein (bounded + cached) ──────────────────────── */
 const _levCache = new Map();
 const _LEV_MAX  = 50000;
 const LEV_CACHE_MAX = 6;
@@ -3132,7 +3514,6 @@ function lev(a, b){
   return r;
 }
 
-/* ── Word-match tolerances ───────────────────────────────── */
 const TOL_TABLE = { strict: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2] };
 function toleranceFor(L){
   const t = TOL_TABLE.strict;
@@ -3244,7 +3625,6 @@ function trySplitTokenMatch(heard, rawTok){
           lev(combinedNorm, target) <= 1);
 }
 
-/* ── Muqatta'at detection & letter-wise matching ──────────── */
 function detectMuqattaat(surahId, ayahNum, nrm){
   const entries = MUQATTAAT_BY_SURAH[surahId];
   if(!entries) return null;
@@ -3257,13 +3637,6 @@ function detectMuqattaat(surahId, ayahNum, nrm){
   return entry[1].slice();
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   NEW HELPER — isSingleLetterName(heard, letters)
-   Returns true when the heard token equals (after normalization) any
-   single letter name belonging to the given letters array. Used to
-   block premature whole-word completion on Muqattaat words such as
-   الم where the first letter-name (الف) shares a phon with الم.
-   ═══════════════════════════════════════════════════════════════════ */
 function isSingleLetterName(heard, letters){
   if(!heard || !letters || !letters.length) return false;
   for(let i = 0; i < letters.length; i++){
@@ -3275,16 +3648,6 @@ function isSingleLetterName(heard, letters){
   return false;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   MUQATTAAT PROGRESS — Rewritten (Fix A + Fix B)
-   ─ Fix A: guard the whole-word phon path so a single letter-name
-     (الف, لام, ميم …) never completes the whole Muqattaat word.
-   ─ Fix B: per-letter matching is now much more lenient.
-     * names ≥ 3 chars accept |Δlen| ≤ 3 and lev ≤ 2
-     * names ≤ 2 chars keep the tight |Δlen| ≤ 2 / lev ≤ 1 gate
-     * phon fallback (hPhon and hPhonLoose) mirrors the same tolerances
-     * concatenation fallback runs span from remaining … down to 1
-   ═══════════════════════════════════════════════════════════════════ */
 function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
   if(!w || !w.isMuqattaat) return 'no-match';
   if(!heard) return 'no-match';
@@ -3292,12 +3655,8 @@ function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
   const cursor  = w.muqattaatCursor || 0;
   if(cursor >= letters.length) return 'complete';
 
-  /* 1. Exact whole-word */
   if(heard === w.norm) return 'complete';
 
-  /* 2. Lenient whole-word phon match — but never when the heard token is
-        itself a single letter name of any letter in this word, otherwise
-        e.g. 'الف' would prematurely complete 'الم'. */
   if(heard.length >= 2 && w.phon && hPhon &&
      w.phon.length >= 2 && hPhon.length >= 2 &&
      !isSingleLetterName(heard, letters)){
@@ -3305,7 +3664,6 @@ function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
     if(ratio >= 0.75 && lev(hPhon, w.phon) <= 1) return 'complete';
   }
 
-  /* 3. Per-letter match at cursor — lenient */
   const target = letters[cursor];
   const names  = LETTER_NAMES[target] || [];
   for(let i = 0; i < names.length; i++){
@@ -3336,7 +3694,6 @@ function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
     }
   }
 
-  /* 4. Concatenation fallback — span from remaining down to 1 */
   for(let span = letters.length - cursor; span >= 1; span--){
     let concat = '';
     let concatPhon = '';
@@ -3376,7 +3733,6 @@ function isStrongPartialPrefix(heard){
   return (heard.length / target.length) >= 0.40;
 }
 
-/* ── Audio URL builders ───────────────────────────────────── */
 function buildAyahUrl(folder, surah, ayah){
   return AYAH_AUDIO_BASE + folder + '/' + String(surah).padStart(3,'0') + String(ayah).padStart(3,'0') + '.mp3';
 }
@@ -3384,7 +3740,6 @@ function buildTranslationAudioUrl(folder, surah, ayah){
   return AYAH_AUDIO_BASE + folder + '/' + String(surah).padStart(3,'0') + String(ayah).padStart(3,'0') + '.mp3';
 }
 
-/* ── Downloads / offline audio store ──────────────────────── */
 const AUDIO_CACHE_NAME = 'qc-audio';
 const DOWNLOADS_STORE_KEY = 'qc.downloads';
 const DOWNLOAD_CONCURRENCY = 3;
@@ -3474,7 +3829,6 @@ function getAudioDownloadBtn(surahNumber, type) {
   return audioSurahList.querySelector('.dlbtn[data-surah="' + surahNumber + '"][data-type="' + type + '"]');
 }
 
-/* ── Global mutable state (coach) ─────────────────────────── */
 let words=[], ptr=0, errors=0, finished=false;
 let mode = 'page';
 let pageNum = 1;
@@ -3544,7 +3898,6 @@ const STORE = {
   set surah(v){ localStorage.setItem('qc.surah', String(v)); }
 };
 
-/* ── Streak & achievements ────────────────────────────────── */
 const STREAK_KEY        = 'qc.streak';
 const ACHIEVEMENTS_KEY  = 'qc.achievements';
 const HIFZ_HISTORY_KEY  = 'qc.hifzHistory';
@@ -3638,7 +3991,6 @@ function saveHifzHistory(h){
   try{ localStorage.setItem(HIFZ_HISTORY_KEY, JSON.stringify(h.slice(-50))); }catch(e){}
 }
 
-/* ── Toast + escape ───────────────────────────────────────── */
 let toastEl = null;
 function showToast(html, ms){
   if(!toastEl){ toastEl = document.createElement('div'); toastEl.className = 'toast'; document.body.appendChild(toastEl); }
@@ -3652,7 +4004,6 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;','<': '&lt;','>': '&gt;','"': '&quot;',"'": '&#39;' })[c]);
 }
 
-/* ── Islamic calendar constants ───────────────────────────── */
 const HIJRI_MONTHS_EN = ['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Ula','Jumada al-Akhirah','Rajab','Shaban','Ramadan','Shawwal','Dhul Qadah','Dhul Hijjah'];
 const HIJRI_MONTHS_AR = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الثانية','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
 const HIJRI_MONTHS_SHORT = ['Muh','Saf','Rab I','Rab II','Jum I','Jum II','Raj','Sha','Ram','Shaw','Dhul Q','Dhul H'];
@@ -3671,7 +4022,6 @@ const IMPORTANT_DATES = [
   { month: 12, day: 10, name: 'Eid al-Adha',       icon: '🐏' }
 ];
 
-/* ── QA / debug gates that future sections depend on ──────── */
 let chaptersCache = null;
 let surahIndexRendered = false;
 let juzIndexRendered   = false;
@@ -3695,7 +4045,6 @@ async function ensureChapters(){
   return chaptersCache;
 }
 
-/* ── RMS audio analyser (mic-side spectral & envelope features) ─────────── */
 const rmsAnalyser = (function(){
   const samples = [];
   const MAX_AGE_MS = 8000;
@@ -3958,7 +4307,6 @@ const rmsAnalyser = (function(){
   };
 })();
 
-/* ── Recognizer token buffer ──────────────────────────────── */
 function recPush(newToks){
   if(!newToks || !newToks.length) return;
   for(let i = 0; i < newToks.length; i++) recTokens.push(newToks[i]);
@@ -3970,13 +4318,13 @@ function recReset(){
   interimProgress.clear(); followWrongTokens = 0; cancelFollowPinTimer();
 }
 
-/* ── Screen router ────────────────────────────────────────── */
 function showScreen(name){
   currentScreenName = name;
   const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed, dashboard: screenDashboard };
   Object.entries(map).forEach(([k, el]) => { if(!el) return; el.hidden = (k !== name); });
   if(name !== 'coach' && readerFullscreen) exitReaderFullscreen();
   if(name === 'home') refreshProgressMenu();
+  if(name === 'dashboard') loadShareCard();
   closeReciterMenu();
   closeTranslationMenu();
   closeTextTranslationMenu();
@@ -3985,6 +4333,7 @@ function showScreen(name){
 
 async function openCoachScreen(){
   showScreen('coach');
+  refreshProgressMenu();
   if(coachLoading) return;
   if(coachLoaded && !mushafDirtyForViewer) return;
   coachLoading = true; mushafDirtyForViewer = false;
@@ -3995,7 +4344,6 @@ async function openCoachScreen(){
   } finally { coachLoading = false; }
 }
 
-/* ── Achievements modal ──────────────────────────────────── */
 function openAchievementsModal(){
   const a = loadAchievements();
   const unlocked = Object.keys(a).length;
@@ -4020,7 +4368,6 @@ function openAchievementsModal(){
   bg.querySelector('#achClose').addEventListener('click', close);
 }
 
-/* ── Hifz test state and functions ───────────────────────── */
 const hifzState = {
   active:false, mode:'silent', surah:1, ayahs:[], words:[],
   hints:0, completedAyahs:0, totalAyahs:0,
@@ -4262,7 +4609,6 @@ function finishHifzTest(){
   bg.querySelector('#hifzResultClose').addEventListener('click', close);
 }
 
-/* ── Tajweed Colors display state & fetchers ─────────────── */
 const TJ_API_BASE = 'https://api.quran.com/api/v4';
 const TJ_ALL_RULES = ['ham_wasl','laam_shamsiyah','madda_normal','madda_permissible','madda_necessary','qalqalah','ghunnah','ikhfa','idghaam_ghunnah','idghaam_no_ghunnah','iqlab','silent'];
 const tjState = { surah: null, ayahs: [], loading: false, enabledRules: new Set(TJ_ALL_RULES.slice()) };
@@ -4374,6 +4720,8 @@ let coachTajweedGen = 0;
 let coachTajweedApplied = false;
 let coachTajweedReady = false;
 let coachTajweedDegraded = false;
+/* ── NEW: true when Tajweed mic/RMS path is unreachable on this device ── */
+let coachTajweedMicFailed = false;
 
 function decorateTajweedToSpans(html){
   let out = String(html || '');
@@ -4474,6 +4822,23 @@ async function fetchCoachTajweed(surahNumber){
   return verses;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   FIX #1 — Bismillah words now get Tajweed rules
+   ──────────────────────────────────────────────────────────────
+   renderVerses() creates bismillah words with verse = "surah:0".
+   But Quran.com's Tajweed API only returns verses 1..N — never
+   verse 0. So tajMap.get("surah:0") was always undefined, and the
+   alignment loop silently skipped every bismillah word. All rule
+   checks (madd, ghunnah, qalqalah, silent, etc.) short-circuited
+   on w.tjRules === null.
+
+   Fix: when populating tajMap, split verse 1's Tajweed words —
+   the leading words whose norms concatenate to BISMILLAH_WORDS_NORM
+   get stored under "surah:0", and the remainder stays under "surah:1".
+   Splits that don't cleanly separate (e.g. surah 1, 9, or an API
+   edition that already strips bismillah) leave `cut === -1` and are
+   silently skipped — no regression.
+   ══════════════════════════════════════════════════════════════ */
 async function applyTajweedColorsToCoach(){
   const gen = ++coachTajweedGen;
   coachTajweedReady = false;
@@ -4496,17 +4861,39 @@ async function applyTajweedColorsToCoach(){
   }
   if (gen !== coachTajweedGen) return;
   if (followOnly) return;
+
   const tajMap = new Map();
   verses.forEach(v => {
     const verseKey = v.verse_key || (surahNum + ':' + v.verse_number);
-    const tajWords = splitTajweedIntoWords(v.text_uthmani_tajweed || '');
+    let tajWords = splitTajweedIntoWords(v.text_uthmani_tajweed || '');
+    if (!tajWords.length) return;
+    /* ── FIX #1: split bismillah off verse 1 ── */
+    if (v.verse_number === 1 && shouldShowBismillah(surahNum)) {
+      const bismNorm = BISMILLAH_WORDS_NORM.join('');
+      let acc = '';
+      let cut = -1;
+      const limit = Math.min(tajWords.length, 6);
+      for (let i = 0; i < limit; i++) {
+        const n = tajWords[i].norm;
+        if (!n) break;
+        acc += n;
+        if (acc === bismNorm) { cut = i + 1; break; }
+        if (bismNorm.indexOf(acc) !== 0) break;
+      }
+      if (cut >= 1 && cut < tajWords.length) {
+        tajMap.set(surahNum + ':0', tajWords.slice(0, cut));
+        tajWords = tajWords.slice(cut);
+      }
+    }
     if (tajWords.length) tajMap.set(verseKey, tajWords);
   });
+
   const wordsByVerse = new Map();
   words.forEach(w => {
     if (!wordsByVerse.has(w.verse)) wordsByVerse.set(w.verse, []);
     wordsByVerse.get(w.verse).push(w);
   });
+
   const alignVerse = (vWords, tWords) => {
     const pairs = new Array(vWords.length).fill(null);
     let vi = 0, ti = 0;
@@ -4527,7 +4914,6 @@ async function applyTajweedColorsToCoach(){
     return pairs;
   };
 
-  /* ══════ FIX 5 — count alignment failures and surface them ══════ */
   let applied = 0, mismatches = 0;
   wordsByVerse.forEach((verseWords, verseKey) => {
     const tajWords = tajMap.get(verseKey);
@@ -4566,7 +4952,7 @@ async function applyTajweedColorsToCoach(){
   }
   updateTajweedStatusChip();
   const tjPill = document.getElementById('modeTajweedBtn');
-  if (tjPill){ tjPill.textContent = '🎵 Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
+  if (tjPill){ tjPill.textContent = 'Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
   if (mismatches > 0){ console.warn('[Coach] Tajweed: ' + mismatches + ' word(s) could not be aligned.'); }
   addFeedback('🎨 Tajweed colors applied — ' + applied + ' colored word' + (applied === 1 ? '' : 's') + '.', false, true);
 }
@@ -4577,7 +4963,7 @@ function removeTajweedColorsFromCoach(){
   coachTajweedDegraded = false;
   updateTajweedStatusChip();
   const tjPill = document.getElementById('modeTajweedBtn');
-  if (tjPill){ tjPill.textContent = '🎵 Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
+  if (tjPill){ tjPill.textContent = 'Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
   if (!coachTajweedApplied) return;
   words.forEach(w => { w.el.textContent = w.raw; w.tjRules = null; w.normNoSilent = null; w.el.removeAttribute('title'); w.el.removeAttribute('aria-label'); });
   coachTajweedApplied = false;
@@ -4588,6 +4974,13 @@ function updateTajweedStatusChip(){
   if(!chip) return;
   if(followOnly){ chip.hidden = true; return; }
   chip.hidden = false;
+  if(coachTajweedMicFailed){
+    chip.className = 'toggle tj-status-error';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Rules not ready';
+    chip.title = 'Tajweed rules require microphone access for real-time acoustic analysis. The microphone could not be accessed on this device. Try updating Chrome, checking Settings → Apps → Chrome → Permissions → Microphone, or switching to Follow mode.';
+    chip.setAttribute('aria-label', 'Tajweed rules not ready — microphone unavailable');
+    return;
+  }
   if(coachTajweedDegraded){
     chip.className = 'toggle tj-status-error';
     chip.innerHTML = '<span class="tj-status-dot"></span>Rules unavailable';
@@ -4606,13 +4999,51 @@ function updateTajweedStatusChip(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   UPGRADE 1 & 2 — Madd / Ghunnah / Qalqalah timing constants
-   ═══════════════════════════════════════════════════════════════════ */
+/* ── NEW: called when Tajweed mic/RMS path is unreachable ── */
+function markTajweedMicFailed(){
+  coachTajweedMicFailed = true;
+  updateTajweedStatusChip();
+  showTajweedMicFailedModal();
+  addFeedback('⚠️ <b>Tajweed rules not ready</b> — the microphone is not reaching the Tajweed engine. Try updating Chrome, checking microphone permissions, or switching to Follow mode.', true);
+}
+
+function showTajweedMicFailedModal(){
+  if(document.getElementById('tajweedMicFailedBg')) return;   // don't stack
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.id = 'tajweedMicFailedBg';
+  bg.innerHTML =
+    '<div class="modal"><div class="grabber"></div>' +
+    '<h2>⚠️ Tajweed rules not ready</h2>' +
+    '<div class="errbox">' +
+      'The microphone is not reaching the Tajweed engine on this device. Tajweed rule detection requires ' +
+      '<b>both speech recognition and real-time waveform analysis (RMS)</b> — this browser or device ' +
+      'combination may not support them working together.' +
+    '</div>' +
+    '<div class="okbox"><b>Try these steps:</b><br>' +
+      '• <b>Update Google Chrome</b> to the latest version from the Play Store.<br>' +
+      '• Check <b>Settings → Apps → Chrome → Permissions → Microphone</b> and set it to <b>Allow</b>.<br>' +
+      '• Close other apps that might be using the microphone.<br>' +
+      '• Switch to <b>Follow</b> mode — it uses the same microphone path as the Hifz Test and works on more devices.' +
+    '</div>' +
+    '<p style="font-size:.8rem;color:var(--muted);line-height:1.55">' +
+      'Tajweed acoustic rules (madd, ghunnah, qalqalah) are currently <b>disabled</b>. ' +
+      'Transcript-based checks will continue where possible.' +
+    '</p>' +
+    '<button class="primary" id="tajMicFailedClose">Got it</button></div>';
+  document.body.appendChild(bg);
+  const close = () => bg.remove();
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  bg.querySelector('#tajMicFailedClose').addEventListener('click', close);
+}
+
 const MADD_MIN_DELTA_MS = { normal: 180, permissible: 380, necessary: 600 };
 const MADD_MIN_HARAKAT  = { normal: 1.7, permissible: 3.6, necessary: 5.5 };
 const MADD_MAX_HARAKAT  = { normal: 2.3, permissible: 5.4, necessary: 6.5 };
-const END_OF_AYAH_MADD_MIN_MS = 250;
+/* ── FIX #3a: was 250 — raised to 350 ms so a too-short ʿāriḍ madd
+   at the end of the āyah can be flagged even without a T_mora
+   baseline (first few recitations). ────────────────────────────── */
+const END_OF_AYAH_MADD_MIN_MS = 350;
 const MADD_COUNTS                = { normal: 2, permissible: 4, necessary: 6 };
 const PACE_WINDOW_MS             = 90000;
 const PACE_MIN_SAMPLES           = 6;
@@ -4678,7 +5109,6 @@ function ghunnahRequiredMs(kind){
   return Math.round(base * paceScale());
 }
 
-/* ── Strict-mode state ──────────────────────────────────── */
 let lastDirectCommitIdx = -1;
 let lastDirectCommitAt  = 0;
 let lastCommitBatchId   = -1;
@@ -4687,7 +5117,6 @@ let silentWarned        = false;
 let batchTimingCtx      = null;
 let prevWordAudio       = null;
 
-/* ── Tajweed rule info & parse helpers ──────────────────── */
 const TAJWEED_RULE_INFO = {
   ham_wasl:             { name: 'Hamzat al-Wasl',            desc: 'connecting hamza — silent when joining speech' },
   laam_shamsiyah:       { name: 'Laam Shamsiyyah',           desc: 'solar lām — assimilated into the following sun letter' },
@@ -4710,7 +5139,6 @@ function buildRuleTooltip(rules, sep){
   }).join(sep || '\n');
 }
 
-/* ══════ FIX 1 — parse idghaam_no_ghunnah ══════ */
 function parseTajweedWordRules(decoratedHtml){
   const rules = {
     madd: null, ghunnahLetters: [], silentLetters: [],
@@ -4760,7 +5188,6 @@ function parseTajweedWordRules(decoratedHtml){
   }
   if (decoratedHtml.indexOf('tj-ham_wasl') !== -1) rules.hamWasl = true;
 
-  /* NEW: idghaam_no_ghunnah parsing */
   if (decoratedHtml.indexOf('tj-idghaam_no_ghunnah') !== -1) {
     rules.hasIdghaamNoGhunnah = true;
     const iRe = /<span[^>]*class="(?:[^"]*\s)?tj-idghaam_no_ghunnah(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/span>/g;
@@ -4795,13 +5222,18 @@ function maybeExplainRules(w){
   addFeedback('🎵 <b>' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</b> — ' + escapeHtml(explanation), false, true);
 }
 
-/* ── Strict rule evaluators ─────────────────────────────── */
 function strict1MaddOk(prevW, deltaMs){
   if (!prevW || !prevW.tjRules || !prevW.tjRules.madd) return true;
   const need = maddRequiredMs(prevW.tjRules.madd);
   return deltaMs >= need;
 }
 
+/* ── FIX #3b: don't downgrade ghunnah errors to warnings when the audio
+   segment is missing. Previously spectralOk defaulted to `true`, so a
+   genuine ghunnah omission in the transcript got silently downgraded to
+   a warning (dotted underline, no error). Now spectralOk is explicitly
+   `false` when we cannot verify the spectrum, so a text mismatch is
+   enough to fire the red error. ──────────────────────────────────────── */
 function strict1GhunnahOk(w, heard){
   if (!w || !w.tjRules || !w.tjRules.hasGhunnahContext) return true;
   if (!STRICT_FEATURES.ghunnah()) return true;
@@ -4822,10 +5254,12 @@ function strict1GhunnahOk(w, heard){
     if (!hasN && !hasM) textOk = true;
     else textOk = (hasN && heard.indexOf(N) !== -1) || (hasM && heard.indexOf(M) !== -1);
   }
-  let spectralOk = true;
+  let spectralOk;
   if (w.audio && rmsAnalyser.isRunning()){
     const smp = rmsAnalyser.samplesIn(w.audio.start, w.audio.end);
     spectralOk = nasalPresent(smp);
+  } else {
+    spectralOk = false;
   }
   if (!spectralOk && !textOk){
     markStrict1Error(w, 'ghunnah-' + gType, 'nasal murmur absent (text + spectrum)');
@@ -4849,7 +5283,6 @@ function emphaticViolation(heardNorm, targetNorm){
   return viol;
 }
 
-/* ══════ UPGRADE 2 — Nasal band widened to 250–600 Hz ══════ */
 function nasalPresent(samples){
   if (!samples || samples.length < 4) return false;
   let count = 0, total = 0;
@@ -4915,12 +5348,10 @@ function checkExtraSyllable(w){
   return true;
 }
 
-/* ══════ FIX 4 — checkQalqalah accepts heard + text fallback ══════ */
 function checkQalqalah(w, heard){
   if (!w || !w.tjRules || !w.tjRules.allRules) return true;
   if (w.tjRules.allRules.indexOf('qalqalah') === -1) return true;
 
-  /* Segment-based burst detection (preferred) */
   if (w.audio && w.audio.durationMs >= 100 && rmsAnalyser.isRunning()){
     const samples = rmsAnalyser.samplesIn(w.audio.start, w.audio.end);
     if (samples && samples.length >= 6){
@@ -4942,7 +5373,6 @@ function checkQalqalah(w, heard){
     }
   }
 
-  /* NEW: Text-only fallback when segment unavailable */
   if (heard && w.norm){
     const QALQALAH_LETTERS = '\u0642\u0637\u0628\u062C\u062F';
     for (let i = 0; i < w.norm.length; i++){
@@ -4957,7 +5387,6 @@ function checkQalqalah(w, heard){
   return true;
 }
 
-/* ══════ FIX 1b — new idghaam_no_ghunnah check ══════ */
 function checkIdghaamNoGhunnah(w, heard){
   if (!w || !w.tjRules || !w.tjRules.hasIdghaamNoGhunnah) return true;
   if (!w.audio || w.audio.durationMs < 100 || !rmsAnalyser.isRunning()) return true;
@@ -5058,7 +5487,7 @@ function markStrict1Error(w, kind, detail){
     tajweedName: tajweedName, tajweedExplanation: tajweedExplanation
   };
   mistakes.push(m); appendMistake(m); scheduleHUD();
-  if (beepOn) beepThrottled('error');
+  /* Beep on Tajweed errors removed per user request. */
   const now = performance.now();
   if (now - (markStrict1Error._lastFeedbackAt || 0) > 1200){
     markStrict1Error._lastFeedbackAt = now;
@@ -5079,13 +5508,14 @@ function markStrict1Warning(w, kind, detail){
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   FIX 3 + FIX 6a — runStrict1Checks with:
-   • Segment-based timing gate independent of adjacency
-   • Emphatic check runs on EVERY commit path
-   • Qalqalah gets `heard` for text fallback
-   • Idghaam-no-ghunnah check invoked
-   ═══════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   FIX #3a — end-of-āyah madd now measured against the permissible
+             minimum (3.6× T_mora) instead of the normal minimum
+             (1.7× T_mora).
+   FIX #3c — forceTiming bypass lets the batch-end re-split loop
+             run timing checks on words that were part of a
+             multi-word ASR burst.
+   ══════════════════════════════════════════════════════════════ */
 function runStrict1Checks(idx, heard, opts){
   opts = opts || {};
   if (followOnly) return;
@@ -5094,7 +5524,6 @@ function runStrict1Checks(idx, heard, opts){
   if (!w) return;
   if (w.isMuqattaat) return;
 
-  /* ── FIX 6a — emphatic check on every commit path ── */
   if (STRICT_FEATURES.emphatics() && heard && w.norm && heard !== w.norm){
     const viol = emphaticViolation(heard, w.norm);
     if (viol.length){
@@ -5111,8 +5540,8 @@ function runStrict1Checks(idx, heard, opts){
   if (batchTimingCtx) batchTimingCtx.wordCount++;
   const prevInSameBatch = (lastDirectCommitIdx >= 0) && (lastCommitBatchId === currentBatchId);
 
-  /* ── FIX 3 — segment-based timing (independent of adjacency) ── */
-  if (!opts.skipTiming && !prevInSameBatch){
+  /* FIX #3c: honour opts.forceTiming even when prevInSameBatch is true */
+  if (!opts.skipTiming && (!prevInSameBatch || opts.forceTiming)){
     const rmsAvailable = rmsAnalyser.isRunning() && rmsAnalyser.sampleCount() > 5 && rmsAnalyser.hasSignal();
     const hasSeg = rmsAvailable && w.audio && w.audio.durationMs >= 40;
     const nextW = words[idx + 1];
@@ -5123,8 +5552,10 @@ function runStrict1Checks(idx, heard, opts){
       const T_mora = getBaseMsPerLetter();
       const vr = rmsAnalyser.vowelRun(w.audio.start, w.audio.end);
       const vowelMs = vr.durationMs;
+      /* FIX #3a: use .permissible (3.6×) for end-of-āyah — ʿāriḍ lil-sukūn is a
+         permissible madd of 2–6 ḥarakāt, NOT the 1.7× normal minimum. */
       const required = isEndOfAyah
-        ? (T_mora !== null ? Math.round(T_mora * MADD_MIN_HARAKAT.normal) : END_OF_AYAH_MADD_MIN_MS)
+        ? (T_mora !== null ? Math.round(T_mora * MADD_MIN_HARAKAT.permissible) : END_OF_AYAH_MADD_MIN_MS)
         : (T_mora !== null ? Math.round(T_mora * (MADD_MIN_HARAKAT[kind] || 1.7))
                             : (MADD_MIN_DELTA_MS[kind] || 0));
       const minSegMs = w.norm.length * (T_mora !== null ? T_mora : 100) * 0.6;
@@ -5144,7 +5575,6 @@ function runStrict1Checks(idx, heard, opts){
       }
     }
 
-    /* Pace sampling — adjacency + segment required (unchanged behaviour) */
     if (opts.timingReliable && hasSeg && lastDirectCommitIdx >= 0 && idx === lastDirectCommitIdx + 1){
       const isMadd = !!(w.tjRules && w.tjRules.madd);
       const sampleMs = rmsAnalyser.vowelRun(w.audio.start, w.audio.end).durationMs;
@@ -5152,7 +5582,6 @@ function runStrict1Checks(idx, heard, opts){
     }
   }
 
-  /* ── Delta-based fallback (only when segment unavailable, adjacency required) ── */
   if (!opts.skipTiming && !prevInSameBatch && lastDirectCommitIdx >= 0 && idx === lastDirectCommitIdx + 1){
     const rmsAvailable = rmsAnalyser.isRunning() && rmsAnalyser.sampleCount() > 5 && rmsAnalyser.hasSignal();
     const hasSeg = rmsAvailable && w.audio && w.audio.durationMs >= 40;
@@ -5210,7 +5639,6 @@ function runStrict1Checks(idx, heard, opts){
   }
 }
 
-/* ══════ FIX 2 — distribute merged transcript + split merged segment ══════ */
 function distributeMergedHeard(heard, wordsArr, startIdx, count){
   const out = new Array(count).fill('');
   if (!heard || count <= 0) return out;
@@ -5252,7 +5680,6 @@ function splitSegmentByWords(seg, wordsArr, startIdx, count){
   return out;
 }
 
-/* ═══════ Follow-mode Finite-State Gate constants ═══════ */
 const FOLLOW_TAU_PLAUSIBLE  = 0.72;
 const FOLLOW_TAU_JUMP       = 0.85;
 const FOLLOW_TAU_EXIT       = 0.85;
@@ -5345,7 +5772,6 @@ function isFollowPlausible(heard, hPhon, hPhonLoose, w) {
   return false;
 }
 
-/* ── Speech pipeline ───────────────────────────────────── */
 let pendingSpeechEvent = null;
 let speechResultTimer = null;
 let speechInFlight = false;
@@ -5632,7 +6058,6 @@ async function runMFAInference(w, seg, heard) {
   return durationOk && (normOk || phonOk);
 }
 
-/* ═══════ Follow-mode grade: FSM with τ_plausible / τ_jump / τ_exit ═══════ */
 function gradeFollowFast(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -5645,7 +6070,6 @@ function gradeFollowFast(tokens, startIdx){
     const hPhonLoose = followOnly ? phonLooseArCached(rawTok) : null;
     const w          = words[ptr];
 
-    /* ── Muqatta'at: letter-wise progress, no flagging ── */
     if (w && w.isMuqattaat) {
       const mr = tryMuqattaatProgress(heard, hPhon, hPhonLoose, w);
       if (mr === 'complete') {
@@ -5655,16 +6079,13 @@ function gradeFollowFast(tokens, startIdx){
         pendingHeard.length = 0;
         used++; continue;
       }
-      /* Fix C — bounded stuck escape: non-complete counts as a wrong
-         token so the existing 3-token / 10 s pin-and-stop timer applies. */
       noteFollowWrongToken();
-      used++; continue;   /* partial or no-match → stay on word, no error */
+      used++; continue;
     }
 
     const nextW        = words[ptr + 1];
     const isLastInAyah = !nextW || nextW.verse !== w.verse;
 
-    /* 1. Direct match */
     const directMatch = isMatchWord(heard, hPhon, hPhonLoose, w)
                      || followAlPrefixMatch(heard, w);
     if (directMatch){
@@ -5682,7 +6103,6 @@ function gradeFollowFast(tokens, startIdx){
       }
     }
 
-    /* 2. Split-token (blocked on last-in-ayah) */
     if (!isLastInAyah && trySplitTokenMatch(heard, rawTok)){
       commitCorrect(ptr, null);
       advancePast(1);
@@ -5691,7 +6111,6 @@ function gradeFollowFast(tokens, startIdx){
       used++; continue;
     }
 
-    /* 3. Merged-token */
     const mergedN = tryMergedTokenMatch(heard, hPhon, hPhonLoose);
     if (mergedN > 0){
       commitManyCorrect(ptr, ptr + mergedN, null);
@@ -5701,7 +6120,6 @@ function gradeFollowFast(tokens, startIdx){
       used++; continue;
     }
 
-    /* 4. Restricted look-ahead k ≤ 2, τ_jump = 0.85, same-ayah only */
     let jumped = false;
     for (let k = 1; k <= FOLLOW_MAX_LOOKAHEAD; k++){
       if (ptr + k >= words.length) break;
@@ -5720,7 +6138,6 @@ function gradeFollowFast(tokens, startIdx){
     }
     if (jumped){ used++; continue; }
 
-    /* 5. MFA phonetic */
     if (isFollowMFAMatch(w, heard, hPhon, hPhonLoose)){
       commitCorrect(ptr, null);
       advancePast(1);
@@ -5729,7 +6146,6 @@ function gradeFollowFast(tokens, startIdx){
       used++; continue;
     }
 
-    /* 6. Plausible fallback */
     if (isFollowPlausible(heard, hPhon, hPhonLoose, w)){
       commitCorrect(ptr, null);
       advancePast(1);
@@ -5738,7 +6154,6 @@ function gradeFollowFast(tokens, startIdx){
       used++; continue;
     }
 
-    /* 7. Hold state */
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     if (pendingHeard.length > 5) pendingHeard.length = 0;
@@ -5747,14 +6162,53 @@ function gradeFollowFast(tokens, startIdx){
   return used;
 }
 
-/* ═══════ gradeFull — Tajweed mode ═══════ */
 const FULL_LOOKAHEAD = 5;
 
+/* ══════════════════════════════════════════════════════════════
+   FIX #3c — every word in a multi-word ASR burst gets its own
+   audio segment and its own timing check.
+
+   The original code:
+     • Called runStrict1Checks() per word, but the prevInSameBatch
+       gate skipped timing for every word EXCEPT the first in each
+       ASR batch.
+     • Re-used the same segment object for all words in the batch,
+       so even the first word's madd measurement was wrong when
+       Chrome returned "بسم الله الرحمن الرحيم" as one burst.
+
+   The fix:
+     1. Track each committed word's segment in segGroups, keyed by
+        (start, end) — words that shared a segment end up in one
+        group.
+     2. At the end of each batch, iterate segGroups, split any
+        shared segment proportionally by word-length, and re-run
+        runStrict1Checks with forceTiming:true so the timing gate
+        is bypassed even when prevInSameBatch is true.
+     3. The merged-token path already splits its segment per word;
+        its skipTiming is flipped from true → false so madd and
+        ghunnah are now checked on every merged word too.
+
+   Word-in-muqaṭṭāʿāt and "plausible attempt" branches deliberately
+   skip timing — those words carry lower audio reliability.
+   ══════════════════════════════════════════════════════════════ */
 async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
   const outerBatchCtx = batchTimingCtx;
   batchTimingCtx = { startTime: lastDirectCommitAt, cumulativeRequired: 0, contributions: [], wordCount: 0 };
+  /* FIX #3c-3: per-batch segment groups */
+  const segGroups = [];
+  const trackSeg = (seg, wordIdx, heardTok) => {
+    if (!seg) return;
+    for (let i = 0; i < segGroups.length; i++) {
+      const g = segGroups[i];
+      if (g.seg && g.seg.start === seg.start && g.seg.end === seg.end) {
+        g.words.push({ idx: wordIdx, heard: heardTok });
+        return;
+      }
+    }
+    segGroups.push({ seg, words: [{ idx: wordIdx, heard: heardTok }] });
+  };
   try{
     for(let ti = start; ti < tokens.length; ti++){
       const rawTok = tokens[ti];
@@ -5764,7 +6218,6 @@ async function gradeFull(tokens, startIdx){
       const hPhon = phonArCached(rawTok);
       const hPhonLoose = phonLooseArCached(rawTok);
 
-      /* ── Muqatta'at: letter-wise progress, no flagging ── */
       {
         const mqW = words[ptr];
         if (mqW && mqW.isMuqattaat) {
@@ -5779,8 +6232,6 @@ async function gradeFull(tokens, startIdx){
             mqW._muqStuckCount = 0;
             used++; continue;
           }
-          /* Fix C — soft warning after 6 consecutive non-completes on the
-             same Muqattaat word (Tajweed has no pin timer; this is a hint). */
           mqW._muqStuckCount = (mqW._muqStuckCount || 0) + 1;
           if (mqW._muqStuckCount === 6) {
             const names = (mqW.muqattaatLetters || []).map(l => (LETTER_NAMES[l] || [l])[0]).join(' · ');
@@ -5795,9 +6246,9 @@ async function gradeFull(tokens, startIdx){
       if(heard.length < 2 && heard !== words[ptr].norm && words[ptr].norm.length > 1){ used++; continue; }
 
       if(matchesCurrent){
-        /* FIX 6b — emphatic check now runs inside runStrict1Checks; removed duplicate here */
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         commitCorrect(ptr, seg);
+        trackSeg(seg, ptr, heard);              /* FIX #3c-4 */
         runStrict1Checks(ptr, heard, { timingReliable: true });
         advancePast(1);
         pendingHeard.length = 0; consecutiveReds = 0;
@@ -5809,6 +6260,7 @@ async function gradeFull(tokens, startIdx){
         const combined = normArCached(pendingHeard.join('') + rawTok);
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
         commitCorrect(ptr, seg);
+        trackSeg(seg, ptr, combined);           /* FIX #3c-4 */
         runStrict1Checks(ptr, combined, { timingReliable: false });
         advancePast(1);
         pendingHeard.length = 0; consecutiveReds = 0;
@@ -5816,7 +6268,6 @@ async function gradeFull(tokens, startIdx){
         used++; continue;
       }
 
-      /* ══════ FIX 2 — distribute merged transcript/segment, run checks on every merged word ══════ */
       const mergedN = tryMergedTokenMatch(heard, hPhon, null);
       if(mergedN > 0){
         const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
@@ -5828,7 +6279,8 @@ async function gradeFull(tokens, startIdx){
           const w = words[idx];
           if (!w) continue;
           if (segSlices) w.audio = segSlices[k];
-          runStrict1Checks(idx, heardSlices[k] || heard, { skipTiming: true, timingReliable: false });
+          /* FIX #3c: timing was previously skipped on every merged word */
+          runStrict1Checks(idx, heardSlices[k] || heard, { skipTiming: false, timingReliable: false, forceTiming: true });
         }
         advancePast(mergedN);
         pendingHeard.length = 0; consecutiveReds = 0;
@@ -5839,6 +6291,7 @@ async function gradeFull(tokens, startIdx){
       const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
       if (await runMFAInference(words[ptr], seg, heard)) {
         commitCorrect(ptr, seg);
+        trackSeg(seg, ptr, heard);              /* FIX #3c-4 */
         runStrict1Checks(ptr, heard, { timingReliable: false });
         advancePast(1);
         pendingHeard.length = 0;
@@ -5851,6 +6304,7 @@ async function gradeFull(tokens, startIdx){
       const _needsVowelRun = !followOnly && _wRms.tjRules && (_wRms.tjRules.madd || _wRms.tjRules.hasGhunnahContext);
       if (_needsVowelRun && seg && isAcousticWordShapeMatch(_wRms, seg)) {
         commitCorrect(ptr, seg);
+        trackSeg(seg, ptr, heard);              /* FIX #3c-4 */
         runStrict1Checks(ptr, heard, { timingReliable: false });
         advancePast(1);
         pendingHeard.length = 0;
@@ -5893,7 +6347,7 @@ async function gradeFull(tokens, startIdx){
         errors++;
         const m = { idx: mistakeCounter++, correct: w.raw.replace(TASHKEEL,''), heard: rawTok, verse: w.verse, kind: 'misread' };
         mistakes.push(m); appendMistake(m); scheduleHUD();
-        if(beepOn) beepThrottled('error');
+        /* Beep on Tajweed errors removed per user request. */
       }
       noteFollowWrongToken();
       lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; prevWordAudio = null;
@@ -5902,6 +6356,7 @@ async function gradeFull(tokens, startIdx){
       used++;
     }
 
+    /* ── existing cumulative batch check (kept as a safety net) ── */
     const ctx = batchTimingCtx;
     if(ctx && ctx.startTime > 0 && ctx.wordCount > 1 && ctx.cumulativeRequired > 0 && ctx.contributions.length > 0){
       const now = performance.now();
@@ -5925,13 +6380,32 @@ async function gradeFull(tokens, startIdx){
         }
       }
     }
+
+    /* ── FIX #3c-5: re-split shared segments and force per-word timing ── */
+    for (let gi = 0; gi < segGroups.length; gi++) {
+      const g = segGroups[gi];
+      if (!g.seg) continue;
+      if (g.seg.end <= g.seg.start) continue;
+      const groupWords = g.words;
+      const slices = splitSegmentByWords(g.seg, words, groupWords[0].idx, groupWords.length);
+      if (!slices) continue;
+      for (let k = 0; k < groupWords.length; k++) {
+        const entry = groupWords[k];
+        const w = words[entry.idx];
+        if (!w) continue;
+        if (w.audio !== g.seg) continue;   // already re-split (merged-token path)
+        if (slices[k]) w.audio = slices[k];
+        runStrict1Checks(entry.idx, entry.heard, {
+          skipTiming: false, timingReliable: true, forceTiming: true
+        });
+      }
+    }
   } finally {
     batchTimingCtx = outerBatchCtx;
   }
   return used;
 }
 
-/* ── Adaptive pace tracking ─────────────────────────────── */
 function noteAdvance(n){
   if(n <= 0) return;
   const now = performance.now();
@@ -5957,7 +6431,6 @@ function resetPace(){
   advanceTimes = []; currentPaceWPS = 0; adaptiveSilenceMs = 10000; pendingJumpTarget = -1;
 }
 
-/* ── Status & feedback primitives ────────────────────────── */
 function setStatus(label, state, hint){
   if(!statusLabel) return;
   statusLabel.textContent = label;
@@ -6034,7 +6507,6 @@ function showPermissionHelp(msg){
   bg.querySelector('#permRetry').addEventListener('click', async () => { close(); const ok = await promptForMic(); if(ok && !wantMic) startReciting(); });
 }
 
-/* ── Audio context, beeps, prime ─────────────────────────── */
 let audioCtx=null, audioUnlocked=false;
 function unlockAudio(){
   if(audioUnlocked){ return audioCtx; }
@@ -6142,7 +6614,6 @@ function playUrl(url, opts){
 async function requestWakeLock(){ try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release',()=>{ wakeLock=null; }); } }catch(e){} }
 function releaseWakeLock(){ if(wakeLock){ try{wakeLock.release();}catch(e){} wakeLock=null; } }
 
-/* ── Volume + audio overlay ──────────────────────────────── */
 volumeSlider.value = String(currentVolume);
 function applyVolumeToCurrentAudio(){ if(currentAudio){ try{ currentAudio.volume = Math.max(0, Math.min(1, currentVolume)); }catch(e){} } }
 function handleVolumeChange(newVal, source){
@@ -6226,7 +6697,6 @@ volIcon.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === '
 window.addEventListener('resize', schedulePositionAudioOverlay);
 window.addEventListener('orientationchange', schedulePositionAudioOverlay);
 
-/* ── Mic stream lifecycle ────────────────────────────────── */
 async function ensureMicStream(){
   if(micStream){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
@@ -6252,7 +6722,13 @@ function releaseMicStream(){
 }
 function startMicWatchdog(){
   clearTimeout(micWatchdogTimer); micAudioConfirmed = false;
-  micWatchdogTimer = setTimeout(() => { if(!wantMic || micAudioConfirmed) return; if(micWarningShown) return; micWarningShown = true; showBrokenMicWarning(); }, 10000);
+  micWatchdogTimer = setTimeout(() => {
+    if(!wantMic || micAudioConfirmed) return;
+    if(micWarningShown) return;
+    micWarningShown = true;
+    if(followOnly){ showBrokenMicWarning(); }
+    else { markTajweedMicFailed(); }
+  }, 10000);
 }
 function stopMicWatchdog(){ clearTimeout(micWatchdogTimer); micWatchdogTimer = null; }
 function confirmMicAudio(){ micAudioConfirmed = true; clearTimeout(micWatchdogTimer); micWatchdogTimer = null; }
@@ -6267,7 +6743,6 @@ function showBrokenMicWarning(){
   addFeedback('⚠️ The browser is not passing speech to the recognition service.', true);
 }
 
-/* ── Silence timer ──────────────────────────────────────── */
 let lastSilenceResetAt = 0;
 function resetSilenceTimer(force){
   const now = performance.now();
@@ -6285,16 +6760,12 @@ function resetSilenceTimer(force){
 }
 function clearSilenceTimer(){ clearTimeout(silenceTimer); silenceTimer = null; }
 
-/* ── Mode UI ─────────────────────────────────────────────── */
 let updatingMutex = false;
 function applyMutexUI(){
-  if(!followOnly && !beepOn){ followOnly = true; }
   beepOn = !followOnly;
   if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly); modeFollowBtn.setAttribute('aria-pressed', followOnly ? 'true' : 'false'); }
   if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly); modeTajweedBtn.setAttribute('aria-pressed', !followOnly ? 'true' : 'false'); }
   if(hideTextChip) hideTextChip.hidden = !followOnly;
-  const tjNoiseChip = document.getElementById('tajweedNoiseChip');
-  if(tjNoiseChip) tjNoiseChip.hidden = followOnly;
   if(chkHideText) chkHideText.checked = hideText;
   if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
   applyHideTextUI();
@@ -6313,12 +6784,21 @@ function setRecitationMode(modeName){
   followWrongTokens = 0; cancelFollowPinTimer();
   applyMutexUI(); applyFollowOnlyUI();
   if(followOnly){
+    coachTajweedMicFailed = false;
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
   } else {
-    addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are beeped and marked red.', false, true);
+    addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
+    // If already reciting in Follow (no RMS stream open), start it now.
+    if(wantMic && !rmsAnalyser.isRunning()){
+      ensureMicStream().then(s => {
+        if(!s) markTajweedMicFailed();
+        else { coachTajweedMicFailed = false; updateTajweedStatusChip(); }
+      }).catch(() => markTajweedMicFailed());
+    }
   }
+  updateTajweedStatusChip();
   updatingMutex = false;
 }
 if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
@@ -6361,7 +6841,6 @@ function applyModeUI(){
   nextSurahBtn.disabled = (surahNum <= 1);
 }
 
-/* ── Load surah / render words ──────────────────────────── */
 function explainFetchFailure(settled){
   if(settled.status !== 'fulfilled'){ const reason = settled.reason; if(reason && reason.name === 'AbortError') return 'timed out after ' + (FETCH_TIMEOUT_MS/1000) + ' s'; return (reason && reason.message) || 'network error'; }
   if(!settled.value.ok) return 'HTTP ' + settled.value.status + ' ' + (settled.value.statusText || '');
@@ -6374,6 +6853,7 @@ async function loadSurah(n, keepFeedback){
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   coachTajweedApplied = false; coachTajweedReady = false; coachTajweedDegraded = false;
+  coachTajweedMicFailed = false;
   coachTajweedGen++;
   updateTajweedStatusChip();
   applyModeUI();
@@ -6411,9 +6891,9 @@ function showLoadError(e){
   pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load ' + label + '</span>' + (isOffline ? 'You are offline and this content is not cached yet.' : 'The Quran server did not respond. Check your connection and tap Retry.') + '<div class="detail">' + escapeHtml(detail) + '</div><button id="btnRetry" class="primary">↻ Retry</button></div></div>';
   ensureMushafFsBtn();
   const r = document.getElementById('btnRetry');
-  if(r) r.addEventListener('click', () => { if(mode === 'surah') loadSurah(surahNum, true); else loadPage(pageNum, true); });
+  if(r) r.addEventListener('click', () => loadSurah(surahNum, true));
   setStatus('Load failed', 'error', 'Tap Retry');
-  if(isOffline){ askForInternet(label).then(ok => { if(!ok) return; if(mode === 'surah') loadSurah(surahNum, true); else loadPage(pageNum, true); }); }
+  if(isOffline){ askForInternet(label).then(ok => { if(!ok) return; loadSurah(surahNum, true); }); }
 }
 
 function renderVerses(ayahs, translations){
@@ -6459,8 +6939,8 @@ function renderVerses(ayahs, translations){
       if(bisTokens){
         const bl = document.createElement('div');
         bl.className = 'ayah bismillah-line';
-        bl.dataset.surah = surahId; bl.dataset.ayah = '1';
-        bisTokens.forEach(tok => pushWord(tok, surahId, 1, bl));
+        bl.dataset.surah = surahId; bl.dataset.ayah = '0';
+        bisTokens.forEach(tok => pushWord(tok, surahId, 0, bl));
         inner.appendChild(bl);
       }
     }
@@ -6489,7 +6969,6 @@ function renderVerses(ayahs, translations){
   resetProgress(true);
 }
 
-/* ── HUD / progress / feedback ──────────────────────────── */
 let scrollScheduled = false;
 function scrollElementIntoView(el, force){
   if(!el) return;
@@ -6570,7 +7049,8 @@ function appendMistake(m){
     : '';
   const heardPart = m.heard ? '<span class="heard">→ ' + escapeHtml(m.heard) + '</span>' : '';
   const ayahPart = m.verse ? m.verse.split(':')[1] : '';
-  li.innerHTML = '<span class="idx">' + m.idx + '</span>' + kindBadge + '<span class="correct">' + escapeHtml(m.correct) + '</span>' + heardPart + '<span class="meta">Ayah ' + ayahPart + '</span>';
+  const ayahLabel = (ayahPart === '0') ? 'Bismillah' : ('Ayah ' + ayahPart);
+  li.innerHTML = '<span class="idx">' + m.idx + '</span>' + kindBadge + '<span class="correct">' + escapeHtml(m.correct) + '</span>' + heardPart + '<span class="meta">' + ayahLabel + '</span>';
   mistakesList.appendChild(li);
   mistakesList.scrollTop = mistakesList.scrollHeight;
 }
@@ -6587,8 +7067,10 @@ function completeVerse(verseKey){
   const count = mistakes.filter(m => m.verse === verseKey).length;
   if(count > 0){
     const ayahNum = verseKey.split(':')[1];
-    addFeedback('🔔 <b>End of ayah ' + ayahNum + '</b> — ' + count + ' mistake' + (count===1?'':'s') + '.', true);
-    setStatus('Ayah ' + ayahNum + ' — ' + count + ' mistake' + (count===1?'':'s'), 'correcting', '');
+    const label = (ayahNum === '0') ? 'Bismillah' : ('ayah ' + ayahNum);
+    const statusLabel = (ayahNum === '0') ? 'Bismillah' : ('Ayah ' + ayahNum);
+    addFeedback('🔔 <b>End of ' + label + '</b> — ' + count + ' mistake' + (count===1?'':'s') + '.', true);
+    setStatus(statusLabel + ' — ' + count + ' mistake' + (count===1?'':'s'), 'correcting', '');
   }
 }
 function advancePast(n){
@@ -6640,10 +7122,9 @@ function recordMistake(i, kind, heardRaw){
   const heard   = heardRaw ? String(heardRaw).replace(TASHKEEL, '') : '';
   const m = { idx: mistakeCounter++, correct, heard, verse: w.verse, kind };
   mistakes.push(m); appendMistake(m); scheduleHUD();
-  if(beepOn && kind === 'misread') beepThrottled('error');
+  /* Beep on Tajweed errors removed per user request. */
 }
 
-/* ── Reset / jump-to-word ──────────────────────────────── */
 function resetProgress(fullReset){
   ptr=0; errors=0; finished=false; recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
@@ -6678,7 +7159,6 @@ function jumpToWordAndListen(idx){
   else { startReciting(); addFeedback('🎯 Jumped — listening from here.', false, true); }
 }
 
-/* ── Word press / long-press handling ──────────────────── */
 const wordPress = { active: false, el: null, idx: -1, timer: null, startX: 0, startY: 0 };
 function beginWordPress(el, idx, x, y){
   if(viewerOpen && viewerMode === 'audio') return;
@@ -6742,7 +7222,6 @@ function installWordDelegates(){
   }
 }
 
-/* ── Mic button / recite / stop / finish ───────────────── */
 function setMicButton(){
   micButton.innerHTML = wantMic ? '⏹ Stop' : 'Start Reciting 🎤';
   micButton.classList.toggle('on',wantMic);
@@ -6756,11 +7235,43 @@ async function startReciting(){
   }
   if(!SPEECH_SUPPORTED){ addFeedback('⚠️ Browser speech recognition is not available here. Try <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> on a device with internet.', true); setStatus('Speech not supported', 'error'); return; }
   if(!navigator.onLine){ speechServiceNotified = false; notifySpeechServiceUnreachable(); return; }
-  if(micPermission !== 'granted'){ const ok = await promptForMic(); if(!ok) return; }
-  if(!followOnly && mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
-    addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
+
+  /* ── MICROPHONE SETUP — branches by mode ─────────────────────────
+     • Follow mode: identical to Hifz Test — do NOT call getUserMedia.
+       SpeechRecognition opens the mic itself. This fixes Android
+       devices where an open getUserMedia stream prevents the
+       recogniser from receiving audio.
+     • Tajweed mode: needs the RMS analyser for acoustic rule
+       detection, so getUserMedia is required.                         */
+  if(followOnly){
+    if(micPermission !== 'granted'){
+      const ok = await promptForMic();
+      if(!ok) return;
+      /* promptForMic opened the RMS stream via ensureMicStream();
+         close it now so it doesn't block SpeechRecognition. */
+      releaseMicStream();
+    }
+  } else {
+    if(micPermission !== 'granted'){
+      const ok = await promptForMic();
+      if(!ok){
+        coachTajweedMicFailed = true;
+        updateTajweedStatusChip();
+        return;
+      }
+    }
+    if(mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
+      addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
+    }
+    const _tajStream = await ensureMicStream();
+    if(!_tajStream){
+      markTajweedMicFailed();
+    } else {
+      coachTajweedMicFailed = false;
+      updateTajweedStatusChip();
+    }
   }
-  await ensureMicStream().catch(() => {});
+
   if(finished) resetProgress(true);
   fsPaused = false; micPaused = false; wantMic = true; speechFatalError = false; speechServiceNotified = false;
   recReset(); pendingJumpTarget = -1;
@@ -6812,7 +7323,10 @@ function pauseMic(){
 function resumeMic(){
   if(wantMic && !finished && !fsPaused){
     micPaused = false;
-    ensureMicStream().catch(() => {});
+    if(!followOnly){
+      // Tajweed needs the RMS analyser stream; Follow does not.
+      ensureMicStream().then(s => { if(!s) markTajweedMicFailed(); }).catch(() => {});
+    }
     recRunning = true; speechFatalError = false; micWarningShown = false;
     lastResultAt = performance.now();
     startMicWatchdog(); armSpeechKeepalive();
@@ -6853,7 +7367,6 @@ function stopPlayback(){
   hideAudioOverlay(); syncFsButtons();
 }
 
-/* ── Speech-service unreachable modal ───────────────────── */
 function notifySpeechServiceUnreachable(){
   setStatus('Speech service unreachable', 'error', 'Check your internet connection');
   addFeedback('⚠️ The speech recognition service could not be reached. Live recitation needs an internet connection.', true);
@@ -6868,7 +7381,6 @@ function notifySpeechServiceUnreachable(){
   bg.querySelector('#speechInfoClose').addEventListener('click', close);
 }
 
-/* ── Fullscreen reader controls ─────────────────────────── */
 function enterReaderFullscreen(){
   if(readerFullscreen) return;
   if(viewerOpen) return;
@@ -6894,7 +7406,6 @@ function hideFsBadge(){ fsBadge.classList.remove('visible'); clearTimeout(fsBadg
 function nativeFullscreenElement(){ return document.fullscreenElement || document.webkitFullscreenElement || null; }
 function updateFullscreenIcon(){
   const glyph = readerFullscreen ? '⤡' : '⛶';
-  if(fullscreenBtn) fullscreenBtn.textContent = glyph;
   const mfb = document.getElementById('mushafFsBtn'); if(mfb) mfb.textContent = glyph;
 }
 function ensureMushafFsBtn(){
@@ -6911,7 +7422,6 @@ function ensureMushafFsBtn(){
   pageEl.appendChild(btn);
   return btn;
 }
-if(fullscreenBtn){ fullscreenBtn.addEventListener('click', () => { if(readerFullscreen) exitReaderFullscreen(); else enterReaderFullscreen(); }); }
 document.addEventListener('pointerdown', (e) => {
   if(!readerFullscreen) return; if(viewerOpen) return;
   if(e.target.closest('.fs-controls')) return;
@@ -6970,7 +7480,6 @@ function syncFsButtons(){
   syncRevealButtons();
 }
 
-/* ── Progress persistence ──────────────────────────────── */
 let suppressProgressSave = false;
 let _saveProgressTimer = null;
 function progressKey(modeKey){ return 'qc.progress.' + modeKey; }
@@ -7007,8 +7516,9 @@ function findWordIndexInWords(surah, ayah, offset){
 }
 function refreshProgressMenu(){
   const f = loadSavedProgress('follow'); const t = loadSavedProgress('tajweed');
-  if(progressFollowSub) progressFollowSub.textContent = f ? ('Surah ' + f.surah + ' · ayah ' + f.ayah) : 'No saved session';
-  if(progressTajweedSub) progressTajweedSub.textContent = t ? ('Surah ' + t.surah + ' · ayah ' + t.ayah) : 'No saved session';
+  const fmt = d => d ? ('Surah ' + d.surah + ' · ' + (d.ayah === 0 ? 'Bismillah' : ('ayah ' + d.ayah))) : 'No saved session';
+  if(progressFollowSub) progressFollowSub.textContent = fmt(f);
+  if(progressTajweedSub) progressTajweedSub.textContent = fmt(t);
 }
 async function resumeRecitationSession(modeKey){
   const data = loadSavedProgress(modeKey);
@@ -7037,7 +7547,6 @@ async function resumeRecitationSession(modeKey){
   } finally { suppressProgressSave = false; }
 }
 
-/* ── Islamic dates + calendar modal ─────────────────────── */
 function fmtGregShort(date){ return GREG_MONTHS_SHORT[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear(); }
 function renderImportantDates(){
   if(!islamicDatesList) return;
@@ -7148,7 +7657,6 @@ function renderCalendar(){
   if(selGreg) selGreg.textContent = (selEv ? selEv.icon + ' ' + selEv.name + ' · ' : '') + fmtGregShort(selDateObj);
 }
 
-/* ── Offline prompt ──────────────────────────────────────── */
 function askForInternet(label){
   return new Promise(resolve => {
     const bg = document.createElement('div');
@@ -7167,7 +7675,6 @@ function askForInternet(label){
   });
 }
 
-/* ── Surah index / Juz index / Bookmarks ───────────────── */
 async function renderSurahIndex(){
   if(surahIndexRendered) return;
   surahIndexList.innerHTML = '<div class="loading">Loading…</div>';
@@ -7281,7 +7788,6 @@ function updateBookmarkButton(){
 }
 if(qvBookmark){ qvBookmark.addEventListener('click', () => { bookmarkCurrentPage(); showViewerChrome(); }); }
 
-/* ── Reciter dropdown UI ───────────────────────────────── */
 function renderReciterSelect(){
   if(!reciterMenu) return;
   reciterMenu.innerHTML = '';
@@ -7409,7 +7915,6 @@ function changeTextTranslation(id){
   if(viewerAudio.active && viewerAudio.surah && !viewerAudio.playTranslation){ reloadViewerTranslation(); }
 }
 
-/* ── Audio screen ──────────────────────────────────────── */
 async function renderAudioSurahList(){
   if(audioListRendered){ refreshAudioRowStates(); return; }
   audioSurahList.innerHTML = '<div class="loading">Loading…</div>';
@@ -7464,7 +7969,6 @@ function refreshAudioRowStates(){
   });
 }
 
-/* ── Download helpers ──────────────────────────────────── */
 function updateAudioDownloadBtn(btn, surahNumber, type){
   if(!btn) return;
   const key = type === 'ar' ? downloadKeyFor(reciter, surahNumber) : downloadKeyFor(viewerAudio.translationId, surahNumber);
@@ -7724,7 +8228,6 @@ async function handleAudioDownloadTap(surahNumber, type){
   else downloadTranslationSurahAudio(surahNumber);
 }
 
-/* ── QR generator ──────────────────────────────────────── */
 const QRGen = (function(){
   'use strict';
   const EXP = new Uint8Array(512); const LOG = new Uint8Array(256);
@@ -7788,7 +8291,6 @@ const QRGen = (function(){
   return { encode: encode, toSvg: toSvg };
 })();
 
-/* ── Reader pages (page-viewer) ────────────────────────── */
 const readerState = { pages: new Map(), currentPage: 0, token: 0, highlightVerse: null, loading: false };
 const _surahStartPageCache = new Map();
 async function getSurahStartPage(surahNumber){
@@ -8029,7 +8531,6 @@ async function openJuzInReader(juzNumber){
   loadReaderPage(pg);
 }
 
-/* ── Viewer (QV) state and mode ────────────────────────── */
 let viewerOpen = false;
 let viewerMode = 'read';
 let viewerChromeTimer = null;
@@ -8454,7 +8955,6 @@ async function playCurrentViewerAyah(){
   playCurrentViewerAyah();
 }
 
-/* ── Reader page-turn swipe gestures ────────────────────── */
 const SWIPE_MIN_X = 55;
 let readerGesture = null;
 let pageTurning = false;
@@ -8569,7 +9069,6 @@ document.addEventListener('pointermove', readerGestureMove, {passive:true});
 document.addEventListener('pointerup', readerGestureEnd);
 document.addEventListener('pointercancel', readerGestureCancel);
 
-/* ── Prayer times engine ───────────────────────────────── */
 const PRAYERS = [
   { key:'fajr',    label:'Fajr',    icon:'🌅' },
   { key:'sunrise', label:'Sunrise', icon:'☀️' },
@@ -8684,6 +9183,7 @@ function recomputePrayerTimes(){
   prayerState.timesDateKey = currentDateKey();
   return out;
 }
+
 function fmtPrayerHijri(date){ try{ const h = gregorianToHijri(date); return h.day + ' ' + HIJRI_MONTHS_EN[h.month - 1] + ' ' + h.year + ' AH'; }catch(_){ return ''; } }
 function fmtPrayerGreg(date){ try{ return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'long', year:'numeric' }).format(date); } catch(e){ return date.getDate() + ' ' + GREG_MONTHS_SHORT[date.getMonth()] + ' ' + date.getFullYear(); } }
 function renderPrayerScreen(){
@@ -8767,6 +9267,27 @@ let prayerAlarmTimer = null;
 let firedAlarms = new Set();
 let firedDay = '';
 let athaanAudio = null;
+
+/* ══════ Prayer alarm stop-on-tap ══════ */
+let prayerBeepOscillators = [];
+
+function stopPrayerBeep(){
+  prayerBeepOscillators.forEach(o => { try{ o.stop(); }catch(_){} });
+  prayerBeepOscillators = [];
+}
+
+function stopPrayerAlarm(){
+  stopPrayerBeep();
+  if(athaanAudio){
+    try{ athaanAudio.pause(); athaanAudio.currentTime = 0; }catch(_){}
+  }
+}
+
+document.addEventListener('click',   stopPrayerAlarm, { capture: true, passive: true });
+document.addEventListener('pointerdown', stopPrayerAlarm, { capture: true, passive: true });
+document.addEventListener('touchstart', stopPrayerAlarm, { capture: true, passive: true });
+document.addEventListener('keydown', stopPrayerAlarm, true);
+
 function requestNotificationPermission(){
   if(!('Notification' in window)) return;
   if(Notification.permission === 'default'){ try{ Notification.requestPermission(); }catch(e){} }
@@ -8810,6 +9331,7 @@ function firePrayerAlarm(p){
   tryNext();
 }
 function playPrayerBeep(){
+  stopPrayerBeep();
   try{
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -8827,6 +9349,7 @@ function playPrayerBeep(){
       g.gain.exponentialRampToValueAtTime(0.0001, start + beepDur);
       o.connect(g); g.connect(audioCtx.destination);
       o.start(start); o.stop(start + beepDur + 0.02);
+      prayerBeepOscillators.push(o);
     }
     if(navigator.vibrate) navigator.vibrate([180, 150, 180]);
   }catch(e){}
@@ -8836,6 +9359,7 @@ function setPrayerLocation(name, lat, lng, quiet){
   savePrayerSettings();
   recomputePrayerTimes();
   renderPrayerScreen();
+  try{ loadShareCard(); }catch(_){}
   if(!quiet) showToast('📍 Location set to <b>' + escapeHtml(prayerState.city) + '</b>');
 }
 async function reverseGeocode(lat, lng){
@@ -8952,8 +9476,8 @@ function renderLocationPane(pane){
   };
   searchBtn.addEventListener('click', doSearch);
   input.addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); });
-  pane.querySelector('#psMethod').addEventListener('change', e => { prayerState.method = e.target.value; savePrayerSettings(); recomputePrayerTimes(); renderPrayerScreen(); });
-  pane.querySelector('#psAsr').addEventListener('change', e => { prayerState.asr = e.target.value; savePrayerSettings(); recomputePrayerTimes(); renderPrayerScreen(); });
+  pane.querySelector('#psMethod').addEventListener('change', e => { prayerState.method = e.target.value; savePrayerSettings(); recomputePrayerTimes(); renderPrayerScreen(); try{ loadShareCard(); }catch(_){} });
+  pane.querySelector('#psAsr').addEventListener('change', e => { prayerState.asr = e.target.value; savePrayerSettings(); recomputePrayerTimes(); renderPrayerScreen(); try{ loadShareCard(); }catch(_){} });
 }
 function renderAdjustPane(pane){
   let rows = '';
@@ -8972,9 +9496,10 @@ function renderAdjustPane(pane){
       prayerState.offsets[key] = v; savePrayerSettings(); recomputePrayerTimes();
       const el = document.getElementById('psOff_' + key); if(el) el.textContent = (v > 0 ? '+' : '') + v + ' min';
       renderPrayerScreen();
+      try{ loadShareCard(); }catch(_){}
     });
   });
-  pane.querySelector('#psResetOffsets').addEventListener('click', () => { Object.keys(prayerState.offsets).forEach(k => { prayerState.offsets[k] = 0; }); savePrayerSettings(); recomputePrayerTimes(); renderPrayerScreen(); renderPsPane(); });
+  pane.querySelector('#psResetOffsets').addEventListener('click', () => { Object.keys(prayerState.offsets).forEach(k => { prayerState.offsets[k] = 0; }); savePrayerSettings(); recomputePrayerTimes(); renderPrayerScreen(); renderPsPane(); try{ loadShareCard(); }catch(_){} });
 }
 function renderAlarmsPane(pane){
   const sounds = [
@@ -9036,7 +9561,6 @@ function initPrayerTimes(){
 }
 initPrayerTimes();
 
-/* ── Install prompt / QR / share / copyright ──────────── */
 const INSTALL_DONE_KEY = 'qc.installTabDone';
 let deferredPrompt = null;
 let appInstalledFlag = false;
@@ -9161,7 +9685,6 @@ function showInstallPromptModal(){
   });
 }
 
-/* ── Tile wiring + back buttons ────────────────────────── */
 tileSurahIndex.addEventListener('click', () => { showScreen('index'); renderSurahIndex(); });
 tileJuzIndex.addEventListener('click', () => { showScreen('juz'); renderJuzIndex(); });
 tilePlayAudio.addEventListener('click', () => {
@@ -9181,7 +9704,6 @@ backFromAudio.addEventListener('click', () => showScreen('home'));
 if(backFromDashboard) backFromDashboard.addEventListener('click', () => showScreen('home'));
 btnBackHome.addEventListener('click', () => { if(readerFullscreen) exitReaderFullscreen(); stopEverything(true); releaseMicStream(); showScreen('home'); });
 
-/* ── Home menu wiring + modals ─────────────────────────── */
 (function wireHomeMenu(){
   if(!homeMenuBtn || !homeMenu || !homeMenuWrap) return;
   const closeMenu = () => { homeMenu.hidden = true; homeMenuBtn.setAttribute('aria-expanded','false'); };
@@ -9282,7 +9804,7 @@ function openCopyrightModal(){
   const startBtn = document.getElementById('hifzStartBtn');
   const stopBtn  = document.getElementById('hifzStopBtn');
   const finishBtn = document.getElementById('hifzFinishBtn');
-  if(back) back.addEventListener('click', () => { stopHifzTest(true); showScreen('dashboard'); });
+  if(back) back.addEventListener('click', () => { stopHifzTest(); showScreen('dashboard'); });
   if(sel)  sel.addEventListener('change', refreshHifzAyahMax);
   if(fromEl) fromEl.addEventListener('change', refreshHifzAyahMax);
   if(toEl)   toEl.addEventListener('change', refreshHifzAyahMax);
@@ -9309,7 +9831,8 @@ function openCopyrightModal(){
   chip.addEventListener('click', (e) => {
     e.stopPropagation();
     if(followOnly) return;
-    if(coachTajweedDegraded){ showToast('⚠️ Tajweed annotations could not be fully aligned — some rule checks may be disabled. Check your connection, then switch surah or reload.', 5000); }
+    if(coachTajweedMicFailed){ showTajweedMicFailedModal(); }
+    else if(coachTajweedDegraded){ showToast('⚠️ Tajweed annotations could not be fully aligned — some rule checks may be disabled. Check your connection, then switch surah or reload.', 5000); }
     else if(coachTajweedReady){ showToast('✓ Tajweed rules active: madd length, ghunnah length & letters, qalqalah, silent letters.', 4200); }
     else { showToast('⏳ Fetching Tajweed annotations from Quran.com…', 3000); }
   });
@@ -9365,7 +9888,6 @@ prevSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum<114) flipSu
 nextSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum>1) flipSurah(-1); });
 surahButton.addEventListener('click',openSurahPicker);
 
-/* ── Surah picker (modal) ─────────────────────────────── */
 async function openSurahPicker(){
   const bg=document.createElement('div'); bg.className='modal-bg';
   const m=document.createElement('div'); m.className='modal';
@@ -9391,13 +9913,11 @@ async function openSurahPicker(){
   }catch(e){ list.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:14px;text-align:center">Could not load chapters.</div>'; }
 }
 
-/* ── Surah flip ────────────────────────────────────────── */
 let flipping = false;
 function nudgeEdge(dir){ if(navigator.vibrate) navigator.vibrate(18); }
 async function flipSurah(dir){ if(flipping) return; const next = surahNum + dir; if(next < 1 || next > 114){ nudgeEdge(dir); return; } flipping = true; try{ await loadSurah(next); } finally { flipping = false; } }
 async function flipNav(dir){ return flipSurah(dir); }
 
-/* ── Coach info modal ──────────────────────────────────── */
 function openCoachInfoModal(){
   const bg = document.createElement('div');
   bg.className = 'modal-bg';
@@ -9420,9 +9940,9 @@ function openCoachInfoModal(){
     '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">3</span> 🎵 Tajweed mode (error feedback)</h3><ul>' +
       '<li><b>Tajweed</b> is designed to highlight every mispronunciation.</li>' +
-      '<li>On a mispronounced word the coach <b>beeps</b> and <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
+      '<li>On a mispronounced word the coach <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
       '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> — Haraka-based bounds: Tabee\'i [1.7–2.3], Wajib/Ja\'iz [3.6–5.4], Lazim [5.5–6.5] × Haraka.<br>• <b>Ghunnah</b> — nasal formant band 250–600 Hz verified in both transcript and spectrum.<br>• <b>Qalqalah</b> — plosive-burst detector catches missing bounce.<br>• <b>Laam Shamsiyyah</b> — onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> — glottal re-attack detection.<br>• <b>Idghaam (no ghunnah)</b> — nasalisation-overrun check.<br>• <b>Emphatic letters</b> (ص→س, ط→ت…) surfaced as warnings on every commit path.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped form.</li>' +
-      '<li><b>Rule-ready chip:</b> shows whether rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules unavailable</b>.</li>' +
+      '<li><b>Rule-ready chip:</b> shows whether rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules unavailable</b> · <b>● Rules not ready</b> (microphone unreachable).</li>' +
     '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">4</span> 🙈 Hide text &amp; Reveal text</h3><ul>' +
       '<li><b>Hide text</b> (available in Follow mode) hides the whole mushaf so you can recite from memory. Words become visible as you recite them.</li>' +
@@ -9440,6 +9960,7 @@ function openCoachInfoModal(){
   bg.addEventListener('click', e => { if(e.target === bg) close(); });
   bg.querySelector('#coachInfoClose').addEventListener('click', close);
 }
+
 function openInfoModal(){
   const reciterListHtml = RECITER_ORDER.map((id, i) => { const label = RECITER_LABELS[id] || id; return '<li>' + (i + 1) + '. <b>' + escapeHtml(label) + '</b></li>'; }).join('');
   const bg = document.createElement('div');
@@ -9475,7 +9996,6 @@ function openInfoModal(){
 }
 if(infoBtn) infoBtn.addEventListener('click', openCoachInfoModal);
 
-/* ── Share app ────────────────────────────────────────── */
 async function shareApp(){
   const url = location.href.split('#')[0];
   const data = { title: 'Quran Recitation Coach', text: 'Practice Quran recitation with live word-by-word feedback.', url };
@@ -9484,7 +10004,6 @@ async function shareApp(){
   catch(e){ window.prompt('Copy this link to share:', url); }
 }
 
-/* ── Feedback modal ───────────────────────────────────── */
 const FEEDBACK_ENDPOINT = '/api/feedback';
 const FEEDBACK_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 function openFeedbackModal(){
@@ -9529,7 +10048,6 @@ function openFeedbackModal(){
   setTimeout(() => emailEl.focus(), 80);
 }
 
-/* ── Theme + hijri label ───────────────────────────────── */
 function applyTheme(){
   const isLight = theme === 'light';
   document.body.classList.toggle('light-mode', isLight);
@@ -9546,6 +10064,7 @@ if(themeBtn) themeBtn.addEventListener('click', flipTheme);
 if(homeThemeBtn) homeThemeBtn.addEventListener('click', flipTheme);
 window.addEventListener('error', e => { console.error('[QuranCoach] runtime error:', e.error || e.message); });
 (function applySupportBanner(){
+  if(!supportBox) return;
   if(!SPEECH_SUPPORTED){
     supportBox.hidden = false;
     supportBox.innerHTML = '⚠️ <b>Live recitation is not available in this browser.</b><br>Your browser does not expose the Web Speech API. Page text, English translation, Prayer Times, audio playback, Hifz Test, Tajweed Colors and offline downloads still work everywhere. For live recitation, please use <b>Chrome</b> on Android or desktop, or <b>Safari 14.5+</b> on iPhone.';
@@ -9568,14 +10087,12 @@ function updateHijriDate(){
   if(hijriAr) hijriAr.textContent = ar || '';
 }
 
-/* ── Connection badge (optional) ───────────────────────── */
 const connBadge = document.getElementById('connBadge');
 function updateConn(){ if(!connBadge) return; const dot = connBadge.querySelector('.dot'); if(!dot) return; dot.style.background = navigator.onLine ? 'var(--good)' : 'var(--warn)'; connBadge.title = navigator.onLine ? 'Online' : 'Offline'; }
 window.addEventListener('online',updateConn);
 window.addEventListener('offline',updateConn);
 updateConn();
 
-/* ── QR screen ─────────────────────────────────────────── */
 const SITE_URL = 'https://recite-hazel.vercel.app';
 let _qrSvgCache = null;
 function qrSvgForSite(){
@@ -9599,7 +10116,6 @@ function closeQrScreen(){ if(!qrFullscreen) return; qrFullscreen.hidden = true; 
 if(qrCloseBtn) qrCloseBtn.addEventListener('click', closeQrScreen);
 if(qrFullscreen){ qrFullscreen.addEventListener('click', (e) => { if(e.target === qrFullscreen) closeQrScreen(); }); }
 
-/* ── Global visibility / touch / keyboard handlers ────── */
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
     if(wantMic && !finished && !fsPaused) resumeMic();
@@ -9658,7 +10174,842 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ── Boot ─────────────────────────────────────────────── */
+// ── 45 Quranic Duahs for Daily Rotation ──
+const DAILY_DUAHS = [
+  {
+    arabic: "رَبَّنَا تَقَبَّلْ مِنَّا ۖ إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ",
+    translation: "Our Lord, accept [this] from us. Indeed, You are the Hearing, the Knowing.",
+    reference: "Surah Al-Baqarah 2:127"
+  },
+  {
+    arabic: "رَبَّنَا وَاجْعَلْنَا مُسْلِمَيْنِ لَكَ وَمِن ذُرِّيَّتِنَا أُمَّةً مُّسْلِمَةً لَّكَ وَأَرِنَا مَنَاسِكَنَا وَتُبْ عَلَيْنَا ۖ إِنَّكَ أَنتَ التَّوَّابُ الرَّحِيمُ",
+    translation: "Our Lord, and make us Muslims [in submission] to You and from our descendants a Muslim nation [in submission] to You. And show us our rites and accept our repentance. Indeed, You are the Accepting of Repentance, the Merciful.",
+    reference: "Surah Al-Baqarah 2:128"
+  },
+  {
+    arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+    translation: "Our Lord, give us in this world [that which is] good and in the Hereafter [that which is] good and protect us from the punishment of the Fire.",
+    reference: "Surah Al-Baqarah 2:201"
+  },
+  {
+    arabic: "رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَثَبِّتْ أَقْدَامَنَا وَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ",
+    translation: "Our Lord, pour upon us patience and plant firmly our feet and give us victory over the disbelieving people.",
+    reference: "Surah Al-Baqarah 2:250"
+  },
+  {
+    arabic: "رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ",
+    translation: "Our Lord, do not impose blame upon us if we have forgotten or erred. Our Lord, and lay not upon us a burden like that which You laid upon those before us. Our Lord, and burden us not with that which we have no ability to bear. And pardon us; and forgive us; and have mercy upon us. You are our protector, so give us victory over the disbelieving people.",
+    reference: "Surah Al-Baqarah 2:286"
+  },
+  {
+    arabic: "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِن لَّدُنكَ رَحْمَةً ۚ إِنَّكَ أَنتَ الْوَهَّابُ",
+    translation: "Our Lord, let not our hearts deviate after You have guided us and grant us from Yourself mercy. Indeed, You are the Bestower.",
+    reference: "Surah Ali 'Imran 3:8"
+  },
+  {
+    arabic: "رَبَّنَا إِنَّنَا آمَنَّا فَاغْفِرْ لَنَا ذُنُوبَنَا وَقِنَا عَذَابَ النَّارِ",
+    translation: "Our Lord, indeed we have believed, so forgive us our sins and protect us from the punishment of the Fire.",
+    reference: "Surah Ali 'Imran 3:16"
+  },
+  {
+    arabic: "رَبَّنَا آمَنَّا بِمَا أَنزَلْتَ وَاتَّبَعْنَا الرَّسُولَ فَاكْتُبْنَا مَعَ الشَّاهِدِينَ",
+    translation: "Our Lord, we have believed in what You revealed and have followed the messenger, so register us among the witnesses.",
+    reference: "Surah Ali 'Imran 3:53"
+  },
+  {
+    arabic: "رَبَّنَا اغْفِرْ لَنَا ذُنُوبَنَا وَإِسْرَافَنَا فِي أَمْرِنَا وَثَبِّتْ أَقْدَامَنَا وَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ",
+    translation: "Our Lord, forgive us our sins and our excess in our affairs, and plant firmly our feet and give us victory over the disbelieving people.",
+    reference: "Surah Ali 'Imran 3:147"
+  },
+  {
+    arabic: "رَبَّنَا وَآتِنَا مَا وَعَدتَّنَا عَلَىٰ رُسُلِكَ وَلَا تُخْزِنَا يَوْمَ الْقِيَامَةِ ۗ إِنَّكَ لَا تُخْلِفُ الْمِيعَادَ",
+    translation: "Our Lord, and grant us what You promised us through Your messengers and do not disgrace us on the Day of Resurrection. Indeed, You do not fail in [Your] promise.",
+    reference: "Surah Ali 'Imran 3:194"
+  },
+  {
+    arabic: "رَبَّنَا ظَلَمْنَا أَنفُسَنَا وَإِن لَّمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ",
+    translation: "Our Lord, we have wronged ourselves, and if You do not forgive us and have mercy upon us, we will surely be among the losers.",
+    reference: "Surah Al-A'raf 7:23 (Dua of Adam)"
+  },
+  {
+    arabic: "رَبِّ إِنِّي أَعُوذُ بِكَ أَنْ أَسْأَلَكَ مَا لَيْسَ لِي بِهِ عِلْمٌ ۖ وَإِلَّا تَغْفِرْ لِي وَتَرْحَمْنِي أَكُن مِّنَ الْخَاسِرِينَ",
+    translation: "My Lord, I seek refuge in You from asking that of which I have no knowledge. And unless You forgive me and have mercy upon me, I will be among the losers.",
+    reference: "Surah Hud 11:47 (Dua of Nuh)"
+  },
+  {
+    arabic: "رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ",
+    translation: "My Lord, make me an establisher of prayer, and [many] from my descendants. Our Lord, and accept my supplication.",
+    reference: "Surah Ibrahim 14:40 (Dua of Ibrahim)"
+  },
+  {
+    arabic: "رَبَّنَا اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ",
+    translation: "Our Lord, forgive me and my parents and the believers the Day the account is established.",
+    reference: "Surah Ibrahim 14:41"
+  },
+  {
+    arabic: "رَّبِّ أَدْخِلْنِي مُدْخَلَ صِدْقٍ وَأَخْرِجْنِي مُخْرَجَ صِدْقٍ وَاجْعَل لِّي مِن لَّدُنكَ سُلْطَانًا نَّصِيرًا",
+    translation: "My Lord, cause me to enter a sound entrance and to exit a sound exit and grant me from Yourself a supporting authority.",
+    reference: "Surah Al-Isra 17:80"
+  },
+  {
+    arabic: "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِّن لِّسَانِي يَفْقَهُوا قَوْلِي",
+    translation: "My Lord, expand for me my breast [with assurance] and ease for me my task and untie the knot from my tongue that they may understand my speech.",
+    reference: "Surah Ta-Ha 20:25-28 (Dua of Musa)"
+  },
+  {
+    arabic: "رَّبِّ زِدْنِي عِلْمًا",
+    translation: "My Lord, increase me in knowledge.",
+    reference: "Surah Ta-Ha 20:114"
+  },
+  {
+    arabic: "لَّا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ",
+    translation: "There is no deity except You; exalted are You. Indeed, I have been of the wrongdoers.",
+    reference: "Surah Al-Anbya 21:87 (Dua of Yunus)"
+  },
+  {
+    arabic: "أَنِّي مَسَّنِيَ الضُّرُّ وَأَنتَ أَرْحَمُ الرَّاحِمِينَ",
+    translation: "Indeed, adversity has touched me, and You are the Most Merciful of the merciful.",
+    reference: "Surah Al-Anbya 21:83 (Dua of Ayyub)"
+  },
+  {
+    arabic: "رَبِّ لَا تَذَرْنِي فَرْدًا وَأَنتَ خَيْرُ الْوَارِثِينَ",
+    translation: "My Lord, do not leave me alone [with no heir], while you are the best of inheritors.",
+    reference: "Surah Al-Anbya 21:89 (Dua of Zakariyya)"
+  },
+  {
+    arabic: "رَبِّ أَوْزِعْنِي أَنْ أَشْكُرَ نِعْمَتَكَ الَّتِي أَنْعَمْتَ عَلَيَّ وَعَلَىٰ وَالِدَيَّ وَأَنْ أَعْمَلَ صَالِحًا تَرْضَاهُ وَأَدْخِلْنِي بِرَحْمَتِكَ فِي عِبَادِكَ الصَّالِحِينَ",
+    translation: "My Lord, enable me to be grateful for Your favor which You have bestowed upon me and upon my parents and to do righteousness of which You approve. And admit me by Your mercy into [the ranks of] Your righteous servants.",
+    reference: "Surah An-Naml 27:19 (Dua of Sulayman)"
+  },
+  {
+    arabic: "رَبَّنَا آمَنَّا فَاغْفِرْ لَنَا وَارْحَمْنَا وَأَنتَ خَيْرُ الرَّاحِمِينَ",
+    translation: "Our Lord, we have believed, so forgive us and have mercy upon us, and You are the best of the merciful.",
+    reference: "Surah Al-Mu'minun 23:109"
+  },
+  {
+    arabic: "رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا",
+    translation: "Our Lord, grant us from among our wives and offspring comfort to our eyes and make us a leader [i.e., example] for the righteous.",
+    reference: "Surah Al-Furqan 25:74"
+  },
+  {
+    arabic: "رَبِّ هَبْ لِي حُكْمًا وَأَلْحِقْنِي بِالصَّالِحِينَ وَاجْعَل لِّي لِسَانَ صِدْقٍ فِي الْآخِرِينَ وَاجْعَلْنِي مِن وَرَثَةِ جَنَّةِ النَّعِيمِ",
+    translation: "My Lord, grant me wisdom and join me with the righteous. And grant me a reputation of honor among later generations. And make me among the inheritors of the Garden of Pleasure.",
+    reference: "Surah Ash-Shu'ara 26:83-85 (Dua of Ibrahim)"
+  },
+  {
+    arabic: "رَبِّ نَجِّنِي مِنَ الْقَوْمِ الظَّالِمِينَ",
+    translation: "My Lord, save me from the wrongdoing people.",
+    reference: "Surah Al-Qasas 28:21 (Dua of Musa)"
+  },
+  {
+    arabic: "رَبِّ إِنِّي ظَلَمْتُ نَفْسِي فَاغْفِرْ لِي",
+    translation: "My Lord, indeed I have wronged myself, so forgive me.",
+    reference: "Surah Al-Qasas 28:16 (Dua of Musa)"
+  },
+  {
+    arabic: "رَبَّنَا وَسِعْتَ كُلَّ شَيْءٍ رَّحْمَةً وَعِلْمًا فَاغْفِرْ لِلَّذِينَ تَابُوا وَاتَّبَعُوا سَبِيلَكَ وَقِهِمْ عَذَابَ الْجَحِيمِ",
+    translation: "Our Lord, You have encompassed all things in mercy and knowledge, so forgive those who have repented and followed Your way and protect them from the punishment of Hellfire.",
+    reference: "Surah Ghafir 40:7"
+  },
+  {
+    arabic: "رَبَّنَا اكْشِفْ عَنَّا الْعَذَابَ إِنَّا مُؤْمِنُونَ",
+    translation: "Our Lord, remove from us the torment; indeed, we are believers.",
+    reference: "Surah Ad-Dukhan 44:12"
+  },
+  {
+    arabic: "رَبَّنَا اغْفِرْ لَنَا وَلِإِخْوَانِنَا الَّذِينَ سَبَقُونَا بِالْإِيمَانِ وَلَا تَجْعَلْ فِي قُلُوبِنَا غِلًّا لِّلَّذِينَ آمَنُوا رَبَّنَا إِنَّكَ رَءُوفٌ رَّحِيمٌ",
+    translation: "Our Lord, forgive us and our brothers who preceded us in faith and put not in our hearts [any] resentment toward those who have believed. Our Lord, indeed You are Kind and Merciful.",
+    reference: "Surah Al-Hashr 59:10"
+  },
+  {
+    arabic: "رَّبَّنَا عَلَيْكَ تَوَكَّلْنَا وَإِلَيْكَ أَنَبْنَا وَإِلَيْكَ الْمَصِيرُ",
+    translation: "Our Lord, upon You we have relied, and to You we have returned, and to You is the destination.",
+    reference: "Surah Al-Mumtahanah 60:4"
+  },
+  {
+    arabic: "رَّبَّنَا أَتْمِمْ لَنَا نُورَنَا وَاغْفِرْ لَنَا ۖ إِنَّكَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+    translation: "Our Lord, perfect for us our light and forgive us. Indeed, You are over all things competent.",
+    reference: "Surah At-Tahrim 66:8"
+  },
+  {
+    arabic: "رَّبِّ أَعُوذُ بِكَ مِنْ هَمَزَاتِ الشَّيَاطِينِ وَأَعُوذُ بِكَ رَبِّ أَن يَحْضُرُونِ",
+    translation: "My Lord, I seek refuge in You from the incitements of the devils, and I seek refuge in You, my Lord, lest they be present with me.",
+    reference: "Surah Al-Mu'minun 23:97-98"
+  },
+  {
+    arabic: "رَبَّنَا آمَنَّا فَاكْتُبْنَا مَعَ الشَّاهِدِينَ",
+    translation: "Our Lord, we have believed, so register us among the witnesses.",
+    reference: "Surah Al-Ma'idah 5:83"
+  },
+  {
+    arabic: "رَبَّنَا أَخْرِجْنَا مِنْ هَٰذِهِ الْقَرْيَةِ الظَّالِمِ أَهْلُهَا وَاجْعَل لَّنَا مِن لَّدُنكَ وَلِيًّا وَاجْعَل لَّنَا مِن لَّدُنكَ نَصِيرًا",
+    translation: "Our Lord, take us out of this city of oppressive people and appoint for us from Yourself a protector and appoint for us from Yourself a helper.",
+    reference: "Surah An-Nisa 4:75"
+  },
+  {
+    arabic: "رَبَّنَا إِنَّنَا نَخَافُ أَن يَفْرُطَ عَلَيْنَا أَوْ أَن يَطْغَىٰ",
+    translation: "Our Lord, indeed we are afraid that he will hasten [punishment] against us or that he will transgress.",
+    reference: "Surah Ta-Ha 20:45"
+  },
+  {
+    arabic: "رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا",
+    translation: "Our Lord, grant us from Yourself mercy and prepare for us from our affair right guidance.",
+    reference: "Surah Al-Kahf 18:10"
+  },
+  {
+    arabic: "رَبِّ لَوْ شِئْتَ أَهْلَكْتَهُم مِّن قَبْلُ وَإِيَّايَ ۖ أَتُهْلِكُنَا بِمَا فَعَلَ السُّفَهَاءُ مِنَّا ۖ إِنْ هِيَ إِلَّا فِتْنَتُكَ تُضِلُّ بِهَا مَن تَشَاءُ وَتَهْدِي مَن تَشَاءُ ۖ أَنتَ وَلِيُّنَا فَاغْفِرْ لَنَا وَارْحَمْنَا ۖ وَأَنتَ خَيْرُ الْغَافِرِينَ",
+    translation: "My Lord, if You had willed, You could have destroyed them before and me [as well]. Would You destroy us for what the foolish among us have done? This is not but Your trial by which You send astray whom You will and guide whom You will. You are our Protector, so forgive us and have mercy upon us, and You are the best of forgivers.",
+    reference: "Surah Al-A'raf 7:155 (Dua of Musa)"
+  },
+  {
+    arabic: "رَبِّ اجْعَلْ هَٰذَا الْبَلَدَ آمِنًا وَاجْنُبْنِي وَبَنِيَّ أَن نَّعْبُدَ الْأَصْنَامَ",
+    translation: "My Lord, make this city [Makkah] secure and keep me and my sons away from worshipping idols.",
+    reference: "Surah Ibrahim 14:35 (Dua of Ibrahim)"
+  },
+  {
+    arabic: "رَبَّنَا إِنَّكَ تَعْلَمُ مَا نُخْفِي وَمَا نُعْلِنُ ۗ وَمَا يَخْفَىٰ عَلَى اللَّهِ مِن شَيْءٍ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ",
+    translation: "Our Lord, indeed You know what we conceal and what we declare, and nothing is hidden from Allah on the earth or in the heaven.",
+    reference: "Surah Ibrahim 14:38"
+  },
+  {
+    arabic: "رَبَّنَا لَا تَجْعَلْنَا مَعَ الْقَوْمِ الظَّالِمِينَ",
+    translation: "Our Lord, do not place us with the wrongdoing people.",
+    reference: "Surah Al-A'raf 7:47"
+  },
+  {
+    arabic: "رَبَّنَا افْتَحْ بَيْنَنَا وَبَيْنَ قَوْمِنَا بِالْحَقِّ وَأَنتَ خَيْرُ الْفَاتِحِينَ",
+    translation: "Our Lord, decide between us and our people in truth, and You are the best of those who give decision.",
+    reference: "Surah Al-A'raf 7:89"
+  },
+  {
+    arabic: "رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَتَوَفَّنَا مُسْلِمِينَ",
+    translation: "Our Lord, pour upon us patience and let us die as Muslims [in submission to You].",
+    reference: "Surah Al-A'raf 7:126"
+  }
+];
+
+// ── 25 Authentic Hadiths of the Day ──
+const DAILY_HADITHS = [
+  {
+    arabic: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى",
+    translation: "Actions are but by intentions, and every person will have only what he intended.",
+    reference: "Sahih al-Bukhari 1 · Sahih Muslim 1907"
+  },
+  {
+    arabic: "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",
+    translation: "None of you truly believes until he loves for his brother what he loves for himself.",
+    reference: "Sahih al-Bukhari 13 · Sahih Muslim 45"
+  },
+  {
+    arabic: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ",
+    translation: "Whoever believes in Allah and the Last Day, let him speak good or remain silent.",
+    reference: "Sahih al-Bukhari 6018 · Sahih Muslim 47"
+  },
+  {
+    arabic: "إِنَّ أَحْسَنَكُمْ أَخْلَاقًا أَحَاسِنُكُمْ إِيمَانًا",
+    translation: "The most complete of believers in faith are those with the best character.",
+    reference: "Sunan at-Tirmidhi 1162"
+  },
+  {
+    arabic: "إِنَّ اللَّهَ لاَ يَنْظُرُ إِلَى صُوَرِكُمْ وَأَمْوَالِكُمْ، وَلَكِنْ يَنْظُرُ إِلَى قُلُوبِكُمْ وَأَعْمَالِكُمْ",
+    translation: "Allah does not look at your appearance or your wealth, but He looks at your hearts and your deeds.",
+    reference: "Sahih Muslim 2564"
+  },
+  {
+    arabic: "أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ",
+    translation: "The most beloved of deeds to Allah are those that are most consistent, even if they are small.",
+    reference: "Sahih al-Bukhari 6464 · Sahih Muslim 783"
+  },
+  {
+    arabic: "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ",
+    translation: "A Muslim is the one from whose tongue and hands the Muslims are safe.",
+    reference: "Sahih al-Bukhari 10 · Sahih Muslim 40"
+  },
+  {
+    arabic: "لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ",
+    translation: "The strong man is not the one who can overpower others, but the one who controls himself when angry.",
+    reference: "Sahih al-Bukhari 6114 · Sahih Muslim 2609"
+  },
+  {
+    arabic: "اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ، وَأَتْبِعِ السَّيِّئَةَ الْحَسَنَةَ تَمْحُهَا، وَخَالِقِ النَّاسَ بِخُلُقٍ حَسَنٍ",
+    translation: "Fear Allah wherever you are, follow a bad deed with a good one and it will wipe it out, and treat people with good character.",
+    reference: "Sunan at-Tirmidhi 1987"
+  },
+  {
+    arabic: "الطُّهُورُ شَطْرُ الإِيمَانِ",
+    translation: "Cleanliness is half of faith.",
+    reference: "Sahih Muslim 223"
+  },
+  {
+    arabic: "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",
+    translation: "The best of you are those who learn the Quran and teach it.",
+    reference: "Sahih al-Bukhari 5027"
+  },
+  {
+    arabic: "يَسِّرُوا وَلَا تُعَسِّرُوا، وَبَشِّرُوا وَلَا تُنَفِّرُوا",
+    translation: "Make things easy and do not make them difficult, give glad tidings and do not repel people.",
+    reference: "Sahih al-Bukhari 69 · Sahih Muslim 1734"
+  },
+  {
+    arabic: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيُكْرِمْ ضَيْفَهُ",
+    translation: "Whoever believes in Allah and the Last Day, let him honour his guest.",
+    reference: "Sahih al-Bukhari 6018 · Sahih Muslim 47"
+  },
+  {
+    arabic: "لاَ تَحْقِرَنَّ مِنَ الْمَعْرُوفِ شَيْئًا، وَلَوْ أَنْ تَلْقَى أَخَاكَ بِوَجْهٍ طَلْقٍ",
+    translation: "Do not belittle any good deed, even meeting your brother with a cheerful face.",
+    reference: "Sahih Muslim 2626"
+  },
+  {
+    arabic: "لاَ يَشْكُرُ اللَّهَ مَنْ لاَ يَشْكُرُ النَّاسَ",
+    translation: "The one who is not grateful to people is not grateful to Allah.",
+    reference: "Sunan Abi Dawud 4811"
+  },
+  {
+    arabic: "ادْعُوا اللَّهَ وَأَنْتُمْ مُوقِنُونَ بِالإِجَابَةِ",
+    translation: "Make supplication to Allah while you are certain of a response.",
+    reference: "Sunan at-Tirmidhi 2949"
+  },
+  {
+    arabic: "وَالْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ",
+    translation: "A kind word is charity.",
+    reference: "Sahih al-Bukhari 2989 · Sahih Muslim 1009"
+  },
+  {
+    arabic: "وَأَمَاطَتُكَ الأَذَى عَنِ الطَّرِيقِ صَدَقَةٌ",
+    translation: "Removing a harmful thing from the path is charity.",
+    reference: "Sahih al-Bukhari 2989 · Sahih Muslim 1009"
+  },
+  {
+    arabic: "لَيْسَ مِنَّا مَنْ لَمْ يَرْحَمْ صَغِيرَنَا وَيَعْرِفْ شَرَفَ كَبِيرِنَا",
+    translation: "He who does not show mercy to our young or respect our elders is not from us.",
+    reference: "Sunan at-Tirmidhi 1919"
+  },
+  {
+    arabic: "أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا",
+    translation: "The most complete of believers in faith are those with the best character.",
+    reference: "Sunan at-Tirmidhi 1162"
+  },
+  {
+    arabic: "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ",
+    translation: "Your smile in the face of your brother is charity.",
+    reference: "Sunan at-Tirmidhi 1956"
+  },
+  {
+    arabic: "خَيْرُكُمْ خَيْرُكُمْ لأَهْلِهِ، وَأَنَا خَيْرُكُمْ لأَهْلِي",
+    translation: "The best of you are those who are best to their families, and I am the best of you to my family.",
+    reference: "Sunan at-Tirmidhi 3895"
+  },
+  {
+    arabic: "وَمَنْ سَتَرَ مُسْلِمًا سَتَرَهُ اللَّهُ يَوْمَ الْقِيَامَةِ",
+    translation: "Whoever conceals the faults of a Muslim, Allah will conceal his faults on the Day of Resurrection.",
+    reference: "Sahih Muslim 2699"
+  },
+  {
+    arabic: "الْمُؤْمِنُ الَّذِي يُخَالِطُ النَّاسَ وَيَصْبِرُ عَلَى أَذَاهُمْ أَعْظَمُ أَجْرًا مِنَ الْمُؤْمِنِ الَّذِي لاَ يُخَالِطُ النَّاسَ",
+    translation: "The believer who mixes with people and bears their harm is greater in reward than the believer who does not mix with them.",
+    reference: "Sunan at-Tirmidhi 2507"
+  },
+  {
+    arabic: "مَنْ لاَ يَرْحَمُ لاَ يُرْحَمُ",
+    translation: "Whoever does not show mercy will not be shown mercy.",
+    reference: "Sahih al-Bukhari 7376 · Sahih Muslim 2319"
+  }
+];
+
+function dayOfYearIndex(len){
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const day = Math.floor((now - start) / 86400000);
+  return len ? (day % len) : 0;
+}
+function pickDaily(list){ return list[dayOfYearIndex(list.length)]; }
+
+function getSharePrayerTimes(){
+  if(prayerState.lat !== null && prayerState.lng !== null){
+    if(prayerState.timesDateKey !== currentDateKey()) recomputePrayerTimes();
+    return { times: prayerState.todayTimes || {}, city: prayerState.city || 'My location' };
+  }
+  // Makkah fallback
+  const raw = computePrayerTimes(new Date(), 21.4225, 39.8262, 'Makkah', 'Standard');
+  const times = {};
+  for(const p of PRAYERS){
+    const v = raw[p.key];
+    if(typeof v !== 'number' || !isFinite(v)){ times[p.key] = '--:--'; continue; }
+    let h = Math.floor(v), m = Math.round((v - h) * 60);
+    if(m === 60){ m = 0; h = (h + 1) % 24; }
+    times[p.key] = pad2(h) + ':' + pad2(m);
+  }
+  return { times, city: 'Makkah, SA' };
+}
+
+function getShareCardData(){
+  const pt = getSharePrayerTimes();
+  const duah   = pickDaily(DAILY_DUAHS);
+  const hadith = pickDaily(DAILY_HADITHS);
+  const now = new Date();
+  let hijriStr = '';
+  try{
+    const h = gregorianToHijri(now);
+    hijriStr = h.day + ' ' + HIJRI_MONTHS_EN[h.month - 1] + ' ' + h.year + ' AH';
+  }catch(_){}
+  const gregStr = fmtPrayerGreg(now);
+  return { city: pt.city, times: pt.times, duah, hadith, hijriStr, gregStr };
+}
+
+function loadShareCard(){
+  const d = getShareCardData();
+  const cityEl = document.getElementById('shareCityName');
+  if(cityEl) cityEl.textContent = d.city;
+  const datesEl = document.getElementById('shareDates');
+  if(datesEl) datesEl.textContent = d.hijriStr + '  ·  ' + d.gregStr;
+  const prayEl = document.getElementById('sharePrayers');
+  if(prayEl){
+    prayEl.innerHTML = '';
+    for(const p of PRAYERS){
+      const div = document.createElement('div');
+      div.className = 'share-prayer' + (p.key === 'sunrise' ? ' is-sunrise' : '');
+      const n = document.createElement('span'); n.className = 'sp-name'; n.textContent = p.label;
+      const t = document.createElement('span'); t.className = 'sp-time'; t.textContent = d.times[p.key] || '--:--';
+      div.appendChild(n); div.appendChild(t);
+      prayEl.appendChild(div);
+    }
+  }
+  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v || ''; };
+  setText('shareDuahArabic',      d.duah.arabic);
+  setText('shareDuahTranslation', d.duah.translation);
+  setText('shareDuahRef',         d.duah.reference);
+  setText('shareHadithArabic',      d.hadith.arabic);
+  setText('shareHadithTranslation', d.hadith.translation);
+  setText('shareHadithRef',         d.hadith.reference);
+}
+
+// ── Canvas helpers for PNG share card ──
+function _cvRoundRect(ctx, x, y, w, h, r){
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+function _cvWrapText(ctx, text, maxW){
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+  for(const w of words){
+    const test = line ? line + ' ' + w : w;
+    if(ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; }
+    else line = test;
+  }
+  if(line) lines.push(line);
+  return lines.length ? lines : [''];
+}
+function _cvDrawDivider(ctx, W, PAD, y){
+  const grad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+  grad.addColorStop(0,   'rgba(201,162,39,0)');
+  grad.addColorStop(0.5, 'rgba(201,162,39,0.65)');
+  grad.addColorStop(1,   'rgba(201,162,39,0)');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(PAD, y);
+  ctx.lineTo(W - PAD, y);
+  ctx.stroke();
+  ctx.save();
+  ctx.translate(W / 2, y);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = '#c9a227';
+  ctx.fillRect(-4, -4, 8, 8);
+  ctx.restore();
+}
+
+async function shareCardAsImage(){
+  const shareBtn = document.getElementById('shareCardShareBtn');
+  if(shareBtn){ shareBtn.disabled = true; }
+  try{
+    try{ await document.fonts.ready; }catch(_){}
+    try{ await document.fonts.load('48px Amiri', 'بسم الله'); }catch(_){}
+    try{ await document.fonts.load('700 48px Amiri', 'بسم الله'); }catch(_){}
+
+    const d = getShareCardData();
+    const SCALE = 2;
+    const W = 1080;
+    const PAD = 64;
+    const INNER = W - PAD * 2;
+    const AR_FONT = '"Amiri","Amiri Quran","Noto Naskh Arabic",serif';
+    const UI_FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
+    const AR_SIZE = 44;
+    const TR_SIZE = 28;
+    const LH_AR = 74;
+    const LH_TR = 42;
+
+    // ── measure pass ──
+    const mc = document.createElement('canvas').getContext('2d');
+    const measureAr = (text) => { mc.font = AR_SIZE + 'px ' + AR_FONT; return _cvWrapText(mc, text, INNER - 40); };
+    const measureTr = (text) => { mc.font = 'italic ' + TR_SIZE + 'px ' + UI_FONT; return _cvWrapText(mc, text, INNER - 40); };
+
+    const duahAr   = measureAr(d.duah.arabic);
+    const duahTr   = measureTr('"' + d.duah.translation + '"');
+    const hadithAr = measureAr(d.hadith.arabic);
+    const hadithTr = measureTr('"' + d.hadith.translation + '"');
+
+    // ── compute height ──
+    let H = PAD;
+    H += 50 + 14;   // brand
+    H += 56 + 4;    // city
+    H += 30 + 30;   // dates + gap
+    H += 100 + 24;  // prayer row + gap
+    H += 30;        // divider
+    H += 32 + 8;    // title
+    H += duahAr.length * LH_AR;
+    H += 12;
+    H += duahTr.length * LH_TR;
+    H += 12;
+    H += 28 + 24;   // reference + gap
+    H += 30;        // divider
+    H += 32 + 8;    // title
+    H += hadithAr.length * LH_AR;
+    H += 12;
+    H += hadithTr.length * LH_TR;
+    H += 12;
+    H += 28 + 24;   // reference + gap
+    H += 30;        // divider
+    H += 30 + 30;   // footer
+    H += PAD;
+    H = Math.round(H);
+
+    // ── set up canvas ──
+    const canvas = document.createElement('canvas');
+    canvas.width  = W * SCALE;
+    canvas.height = H * SCALE;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(SCALE, SCALE);
+    ctx.textBaseline = 'middle';
+
+    // ── background ──
+    const bg = ctx.createRadialGradient(W / 2, -200, 100, W / 2, 0, H);
+    bg.addColorStop(0,    '#1a2540');
+    bg.addColorStop(0.55, '#0d1119');
+    bg.addColorStop(1,    '#0d1119');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // bottom subtle glow
+    const bg2 = ctx.createRadialGradient(W / 2, H + 60, 100, W / 2, H, H / 2);
+    bg2.addColorStop(0, 'rgba(79,140,255,0.08)');
+    bg2.addColorStop(1, 'rgba(79,140,255,0)');
+    ctx.fillStyle = bg2;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── gold double border ──
+    ctx.strokeStyle = '#c9a227';
+    ctx.lineWidth = 4;
+    _cvRoundRect(ctx, 24, 24, W - 48, H - 48, 36);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(201,162,39,0.35)';
+    ctx.lineWidth = 1.5;
+    _cvRoundRect(ctx, 36, 36, W - 72, H - 72, 30);
+    ctx.stroke();
+
+    // ── brand bar ──
+    let y = PAD;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#e3bd45';
+    ctx.font = '800 44px ' + UI_FONT;
+    ctx.fillText('Recite', PAD, y + 25);
+    ctx.fillStyle = 'rgba(201,162,39,0.55)';
+    ctx.fillRect(PAD, y + 46, 86, 2);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#8f9bb3';
+    ctx.font = '700 18px ' + UI_FONT;
+    ctx.fillText('QURAN RECITATION COACH', W - PAD, y + 25);
+    y += 50 + 14;
+
+    // ── city ──
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e8edf7';
+    ctx.font = '800 48px ' + UI_FONT;
+    ctx.fillText(d.city, W / 2, y + 28);
+    y += 56 + 4;
+
+    // ── dates ──
+    ctx.fillStyle = '#8f9bb3';
+    ctx.font = '600 22px ' + UI_FONT;
+    ctx.fillText(d.hijriStr + '   ·   ' + d.gregStr, W / 2, y + 15);
+    y += 30 + 30;
+
+    // ── prayer row ──
+    const cellGap = 8;
+    const cellW = (INNER - cellGap * 5) / 6;
+    PRAYERS.forEach((p, i) => {
+      const cx = PAD + i * (cellW + cellGap);
+      const isSunrise = p.key === 'sunrise';
+      ctx.fillStyle = isSunrise ? 'rgba(255,176,32,0.10)' : 'rgba(79,140,255,0.10)';
+      _cvRoundRect(ctx, cx, y, cellW, 100, 14);
+      ctx.fill();
+      ctx.strokeStyle = isSunrise ? 'rgba(255,176,32,0.45)' : 'rgba(79,140,255,0.35)';
+      ctx.lineWidth = 1.5;
+      _cvRoundRect(ctx, cx, y, cellW, 100, 14);
+      ctx.stroke();
+
+      ctx.fillStyle = isSunrise ? '#ffb020' : '#8f9bb3';
+      ctx.font = '800 16px ' + UI_FONT;
+      ctx.textAlign = 'center';
+      ctx.fillText(p.label.toUpperCase(), cx + cellW / 2, y + 32);
+
+      ctx.fillStyle = isSunrise ? '#ffb020' : '#e8edf7';
+      ctx.font = '800 28px ' + UI_FONT;
+      ctx.fillText(d.times[p.key] || '--:--', cx + cellW / 2, y + 70);
+    });
+    y += 100 + 24;
+
+    // ── divider + Duah ──
+    _cvDrawDivider(ctx, W, PAD, y);
+    y += 30;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#e3bd45';
+    ctx.font = '800 22px ' + UI_FONT;
+    ctx.fillText('DUAH OF THE DAY', PAD + 8, y + 16);
+    y += 32 + 8;
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f5e6b8';
+    ctx.font = AR_SIZE + 'px ' + AR_FONT;
+    for(const line of duahAr){ ctx.fillText(line, W / 2, y + LH_AR / 2); y += LH_AR; }
+    y += 12;
+
+    ctx.fillStyle = '#8f9bb3';
+    ctx.font = 'italic ' + TR_SIZE + 'px ' + UI_FONT;
+    for(const line of duahTr){ ctx.fillText(line, W / 2, y + LH_TR / 2); y += LH_TR; }
+    y += 12;
+
+    ctx.fillStyle = '#c9a227';
+    ctx.font = '800 18px ' + UI_FONT;
+    ctx.fillText(d.duah.reference.toUpperCase(), W / 2, y + 14);
+    y += 28 + 24;
+
+    // ── divider + Hadith ──
+    _cvDrawDivider(ctx, W, PAD, y);
+    y += 30;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#e3bd45';
+    ctx.font = '800 22px ' + UI_FONT;
+    ctx.fillText('HADITH OF THE DAY', PAD + 8, y + 16);
+    y += 32 + 8;
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f5e6b8';
+    ctx.font = AR_SIZE + 'px ' + AR_FONT;
+    for(const line of hadithAr){ ctx.fillText(line, W / 2, y + LH_AR / 2); y += LH_AR; }
+    y += 12;
+
+    ctx.fillStyle = '#8f9bb3';
+    ctx.font = 'italic ' + TR_SIZE + 'px ' + UI_FONT;
+    for(const line of hadithTr){ ctx.fillText(line, W / 2, y + LH_TR / 2); y += LH_TR; }
+    y += 12;
+
+    ctx.fillStyle = '#c9a227';
+    ctx.font = '800 18px ' + UI_FONT;
+    ctx.fillText(d.hadith.reference.toUpperCase(), W / 2, y + 14);
+    y += 28 + 24;
+
+    // ── divider + footer ──
+    _cvDrawDivider(ctx, W, PAD, y);
+    y += 30;
+    ctx.fillStyle = '#8f9bb3';
+    ctx.font = '600 20px ' + UI_FONT;
+    ctx.fillText('from Recite,', W / 2, y + 15);
+    y += 30;
+    ctx.fillStyle = '#4f8cff';
+    ctx.font = '700 22px ' + UI_FONT;
+    ctx.fillText('https://recite-hazel.vercel.app/', W / 2, y + 15);
+
+    // ── export PNG ──
+    canvas.toBlob(async (blob) => {
+      if(shareBtn) shareBtn.disabled = false;
+      if(!blob){ showToast('⚠️ Could not generate image.'); return; }
+      const file = new File([blob], 'recite-daily-card.png', { type: 'image/png' });
+      let canShareFiles = false;
+      try { canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch(_){}
+      if(canShareFiles){
+        try{
+          await navigator.share({
+            files: [file],
+            title: 'Recite — Daily Card',
+            text: 'from Recite, https://recite-hazel.vercel.app/'
+          });
+          return;
+        }catch(e){
+          if(e && e.name === 'AbortError') return;
+        }
+      }
+      // Fallback: download
+      try{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'recite-daily-card.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => { try{ URL.revokeObjectURL(url); }catch(_){} }, 5000);
+        showToast('🖼️ Card saved — share it anywhere.');
+      }catch(e){
+        showToast('⚠️ Could not share or save the image.');
+      }
+    }, 'image/png');
+  } catch(err){
+    if(shareBtn) shareBtn.disabled = false;
+    console.warn('[ShareCard] failed:', err);
+    showToast('⚠️ Could not generate the share card.');
+  }
+} /* ── Plain-text version of the daily card ─────────────────── */
+function buildShareCardText(){
+  const d = getShareCardData();
+  const lines = [];
+
+  // Header
+  lines.push('*Prayer Times — ' + d.city + '*');
+  lines.push('_' + d.hijriStr + ' · ' + d.gregStr + '_');
+  lines.push('');
+
+  // Prayer times
+  for(const p of PRAYERS){
+    lines.push(p.label + ' — ' + (d.times[p.key] || '--:--'));
+  }
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━');
+  lines.push('');
+
+  // Duah of the Day
+  lines.push('*Duah of the Day*');
+  lines.push('');
+  lines.push(d.duah.arabic);
+  lines.push('');
+  lines.push('_"' + d.duah.translation + '"_');
+  lines.push('');
+  lines.push('— ' + d.duah.reference);
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━');
+  lines.push('');
+
+  // Hadith of the Day
+  lines.push('*Hadith of the Day*');
+  lines.push('');
+  lines.push(d.hadith.arabic);
+  lines.push('');
+  lines.push('_"' + d.hadith.translation + '"_');
+  lines.push('');
+  lines.push('— ' + d.hadith.reference);
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━');
+  lines.push('');
+
+  // Footer
+  lines.push('from *Recite*,');
+  lines.push('https://recite-hazel.vercel.app/');
+
+  return lines.join('\n');
+}
+
+/* ── Share as text — native share sheet, then copy modal ──── */
+async function shareCardAsText(){
+  const shareBtn = document.getElementById('shareCardTextBtn');
+  if(shareBtn) shareBtn.disabled = true;
+  try{
+    const text = buildShareCardText();
+
+    // 1. Native share sheet (mobile) — text-only payload.
+    //    On iOS / Android this opens WhatsApp, Telegram,
+    //    Messages, etc. directly with the text ready to send.
+    if(navigator.share){
+      try{
+        await navigator.share({ title: 'Recite — Daily Card', text: text });
+        return;                                // shared — done
+      }catch(e){
+        if(e && e.name === 'AbortError') return; // user cancelled — silent
+        // any other error → fall through to the modal
+      }
+    }
+
+    // 2. Desktop / unsupported browser — show a modal with
+    //    the text pre-selected so a single Ctrl+C copies it.
+    showTextShareModal(text);
+  }catch(err){
+    console.warn('[ShareCard] text share failed:', err);
+    showToast('⚠️ Could not build the daily card text.');
+  }finally{
+    if(shareBtn) shareBtn.disabled = false;
+  }
+}
+
+/* ── Copyable modal for text sharing ──────────────────────── */
+function showTextShareModal(text){
+  const existing = document.getElementById('shareCardTextBg');
+  if(existing) existing.remove();
+
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.id = 'shareCardTextBg';
+  bg.innerHTML =
+    '<div class="modal">' +
+      '<div class="grabber"></div>' +
+      '<h2>📝 Daily card as text</h2>' +
+      '<p>Copy the text below and paste it in WhatsApp, Telegram, Messages — or anywhere else.</p>' +
+      '<textarea id="shareCardTextarea" class="ps-input" rows="16" readonly ' +
+        'style="font-family:ui-monospace,Menlo,monospace;font-size:.76rem;line-height:1.55;' +
+               'resize:vertical;min-height:220px;white-space:pre-wrap">' +
+      '</textarea>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">' +
+        '<button class="primary" id="shareCardCopyBtn" type="button">📋 Copy to clipboard</button>' +
+        '<button class="ghost"   id="shareCardTextClose" type="button">Close</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(bg);
+
+  const ta = bg.querySelector('#shareCardTextarea');
+  ta.value = text;
+
+  const close = () => bg.remove();
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  bg.querySelector('#shareCardTextClose').addEventListener('click', close);
+
+  bg.querySelector('#shareCardCopyBtn').addEventListener('click', async () => {
+    try{
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+      } else {
+        document.execCommand('copy');
+      }
+      showToast('📋 Copied to clipboard.');
+    }catch(_){
+      try{ document.execCommand('copy'); showToast('📋 Copied to clipboard.'); }
+      catch(e){ showToast('⚠️ Could not copy — select the text and copy manually.'); }
+    }
+  });
+
+  // Auto-select so Ctrl+C / Cmd+C works immediately
+  setTimeout(() => { try{ ta.focus(); ta.select(); }catch(_){} }, 80);
+}
+
+(function wireShareCard(){
+  const imgBtn  = document.getElementById('shareCardShareBtn');
+  const textBtn = document.getElementById('shareCardTextBtn');
+  if(imgBtn)  imgBtn.addEventListener('click',  shareCardAsImage);
+  if(textBtn) textBtn.addEventListener('click', shareCardAsText);
+})();
+
 (function boot(){
   initServiceWorker().catch(err => console.warn('[SW] boot init failed:', err));
   updateHijriDate(); setInterval(updateHijriDate, 30 * 60 * 1000);
@@ -9673,6 +11024,7 @@ document.addEventListener('keydown', e => {
   loadBookmarks(); renderBookmarksScreen(); renderJuzIndex(); refreshProgressMenu();
   updateInstallMenuItem(); maybeShowInstallPrompt();
   updateStreakUI(); renderStreakBadges();
+  loadShareCard();
   const hifzSel = document.getElementById('hifzSurahSelect');
   if(hifzSel){
     const lastSurah = parseInt(localStorage.getItem('qc.hifz.lastSurah') || '1', 10);
