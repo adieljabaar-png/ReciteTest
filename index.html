@@ -3892,6 +3892,7 @@ let recCursor = 0;
 let pendingHeard = [];
 let consecutiveReds = 0;
 const interimProgress = new Map();
+let currentConsensusSet = new Set();
 
 let speechRecognition = null;
 let speechStarting = false;
@@ -4342,6 +4343,7 @@ function recPush(newToks){
 function recReset(){
   recTokens = []; recCursor = 0; pendingHeard = []; consecutiveReds = 0;
   interimProgress.clear(); followWrongTokens = 0; cancelFollowPinTimer();
+  currentConsensusSet = new Set();
 }
 
 function showScreen(name){
@@ -5813,12 +5815,28 @@ let pendingSpeechEvent = null;
 let speechResultTimer = null;
 let speechInFlight = false;
 const speechQueue = [];
-const SPEECH_THROTTLE_MS = 50;
+const SPEECH_THROTTLE_MS = 25;
 
 function resetSpeechPipeline(){
   speechQueue.length = 0;
   pendingSpeechEvent = null;
   if (speechResultTimer) { clearTimeout(speechResultTimer); speechResultTimer = null; }
+}
+
+function buildConsensusSet(alternatives){
+  currentConsensusSet = new Set();
+  if (!alternatives || alternatives.length < 2) return;
+  const counts = new Map();
+  for (let ai = 0; ai < alternatives.length; ai++){
+    const toks = String((alternatives[ai] && alternatives[ai].transcript) || '').trim().split(/\s+/).filter(Boolean);
+    for (let ti = 0; ti < toks.length; ti++){
+      const n = normArCached(toks[ti]);
+      if (n.length >= 2) counts.set(n, (counts.get(n) || 0) + 1);
+    }
+  }
+  for (const [k, v] of counts){
+    if (v >= 2) currentConsensusSet.add(k);
+  }
 }
 
 function scheduleSpeechResult(event) {
@@ -5905,6 +5923,12 @@ async function runSpeechResultProcessing(snap) {
     if (!bestAlt || !bestTranscript) continue;
     const toks = bestTranscript.split(/\s+/).filter(Boolean);
     if (!toks.length) continue;
+
+    /* N-best consensus (Follow mode only) — feeds both the interim tail-unlock
+       and the followOnly fast path in gradeFollowFast. */
+    if (followOnly) buildConsensusSet(alternatives);
+    else currentConsensusSet = new Set();
+
     if (isFinal) {
       const already = interimProgress.get(i) || 0;
       interimProgress.delete(i);
@@ -5924,9 +5948,10 @@ async function runSpeechResultProcessing(snap) {
       if (followOnly && toks.length > already && safeEnd < toks.length) {
         const tailNorm = normArCached(toks[toks.length - 1]);
         const currentTarget = (ptr < words.length) ? words[ptr].norm : '';
+        const isConsensusTail = currentConsensusSet.has(tailNorm);
         const isSafeTail =
-          tailNorm.length >= 3 &&
-          !(currentTarget && currentTarget.startsWith(tailNorm));
+          isConsensusTail ||
+          (tailNorm.length >= 3 && !(currentTarget && currentTarget.startsWith(tailNorm)));
         if (isSafeTail) safeEnd = toks.length;
       }
       const newToks = toks.slice(already, safeEnd);
@@ -5984,7 +6009,12 @@ function buildPhraseObjects(rec) {
     const clean = String(words[i].raw || '').normalize('NFKC').replace(TASHKEEL, '').replace(/[^\u0621-\u064A\s]/g, '').trim();
     if (!clean || seen.has(clean)) continue;
     seen.add(clean);
-    try { phrases.push(new PhraseCtor(clean, 6.0)); } catch (_) {}
+    /* Phrase-boost decay — 8.0 for the next ~2 words, 4.0 up to +5, 1.0 beyond.
+       Focuses contextual biasing on the near-horizon without over-boosting the
+       whole upcoming surah. */
+    const distance = i - ptr;
+    const boost = distance <= 2 ? 8.0 : distance <= 5 ? 4.0 : 1.0;
+    try { phrases.push(new PhraseCtor(clean, boost)); } catch (_) {}
   }
   if (!phrases.length) return false;
   try { rec.phrases = phrases; rec.__lastPhrasePtr = ptr; return true; }
@@ -6130,6 +6160,19 @@ function gradeFollowFast(tokens, startIdx){
       }
       noteFollowWrongToken();
       used++; continue;
+    }
+
+    /* N-best consensus fast path: multiple alternatives agreed on the target
+       word's form — bypass pendingHeard and the whole match cascade. */
+    if (followOnly && w && currentConsensusSet.size > 0 && currentConsensusSet.has(w.norm)){
+      if (heard === w.norm || lev(heard, w.norm) <= 1 ||
+          isMatchWord(heard, hPhon, hPhonLoose, w)){
+        commitCorrect(ptr, null);
+        advancePast(1);
+        noteFollowProgress();
+        pendingHeard.length = 0;
+        used++; continue;
+      }
     }
 
     const nextW        = words[ptr + 1];
@@ -6803,6 +6846,7 @@ function setRecitationMode(modeName){
   followOnly = newFollow; beepOn = !followOnly;
   try{ localStorage.setItem('qc.followOnly', followOnly ? '1' : '0'); }catch(e){}
   pendingHeard.length = 0; consecutiveReds = 0;
+  currentConsensusSet = new Set();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   followWrongTokens = 0; cancelFollowPinTimer();
@@ -7387,6 +7431,7 @@ function stopReciting(silent){
   cancelFollowPinTimer();
   _phrasesRetryDone = false;
   pendingHeard.length = 0;
+  currentConsensusSet = new Set();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
   prevWordAudio = null;
   setMicButton(); recRunning = false; speechStarting = false;
