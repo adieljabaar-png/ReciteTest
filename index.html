@@ -5007,10 +5007,17 @@ function notifyRmsUnavailable(){
   try{ updateTajweedStatusChip(); }catch(_){}
 }
 
+let _lastTajweedMicFailedAt = 0;
 function markTajweedMicFailed(){
+  const now = performance.now();
   coachTajweedMicFailed = true;
   updateTajweedStatusChip();
-  showTajweedMicFailedModal();
+  /* Suppress the modal for 60 s so rapid Follow ↔ Tajweed toggling
+     cannot flood the user with the same "mic is broken" dialog. */
+  if(now - _lastTajweedMicFailedAt > 60000){
+    _lastTajweedMicFailedAt = now;
+    showTajweedMicFailedModal();
+  }
   addFeedback('⚠️ <b>Tajweed rules not ready</b> — the microphone is not reaching the Tajweed engine. Try updating Chrome, checking microphone permissions, or switching to Follow mode.', true);
 }
 
@@ -6784,7 +6791,9 @@ function applyMutexUI(){
   applyHideTextUI();
   updateTajweedStatusChip();
   syncRevealButtons();
+
 }
+
 function setRecitationMode(modeName){
   const newFollow = (modeName === 'follow');
   if(newFollow === followOnly && !updatingMutex) return;
@@ -6795,24 +6804,70 @@ function setRecitationMode(modeName){
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   followWrongTokens = 0; cancelFollowPinTimer();
+  /* Fresh recognizer may be created on the next startReciting() — let it
+     try phrase hints again after a mode switch. */
+  _phrasesRetryDone = false;
   applyMutexUI(); applyFollowOnlyUI();
   if(followOnly){
+    /* Follow mode never uses getUserMedia. Release the Tajweed-only
+       stream and RMS analyser so the "mic in use" indicator goes away
+       and battery/CPU stop being burned. The recognizer is untouched. */
+    releaseMicStream();
     coachTajweedMicFailed = false;
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
+    updateTajweedStatusChip();
   } else {
     addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
     if(wantMic && !rmsAnalyser.isRunning()){
+      /* On iOS Safari, Samsung Internet, Huawei/Honor and older WebViews,
+         the speech recognizer may hold the mic exclusively. Stop it
+         briefly, acquire the stream, then restart — so both can run. */
+      const wasRunning = recRunning;
+      if(wasRunning){ try{ speechRecognition && speechRecognition.stop(); }catch(_){} }
+
+      const restartRecognizer = () => {
+        if(wasRunning && wantMic && !fsPaused && !micPaused){
+          try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
+          catch(_){ speechStarting = false; }
+        }
+      };
+
       ensureMicStream().then(s => {
-        if(!s) markTajweedMicFailed();
-        else { coachTajweedMicFailed = false; updateTajweedStatusChip(); }
-      }).catch(() => markTajweedMicFailed());
+        if(s){
+          coachTajweedMicFailed = false;
+          updateTajweedStatusChip();
+          if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
+            _rmsUnavailableNotified = true;
+            notifyRmsUnavailable();
+          }
+        } else {
+          /* Only a genuine mic refusal should raise the modal.
+             NotReadableError / TrackStartError means "mic is busy",
+             usually because the recognizer is holding it — not broken. */
+          const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
+          if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
+             nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
+            markTajweedMicFailed();
+          } else {
+            coachTajweedMicFailed = false;
+            updateTajweedStatusChip();
+          }
+        }
+        restartRecognizer();
+      }).catch(() => {
+        coachTajweedMicFailed = false;
+        updateTajweedStatusChip();
+        restartRecognizer();
+      });
+    } else {
+      updateTajweedStatusChip();
     }
   }
-  updateTajweedStatusChip();
   updatingMutex = false;
 }
+
 if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
 if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); }
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
@@ -7254,7 +7309,7 @@ async function startReciting(){
   if(!SPEECH_SUPPORTED){ addFeedback('⚠️ Browser speech recognition is not available here. Try <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> on a device with internet.', true); setStatus('Speech not supported', 'error'); return; }
   if(!navigator.onLine){ speechServiceNotified = false; notifySpeechServiceUnreachable(); return; }
 
-  if(followOnly){
+    if(followOnly){
     releaseMicStream();
   } else {
     if(micPermission !== 'granted'){
@@ -7270,7 +7325,18 @@ async function startReciting(){
     }
     const _tajStream = await ensureMicStream();
     if(!_tajStream){
-      markTajweedMicFailed();
+      /* Distinguish "mic busy with the recognizer" from "mic denied/absent".
+         Only the latter should tell the user something is broken. */
+      const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
+      if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
+         nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
+        markTajweedMicFailed();
+      } else {
+        /* NotReadableError / TrackStartError / timeout → fall through to
+           transcript-only mode silently. */
+        coachTajweedMicFailed = false;
+        updateTajweedStatusChip();
+      }
     } else {
       coachTajweedMicFailed = false;
       updateTajweedStatusChip();
@@ -7280,6 +7346,7 @@ async function startReciting(){
       }
     }
   }
+  
 
   if(finished) resetProgress(true);
   fsPaused = false; micPaused = false; wantMic = true; speechFatalError = false; speechServiceNotified = false;
