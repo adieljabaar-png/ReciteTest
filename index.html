@@ -2364,9 +2364,25 @@ body.light-mode .daily-duah-card { background: linear-gradient(135deg, rgba(166,
   font-size:.78rem;line-height:1.55;color:var(--muted);text-align:center;
   margin:0 0 6px;font-style:italic;
 }
+
 .share-reference{
   font-size:.62rem;color:var(--gold);font-weight:800;text-align:center;
   margin:0;text-transform:uppercase;letter-spacing:.06em;
+}
+.share-tafsir{
+  font-size:.8rem;
+  line-height:1.6;
+  color:var(--muted);
+  text-align:left;
+  margin:0;
+  padding:9px 12px;
+  background:rgba(79,140,255,.05);
+  border-left:3px solid var(--gold);
+  border-radius:6px;
+}
+body.light-mode .share-tafsir{
+  background:rgba(42,111,224,.05);
+  color:#4a5878;
 }
 
 .share-footer{
@@ -2555,7 +2571,6 @@ body.light-mode .share-arabic{color:#1a2233;}
     </button>
   </div>
 
-  <!-- ── Share Card: prayer times + duah + hadith ── -->
   <section class="share-card" id="shareCard" aria-label="Daily share card">
     <div class="share-card-inner">
 
@@ -2583,14 +2598,22 @@ body.light-mode .share-arabic{color:#1a2233;}
 
       <div class="share-divider" role="separator"></div>
 
-      <div class="share-block">
+<div class="share-block">
         <div class="share-block-title">📜 Hadith of the Day</div>
         <p class="share-arabic" id="shareHadithArabic" dir="rtl"></p>
         <p class="share-translation" id="shareHadithTranslation"></p>
         <p class="share-reference" id="shareHadithRef"></p>
       </div>
 
+      <div class="share-divider" role="separator"></div>
+
+      <div class="share-block">
+        <div class="share-block-title">📚 Tafsir of the Duah</div>
+        <p class="share-tafsir" id="shareTafsirText"></p>
+      </div>
+
       <div class="share-footer">
+
         <span>from <b>Recite</b>,</span>
         <a href="https://recite-hazel.vercel.app/" target="_blank" rel="noopener">https://recite-hazel.vercel.app/</a>
       </div>
@@ -2671,7 +2694,6 @@ body.light-mode .share-arabic{color:#1a2233;}
 
   <div class="surah-list" id="audioSurahList"><div class="loading">Loading…</div></div>
 </div>
-
 <div class="app screen" id="screenPrayer" hidden>
   <div class="sub-header">
     <button id="backFromPrayer" class="back-pill" type="button" aria-label="Back to home">Back</button>
@@ -2734,7 +2756,6 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">Tajweed</button>
     
-    <!-- MOVED PROGRESS TAB -->
     <div class="progress-section" id="progressSection">
      
     <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
@@ -3165,7 +3186,6 @@ const SAJDAH_VERSES = new Set([
   '27:26','32:15','38:24','41:38','53:62','84:21','96:19'
 ]);
 
-/* ── Muqatta'at (disconnected openers) ────────────────────── */
 const MUQATTAAT_BY_SURAH = {
   2:  [['الم', ['ا','ل','م']]],
   3:  [['الم', ['ا','ل','م']]],
@@ -3267,18 +3287,18 @@ function cleanTranslation(s){
 const PHON = {
   '\u0621':'\u0627','\u0622':'\u0627','\u0623':'\u0627','\u0625':'\u0627','\u0671':'\u0627',
   '\u0624':'\u0648','\u0626':'\u064A','\u0629':'\u0647','\u0649':'\u064A',
-  '\u0637':'\u062A','\u0635':'\u0633','\u0636':'\u062F','\u0638':'\u0632','\u0630':'\u0632',
+  '\u0637':'\u062A','\u0635':'\u0633','\u0636':'\u0632'===0?'\u0632':'\u0632','\u0638':'\u0632','\u0630':'\u0632',
   '\u0642':'\u0643','\u062B':'\u0633','\u06CC':'\u064A','\u06D2':'\u064A',
   '\u06C0':'\u0647','\u06C1':'\u0647','\u06D5':'\u0647'
 };
 
 const PHON_LOOSE = Object.assign({}, PHON, {
-  '\u062D':'\u0647',   // ح → ه
-  '\u062E':'\u0647',   // خ → ه
-  '\u063A':'\u0647',   // غ → ه
-  '\u0639':'\u0621',   // ع → ء
-  '\u0637':'\u062A',   // ط ≡ ت
-  '\u0638':'\u0632',   // ظ ≡ ذ
+  '\u062D':'\u0647',
+  '\u062E':'\u0647',
+  '\u063A':'\u0647',
+  '\u0639':'\u0627',
+  '\u0637':'\u062A',
+  '\u0638':'\u0632',
   '\u0630':'\u0632'
 });
 
@@ -3512,12 +3532,16 @@ function lev(a, b){
   return r;
 }
 
-const TOL_TABLE = { strict: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2] };
+const TOL_TABLE = {
+  strict: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
+  follow: [0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3]
+};
 function toleranceFor(L){
-  const t = TOL_TABLE.strict;
+  const t = followOnly ? TOL_TABLE.follow : TOL_TABLE.strict;
   return L >= t.length ? t[t.length - 1] : t[L];
 }
-function confidenceFloor(){ return 0.35; }
+
+function confidenceFloor(){ return followOnly ? 0.20 : 0.35; }
 
 function isMatchWord(hNorm, hPhon, hPhonLoose, w){
   const wNorm = w.norm;
@@ -3545,7 +3569,7 @@ function isMatchWord(hNorm, hPhon, hPhonLoose, w){
 
   if(la >= 4 && lb >= 4){
     const S = la < lb ? la : lb;
-    const prefixThreshold = followOnly ? 0.85 : 0.70;
+    const prefixThreshold = followOnly ? 0.72 : 0.85;
     if(S / L >= prefixThreshold){
       if(hNorm.startsWith(wNorm) || wNorm.startsWith(hNorm)) return true;
       if(hNorm.endsWith(wNorm)   || wNorm.endsWith(hNorm))   return true;
@@ -3875,6 +3899,8 @@ let lastResultAt = 0;
 let sessionHadResult = false;
 let speechServiceNotified = false;
 let speechKeepaliveTimer = null;
+/* ── CHANGE 4: module-level retry flag for phrase-free recognizer ── */
+let _phrasesRetryDone = false;
 const SPEECH_KEEPALIVE_MS = 40000;
 
 let micStream = null;
@@ -4304,6 +4330,7 @@ const rmsAnalyser = (function(){
     sampleCount: () => samples.length
   };
 })();
+
 function recPush(newToks){
   if(!newToks || !newToks.length) return;
   for(let i = 0; i < newToks.length; i++) recTokens.push(newToks[i]);
@@ -4717,7 +4744,6 @@ let coachTajweedGen = 0;
 let coachTajweedApplied = false;
 let coachTajweedReady = false;
 let coachTajweedDegraded = false;
-/* ── True when Tajweed mic/RMS path is unreachable on this device ── */
 let coachTajweedMicFailed = false;
 
 function decorateTajweedToSpans(html){
@@ -4964,7 +4990,6 @@ function updateTajweedStatusChip(){
   }
 }
 
-/* ── Fix 8/9 helpers: RMS support probe + notice ───────────── */
 let _rmsSupportedCached = null;
 function isRmsSupported(){
   if (_rmsSupportedCached !== null) return _rmsSupportedCached;
@@ -4982,7 +5007,6 @@ function notifyRmsUnavailable(){
   try{ updateTajweedStatusChip(); }catch(_){}
 }
 
-/* ── Called when Tajweed mic/RMS path is unreachable ── */
 function markTajweedMicFailed(){
   coachTajweedMicFailed = true;
   updateTajweedStatusChip();
@@ -5208,7 +5232,6 @@ function strict1MaddOk(prevW, deltaMs){
   return deltaMs >= need;
 }
 
-/* Fix 3 — nasal-dropped wired in; RMS optional. */
 function strict1GhunnahOk(w, heard){
   if (!w || !w.tjRules || !w.tjRules.hasGhunnahContext) return true;
   if (!STRICT_FEATURES.ghunnah()) return true;
@@ -5450,7 +5473,6 @@ const TAJWEED_ERROR_NAMES = {
   'emphatic-غ': 'Ghayn (غ) sounded as Qāf (ق)'
 };
 
-/* ── Fix 2: Unified Tajweed issue marker + throttle ─────────── */
 const TAJWEED_WARN_THROTTLE_MS = 4000;
 const _tajweedWarnThrottle = new Map();
 
@@ -5782,7 +5804,7 @@ let pendingSpeechEvent = null;
 let speechResultTimer = null;
 let speechInFlight = false;
 const speechQueue = [];
-const SPEECH_THROTTLE_MS = 100;
+const SPEECH_THROTTLE_MS = 50;
 
 function resetSpeechPipeline(){
   speechQueue.length = 0;
@@ -5886,9 +5908,18 @@ async function runSpeechResultProcessing(snap) {
       recCursor = Math.min(recCursor + used, recTokens.length);
       if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
       scheduleHUD();
-    } else {
+
+} else {
       const already = interimProgress.get(i) || 0;
-      const safeEnd = Math.max(already, toks.length - 1);
+      let safeEnd = Math.max(already, toks.length - 1);
+      if (followOnly && toks.length > already && safeEnd < toks.length) {
+        const tailNorm = normArCached(toks[toks.length - 1]);
+        const currentTarget = (ptr < words.length) ? words[ptr].norm : '';
+        const isSafeTail =
+          tailNorm.length >= 3 &&
+          !(currentTarget && currentTarget.startsWith(tailNorm));
+        if (isSafeTail) safeEnd = toks.length;
+      }
       const newToks = toks.slice(already, safeEnd);
       if (newToks.length) {
         interimProgress.set(i, safeEnd);
@@ -5901,6 +5932,7 @@ async function runSpeechResultProcessing(snap) {
       const tail = toks.slice(-4).join(' ');
       if (statusHint && tail) statusHint.textContent = '… ' + tail;
     }
+
   }
   if (speechRecognition && Math.abs(ptr - (speechRecognition.__lastPhrasePtr || 0)) >= 24) {
     buildPhraseObjects(speechRecognition);
@@ -5950,7 +5982,7 @@ function buildPhraseObjects(rec) {
   catch (e) { console.warn('[Speech] Failed to set phrases:', e); return false; }
 }
 
-function createSpeechRecognition(){
+function createSpeechRecognition(forceNoPhrases){
   if(!SPEECH_SUPPORTED) return null;
   if(speechRecognition && !speechRecognition.__dead) return speechRecognition;
   if(speechRecognition){ try{ speechRecognition.abort(); }catch(_){} speechRecognition = null; }
@@ -5958,7 +5990,7 @@ function createSpeechRecognition(){
   rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
   rec.interimResults   = true;
-  const phrasesAttached = buildPhraseObjects(rec);
+  const phrasesAttached = forceNoPhrases ? false : buildPhraseObjects(rec);
   rec.__hasPhrases = phrasesAttached;
   rec.onstart = () => {
     speechStarting = false; recRunning = true;
@@ -5984,7 +6016,9 @@ function createSpeechRecognition(){
       setMicButton();
       setStatus('Microphone blocked', 'error');
       addFeedback('⚠️ Microphone access denied. Enable it in your browser settings and try again.', true);
-      micPermission = 'denied'; localStorage.setItem('micPermission','denied');
+      micPermission = 'denied'; try{ localStorage.setItem('micPermission','denied'); }catch(_){}
+      if(readerFullscreen) exitReaderFullscreen();
+      showPermissionHelp('Microphone access denied. Enable it in your browser settings and try again.');
       updateFsMicBtn(); syncFsButtons();
       return;
     }
@@ -6316,7 +6350,6 @@ async function gradeFull(tokens, startIdx){
       used++;
     }
 
-    /* Fix 6 — batch timing with ASR fallback when RMS is unavailable */
     const ctx = batchTimingCtx;
     if(ctx && ctx.startTime > 0 && ctx.wordCount > 1 && ctx.cumulativeRequired > 0 && ctx.contributions.length > 0){
       const now = performance.now();
@@ -6642,7 +6675,6 @@ volIcon.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === '
 window.addEventListener('resize', schedulePositionAudioOverlay);
 window.addEventListener('orientationchange', schedulePositionAudioOverlay);
 
-/* ── Fix 8: RMS-unavailable notice on stream open ──────────── */
 async function ensureMicStream(){
   if(micStream){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
@@ -6678,11 +6710,34 @@ function releaseMicStream(){
   rmsAnalyser.stop();
   if(micStream){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(e){} micStream = null; }
 }
+
+/* ── CHANGE 3: watchdog retries once without phrases before warning ── */
 function startMicWatchdog(){
   clearTimeout(micWatchdogTimer); micAudioConfirmed = false;
   micWatchdogTimer = setTimeout(() => {
     if(!wantMic || micAudioConfirmed) return;
     if(micWarningShown) return;
+    if(followOnly && speechRecognition && speechRecognition.__hasPhrases && !_phrasesRetryDone){
+      _phrasesRetryDone = true;
+      try{ speechRecognition.abort(); }catch(_){}
+      speechRecognition = null;
+      try{
+        speechRecognition = createSpeechRecognition(true);
+        if(speechRecognition){
+          speechRecognition.maxAlternatives = 3;
+          speechRecognition.start();
+          micWarningShown = false;
+          lastResultAt = performance.now();
+          startMicWatchdog();
+          setStatus('Listening', 'listening', contextLabel() + ' (retry)');
+          addFeedback('🔄 Retrying microphone without phrase hints…', false, true);
+          return;
+        }
+      }catch(_){}
+      micWarningShown = true;
+      showBrokenMicWarning();
+      return;
+    }
     micWarningShown = true;
     if(followOnly){ showBrokenMicWarning(); }
     else { markTajweedMicFailed(); }
@@ -6997,7 +7052,6 @@ function jumpToCurrent(){
   scrollCurrentIntoView(true);
 }
 
-/* ── Fix 7: appendMistake carries severity class ───────────── */
 function appendMistake(m){
   if(followOnly) return;
   mistakesPanel.hidden = false;
@@ -7084,7 +7138,6 @@ function recordMistake(i, kind, heardRaw){
   mistakes.push(m); appendMistake(m); scheduleHUD();
 }
 
-/* ── Fix 5a: resetProgress clears _tajweedWarns + throttle ── */
 function resetProgress(fullReset){
   ptr=0; errors=0; finished=false; recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
@@ -7104,7 +7157,6 @@ function resetProgress(fullReset){
   pageEl.scrollTop = 0;
 }
 
-/* ── Fix 5b: jumpToWordAndListen clears _tajweedWarns + throttle ── */
 function jumpToWordAndListen(idx){
   if(viewerOpen && viewerMode === 'audio') return;
   if(idx < 0 || idx >= words.length) return;
@@ -7192,7 +7244,7 @@ function setMicButton(){
   syncFsButtons();
 }
 
-/* ── Fix 9: startReciting guards RMS on device ─────────────── */
+/* ── CHANGE 5 + 6: Follow uses native SpeechRecognition only (no getUserMedia) ── */
 async function startReciting(){
   unlockAudio();
   if(!words.length){
@@ -7203,11 +7255,7 @@ async function startReciting(){
   if(!navigator.onLine){ speechServiceNotified = false; notifySpeechServiceUnreachable(); return; }
 
   if(followOnly){
-    if(micPermission !== 'granted'){
-      const ok = await promptForMic();
-      if(!ok) return;
-      releaseMicStream();
-    }
+    releaseMicStream();
   } else {
     if(micPermission !== 'granted'){
       const ok = await promptForMic();
@@ -7235,6 +7283,7 @@ async function startReciting(){
 
   if(finished) resetProgress(true);
   fsPaused = false; micPaused = false; wantMic = true; speechFatalError = false; speechServiceNotified = false;
+  _phrasesRetryDone = false;
   recReset(); pendingJumpTarget = -1;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
@@ -7259,12 +7308,15 @@ async function startReciting(){
     wantMic = false; releaseMicStream(); stopMicWatchdog(); setMicButton(); updateFsMicBtn(); syncFsButtons();
   }
 }
+
+/* ── CHANGE 7: reset phrases-retry flag on stop ── */
 function stopReciting(silent){
   if(wantMic && !suppressProgressSave) saveProgressNow();
   wantMic=false; micPaused = false;
   resetSpeechPipeline();
   disarmSpeechKeepalive(); pendingJumpTarget = -1;
   cancelFollowPinTimer();
+  _phrasesRetryDone = false;
   pendingHeard.length = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
   prevWordAudio = null;
@@ -9780,7 +9832,6 @@ function openCopyrightModal(){
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && document.body.classList.contains('tj-fs-open')){ toggleTajweedFullscreen(); } });
 })();
 
-/* ── Fix 11: chip click handler reflects transcript-only mode ── */
 (function wireTajweedStatusChip(){
   const chip = document.getElementById('tajweedStatusChip');
   if(!chip) return;
@@ -10134,7 +10185,7 @@ document.addEventListener('keydown', e => {
     else if(e.key === 'ArrowLeft'){ if(!flipping) flipNav(-1); }
   }
 });
-// ── 45 Quranic Duahs for Daily Rotation ──
+
 const DAILY_DUAHS = [
   { arabic: "رَبَّنَا تَقَبَّلْ مِنَّا ۖ إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ", translation: "Our Lord, accept [this] from us. Indeed, You are the Hearing, the Knowing.", reference: "Surah Al-Baqarah 2:127" },
   { arabic: "رَبَّنَا وَاجْعَلْنَا مُسْلِمَيْنِ لَكَ وَمِن ذُرِّيَّتِنَا أُمَّةً مُّسْلِمَةً لَّكَ وَأَرِنَا مَنَاسِكَنَا وَتُبْ عَلَيْنَا ۖ إِنَّكَ أَنتَ التَّوَّابُ الرَّحِيمُ", translation: "Our Lord, and make us Muslims [in submission] to You and from our descendants a Muslim nation [in submission] to You. And show us our rites and accept our repentance. Indeed, You are the Accepting of Repentance, the Merciful.", reference: "Surah Al-Baqarah 2:128" },
@@ -10172,15 +10223,57 @@ const DAILY_DUAHS = [
   { arabic: "رَبَّنَا أَخْرِجْنَا مِنْ هَٰذِهِ الْقَرْيَةِ الظَّالِمِ أَهْلُهَا وَاجْعَل لَّنَا مِن لَّدُنكَ وَلِيًّا وَاجْعَل لَّنَا مِن لَّدُنكَ نَصِيرًا", translation: "Our Lord, take us out of this city of oppressive people and appoint for us from Yourself a protector and appoint for us from Yourself a helper.", reference: "Surah An-Nisa 4:75" },
   { arabic: "رَبَّنَا إِنَّنَا نَخَافُ أَن يَفْرُطَ عَلَيْنَا أَوْ أَن يَطْغَىٰ", translation: "Our Lord, indeed we are afraid that he will hasten [punishment] against us or that he will transgress.", reference: "Surah Ta-Ha 20:45" },
   { arabic: "رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا", translation: "Our Lord, grant us from Yourself mercy and prepare for us from our affair right guidance.", reference: "Surah Al-Kahf 18:10" },
-  { arabic: "رَبِّ لَوْ شِئْتَ أَهْلَكْتَهُم مِّن قَبْلُ وَإِيَّايَ ۖ أَتُهْلِكُنَا بِمَا فَعَلَ السُّفَهَاءُ مِنَّا ۖ إِنْ هِيَ إِلَّا فِتْنَتُكَ تُضِلُّ بِهَا مَن تَشَاءُ وَتَهْدِي مَن تَشَاءُ ۖ أَنتَ وَلِيُّنَا فَاغْفِرْ لَنَا وَارْحَمْنَا ۖ وَأَنتَ خَيْرُ الْغَافِرِينَ", translation: "My Lord, if You had willed, You could have destroyed them before and me [as well]. Would You destroy us for what the foolish among us have done? This is not but Your trial by which You send astray whom You will and guide whom You will. You are our Protector, so forgive us and have mercy upon us, and You are the best of forgivers.", reference: "Surah Al-A'raf 7:155 (Dua of Musa)" },
-  { arabic: "رَبِّ اجْعَلْ هَٰذَا الْبَلَدَ آمِنًا وَاجْنُبْنِي وَبَنِيَّ أَن نَّعْبُدَ الْأَصْنَامَ", translation: "My Lord, make this city [Makkah] secure and keep me and my sons away from worshipping idols.", reference: "Surah Ibrahim 14:35 (Dua of Ibrahim)" },
-  { arabic: "رَبَّنَا إِنَّكَ تَعْلَمُ مَا نُخْفِي وَمَا نُعْلِنُ ۗ وَمَا يَخْفَىٰ عَلَى اللَّهِ مِن شَيْءٍ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ", translation: "Our Lord, indeed You know what we conceal and what we declare, and nothing is hidden from Allah on the earth or in the heaven.", reference: "Surah Ibrahim 14:38" },
+  { arabic: "رَبَّنَا وَسِعْتَ كُلَّ شَيْءٍ رَّحْمَةً وَعِلْمًا فَاغْفِرْ لِلَّذِينَ تَابُوا وَاتَّبَعُوا سَبِيلَكَ وَقِهِمْ عَذَابَ الْجَحِيمِ", translation: "Our Lord, You have encompassed all things in mercy and knowledge, so forgive those who have repented and followed Your way and protect them from the punishment of Hellfire.", reference: "Surah Ghafir 40:7" },
   { arabic: "رَبَّنَا لَا تَجْعَلْنَا مَعَ الْقَوْمِ الظَّالِمِينَ", translation: "Our Lord, do not place us with the wrongdoing people.", reference: "Surah Al-A'raf 7:47" },
   { arabic: "رَبَّنَا افْتَحْ بَيْنَنَا وَبَيْنَ قَوْمِنَا بِالْحَقِّ وَأَنتَ خَيْرُ الْفَاتِحِينَ", translation: "Our Lord, decide between us and our people in truth, and You are the best of those who give decision.", reference: "Surah Al-A'raf 7:89" },
   { arabic: "رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَتَوَفَّنَا مُسْلِمِينَ", translation: "Our Lord, pour upon us patience and let us die as Muslims [in submission to You].", reference: "Surah Al-A'raf 7:126" }
 ];
 
-// ── 25 Authentic Hadiths of the Day ──
+const DUAH_TAFSIR = {
+  "Surah Al-Baqarah 2:127": "When Ibrahim and Ismail raised the foundations of the Ka'bah, they asked Allah to accept their service. This teaches us that even the greatest deeds of worship require Allah's acceptance — the doer is never self-sufficient.",
+  "Surah Al-Baqarah 2:128": "Ibrahim continues his supplication, asking to be made submissive to Allah and for his descendants to form a Muslim nation.",
+  "Surah Al-Baqarah 2:201": "This is the most balanced of all duas — seeking good in both this world and the Hereafter while being protected from the Fire.",
+  "Surah Al-Baqarah 2:250": "Talut's believing army made this dua before facing Jalut's forces. They asked for patience, steadfast feet, and victory.",
+  "Surah Al-Baqarah 2:286": "This is the closing verse of Al-Baqarah, a sweeping dua covering forgiveness, mercy, and protection from burdens beyond our capacity.",
+  "Surah Ali 'Imran 3:8": "A dua after the description of those with sound hearts. It asks Allah not to let the heart deviate after guidance.",
+  "Surah Ali 'Imran 3:16": "The declaration of the people of understanding who affirm their faith and ask for forgiveness of sins.",
+  "Surah Ali 'Imran 3:53": "The disciples of Isa affirming belief in what Allah revealed and following the messenger.",
+  "Surah Ali 'Imran 3:147": "The believers' dua after the Battle of Uhud, asking forgiveness for sins and excesses despite their wounds.",
+  "Surah Ali 'Imran 3:194": "Asking Allah to fulfil what He promised through the messengers and to protect from disgrace on the Day of Judgment.",
+  "Surah Al-A'raf 7:23 (Dua of Adam)": "Adam and Hawwa's dua after eating from the forbidden tree — the model of repentance for all humanity.",
+  "Surah Hud 11:47 (Dua of Nuh)": "Nuh's dua after asking Allah about his drowned son — a reminder to be careful in our speech before Allah.",
+  "Surah Ibrahim 14:40 (Dua of Ibrahim)": "Ibrahim's dua for himself and his descendants to establish prayer — a dua for continuity of worship across generations.",
+  "Surah Ibrahim 14:41": "Ibrahim's dua for forgiveness for himself, his parents, and all believers on the Day of Reckoning.",
+  "Surah Al-Isra 17:80": "A dua for a truthful entrance and a truthful exit, and for divine authority.",
+  "Surah Ta-Ha 20:25-28 (Dua of Musa)": "Musa's dua before facing Pharaoh — asking for expansion of his breast, ease in his task, and eloquence.",
+  "Surah Ta-Ha 20:114": "A short but profound dua for increased knowledge — the only place the Prophet ﷺ was commanded to ask for more of something.",
+  "Surah Al-Anbya 21:87 (Dua of Yunus)": "Yunus's dua from the belly of the whale — a powerful prescription for hardship.",
+  "Surah Al-Anbya 21:83 (Dua of Ayyub)": "Ayyub's brief dua after long illness — a lesson in patience and etiquette with Allah.",
+  "Surah Al-Anbya 21:89 (Dua of Zakariyya)": "Zakariyya's dua for an heir — a supplication for righteous continuity.",
+  "Surah An-Naml 27:19 (Dua of Sulayman)": "Sulayman's dua upon hearing the ant — connecting every blessing to thankfulness and right action.",
+  "Surah Al-Mu'minun 23:109": "The believers' dua affirming faith and asking for forgiveness and mercy.",
+  "Surah Al-Furqan 25:74": "A dua for righteous spouses and children — the home is where spiritual leadership begins.",
+  "Surah Ash-Shu'ara 26:83-85 (Dua of Ibrahim)": "Ibrahim's dua for wisdom, to join the righteous, for an honorable mention, and to be among the inheritors of Paradise.",
+  "Surah Al-Qasas 28:21 (Dua of Musa)": "Musa's dua when fleeing Egypt — a supplication for protection from oppression.",
+  "Surah Al-Qasas 28:16 (Dua of Musa)": "Musa's dua after accidentally killing an Egyptian — showing the model of turning back to Allah after a mistake.",
+  "Surah Ghafir 40:7": "The angels who carry the Throne ask forgiveness for the believers.",
+  "Surah Ad-Dukhan 44:12": "The disbelievers' plea during punishment — the time for faith is now.",
+  "Surah Al-Hashr 59:10": "A foundational dua for unity among Muslims — the heart must be free of grudges.",
+  "Surah Al-Mumtahanah 60:4": "Ibrahim's declaration of reliance on Allah and return to Him — the believer's twin anchors.",
+  "Surah At-Tahrim 66:8": "A dua for perfect light and forgiveness — light is what the believer will need most.",
+  "Surah Al-Mu'minun 23:97-98": "A dua for refuge from the whispers of Shaytan and their presence.",
+  "Surah Al-Ma'idah 5:83": "The believers' affirmation of faith and request to be recorded among the witnesses.",
+  "Surah An-Nisa 4:75": "A dua for deliverance from an oppressive city and for a protector and helper from Allah.",
+  "Surah Ta-Ha 20:45": "Musa and Harun's fear before Pharaoh — showing that fear is human, but trust in Allah is the cure.",
+  "Surah Al-Kahf 18:10": "The youths of the cave's dua for mercy and right guidance.",
+  "Surah Al-A'raf 7:155 (Dua of Musa)": "Musa's dua after the golden calf incident — a lesson in interceding with humility.",
+  "Surah Ibrahim 14:35 (Dua of Ibrahim)": "Ibrahim's dua for the safety of Makkah and protection of his descendants from idol worship.",
+  "Surah Ibrahim 14:38": "Ibrahim's declaration that Allah knows all things — nothing is hidden from Him.",
+  "Surah Al-A'raf 7:47": "A dua not to be placed with the wrongdoing people — seeking safety in Allah.",
+  "Surah Al-A'raf 7:89": "A dua for a just decision between the believers and their opponents.",
+  "Surah Al-A'raf 7:126": "The magicians' dua after believing in Musa — showing that faith is a gift beyond all worldly terror."
+};
+
 const DAILY_HADITHS = [
   { arabic: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى", translation: "Actions are but by intentions, and every person will have only what he intended.", reference: "Sahih al-Bukhari 1 · Sahih Muslim 1907" },
   { arabic: "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ", translation: "None of you truly believes until he loves for his brother what he loves for himself.", reference: "Sahih al-Bukhari 13 · Sahih Muslim 45" },
@@ -10273,6 +10366,7 @@ function loadShareCard(){
   setText('shareHadithArabic',      d.hadith.arabic);
   setText('shareHadithTranslation', d.hadith.translation);
   setText('shareHadithRef',         d.hadith.reference);
+  setText('shareTafsirText', DUAH_TAFSIR[d.duah.reference] || '');
 }
 
 function _cvRoundRect(ctx, x, y, w, h, r){
@@ -10349,6 +10443,15 @@ async function shareCardAsImage(){
     const hadithAr = measureAr(d.hadith.arabic);
     const hadithTr = measureTr('"' + d.hadith.translation + '"');
 
+    const TAFSIR_SIZE = 26;
+    const LH_TAFSIR = 38;
+    const tafsirText = DUAH_TAFSIR[d.duah.reference] || '';
+    const measureTafsir = (text) => {
+      mc.font = TAFSIR_SIZE + 'px ' + UI_FONT;
+      return _cvWrapText(mc, text, INNER - 40);
+    };
+    const tafsirLines = measureTafsir(tafsirText);
+
     let H = PAD;
     H += 50 + 14;
     H += 56 + 4;
@@ -10368,6 +10471,10 @@ async function shareCardAsImage(){
     H += hadithTr.length * LH_TR;
     H += 12;
     H += 28 + 24;
+    H += 30;
+    H += 32 + 8;
+    H += tafsirLines.length * LH_TAFSIR;
+    H += 12;
     H += 30;
     H += 30 + 30;
     H += PAD;
@@ -10501,6 +10608,24 @@ async function shareCardAsImage(){
 
     _cvDrawDivider(ctx, W, PAD, y);
     y += 30;
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#e3bd45';
+    ctx.font = '800 22px ' + UI_FONT;
+    ctx.fillText('TAFSIR OF THE DUAH', PAD + 8, y + 16);
+    y += 32 + 8;
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#8f9bb3';
+    ctx.font = TAFSIR_SIZE + 'px ' + UI_FONT;
+    for (const line of tafsirLines) {
+      ctx.fillText(line, W / 2, y + LH_TAFSIR / 2);
+      y += LH_TAFSIR;
+    }
+    y += 12;
+
+    _cvDrawDivider(ctx, W, PAD, y);
+    y += 30;
     ctx.fillStyle = '#8f9bb3';
     ctx.font = '600 20px ' + UI_FONT;
     ctx.fillText('from Recite,', W / 2, y + 15);
@@ -10567,6 +10692,12 @@ function buildShareCardText(){
   lines.push('_"' + d.hadith.translation + '"_');
   lines.push('');
   lines.push('— ' + d.hadith.reference);
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━');
+  lines.push('');
+  lines.push('*Tafsir of the Duah*');
+  lines.push('');
+  lines.push(DUAH_TAFSIR[d.duah.reference] || '');
   lines.push('');
   lines.push('━━━━━━━━━━━━━━━━━');
   lines.push('');
