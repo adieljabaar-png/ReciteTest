@@ -1,50 +1,72 @@
-<!DOCTYPE html><html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#0d1119" />
-<meta name="google-site-verification" content="kSqzXbRlG9zes7RfT-dKa9P4EJMbWfy9S2KVqTJIU9Y" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Recite" />
-<meta name="application-name" content="Recite" />
-<meta name="description" content="Practice Quran recitation with live word-by-word feedback." />
-<meta name="copyright" content="© 2025 Quran Recitation Coach. All rights reserved." />
-<meta name="rights" content="All rights reserved. AI training prohibited." />
-<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1, noai, noimageai" />
-<meta name="googlebot" content="index, follow" />
-<meta name="bingbot" content="index, follow" />
-<meta name="GPTBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="ChatGPT-User" content="noindex, nofollow, noai, noimageai" />
-<meta name="OAI-SearchBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="CCBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="Google-Extended" content="noindex, nofollow, noai, noimageai" />
-<meta name="Google-CloudVertexBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="anthropic-ai" content="noindex, nofollow, noai, noimageai" />
-<meta name="ClaudeBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="Claude-Web" content="noindex, nofollow, noai, noimageai" />
-<meta name="PerplexityBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="cohere-ai" content="noindex, nofollow, noai, noimageai" />
-<meta name="Bytespider" content="noindex, nofollow, noai, noimageai" />
-<meta name="Applebot-Extended" content="noindex, nofollow, noai, noimageai" />
-<meta name="FacebookBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="ImagesiftBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="Omgilibot" content="noindex, nofollow, noai, noimageai" />
-<meta name="Diffbot" content="noindex, nofollow, noai, noimageai" />
-<meta name="YouBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="TimpiBot" content="noindex, nofollow, noai, noimageai" />
-<meta name="Amazonbot" content="noindex, nofollow, noai, noimageai" />
-<meta name="meta-externalagent" content="noindex, nofollow, noai, noimageai" />
-<link rel="manifest" href="/manifest.json" />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E" />
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E" />
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d1119">
+
+<meta name="google-site-verification=KYcJNZv6RsJdXAIpwZHUuKMi3_YIYT1OCAjw7guBctQ">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Recite">
+<meta name="application-name" content="Recite">
+<meta name="description" content="Practice Quran recitation with live word-by-word feedback.">
+<meta name="copyright" content="© 2025 Quran Recitation Coach. All rights reserved.">
+<meta name="rights" content="All rights reserved. AI training prohibited.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1, noai, noimageai">
+<meta name="googlebot" content="index, follow">
+<meta name="bingbot" content="index, follow">
+<meta name="GPTBot" content="noindex, nofollow, noai, noimageai">
+<meta name="ChatGPT-User" content="noindex, nofollow, noai, noimageai">
+<meta name="OAI-SearchBot" content="noindex, nofollow, noai, noimageai">
+<meta name="CCBot" content="noindex, nofollow, noai, noimageai">
+<meta name="Google-Extended" content="noindex, nofollow, noai, noimageai">
+<meta name="Google-CloudVertexBot" content="noindex, nofollow, noai, noimageai">
+<meta name="anthropic-ai" content="noindex, nofollow, noai, noimageai">
+<meta name="ClaudeBot" content="noindex, nofollow, noai, noimageai">
+<meta name="Claude-Web" content="noindex, nofollow, noai, noimageai">
+<meta name="PerplexityBot" content="noindex, nofollow, noai, noimageai">
+<meta name="cohere-ai" content="noindex, nofollow, noai, noimageai">
+<meta name="Bytespider" content="noindex, nofollow, noai, noimageai">
+<meta name="Applebot-Extended" content="noindex, nofollow, noai, noimageai">
+<meta name="FacebookBot" content="noindex, nofollow, noai, noimageai">
+<meta name="ImagesiftBot" content="noindex, nofollow, noai, noimageai">
+<meta name="Omgilibot" content="noindex, nofollow, noai, noimageai">
+<meta name="Diffbot" content="noindex, nofollow, noai, noimageai">
+<meta name="YouBot" content="noindex, nofollow, noai, noimageai">
+<meta name="TimpiBot" content="noindex, nofollow, noai, noimageai">
+<meta name="Amazonbot" content="noindex, nofollow, noai, noimageai">
+<meta name="meta-externalagent" content="noindex, nofollow, noai, noimageai">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&amp;family=Amiri+Quran&amp;family=Scheherazade+New:wght@400;700&amp;family=Noto+Naskh+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
 <title>Quran Recitation Coach</title>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
-<script defer src="/my-analytics/script.js"></script>
+<script defer="" src="/my-analytics/script.js"></script>
 <style>
   :root{
     --bg:#0d1119;--panel:#151c2b;--panel-2:#1b2436;--line:#28334a;
@@ -570,10 +592,23 @@ body.light-mode .surah-row .dlbtn.done{background:rgba(31,154,90,.14);border-col
   color:var(--text);font-family:inherit;font-weight:600;
   text-align:left;cursor:pointer;-webkit-appearance:none;
   box-shadow:0 6px 18px rgba(0,0,0,.24);
-  transition:border-color .2s,transform .12s,box-shadow .2s;
+  transition:border-color .2s,transform .12s,box-shadow .2s,opacity .2s,filter .2s;
 }
 .reciter-trigger:hover{border-color:rgba(79,140,255,.45)}
 .reciter-trigger:active{transform:scale(.993)}
+.reciter-trigger:disabled,
+.reciter-dropdown.disabled .reciter-trigger{
+  opacity:.42;
+  cursor:not-allowed;
+  filter:grayscale(.5);
+  transform:none;
+}
+.reciter-trigger:disabled:hover,
+.reciter-dropdown.disabled .reciter-trigger:hover{border-color:var(--gold)}
+.reciter-trigger:disabled:active,
+.reciter-dropdown.disabled .reciter-trigger:active{transform:none}
+.reciter-trigger:disabled .rt-chev,
+.reciter-dropdown.disabled .reciter-trigger .rt-chev{opacity:.25}
 .reciter-dropdown.open .reciter-trigger{border-color:rgba(79,140,255,.70);box-shadow:0 8px 22px rgba(79,140,255,.20);}
 .rt-icon{
   font-size:1.1rem;width:40px;height:40px;border-radius:11px;
@@ -2454,7 +2489,7 @@ body.light-mode .share-arabic{color:#1a2233;}
 }
 </style>
 </head>
-<body>
+<body class="page-dark">
 
 <script>
 (function () {
@@ -2490,14 +2525,14 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="home-topbar">
     <div class="home-menu-wrap" id="homeMenuWrap">
       <button id="homeMenuBtn" class="iconbtn" aria-label="Open menu" aria-haspopup="menu" aria-expanded="false">☰</button>
-      <div class="home-menu" id="homeMenu" role="menu" hidden>
-        <button class="home-menu-item has-sub" id="homeMenuInstall" type="button" role="menuitem">
+      <div class="home-menu" id="homeMenu" role="menu" hidden="">
+        <button class="home-menu-item has-sub" id="homeMenuInstall" type="button" role="menuitem" aria-label="Install this app on your device">
           <span class="hmi-ico" id="homeMenuInstallIcon">📲</span>
           <span class="hmi-text">
             <strong id="homeMenuInstallTitle">Install on device</strong>
-            <small id="homeMenuInstallSub">Home Screen icon · full screen</small>
+            <small id="homeMenuInstallSub">Add to Home Screen · full screen</small>
           </span>
-          <span class="hmi-badge" id="homeMenuInstallBadge" hidden>✓</span>
+          <span class="hmi-badge" id="homeMenuInstallBadge" hidden="">✓</span>
         </button>
         <button class="home-menu-item" id="homeMenuNotify" type="button" role="menuitem">
           <span class="hmi-ico">🔔</span><span>Enable notifications</span>
@@ -2518,8 +2553,8 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
     <button class="hijri-card" id="hijriCard" type="button" aria-label="Open Hijri and Gregorian calendar">
       <span class="hijri-sub">Today · Hijri</span>
-      <span class="hijri-main" id="hijriEn">—</span>
-      <span class="hijri-alt" id="hijriAr"></span>
+      <span class="hijri-main" id="hijriEn">3 Jumada al-Akhirah 1448 AH</span>
+      <span class="hijri-alt" id="hijriAr">3 جمادى الثانية 1448 هـ</span>
     </button>
     <button id="homeThemeBtn" class="iconbtn" aria-label="Toggle dark / light theme">🌙</button>
   </div>
@@ -2571,12 +2606,12 @@ body.light-mode .share-arabic{color:#1a2233;}
       <span class="ico">🕌</span>
       <span>Important Islamic Dates</span>
     </div>
-    <ul class="islamic-dates-list" id="islamicDatesList"></ul>
+    <ul class="islamic-dates-list" id="islamicDatesList"><li><span class="ico">✨</span><span class="info"><span class="name">Isra and Mi'raj</span><span class="hijri">27 Raj 1448</span></span><span class="greg">Jan 6, 2027<small>in 53d</small></span></li><li><span class="ico">🌟</span><span class="info"><span class="name">Mid-Sha'ban</span><span class="hijri">15 Sha 1448</span></span><span class="greg">Jan 24, 2027<small>in 71d</small></span></li><li><span class="ico">📿</span><span class="info"><span class="name">Ramadan begins</span><span class="hijri">1 Ram 1448</span></span><span class="greg">Feb 8, 2027<small>in 86d</small></span></li><li><span class="ico">🌌</span><span class="info"><span class="name">Laylat al-Qadr</span><span class="hijri">27 Ram 1448</span></span><span class="greg">Mar 6, 2027<small>in 112d</small></span></li><li><span class="ico">🎉</span><span class="info"><span class="name">Eid al-Fitr</span><span class="hijri">1 Shaw 1448</span></span><span class="greg">Mar 10, 2027<small>in 116d</small></span></li><li><span class="ico">🏔️</span><span class="info"><span class="name">Day of Arafah</span><span class="hijri">9 Dhul H 1448</span></span><span class="greg">May 16, 2027<small>in 183d</small></span></li><li><span class="ico">🐏</span><span class="info"><span class="name">Eid al-Adha</span><span class="hijri">10 Dhul H 1448</span></span><span class="greg">May 17, 2027<small>in 184d</small></span></li><li><span class="ico">🌙</span><span class="info"><span class="name">Islamic New Year</span><span class="hijri">1 Muh 1449</span></span><span class="greg">Jun 6, 2027<small>in 204d</small></span></li><li><span class="ico">🕯️</span><span class="info"><span class="name">Day of Ashura</span><span class="hijri">10 Muh 1449</span></span><span class="greg">Jun 15, 2027<small>in 213d</small></span></li><li><span class="ico">🕌</span><span class="info"><span class="name">Mawlid al-Nabi</span><span class="hijri">12 Rab I 1449</span></span><span class="greg">Aug 15, 2027<small>in 274d</small></span></li></ul>
   </section>
 
 </div>
 
-<div class="app screen" id="screenDashboard" hidden>
+<div class="app screen" id="screenDashboard" hidden="">
   <div class="sub-header">
     <button id="backFromDashboard" class="back-pill" type="button">Back</button>
     <h1>Dashboard</h1>
@@ -2620,35 +2655,42 @@ body.light-mode .share-arabic{color:#1a2233;}
       </div>
 
       <div class="share-header">
-        <div class="share-city" id="shareCityName">—</div>
-        <div class="share-dates" id="shareDates">—</div>
+        <div class="share-city" id="shareCityName">Makkah, SA</div>
+        <div class="share-dates" id="shareDates">3 Jumada al-Akhirah 1448 AH  ·  14 November 2026</div>
       </div>
 
-      <div class="share-prayers" id="sharePrayers"></div>
+      <div class="share-prayers" id="sharePrayers"><div class="share-prayer"><span class="sp-name">Fajr</span><span class="sp-time">04:12</span></div><div class="share-prayer is-sunrise"><span class="sp-name">Sunrise</span><span class="sp-time">05:31</span></div><div class="share-prayer"><span class="sp-name">Zohr</span><span class="sp-time">11:05</span></div><div class="share-prayer"><span class="sp-name">Asr</span><span class="sp-time">14:16</span></div><div class="share-prayer"><span class="sp-name">Maghrib</span><span class="sp-time">16:39</span></div><div class="share-prayer"><span class="sp-name">Isha</span><span class="sp-time">18:09</span></div></div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">🤲 Duah of the Day</div>
-        <p class="share-arabic" id="shareDuahArabic" dir="rtl"></p>
-        <p class="share-translation" id="shareDuahTranslation"></p>
-        <p class="share-reference" id="shareDuahRef"></p>
-      </div>
-
-      <div class="share-divider" role="separator"></div>
-
-<div class="share-block">
-        <div class="share-block-title">📜 Hadith of the Day</div>
-        <p class="share-arabic" id="shareHadithArabic" dir="rtl"></p>
-        <p class="share-translation" id="shareHadithTranslation"></p>
-        <p class="share-reference" id="shareHadithRef"></p>
+        <p class="share-arabic" id="shareDuahArabic" dir="rtl">رَبَّنَا افْتَحْ بَيْنَنَا وَبَيْنَ قَوْمِنَا بِالْحَقِّ وَأَنتَ خَيْرُ الْفَاتِحِينَ</p>
+        <p class="share-translation" id="shareDuahTranslation">Our Lord, decide between us and our people in truth, and You are the best of those who give decision.</p>
+        <p class="share-reference" id="shareDuahRef">Surah Al-A'raf 7:89</p>
       </div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">📚 Tafsir of the Duah</div>
-        <p class="share-tafsir" id="shareTafsirText"></p>
+        <p class="share-tafsir" id="shareTafsirText">A dua for a just decision between the believers and their opponents.</p>
+      </div>
+
+      <div class="share-divider" role="separator"></div>
+
+      <div class="share-block">
+        <div class="share-block-title">📜 Hadith of the Day</div>
+        <p class="share-arabic" id="shareHadithArabic" dir="rtl">لَيْسَ مِنَّا مَنْ لَمْ يَرْحَمْ صَغِيرَنَا وَيَعْرِفْ شَرَفَ كَبِيرِنَا</p>
+        <p class="share-translation" id="shareHadithTranslation">He who does not show mercy to our young or respect our elders is not from us.</p>
+        <p class="share-reference" id="shareHadithRef">Sunan at-Tirmidhi 1919</p>
+      </div>
+
+      <div class="share-divider" role="separator"></div>
+
+      <div class="share-block">
+        <div class="share-block-title">💡 Explanation of the Hadith</div>
+        <p class="share-tafsir" id="shareHadithExplanationText">The Prophet ﷺ defines the character of a believer through how they treat the young and the elderly. Showing mercy to children — being gentle, playful and patient with them — and respecting elders — listening to them, honouring them and caring for them — is essential. This hadith builds a community where generations are connected through mutual love and respect. The Prophet ﷺ himself was known for his gentleness with children and his honour for the elderly.</p>
       </div>
 
       <div class="share-footer">
@@ -2665,7 +2707,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </section>
 </div>
 
-<div class="app screen" id="screenSurahIndex" hidden>
+<div class="app screen" id="screenSurahIndex" hidden="">
   <div class="sub-header">
     <button id="backFromIndex" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Surah index</h1>
@@ -2673,12 +2715,12 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
   <div class="lang-selector-wrap">
     <label class="lang-label" for="surahIndexLang">🌐 Translation</label>
-    <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"></select>
+    <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
   <div class="surah-list" id="surahIndexList"><div class="loading">Loading…</div></div>
 </div>
 
-<div class="app screen" id="screenJuzIndex" hidden>
+<div class="app screen" id="screenJuzIndex" hidden="">
   <div class="sub-header">
     <button id="backFromJuz" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Juz index</h1>
@@ -2686,21 +2728,21 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
   <div class="lang-selector-wrap">
     <label class="lang-label" for="juzIndexLang">🌐 Translation</label>
-    <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"></select>
+    <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
-  <div class="surah-list" id="juzIndexList"></div>
+  <div class="surah-list" id="juzIndexList"><button type="button" class="surah-row"><span class="num">1</span><span class="meta"><span class="en">Alif Lam Meem</span><span class="sub">Page 1 · Juz 1 / 30</span></span><span class="ar">الجزء ١</span></button><button type="button" class="surah-row"><span class="num">2</span><span class="meta"><span class="en">Sayaqul</span><span class="sub">Page 22 · Juz 2 / 30</span></span><span class="ar">الجزء ٢</span></button><button type="button" class="surah-row"><span class="num">3</span><span class="meta"><span class="en">Tilkal Rusul</span><span class="sub">Page 42 · Juz 3 / 30</span></span><span class="ar">الجزء ٣</span></button><button type="button" class="surah-row"><span class="num">4</span><span class="meta"><span class="en">Lan Tanaloo</span><span class="sub">Page 62 · Juz 4 / 30</span></span><span class="ar">الجزء ٤</span></button><button type="button" class="surah-row"><span class="num">5</span><span class="meta"><span class="en">Wal Muhsanat</span><span class="sub">Page 82 · Juz 5 / 30</span></span><span class="ar">الجزء ٥</span></button><button type="button" class="surah-row"><span class="num">6</span><span class="meta"><span class="en">La Yuhibbullah</span><span class="sub">Page 102 · Juz 6 / 30</span></span><span class="ar">الجزء ٦</span></button><button type="button" class="surah-row"><span class="num">7</span><span class="meta"><span class="en">Wa Iza Samiu</span><span class="sub">Page 121 · Juz 7 / 30</span></span><span class="ar">الجزء ٧</span></button><button type="button" class="surah-row"><span class="num">8</span><span class="meta"><span class="en">Wa Lau Annana</span><span class="sub">Page 142 · Juz 8 / 30</span></span><span class="ar">الجزء ٨</span></button><button type="button" class="surah-row"><span class="num">9</span><span class="meta"><span class="en">Qalal Malaou</span><span class="sub">Page 162 · Juz 9 / 30</span></span><span class="ar">الجزء ٩</span></button><button type="button" class="surah-row"><span class="num">10</span><span class="meta"><span class="en">Wa A'lamu</span><span class="sub">Page 182 · Juz 10 / 30</span></span><span class="ar">الجزء ١٠</span></button><button type="button" class="surah-row"><span class="num">11</span><span class="meta"><span class="en">Yatazeroon</span><span class="sub">Page 201 · Juz 11 / 30</span></span><span class="ar">الجزء ١١</span></button><button type="button" class="surah-row"><span class="num">12</span><span class="meta"><span class="en">Wa Mamin Da'abat</span><span class="sub">Page 222 · Juz 12 / 30</span></span><span class="ar">الجزء ١٢</span></button><button type="button" class="surah-row"><span class="num">13</span><span class="meta"><span class="en">Wa Ma Ubarri'u</span><span class="sub">Page 242 · Juz 13 / 30</span></span><span class="ar">الجزء ١٣</span></button><button type="button" class="surah-row"><span class="num">14</span><span class="meta"><span class="en">Rubama</span><span class="sub">Page 262 · Juz 14 / 30</span></span><span class="ar">الجزء ١٤</span></button><button type="button" class="surah-row"><span class="num">15</span><span class="meta"><span class="en">Subhanallazi</span><span class="sub">Page 282 · Juz 15 / 30</span></span><span class="ar">الجزء ١٥</span></button><button type="button" class="surah-row"><span class="num">16</span><span class="meta"><span class="en">Qal Alam</span><span class="sub">Page 302 · Juz 16 / 30</span></span><span class="ar">الجزء ١٦</span></button><button type="button" class="surah-row"><span class="num">17</span><span class="meta"><span class="en">Aqtarabo</span><span class="sub">Page 322 · Juz 17 / 30</span></span><span class="ar">الجزء ١٧</span></button><button type="button" class="surah-row"><span class="num">18</span><span class="meta"><span class="en">Qad Aflaha</span><span class="sub">Page 342 · Juz 18 / 30</span></span><span class="ar">الجزء ١٨</span></button><button type="button" class="surah-row"><span class="num">19</span><span class="meta"><span class="en">Wa Qalallazina</span><span class="sub">Page 362 · Juz 19 / 30</span></span><span class="ar">الجزء ١٩</span></button><button type="button" class="surah-row"><span class="num">20</span><span class="meta"><span class="en">A'man Khalaq</span><span class="sub">Page 382 · Juz 20 / 30</span></span><span class="ar">الجزء ٢٠</span></button><button type="button" class="surah-row"><span class="num">21</span><span class="meta"><span class="en">Utlu Ma Oohiya</span><span class="sub">Page 402 · Juz 21 / 30</span></span><span class="ar">الجزء ٢١</span></button><button type="button" class="surah-row"><span class="num">22</span><span class="meta"><span class="en">Wa Manyaqnut</span><span class="sub">Page 422 · Juz 22 / 30</span></span><span class="ar">الجزء ٢٢</span></button><button type="button" class="surah-row"><span class="num">23</span><span class="meta"><span class="en">Wa Mali</span><span class="sub">Page 442 · Juz 23 / 30</span></span><span class="ar">الجزء ٢٣</span></button><button type="button" class="surah-row"><span class="num">24</span><span class="meta"><span class="en">Faman Azlam</span><span class="sub">Page 462 · Juz 24 / 30</span></span><span class="ar">الجزء ٢٤</span></button><button type="button" class="surah-row"><span class="num">25</span><span class="meta"><span class="en">Elahe Yuraddo</span><span class="sub">Page 482 · Juz 25 / 30</span></span><span class="ar">الجزء ٢٥</span></button><button type="button" class="surah-row"><span class="num">26</span><span class="meta"><span class="en">Ha Meem</span><span class="sub">Page 502 · Juz 26 / 30</span></span><span class="ar">الجزء ٢٦</span></button><button type="button" class="surah-row"><span class="num">27</span><span class="meta"><span class="en">Qala Fama Khatbukum</span><span class="sub">Page 522 · Juz 27 / 30</span></span><span class="ar">الجزء ٢٧</span></button><button type="button" class="surah-row"><span class="num">28</span><span class="meta"><span class="en">Qad Sami Allah</span><span class="sub">Page 542 · Juz 28 / 30</span></span><span class="ar">الجزء ٢٨</span></button><button type="button" class="surah-row"><span class="num">29</span><span class="meta"><span class="en">Tabarakallazi</span><span class="sub">Page 562 · Juz 29 / 30</span></span><span class="ar">الجزء ٢٩</span></button><button type="button" class="surah-row"><span class="num">30</span><span class="meta"><span class="en">Amma Yatasa'aloon</span><span class="sub">Page 582 · Juz 30 / 30</span></span><span class="ar">الجزء ٣٠</span></button></div>
 </div>
 
-<div class="app screen" id="screenBookmarks" hidden>
+<div class="app screen" id="screenBookmarks" hidden="">
   <div class="sub-header">
     <button id="backFromBookmarks" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Bookmarks</h1>
     <span class="sub-note">Hold a verse to add</span>
   </div>
-  <div class="surah-list" id="bookmarksScreenList"></div>
+  <div class="surah-list" id="bookmarksScreenList"><div class="empty-note">No bookmarks yet.<br>Hold any verse for 3 seconds in the reader to save it.</div></div>
 </div>
 
-<div class="app screen" id="screenAudio" hidden>
+<div class="app screen" id="screenAudio" hidden="">
   <div class="sub-header">
     <button id="backFromAudio" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Play audio</h1>
@@ -2710,38 +2752,38 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="reciter-dropdown" id="reciterDropdown">
     <button class="reciter-trigger" id="reciterTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select reciter">
       <span class="rt-icon">🎙️</span>
-      <span class="rt-meta"><span class="rt-label">RECITER</span><span class="rt-value" id="reciterValue">—</span></span>
+      <span class="rt-meta"><span class="rt-label">RECITER</span><span class="rt-value" id="reciterValue">Mishary Rashid Alafasy</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="reciterMenu" role="listbox" aria-label="Available Qaris" hidden></div>
+    <div class="reciter-menu" id="reciterMenu" role="listbox" aria-label="Available Qaris" hidden=""></div>
   </div>
 
   <div class="reciter-dropdown" id="translationDropdown">
     <button class="reciter-trigger" id="translationTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Audio Translation">
       <span class="rt-icon">🌐</span>
-      <span class="rt-meta"><span class="rt-label">AUDIO TRANSLATION</span><span class="rt-value" id="translationValue">—</span></span>
+      <span class="rt-meta"><span class="rt-label">AUDIO TRANSLATION</span><span class="rt-value" id="translationValue">English — Saheeh International</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="translationMenu" role="listbox" aria-label="Available Translations" hidden></div>
+    <div class="reciter-menu" id="translationMenu" role="listbox" aria-label="Available Translations" hidden=""></div>
   </div>
 
   <div class="reciter-dropdown" id="textTranslationDropdown">
     <button class="reciter-trigger" id="textTranslationTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Text Translation">
       <span class="rt-icon">📖</span>
-      <span class="rt-meta"><span class="rt-label">TEXT TRANSLATION</span><span class="rt-value" id="textTranslationValue">—</span></span>
+      <span class="rt-meta"><span class="rt-label">TEXT TRANSLATION</span><span class="rt-value" id="textTranslationValue">English — Abdullah Yusuf Ali</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="textTranslationMenu" role="listbox" aria-label="Available Text Translations" hidden></div>
+    <div class="reciter-menu" id="textTranslationMenu" role="listbox" aria-label="Available Text Translations" hidden=""></div>
   </div>
 
-  <label class="toggle" id="translateAudioChip" style="width: 100%; justify-content: flex-start; margin-bottom: 10px; padding: 12px 16px; border-radius: 14px;">
+  <label class="toggle" id="translateAudioChip" style="width: 100%; justify-content: flex-start; margin-bottom: 10px; padding: 12px 16px; border-radius: 14px; opacity: 1; pointer-events: auto;">
     <input type="checkbox" id="chkTranslateAudio" style="width: 20px; height: 20px;">
     <span style="font-weight: 700; font-size: .9rem; color: var(--text);">Play translation audio</span>
   </label>
 
   <div class="surah-list" id="audioSurahList"><div class="loading">Loading…</div></div>
 </div>
-<div class="app screen" id="screenPrayer" hidden>
+<div class="app screen" id="screenPrayer" hidden="">
   <div class="sub-header">
     <button id="backFromPrayer" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Prayer Times</h1>
@@ -2750,39 +2792,39 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="prayer-top">
     <button class="prayer-settings-btn" id="prayerSettingsBtn" type="button" aria-label="Prayer settings">⚙️</button>
     <div class="prayer-city-wrap">
-      <span class="prayer-city" id="prayerCityName">—</span>
-      <span class="prayer-method" id="prayerMethodName">—</span>
+      <span class="prayer-city" id="prayerCityName">Set your location</span>
+      <span class="prayer-method" id="prayerMethodName">Egyptian General Authority of Survey</span>
     </div>
     <button class="prayer-settings-btn" id="prayerQiblaBtn" type="button" aria-label="Qibla direction">🧭</button>
   </div>
   <div class="prayer-date-row">
-    <span class="pdr-item pdr-hijri" id="pdrHijri">—</span>
+    <span class="pdr-item pdr-hijri" id="pdrHijri">3 Jumada al-Akhirah 1448 AH</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-greg" id="pdrGreg">—</span>
+    <span class="pdr-item pdr-greg" id="pdrGreg">14 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">--:--</span>
+    <span class="pdr-item pdr-time" id="pdrTime">11:55</span>
   </div>
-  <ul class="prayer-list" id="prayerList"></ul>
+  <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
     Tap the bell next to any prayer to toggle its alarm on / off.<br><br>Please note, for the Athaan alarm to sound, do not fully close the app and leave the media volume on.
   </div>
 </div>
 
-<div class="app screen" id="screenCoach" hidden>
+<div class="app screen" id="screenCoach" hidden="">
   <header>
     <button id="btnBackHome" class="back-pill" aria-label="Back to home">Back</button>
     <span class="coach-title">Quran Recitation Coach</span>
     <button id="btnInfo" class="back-pill" aria-label="About the Recitation Coach">Info</button>
     <button id="btnTheme" class="iconbtn" aria-label="Toggle theme">🌙</button>
   </header>
-  <div id="support" class="warnbox" hidden></div>
+  <div id="support" class="warnbox" hidden=""></div>
   <div class="statusbar idle" id="statusbar" role="status" aria-live="polite">
     <span class="dot"></span>
     <span class="label" id="statusLabel">Loading…</span>
     <span class="hint" id="statusHint"></span>
   </div>
   <section class="panel hide-immersive">
-    <div class="row" id="surahNavRow" hidden>
+    <div class="row" id="surahNavRow" hidden="">
       <button id="btnPrevSurah" class="ghost icon" aria-label="Next surah">◀</button>
       <div class="surah-info">
         <span class="surah-en" id="surahEn">—</span>
@@ -2798,9 +2840,9 @@ body.light-mode .share-arabic{color:#1a2233;}
     <div class="stat"><span id="statErrors">—</span><small>Mistakes</small></div>
     <div class="stat"><span id="statAcc">—</span><small>Accuracy</small></div>
   </section>
-  <div class="barwrap"><div class="bar" id="bar"></div></div>
+  <div class="barwrap"><div class="bar" id="bar" style="width: 0%;"></div></div>
   <div class="toggles hide-immersive">
-    <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
+    <button class="toggle mode-pill active" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">Tajweed</button>
     
     <div class="progress-section" id="progressSection">
@@ -2812,7 +2854,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </span>
   <span class="pt-chev">▾</span>
 </button>
-      <div class="progress-menu" id="progressMenu" role="menu" hidden>
+      <div class="progress-menu" id="progressMenu" role="menu" hidden="">
         <button class="progress-item" id="progressFollow" type="button" role="menuitem">
           <span class="pi-icon">👂</span>
           <span class="pi-text"><strong>Follow</strong><small id="progressFollowSub">No saved session</small></span>
@@ -2824,10 +2866,9 @@ body.light-mode .share-arabic{color:#1a2233;}
       </div>
     </div>
 
-    <span class="toggle" id="tajweedStatusChip" hidden
-          role="status" aria-live="polite" aria-atomic="true"></span>
+    <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
     
-    <label class="toggle hide-text" id="hideTextChip" hidden>
+    <label class="toggle hide-text" id="hideTextChip">
       <input type="checkbox" id="chkHideText"> Hide text
     </label>
   </div>
@@ -2836,7 +2877,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button id="btnMic" class="gold-control-main">Start Reciting 🎤</button>
     <button id="btnReset" class="gold-control-small" aria-label="Restart">↺</button>
   </div>
-  <section class="mistakes-panel hide-immersive" id="mistakesPanel" hidden>
+  <section class="mistakes-panel hide-immersive" id="mistakesPanel" hidden="">
     <div class="mistakes-header">
       <span>📋 Mistakes</span>
       <span class="count" id="mistakeCountBadge">0</span>
@@ -2858,7 +2899,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </section>
 </div>
 
-<div class="app screen" id="screenHifz" hidden>
+<div class="app screen" id="screenHifz" hidden="">
   <div class="sub-header">
     <button id="backFromHifz" class="back-pill" type="button">Back</button>
     <h1>Hifz Test</h1>
@@ -2901,7 +2942,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
     <button class="primary" id="hifzStartBtn" type="button" style="width:100%">Start Test</button>
   </div>
-  <div class="hifz-test" id="hifzTestArea" hidden>
+  <div class="hifz-test" id="hifzTestArea" hidden="">
     <div class="hifz-stats-bar">
       <div class="hifz-stat"><span id="hifzAyahProg">0/0</span><small>Ayahs</small></div>
       <div class="hifz-stat"><span id="hifzHintCount">0</span><small>Hints</small></div>
@@ -2918,7 +2959,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
 </div>
 
-<div class="app screen" id="screenTajweed" hidden>
+<div class="app screen" id="screenTajweed" hidden="">
   <div class="sub-header">
     <button id="backFromTajweed" class="back-pill" type="button">Back</button>
     <h1>Tajweed Colors</h1>
@@ -2929,23 +2970,22 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select id="tajweedSurahSelect" class="ps-input" style="flex:1;min-width:0" aria-label="Choose a surah">
       <option value="">Loading surahs…</option>
     </select>
-    <button id="tajweedFullscreenBtn" class="back-pill" type="button"
-            aria-label="Toggle fullscreen">⛶</button>
+    <button id="tajweedFullscreenBtn" class="back-pill" type="button" aria-label="Toggle fullscreen">⛶</button>
   </div>
 
   <div class="tajweed-legend" id="tjLegend">
-    <button class="tj-chip active" data-rule="ham_wasl"       type="button"><span class="tj-dot" style="background:#9b59b6"></span>Hamzat al‑Wasl</button>
+    <button class="tj-chip active" data-rule="ham_wasl" type="button"><span class="tj-dot" style="background:#9b59b6"></span>Hamzat al‑Wasl</button>
     <button class="tj-chip active" data-rule="laam_shamsiyah" type="button"><span class="tj-dot" style="background:#e67e22"></span>Laam Shamsiyyah</button>
-    <button class="tj-chip active" data-rule="madda_normal"   type="button"><span class="tj-dot" style="background:#f1c40f"></span>Madd (normal)</button>
+    <button class="tj-chip active" data-rule="madda_normal" type="button"><span class="tj-dot" style="background:#f1c40f"></span>Madd (normal)</button>
     <button class="tj-chip active" data-rule="madda_permissible" type="button"><span class="tj-dot" style="background:#e67e22"></span>Madd (permissible)</button>
-    <button class="tj-chip active" data-rule="madda_necessary"  type="button"><span class="tj-dot" style="background:#e74c3c"></span>Madd (necessary)</button>
-    <button class="tj-chip active" data-rule="qalqalah"        type="button"><span class="tj-dot" style="background:#2980b9"></span>Qalqalah</button>
-    <button class="tj-chip active" data-rule="ghunnah"         type="button"><span class="tj-dot" style="background:#27ae60"></span>Ghunnah</button>
-    <button class="tj-chip active" data-rule="ikhfa"           type="button"><span class="tj-dot" style="background:#f39c12"></span>Ikhfa</button>
+    <button class="tj-chip active" data-rule="madda_necessary" type="button"><span class="tj-dot" style="background:#e74c3c"></span>Madd (necessary)</button>
+    <button class="tj-chip active" data-rule="qalqalah" type="button"><span class="tj-dot" style="background:#2980b9"></span>Qalqalah</button>
+    <button class="tj-chip active" data-rule="ghunnah" type="button"><span class="tj-dot" style="background:#27ae60"></span>Ghunnah</button>
+    <button class="tj-chip active" data-rule="ikhfa" type="button"><span class="tj-dot" style="background:#f39c12"></span>Ikhfa</button>
     <button class="tj-chip active" data-rule="idghaam_ghunnah" type="button"><span class="tj-dot" style="background:#16a085"></span>Idghaam (with ghunnah)</button>
     <button class="tj-chip active" data-rule="idghaam_no_ghunnah" type="button"><span class="tj-dot" style="background:#1abc9c"></span>Idghaam (no ghunnah)</button>
-    <button class="tj-chip active" data-rule="iqlab"           type="button"><span class="tj-dot" style="background:#8e44ad"></span>Iqlab</button>
-    <button class="tj-chip active" data-rule="silent"          type="button"><span class="tj-dot" style="background:#7f8c8d"></span>Silent</button>
+    <button class="tj-chip active" data-rule="iqlab" type="button"><span class="tj-dot" style="background:#8e44ad"></span>Iqlab</button>
+    <button class="tj-chip active" data-rule="silent" type="button"><span class="tj-dot" style="background:#7f8c8d"></span>Silent</button>
   </div>
 
   <div class="mushaf tajweed-mushaf" id="tajweedMushaf">
@@ -2957,7 +2997,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
 </div>
 
-<div class="quran-viewer" id="quranViewer" hidden>
+<div class="quran-viewer" id="quranViewer" hidden="">
   <div class="qv-stage"><div class="qv-slot" id="viewerMushafSlot"></div></div>
   <div class="qv-chrome" id="qvChrome">
     <div class="qv-top">
@@ -2979,7 +3019,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
   </div>
   <div class="qv-fs-float hidden" id="qvFsFloat">
-    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Toggle fullscreen">⛶</button>
+    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen">⛶</button>
   </div>
 </div>
 
@@ -2987,10 +3027,10 @@ body.light-mode .share-arabic{color:#1a2233;}
 <div class="fs-controls" id="fsControls" role="toolbar" aria-label="Fullscreen controls">
   <button id="fsMic" aria-label="Toggle microphone">🎤</button>
   <span class="fs-sep"></span>
-  <button id="fsPause" aria-label="Pause">⏸</button>
-  <button id="fsContinue" aria-label="Continue">▶</button>
+  <button id="fsPause" aria-label="Pause" disabled="">⏸</button>
+  <button id="fsContinue" aria-label="Continue" disabled="">▶</button>
   <button id="fsStop" aria-label="Stop">⏹</button>
-  <button id="fsReveal" class="fs-text-tab" type="button" style="display:none" aria-label="Reveal text">Reveal text</button>
+  <button id="fsReveal" class="fs-text-tab" type="button" style="display:none" aria-label="Reveal text" title="Reveal the next ayah">Reveal text</button>
   <span class="fs-sep"></span>
   <button id="fsMinimize" aria-label="Minimise fullscreen">⤡</button>
 </div>
@@ -3003,7 +3043,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
 </div>
 
-<div class="qr-fullscreen" id="qrFullscreen" hidden>
+<div class="qr-fullscreen" id="qrFullscreen" hidden="">
   <div class="qr-card">
     <div class="qr-title">Scan to open</div>
     <div class="qr-code" id="qrCodeHost"></div>
@@ -3168,28 +3208,65 @@ const EDITION_FALLBACK = 'quran-uthmani';
 const EDITION_COACH = 'quran-uthmani';
 
 /* ── Translation options ──────────────────────────────────── */
+
 const TEXT_TRANSLATION_OPTIONS = [
-  // English
-  { id: 'en.yusufali',   quranComId: 203, lang: 'en', audioFolder: 'English/Sahih_Intnl_Ibrahim_Walk_192kbps', label: 'English — Abdullah Yusuf Ali',   shortLabel: 'Yusuf Ali' },
-  { id: 'en.sahih',      quranComId: 20,  lang: 'en', audioFolder: 'English/Sahih_Intnl_Ibrahim_Walk_192kbps', label: 'English — Saheeh International', shortLabel: 'Saheeh Intl' },
-
-// Türkçe — text is Diyanet; audio routed to QuranEnc (see buildTranslationAudioUrl)
-  { id: 'tr.diyanet',    quranComId: 77,  lang: 'tr', audioFolder: 'Turkish/Turkish_Kamili_128kbps', quranEncKey: 'turkish_rwwad', label: 'Türkçe — Diyanet', shortLabel: 'Diyanet' },
-
-  // Deutsch
-  { id: 'de.aburida',    quranComId: 27,  lang: 'de', audioFolder: 'German/German_Abu_Rida_128kbps',           label: 'Deutsch — Abu Rida',             shortLabel: 'Abu Rida' },
-  // Français
-  { id: 'fr.hamidullah', quranComId: 31,  lang: 'fr', audioFolder: 'French/French_Hamidullah_128kbps',         label: 'Français — Hamidullah',          shortLabel: 'Hamidullah' },
-  // 中文 (Mandarin)
-  { id: 'zh.jian',       quranComId: 56,  lang: 'zh', audioFolder: 'Chinese/Chinese_Ma_Jian_128kbps',         label: '中文 — Ma Jian',                  shortLabel: 'Ma Jian' }
+  { 
+    id: 'en.yusufali', 
+    quranComId: 203, 
+    lang: 'en', 
+    // KEEPING THIS EXACT FOLDER NAME ensures existing downloads remain valid
+    audioFolder: 'English/Sahih_Intnl_Ibrahim_Walk_192kbps', 
+    label: 'English — Abdullah Yusuf Ali', 
+    shortLabel: 'Yusuf Ali',
+    // Alternate EveryAyah folder names (tried if primary is down)
+    fallbackAudioFolders: [
+      'English/Sahih_Intnl_Ibrahim_Walk_64kbps',
+      'English/Saheeh_International',
+      'English/Sahih_International',
+      'English/Sahih_Intnl_Ibrahim_Walk'
+    ],
+    // Corrected QuranEnc key for English audio
+    quranEncKey: 'english_sahih',
+    // Islamic Network does not host translation audio
+    islamicNetworkKey: null
+  },
+  { 
+    id: 'en.sahih',    
+    quranComId: 20,  
+    lang: 'en', 
+    audioFolder: 'English/Sahih_Intnl_Ibrahim_Walk_192kbps', 
+    label: 'English — Saheeh International', 
+    shortLabel: 'Saheeh Intl',
+    fallbackAudioFolders: [
+      'English/Sahih_Intnl_Ibrahim_Walk_64kbps',
+      'English/Saheeh_International',
+      'English/Sahih_International',
+      'English/Sahih_Intnl_Ibrahim_Walk'
+    ],
+    quranEncKey: 'english_sahih',
+    islamicNetworkKey: null
+  },
+  {
+    id: 'tr.diyanet', 
+    quranComId: 77, 
+    lang: 'tr',
+    audioFolder: 'Turkish/Turkish_Kamili_128kbps',
+    fallbackAudioFolders: [
+      'Turkish/Kamili_128kbps',
+      'Turkish/Kamili',
+      'Turkish/Ali_Kaya_128kbps',
+      'Turkish/Mustafa_Ismail_128kbps'
+    ],
+    quranEncKey: 'turkish_rwwad',
+    islamicNetworkKey: null,
+    label: 'Türkçe — Diyanet', 
+    shortLabel: 'Diyanet'
+  }
 ];
 
 const LANG_OPTIONS = [
-  { code: 'en', name: 'English',   defaultTranslationId: 'en.yusufali'   },
-  { code: 'tr', name: 'Türkçe',    defaultTranslationId: 'tr.diyanet'    },
-  { code: 'de', name: 'Deutsch',   defaultTranslationId: 'de.aburida'    },
-  { code: 'fr', name: 'Français',  defaultTranslationId: 'fr.hamidullah' },
-  { code: 'zh', name: '中文',      defaultTranslationId: 'zh.jian'       }
+  { code: 'en', name: 'English', defaultTranslationId: 'en.yusufali' },
+  { code: 'tr', name: 'Türkçe',  defaultTranslationId: 'tr.diyanet'  }
 ];
 
 let translationTextId = (function () {
@@ -3534,10 +3611,7 @@ const RECITER_ORDER = [
 
 const TRANSLATION_AUDIO_OPTIONS = [
   { id: 'English/Sahih_Intnl_Ibrahim_Walk_192kbps', label: 'English — Saheeh International', textId: 'en.sahih' },
-  { id: 'Turkish/Turkish_Kamili_128kbps',           label: 'Türkçe — Diyanet',               textId: 'tr.diyanet' },
-  { id: 'German/German_Abu_Rida_128kbps',           label: 'Deutsch — Abu Rida',             textId: 'de.aburida' },
-  { id: 'French/French_Hamidullah_128kbps',         label: 'Français — Hamidullah',          textId: 'fr.hamidullah' },
-  { id: 'Chinese/Chinese_Ma_Jian_128kbps',          label: '中文 — Ma Jian',                  textId: 'zh.jian' }
+  { id: 'Turkish/Turkish_Kamili_128kbps',           label: 'Türkçe — Kamili',                textId: 'tr.diyanet' }
 ];
 
 const _levCache = new Map();
@@ -3837,25 +3911,42 @@ function buildAyahUrl(folder, surah, ayah){
   return AYAH_AUDIO_BASE + folder + '/' + String(surah).padStart(3,'0') + String(ayah).padStart(3,'0') + '.mp3';
 
 }
+  // Returns the full ordered list of candidate URLs for a translation.
+// Candidate 0 is the "primary" URL and is used as the cache key for downloads.
 
-function buildTranslationAudioUrl(folder, surah, ayah){
+function buildTranslationAudioUrls(folder, surah, ayah){
   const opt = TEXT_TRANSLATION_OPTIONS.find(t => t.audioFolder === folder);
+  const s = String(surah).padStart(3, '0');
+  const a = String(ayah).padStart(3, '0');
+  const primaryFolder = (opt && opt.audioFolder) ? opt.audioFolder : folder;
+  const urls = [];
 
-  // ── Türkçe ────────────────────────────────────────────────────────────────
-  // EveryAyah's "Turkish/Turkish_Kamili_128kbps" folder is no longer served.
-  // Route Turkish requests to QuranEnc, which hosts per-ayah Turkish audio
-  // with predictable URL pattern: /data/audio/{key}/{sura_3}{aya_3}.mp3
-  if (opt && opt.lang === 'tr' && opt.quranEncKey) {
-    const s = String(surah).padStart(3, '0');
-    const a = String(ayah).padStart(3, '0');
-    return 'https://d.quranenc.com/data/audio/' + opt.quranEncKey + '/' + s + a + '.mp3';
+  // 1. Primary EveryAyah translation URL
+  urls.push('https://everyayah.com/data/translations/' + primaryFolder + '/' + s + a + '.mp3');
+
+  // 2. Alternate EveryAyah folder names
+  if (opt && Array.isArray(opt.fallbackAudioFolders)) {
+    for (const fb of opt.fallbackAudioFolders) {
+      if (!fb || fb === primaryFolder) continue;
+      const u = 'https://everyayah.com/data/translations/' + fb + '/' + s + a + '.mp3';
+      if (urls.indexOf(u) === -1) urls.push(u);
+    }
   }
 
-  // ── EveryAyah path (English / German / French / Chinese) ─────────────────
-  let resolvedFolder = folder;
-  if (opt) resolvedFolder = opt.audioFolder;
-  return AYAH_AUDIO_BASE + resolvedFolder + '/' +
-         String(surah).padStart(3,'0') + String(ayah).padStart(3,'0') + '.mp3';
+  // 3. QuranEnc CDN (CORS-less, but plays fine as HTML audio)
+  if (opt && opt.quranEncKey) {
+    urls.push('https://d.quranenc.com/data/audio/' + opt.quranEncKey + '/' + s + a + '.mp3');
+  }
+
+  return urls;
+}
+
+// Back-compat: existing call sites (download cache key, removeSurahDownload)
+// only need the primary URL.
+
+function buildTranslationAudioUrl(folder, surah, ayah){
+  const urls = buildTranslationAudioUrls(folder, surah, ayah);
+  return urls.length ? urls[0] : '';
 }
 
 const AUDIO_CACHE_NAME = 'qc-audio';
@@ -7943,7 +8034,7 @@ const JUZ_NAMES_AR = ['الم','سيقول','تلك الرسل','لن تنالو
 const JUZ_START_PAGES_FALLBACK = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
 function renderJuzIndex(){
   juzIndexList.innerHTML = '';
-  const label = { en: 'Juz', tr: 'Cüz', de: 'Dschuz', fr: 'Juz', zh: '卷' }[surahIndexLang] || 'Juz';
+  const label = { en: 'Juz', tr: 'Cüz' }[surahIndexLang] || 'Juz';
   for(let i = 1; i <= 30; i++){
     const row = document.createElement('button');
     row.type = 'button'; row.className = 'surah-row';
@@ -8168,6 +8259,20 @@ function changeTranslation(id){
         try { localStorage.setItem('qc.surahIndexLang', surahIndexLang); } catch (e) {}
         populateLangSelectors();
       }
+      // Keep text translation in lockstep when Play translation audio is on
+      if (viewerAudio.playTranslation && translationTextId !== opt.textId) {
+        translationTextId = opt.textId;
+        try { localStorage.setItem('qc.translationText', translationTextId); } catch (e) {}
+        try { readerState.pages.clear(); } catch (e) {}
+        updateTextTranslationTrigger();
+        if (textTranslationMenu) {
+          textTranslationMenu.querySelectorAll('.reciter-item').forEach(it => {
+            const on = it.dataset.textTrans === translationTextId;
+            it.classList.toggle('active', on);
+            it.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+        }
+      }
     }
   } catch (e) {}
   updateTranslationTrigger();
@@ -8195,6 +8300,7 @@ function renderTextTranslationSelect(){
 }
 function updateTextTranslationTrigger(){ if(textTranslationValue) textTranslationValue.textContent = currentTextTranslationLabel(); }
 function openTextTranslationMenu(){
+  if(viewerAudio.playTranslation){ showToast('🔒 Text translation is locked to the audio translation while "Play translation audio" is on.'); return; }
   if(!textTranslationMenu || !textTranslationTrigger || !textTranslationDropdown) return;
   textTranslationMenu.querySelectorAll('.reciter-item').forEach(it => { const on = it.dataset.textTrans === translationTextId; it.classList.toggle('active', on); it.setAttribute('aria-selected', on ? 'true' : 'false'); });
   textTranslationDropdown.classList.add('open'); textTranslationMenu.hidden = false; textTranslationTrigger.setAttribute('aria-expanded', 'true');
@@ -8206,7 +8312,53 @@ function closeTextTranslationMenu(){
   textTranslationDropdown.classList.remove('open'); textTranslationMenu.hidden = true; textTranslationTrigger.setAttribute('aria-expanded', 'false');
 }
 function toggleTextTranslationMenu(){ if(!textTranslationMenu) return; if(textTranslationMenu.hidden) openTextTranslationMenu(); else closeTextTranslationMenu(); }
+function setPlayTranslationState(enabled){
+  if(enabled){
+    // 1. Force the text translation to match the current audio translation
+    const audioOpt = TRANSLATION_AUDIO_OPTIONS.find(t => t.id === viewerAudio.translationId);
+    if(audioOpt && audioOpt.textId){
+      const textOpt = TEXT_TRANSLATION_OPTIONS.find(t => t.id === audioOpt.textId);
+      if(textOpt && textOpt.lang && textOpt.lang !== surahIndexLang){
+        surahIndexLang = textOpt.lang;
+        try{ localStorage.setItem('qc.surahIndexLang', surahIndexLang); }catch(_){}
+        populateLangSelectors();
+      }
+      if(translationTextId !== audioOpt.textId){
+        translationTextId = audioOpt.textId;
+        try{ localStorage.setItem('qc.translationText', translationTextId); }catch(_){}
+        try{ readerState.pages.clear(); }catch(_){}
+        updateTextTranslationTrigger();
+        if(textTranslationMenu){
+          textTranslationMenu.querySelectorAll('.reciter-item').forEach(it => {
+            const on = it.dataset.textTrans === translationTextId;
+            it.classList.toggle('active', on);
+            it.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+        }
+      }
+    }
+    // 2. Close any open menu, then disable the trigger
+    closeTextTranslationMenu();
+    if(textTranslationDropdown) textTranslationDropdown.classList.add('disabled');
+    if(textTranslationTrigger){
+      textTranslationTrigger.disabled = true;
+      textTranslationTrigger.setAttribute('aria-disabled', 'true');
+      textTranslationTrigger.title = 'Locked to the audio translation';
+    }
+  } else {
+    if(textTranslationDropdown) textTranslationDropdown.classList.remove('disabled');
+    if(textTranslationTrigger){
+      textTranslationTrigger.disabled = false;
+      textTranslationTrigger.removeAttribute('aria-disabled');
+      textTranslationTrigger.removeAttribute('title');
+    }
+  }
+}
 function changeTextTranslation(id){
+  if(viewerAudio.playTranslation){
+    showToast('🔒 Text translation is locked to the audio translation while "Play translation audio" is enabled.');
+    return;
+  }
   translationTextId = id;
   try{ localStorage.setItem('qc.translationText', id); }catch(e){}
   try {
@@ -8347,43 +8499,80 @@ async function probeTranslationAudio(url){
     return true;
   }catch(_){ return false; }
 }
+async function isUsableAudioResponse(res){
+  if(!res || !res.ok) return false;
+  const ct = (res.headers.get('content-type') || '').toLowerCase();
+  if(ct && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(ct)) return false;
+  try{
+    const blob = await res.clone().blob();
+    if(blob.size < 1000) return false;
+    if(blob.type && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(blob.type.toLowerCase())) return false;
+    const head = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
+    if(head.length >= 3 && head[0] === 0x3C) return false;
+    if(head.length >= 3 && !(head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) && !(head[0] === 0xFF && (head[1] & 0xE0) === 0xE0)) return false;
+  }catch(_){ return false; }
+  return true;
+}
 async function fetchAudioForOffline(url, parentSignal){
   const bridge = downloadAbortBridge(parentSignal, DOWNLOAD_TIMEOUT_MS);
   try{
     try{
       const res = await fetch(url, { mode: 'cors', cache: 'no-store', signal: bridge.signal });
-      if(res){
-        if(!res.ok) return null;
-        const ct = (res.headers.get('content-type') || '').toLowerCase();
-        if(!ct || /audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(ct)) return res;
-        return null;
+      if(res && res.ok && await isUsableAudioResponse(res)) {
+        return res;
       }
     }catch(_){}
-    if(bridge.signal.aborted) return null;
-    try{ const res = await fetch(url, { mode: 'no-cors', cache: 'no-store', signal: bridge.signal }); if(res && (res.type === 'opaque' || res.ok)) return res; }catch(_){}
     return null;
   } finally { bridge.release(); }
 }
 async function fetchAndStoreAyah(cache, reciterId, surah, ayah, primaryUrl, signal, isTranslation){
   try{
     const hit = await cache.match(primaryUrl, { ignoreSearch: true, ignoreVary: true });
-    if(hit) return 'cached';
+    if(hit){
+      if(hit.type === 'opaque'){ try{ await cache.delete(primaryUrl, { ignoreSearch: true, ignoreVary: true }); }catch(_){} }
+      else {
+        const hitCt = (hit.headers.get('content-type') || '').toLowerCase();
+        if(hitCt && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(hitCt)){ try{ await cache.delete(primaryUrl, { ignoreSearch: true, ignoreVary: true }); }catch(_){} }
+        else return 'cached';
+      }
+    }
   }catch(_){}
-  const sources = [primaryUrl];
+  
+  let sources = [primaryUrl];
+  
   if(!isTranslation){
     islamicNetworkUrls(reciterId, surah, ayah).forEach(u => sources.push(u));
     if(reciterId !== FALLBACK_RECITER){
       sources.push(buildAyahUrl(FALLBACK_RECITER, surah, ayah));
       islamicNetworkUrls(FALLBACK_RECITER, surah, ayah).forEach(u => sources.push(u));
     }
+
+} else {
+    // Add every translation candidate except the primary (already in `sources`).
+    // This lets a download succeed even if the primary folder name is wrong.
+    const allUrls = buildTranslationAudioUrls(reciterId, surah, ayah);
+    for (let i = 0; i < allUrls.length; i++) {
+      const u = allUrls[i];
+      if (u && u !== primaryUrl && sources.indexOf(u) === -1) sources.push(u);
+    }
   }
+
   for(let i = 0; i < sources.length; i++){
     if(signal.aborted) return 'aborted';
     const res = await fetchAudioForOffline(sources[i], signal);
     if(!res) continue;
     try{
-      await cache.put(primaryUrl, res.clone());
-      try{ if(res.body) res.body.cancel(); }catch(_){}
+      if (res.type === 'opaque') { continue; }
+      const blob = await res.clone().blob();
+      if (blob.size < 1000) { continue; } // Skip empty/error HTML pages
+      const blobCt = (blob.type || res.headers.get('content-type') || '').toLowerCase();
+      if (blobCt && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(blobCt)) { continue; }
+      try{
+        const head = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
+        if (head.length >= 3 && head[0] === 0x3C) { continue; }
+        if (head.length >= 3 && !(head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) && !(head[0] === 0xFF && (head[1] & 0xE0) === 0xE0)) { continue; }
+      }catch(_){ continue; }
+      await cache.put(primaryUrl, new Response(blob, { headers: { 'Content-Type': 'audio/mpeg' } }));
       return 'ok';
     }catch(err){ if(err && err.name === 'QuotaExceededError') return 'quota'; }
   }
@@ -8459,9 +8648,14 @@ async function downloadTranslationSurahAudio(surahNumber) {
       if(r === 'ok' || r === 'cached') state.done++;
       else state.failed.push(ayah);
       refreshBtn();
+      // Delay to prevent rate-limiting
+      await new Promise(res => setTimeout(res, 300));
     }
   }
-  try{ const workers = []; for(let w = 0; w < DOWNLOAD_CONCURRENCY; w++) workers.push(worker()); await Promise.all(workers); }catch(err){ console.warn('[Download] failed:', err); }
+  try{ 
+    // Use 1 worker for translations to avoid rate limits
+    await worker(); 
+  }catch(err){ console.warn('[Download] failed:', err); }
   const wasAborted = controller.signal.aborted;
   dlState.delete(key);
   if(quotaHit){ showToast('⚠️ Storage is full. Free up space, then tap ⬇ to resume.', 4600); }
@@ -8540,12 +8734,7 @@ async function handleAudioDownloadTap(surahNumber, type){
   if(downloads[key]){ const yes = await confirmRemoveDownload(surahNumber, type); if(yes) await removeSurahDownload(surahNumber, type); return; }
   if(!navigator.onLine){ showToast('📶 Connect to the internet to download audio.', 3800); return; }
   if(!('caches' in window)){ showToast('⚠️ This browser cannot store audio offline.', 4200); return; }
-  if(type === 'tr'){
-    const probeUrl = buildTranslationAudioUrl(viewerAudio.translationId, surahNumber, 1);
-    showToast('⏳ Checking translation availability…', 6000);
-    const available = await probeTranslationAudio(probeUrl);
-    if(!available){ showToast('⚠️ This English translation isn\'t available on the audio server.', 6000); return; }
-  }
+  // Probe removed — download function handles CORS safely.
   const yes = await confirmSurahDownload(surahNumber, type);
   if(!yes) return;
   if(type === 'ar') downloadSurahAudio(surahNumber);
@@ -8875,8 +9064,7 @@ const viewerAudio = {
 };
 let viewerAudioErrorStreak = 0;
 function getActiveTextTranslationId(){
-  const langOpt = TEXT_TRANSLATION_OPTIONS.find(t => t.lang === surahIndexLang);
-  return langOpt ? langOpt.id : translationTextId;
+  return translationTextId;
 }
 async function reloadViewerTranslation(){
   if(!viewerAudio.active || !viewerAudio.surah) return;
@@ -9153,11 +9341,22 @@ async function loadViewerAudioSurah(surahNumber){
     viewerAudio.ayahIdx = 1; playCurrentViewerAyah(); return;
   }
   viewerAudioErrorStreak = 0;
+
   if(viewerAudio.playTranslation){
     const transOpt = TEXT_TRANSLATION_OPTIONS.find(t => t.lang === surahIndexLang);
     const transFolder = transOpt ? transOpt.audioFolder : 'English/Sahih_Intnl_Ibrahim_Walk_192kbps';
-    const transUrl = buildTranslationAudioUrl(transFolder, surahNumber, 1);
-    if(transUrl){ await playTranslationWithHealing(transUrl); if(myToken !== viewerAudio.token) return; if(!viewerAudio.active || viewerAudio.paused) return; }
+    const transUrls = buildTranslationAudioUrls(transFolder, surahNumber, 1);
+    if(transUrls.length){
+      const trResult = await playTranslationWithHealing(transUrls);
+      if(myToken !== viewerAudio.token) return;
+      if(!viewerAudio.active || viewerAudio.paused) return;
+      if(trResult && trResult.ok === false &&
+         trResult.reason !== 'superseded' &&
+         trResult.reason !== 'stopped' &&
+         trResult.reason !== 'autoplay-blocked'){
+        showToast('⚠️ Translation audio for ' + surahNumber + ':1 could not be loaded.', 3600);
+      }
+    }
   }
   const el1 = findViewerAyahEl(surahNumber, 1);
   if(el1){ el1.classList.remove('playing'); el1.classList.add('done'); }
@@ -9212,23 +9411,66 @@ function updateTranslationCheckboxState() {
   translateAudioChip.style.opacity = '1';
   translateAudioChip.style.pointerEvents = 'auto';
 }
-async function playTranslationWithHealing(url){
-  let result = await playUrl(url);
-  if(!result || result.ok !== false) return result;
-  if(result.reason !== 'load-error' && result.reason !== 'timeout') return result;
-  if(!navigator.onLine) return result;
-  try{
-    const healUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + '_heal=' + Date.now();
-    const res = await fetch(healUrl, { cache: 'no-store' });
-    if(!res.ok) return result;
-    const blob = await res.blob();
-    if(!blob.size || blob.size < 200) return result;
-    try{ const cache = await caches.open(AUDIO_CACHE_NAME); await cache.put(url, new Response(blob, { status: 200, statusText: 'OK', headers: { 'Content-Type': blob.type || 'audio/mpeg' } })); }catch(_){}
-    const blobUrl = URL.createObjectURL(blob);
-    try{ return await playUrl(blobUrl); }
-    finally{ setTimeout(() => { try{ URL.revokeObjectURL(blobUrl); }catch(_){} }, 120000); }
-  }catch(_){ return result; }
+
+async function playTranslationWithHealing(urls){
+  // Accepts either a single URL (string) or an array of candidates.
+  const candidates = Array.isArray(urls) ? urls.filter(Boolean) : (urls ? [urls] : []);
+  if (!candidates.length) return { ok: false, reason: 'no-url' };
+
+  let last = null;
+  for (let i = 0; i < candidates.length; i++) {
+    const url = candidates[i];
+    const result = await playUrl(url);
+
+    if (result && result.ok !== false) return result;
+    // Don't fan out for these — they mean "user/player state", not "URL broken"
+    if (result && (result.reason === 'superseded' ||
+                   result.reason === 'stopped' ||
+                   result.reason === 'autoplay-blocked')) {
+      return result;
+    }
+    last = result;
+    if (!navigator.onLine) return result;
+
+    // Try a cache-heal on this specific candidate before moving on
+    if (result && (result.reason === 'load-error' || result.reason === 'timeout')) {
+      try {
+        const healUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + '_heal=' + Date.now();
+        const res = await fetch(healUrl, { cache: 'no-store' });
+        if (res.ok) {
+          const blob = await res.blob();
+          const healCt = (blob.type || res.headers.get('content-type') || '').toLowerCase();
+          let healLooksAudio = blob.size && blob.size >= 1000 && (!healCt || /audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(healCt));
+          if (healLooksAudio) {
+            try{
+              const head = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
+              if (head.length >= 3 && head[0] === 0x3C) healLooksAudio = false;
+              else if (head.length >= 3 && !(head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) && !(head[0] === 0xFF && (head[1] & 0xE0) === 0xE0)) healLooksAudio = false;
+            }catch(_){ healLooksAudio = false; }
+          }
+          if (healLooksAudio) {
+            try {
+              const cache = await caches.open(AUDIO_CACHE_NAME);
+              await cache.put(url, new Response(blob, {
+                status: 200, statusText: 'OK',
+                headers: { 'Content-Type': blob.type || 'audio/mpeg' }
+              }));
+            } catch (_) {}
+            const blobUrl = URL.createObjectURL(blob);
+            try {
+              const healRes = await playUrl(blobUrl);
+              if (healRes && healRes.ok !== false) return healRes;
+            } finally {
+              setTimeout(() => { try { URL.revokeObjectURL(blobUrl); } catch (_) {} }, 120000);
+            }
+          }
+        }
+      } catch (_) {}
+    }
+  }
+  return last || { ok: false, reason: 'load-error' };
 }
+
 async function playCurrentViewerAyah(){
   if(!viewerAudio.active) return;
   if(!viewerOpen) return;
@@ -9266,16 +9508,28 @@ async function playCurrentViewerAyah(){
     viewerAudio.ayahIdx++; playCurrentViewerAyah(); return;
   }
   viewerAudioErrorStreak = 0;
-  if (viewerAudio.playTranslation) {
+
+if (viewerAudio.playTranslation) {
     const transOpt = TEXT_TRANSLATION_OPTIONS.find(t => t.lang === surahIndexLang);
     const transFolder = transOpt ? transOpt.audioFolder : 'English/Sahih_Intnl_Ibrahim_Walk_192kbps';
-    const transUrl = buildTranslationAudioUrl(transFolder, sNum, aNum);
-    if (transUrl) {
-      const trResult = await playTranslationWithHealing(transUrl);
+    const transUrls = buildTranslationAudioUrls(transFolder, sNum, aNum);
+    if (transUrls.length) {
+      const trResult = await playTranslationWithHealing(transUrls);
       if(myToken !== viewerAudio.token) return;
       if(!viewerAudio.active || viewerAudio.paused) return;
+      if (trResult && trResult.ok === false &&
+          trResult.reason !== 'superseded' &&
+          trResult.reason !== 'stopped' &&
+          trResult.reason !== 'autoplay-blocked') {
+        // Warn once per session so a full surah doesn't spam the toast
+        if (!viewerAudio.playTranslationWarned) {
+          viewerAudio.playTranslationWarned = true;
+          showToast('⚠️ Translation audio is unavailable right now. Arabic continues to play.', 4200);
+        }
+      }
     }
   }
+
   if(line){ line.classList.remove('playing'); line.classList.add('done'); }
   viewerAudio.ayahIdx++;
   playCurrentViewerAyah();
@@ -10013,6 +10267,12 @@ tilePlayAudio.addEventListener('click', () => {
   renderTranslationSelect(); closeTranslationMenu();
   renderTextTranslationSelect(); closeTextTranslationMenu();
   renderAudioSurahList();
+  // Restore the locked state if the user left it enabled
+  if(chkTranslateAudio && chkTranslateAudio.checked){
+    setPlayTranslationState(true);
+  } else {
+    setPlayTranslationState(false);
+  }
 });
 tileBookmarks.addEventListener('click', () => { showScreen('bookmarks'); renderBookmarksScreen(); });
 if(tileDashboard) tileDashboard.addEventListener('click', () => { showScreen('dashboard'); });
@@ -10084,13 +10344,18 @@ function openCopyrightModal(){
   if(chkTranslateAudio){
     chkTranslateAudio.addEventListener('change', (e) => {
       viewerAudio.playTranslation = e.target.checked;
+      setPlayTranslationState(e.target.checked);
       if(viewerAudio.active && viewerAudio.surah && viewerAudio.metaLoaded){ reloadViewerTranslation(); }
     });
   }
 })();
 (function wireTextTranslationDropdown(){
   if(!textTranslationTrigger || !textTranslationMenu || !textTranslationDropdown) return;
-  textTranslationTrigger.addEventListener('click', (e) => { e.stopPropagation(); toggleTextTranslationMenu(); });
+  textTranslationTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(viewerAudio.playTranslation){ showToast('🔒 Text translation is locked to the audio translation while "Play translation audio" is on.'); return; }
+    toggleTextTranslationMenu();
+  });
   document.addEventListener('click', (e) => { if(textTranslationMenu.hidden) return; if(textTranslationDropdown.contains(e.target)) return; closeTextTranslationMenu(); });
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && !textTranslationMenu.hidden){ closeTextTranslationMenu(); } });
 })();
@@ -10299,7 +10564,7 @@ function openInfoModal(){
     '<div class="feature"><h3><span class="fnum">1</span> Hijri date &amp; calendar</h3><ul><li>Today\'s <b>Hijri date</b> is computed from the same arithmetic algorithm used by the calendar.</li></ul></div>' +
     '<div class="feature"><h3><span class="fnum">2</span> Reader with swipeable pages</h3><ul><li><b>Swipe right</b> to turn to the next page; <b>swipe left</b> to go back.</li></ul></div>' +
     '<div class="feature"><h3><span class="fnum">3</span> Book-form mushaf layout</h3><ul><li>Every page is laid out like a printed <b>IndoPak mushaf</b>.</li></ul></div>' +
-    '<div class="feature"><h3><span class="fnum">4</span> 📖 Multi-language translations</h3><ul><li>English (Yusuf Ali &amp; Saheeh International), Türkçe (Diyanet), Deutsch (Abu Rida), Français (Hamidullah), and 中文 (Ma Jian). Choose the language on the <b>Surah index</b>, <b>Juz index</b>, or <b>Play audio</b> screen — the choice applies to the reader and to audio playback.</li></ul></div>' +
+    '<div class="feature"><h3><span class="fnum">4</span> 📖 Multi-language translations</h3><ul><li>English (Yusuf Ali &amp; Saheeh International) and Türkçe (Diyanet). Choose the language on the <b>Surah index</b>, <b>Juz index</b>, or <b>Play audio</b> screen — the choice applies to the reader and to audio playback.</li></ul></div>' +
     '<div class="feature"><h3><span class="fnum">5</span> 🎙️ ' + RECITER_ORDER.length + ' Qari reciters</h3><ul><li><b>Default:</b> Mishary Rashid Alafasy.</li></ul><div style="margin-top:8px;background:rgba(0,0,0,.20);border:1px solid rgba(79,140,255,.25);border-radius:10px;padding:9px 12px"><ul style="margin:0;list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">' + reciterListHtml + '</ul></div></div>' +
     '<div class="feature"><h3><span class="fnum">6</span> Bookmarks</h3><ul><li><b>Hold any verse for 3 seconds</b> to bookmark it.</li></ul></div>' +
     '<div class="feature"><h3><span class="fnum">7</span> Play audio, translation &amp; offline downloads</h3><ul><li>Tap <b>⬇</b> to download a surah for offline.</li></ul></div>' +
@@ -10590,31 +10855,56 @@ const DUAH_TAFSIR = {
 };
 
 const DAILY_HADITHS = [
-  { arabic: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى", translation: "Actions are but by intentions, and every person will have only what he intended.", reference: "Sahih al-Bukhari 1 · Sahih Muslim 1907" },
-  { arabic: "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ", translation: "None of you truly believes until he loves for his brother what he loves for himself.", reference: "Sahih al-Bukhari 13 · Sahih Muslim 45" },
-  { arabic: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ", translation: "Whoever believes in Allah and the Last Day, let him speak good or remain silent.", reference: "Sahih al-Bukhari 6018 · Sahih Muslim 47" },
-  { arabic: "إِنَّ أَحْسَنَكُمْ أَخْلَاقًا أَحَاسِنُكُمْ إِيمَانًا", translation: "The most complete of believers in faith are those with the best character.", reference: "Sunan at-Tirmidhi 1162" },
-  { arabic: "إِنَّ اللَّهَ لاَ يَنْظُرُ إِلَى صُوَرِكُمْ وَأَمْوَالِكُمْ، وَلَكِنْ يَنْظُرُ إِلَى قُلُوبِكُمْ وَأَعْمَالِكُمْ", translation: "Allah does not look at your appearance or your wealth, but He looks at your hearts and your deeds.", reference: "Sahih Muslim 2564" },
-  { arabic: "أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ", translation: "The most beloved of deeds to Allah are those that are most consistent, even if they are small.", reference: "Sahih al-Bukhari 6464 · Sahih Muslim 783" },
-  { arabic: "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ", translation: "A Muslim is the one from whose tongue and hands the Muslims are safe.", reference: "Sahih al-Bukhari 10 · Sahih Muslim 40" },
-  { arabic: "لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ", translation: "The strong man is not the one who can overpower others, but the one who controls himself when angry.", reference: "Sahih al-Bukhari 6114 · Sahih Muslim 2609" },
-  { arabic: "اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ، وَأَتْبِعِ السَّيِّئَةَ الْحَسَنَةَ تَمْحُهَا، وَخَالِقِ النَّاسَ بِخُلُقٍ حَسَنٍ", translation: "Fear Allah wherever you are, follow a bad deed with a good one and it will wipe it out, and treat people with good character.", reference: "Sunan at-Tirmidhi 1987" },
-  { arabic: "الطُّهُورُ شَطْرُ الإِيمَانِ", translation: "Cleanliness is half of faith.", reference: "Sahih Muslim 223" },
-  { arabic: "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ", translation: "The best of you are those who learn the Quran and teach it.", reference: "Sahih al-Bukhari 5027" },
-  { arabic: "يَسِّرُوا وَلَا تُعَسِّرُوا، وَبَشِّرُوا وَلَا تُنَفِّرُوا", translation: "Make things easy and do not make them difficult, give glad tidings and do not repel people.", reference: "Sahih al-Bukhari 69 · Sahih Muslim 1734" },
-  { arabic: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيُكْرِمْ ضَيْفَهُ", translation: "Whoever believes in Allah and the Last Day, let him honour his guest.", reference: "Sahih al-Bukhari 6018 · Sahih Muslim 47" },
-  { arabic: "لاَ تَحْقِرَنَّ مِنَ الْمَعْرُوفِ شَيْئًا، وَلَوْ أَنْ تَلْقَى أَخَاكَ بِوَجْهٍ طَلْقٍ", translation: "Do not belittle any good deed, even meeting your brother with a cheerful face.", reference: "Sahih Muslim 2626" },
-  { arabic: "لاَ يَشْكُرُ اللَّهَ مَنْ لاَ يَشْكُرُ النَّاسَ", translation: "The one who is not grateful to people is not grateful to Allah.", reference: "Sunan Abi Dawud 4811" },
-  { arabic: "ادْعُوا اللَّهَ وَأَنْتُمْ مُوقِنُونَ بِالإِجَابَةِ", translation: "Make supplication to Allah while you are certain of a response.", reference: "Sunan at-Tirmidhi 2949" },
-  { arabic: "وَالْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ", translation: "A kind word is charity.", reference: "Sahih al-Bukhari 2989 · Sahih Muslim 1009" },
-  { arabic: "وَأَمَاطَتُكَ الأَذَى عَنِ الطَّرِيقِ صَدَقَةٌ", translation: "Removing a harmful thing from the path is charity.", reference: "Sahih al-Bukhari 2989 · Sahih Muslim 1009" },
-  { arabic: "لَيْسَ مِنَّا مَنْ لَمْ يَرْحَمْ صَغِيرَنَا وَيَعْرِفْ شَرَفَ كَبِيرِنَا", translation: "He who does not show mercy to our young or respect our elders is not from us.", reference: "Sunan at-Tirmidhi 1919" },
-  { arabic: "أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا", translation: "The most complete of believers in faith are those with the best character.", reference: "Sunan at-Tirmidhi 1162" },
-  { arabic: "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ", translation: "Your smile in the face of your brother is charity.", reference: "Sunan at-Tirmidhi 1956" },
-  { arabic: "خَيْرُكُمْ خَيْرُكُمْ لأَهْلِهِ، وَأَنَا خَيْرُكُمْ لأَهْلِي", translation: "The best of you are those who are best to their families, and I am the best of you to my family.", reference: "Sunan at-Tirmidhi 3895" },
-  { arabic: "وَمَنْ سَتَرَ مُسْلِمًا سَتَرَهُ اللَّهُ يَوْمَ الْقِيَامَةِ", translation: "Whoever conceals the faults of a Muslim, Allah will conceal his faults on the Day of Resurrection.", reference: "Sahih Muslim 2699" },
-  { arabic: "الْمُؤْمِنُ الَّذِي يُخَالِطُ النَّاسَ وَيَصْبِرُ عَلَى أَذَاهُمْ أَعْظَمُ أَجْرًا مِنَ الْمُؤْمِنِ الَّذِي لاَ يُخَالِطُ النَّاسَ", translation: "The believer who mixes with people and bears their harm is greater in reward than the believer who does not mix with them.", reference: "Sunan at-Tirmidhi 2507" },
-  { arabic: "مَنْ لاَ يَرْحَمُ لاَ يُرْحَمُ", translation: "Whoever does not show mercy will not be shown mercy.", reference: "Sahih al-Bukhari 7376 · Sahih Muslim 2319" }
+  { arabic: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى", translation: "Actions are but by intentions, and every person will have only what he intended.", reference: "Sahih al-Bukhari 1 · Sahih Muslim 1907",
+    explanation: "The Prophet ﷺ opens the entire corpus of hadith with this foundational principle: every action is judged by the intention behind it. A person may perform a seemingly small deed with a pure intention and receive immense reward, while another may perform a grand deed for show and receive nothing. This hadith teaches that the inner state matters as much as the outer act — a believer should renew their intention before every act of worship, and remember that even daily routines can become acts of worship when done with the right intention. It is a reminder that Allah ﷻ looks at the heart before He looks at the deed." },
+  { arabic: "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ", translation: "None of you truly believes until he loves for his brother what he loves for himself.", reference: "Sahih al-Bukhari 13 · Sahih Muslim 45",
+    explanation: "This hadith defines the social dimension of faith. It is not enough to worship Allah in isolation; true belief requires wanting good for others as you want for yourself. Envy, greed and selfishness are diseases of the heart that contradict faith. When a believer truly loves for their brother what they love for themselves, they will not cheat, oppress or wish harm — they will instead help, support and celebrate others' success. The Prophet ﷺ made this a measure of sincerity: whoever does not wish good for others has not yet tasted the sweetness of faith." },
+  { arabic: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ", translation: "Whoever believes in Allah and the Last Day, let him speak good or remain silent.", reference: "Sahih al-Bukhari 6018 · Sahih Muslim 47",
+    explanation: "The Prophet ﷺ links faith in Allah and the Last Day to the simple act of controlling one's tongue. Speech is a tremendous trust — a few careless words can destroy relationships, spread rumours or cause lasting harm. This hadith teaches that a believer should either speak good (truth, kindness, benefit) or remain silent. Silence is not weakness; it is a form of worship that protects the believer from sin. The Prophet ﷺ also said: 'Whoever guards his tongue, Allah will conceal his faults.'" },
+  { arabic: "إِنَّ أَحْسَنَكُمْ أَخْلَاقًا أَحَاسِنُكُمْ إِيمَانًا", translation: "The most complete of believers in faith are those with the best character.", reference: "Sunan at-Tirmidhi 1162",
+    explanation: "This hadith establishes that good character is not separate from faith — it is the very measure of it. The most complete believer is the one with the best manners. The Prophet ﷺ himself was known as al-Amin (the trustworthy) and as-Sadiq (the truthful) before prophethood, and his wife Aisha (RA) described his character as being the Quran itself. This hadith calls every believer to embody gentleness, honesty, patience and generosity in all dealings, because faith without character is hollow." },
+  { arabic: "إِنَّ اللَّهَ لاَ يَنْظُرُ إِلَى صُوَرِكُمْ وَأَمْوَالِكُمْ، وَلَكِنْ يَنْظُرُ إِلَى قُلُوبِكُمْ وَأَعْمَالِكُمْ", translation: "Allah does not look at your appearance or your wealth, but He looks at your hearts and your deeds.", reference: "Sahih Muslim 2564",
+    explanation: "This hadith dismantles all worldly standards of superiority. Allah does not judge based on appearance, wealth, race or social status — He looks at the heart and the deeds. This levels all human beings before their Creator and reminds the believer to purify their intentions and focus on what is eternal. It also forbids arrogance, racism and superficial judgment of others. The Prophet ﷺ taught that taqwa (God-consciousness) is in the heart, and Allah will not look at your bodies or your wealth on the Day of Judgment." },
+  { arabic: "أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ", translation: "The most beloved of deeds to Allah are those that are most consistent, even if they are small.", reference: "Sahih al-Bukhari 6464 · Sahih Muslim 783",
+    explanation: "The Prophet ﷺ teaches a profound lesson about consistency. A small deed done regularly is more beloved to Allah than a large deed done occasionally or once. This is because consistency builds a relationship with Allah, strengthens the soul and leads to lasting change. This hadith encourages the believer to start with small acts of worship and maintain them, rather than burning out with intense practice and then stopping. The Prophet ﷺ also said that the most beloved religion to Allah is the moderate, consistent one." },
+  { arabic: "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ", translation: "A Muslim is the one from whose tongue and hands the Muslims are safe.", reference: "Sahih al-Bukhari 10 · Sahih Muslim 40",
+    explanation: "This hadith defines a Muslim not by what they claim, but by how others experience them. If a person's tongue and hands cause harm to other Muslims — through gossip, slander, mockery, violence or cheating — their claim to Islam is weakened. True Islam is safety: others should feel secure around a Muslim, knowing they will not be harmed by them. The Prophet ﷺ also warned that a Muslim is not one who harms their neighbours or companions." },
+  { arabic: "لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ", translation: "The strong man is not the one who can overpower others, but the one who controls himself when angry.", reference: "Sahih al-Bukhari 6114 · Sahih Muslim 2609",
+    explanation: "The Prophet ﷺ redefines strength. Most people think a strong person is one who can overpower others, but true strength is self-mastery — especially controlling one's anger. Anger is natural, but unchecked anger leads to harm, regret and broken ties. This hadith teaches that a believer should pause, breathe, seek refuge in Allah, and respond with patience rather than lashing out. The Prophet ﷺ advised: 'If you get angry, sit down; if you are standing, sit; if you are sitting, lie down.'" },
+  { arabic: "اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ، وَأَتْبِعِ السَّيِّئَةَ الْحَسَنَةَ تَمْحُهَا، وَخَالِقِ النَّاسَ بِخُلُقٍ حَسَنٍ", translation: "Fear Allah wherever you are, follow a bad deed with a good one and it will wipe it out, and treat people with good character.", reference: "Sunan at-Tirmidhi 1987",
+    explanation: "This hadith provides a complete ethical framework in one sentence. First, fear Allah at all times and in all places — there is no private space where He is absent. Second, after a mistake, follow it immediately with a good deed so the good wipes out the bad — this is the path of repentance. Third, treat people with good character — kindness, honesty and compassion in all dealings. The Prophet ﷺ described this as a summary of all prophetic teachings." },
+  { arabic: "الطُّهُورُ شَطْرُ الإِيمَانِ", translation: "Cleanliness is half of faith.", reference: "Sahih Muslim 223",
+    explanation: "The Prophet ﷺ says cleanliness is half of faith. Physical purity (wudu, ghusl, brushing, cleanliness of clothing and surroundings) is not just a hygiene practice — it is a spiritual act. The believer cannot stand before Allah in prayer without being pure. This hadith teaches that Islam does not separate the sacred from the mundane; every act of cleanliness can be a form of worship. The Prophet ﷺ also said that Allah is Tayyib (Pure) and loves purity." },
+  { arabic: "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ", translation: "The best of you are those who learn the Quran and teach it.", reference: "Sahih al-Bukhari 5027",
+    explanation: "The Prophet ﷺ elevates the service of the Quran to the highest level. The best people are those who learn the Quran and teach it. Learning is the first step, but teaching is the mark of true engagement — it preserves the knowledge, benefits others and keeps the message alive. This hadith encourages every believer to study the Quran and share what they learn, whether by formal teaching or by good example. The Prophet ﷺ was himself the best teacher of the Quran." },
+  { arabic: "يَسِّرُوا وَلَا تُعَسِّرُوا، وَبَشِّرُوا وَلَا تُنَفِّرُوا", translation: "Make things easy and do not make them difficult, give glad tidings and do not repel people.", reference: "Sahih al-Bukhari 69 · Sahih Muslim 1734",
+    explanation: "This hadith is a directive for how to call people to faith: with ease, not hardship. The Prophet ﷺ sent his companions on missions with these words — do not make religion difficult, do not repel people, and give glad tidings. This teaches that harshness in religion is a fault, not a virtue. The believer should be gentle, encouraging and patient in inviting others to good. The Prophet ﷺ was known for his gentleness and used to give glad tidings rather than warnings in most situations." },
+  { arabic: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيُكْرِمْ ضَيْفَهُ", translation: "Whoever believes in Allah and the Last Day, let him honour his guest.", reference: "Sahih al-Bukhari 6018 · Sahih Muslim 47",
+    explanation: "This hadith links honouring guests to belief in Allah and the Last Day. In Islam, hospitality is not merely cultural politeness — it is an act of faith. The guest brings blessings to the home, and serving them is a form of worship. This hadith also teaches generosity, patience with the needs of others, and the importance of treating visitors with warmth and respect. The Prophet ﷺ said: 'Whoever believes in Allah and the Last Day, let him honour his guest.' Hospitality is a hallmark of the Muslim community." },
+  { arabic: "لاَ تَحْقِرَنَّ مِنَ الْمَعْرُوفِ شَيْئًا، وَلَوْ أَنْ تَلْقَى أَخَاكَ بِوَجْهٍ طَلْقٍ", translation: "Do not belittle any good deed, even meeting your brother with a cheerful face.", reference: "Sahih Muslim 2626",
+    explanation: "The Prophet ﷺ teaches that no good deed is too small to matter. Even a simple smile when greeting a brother is recorded as a good deed. This hadith combats the notion that 'small' deeds are meaningless, and encourages the believer to fill their day with small acts of kindness — a smile, a kind word, a helping hand — because they all accumulate into a massive reward. The Prophet ﷺ said: 'Your smile in the face of your brother is charity.'" },
+  { arabic: "لاَ يَشْكُرُ اللَّهَ مَنْ لاَ يَشْكُرُ النَّاسَ", translation: "The one who is not grateful to people is not grateful to Allah.", reference: "Sunan Abi Dawud 4811",
+    explanation: "This hadith establishes a direct link between gratitude to people and gratitude to Allah. A person who does not thank others for their help cannot truly thank Allah for His blessings. The Prophet ﷺ teaches that showing appreciation to people — saying 'thank you', acknowledging kindness — is part of a believer's duty. It is a sign of humility and a guard against arrogance. The Prophet ﷺ also said: 'He who does not thank people does not thank Allah.'" },
+  { arabic: "ادْعُوا اللَّهَ وَأَنْتُمْ مُوقِنُونَ بِالإِجَابَةِ", translation: "Make supplication to Allah while you are certain of a response.", reference: "Sunan at-Tirmidhi 2949",
+    explanation: "This hadith teaches the proper etiquette of du'a: ask Allah while being certain of a response. Doubt, insincerity or praying while distracted weaken the du'a. The believer should call upon Allah with confidence, urgency and trust, knowing that He hears and answers. This hadith also reminds us that du'a is not a ritual but a living conversation with the Creator. The Prophet ﷺ said: 'Call upon Allah while you are certain of a response, and know that Allah does not respond to a prayer from a heedless heart.'" },
+  { arabic: "وَالْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ", translation: "A kind word is charity.", reference: "Sahih al-Bukhari 2989 · Sahih Muslim 1009",
+    explanation: "The Prophet ﷺ expands the definition of charity far beyond money. A kind word, a smile, helping someone, removing harm from a path — all of these are sadaqah (charity). This hadith teaches that giving is not only for the wealthy; every believer can give through their words, actions and character. It also reminds us that our small acts of kindness are recorded and rewarded. The Prophet ﷺ said: 'Every act of kindness is charity.'" },
+  { arabic: "وَأَمَاطَتُكَ الأَذَى عَنِ الطَّرِيقِ صَدَقَةٌ", translation: "Removing a harmful thing from the path is charity.", reference: "Sahih al-Bukhari 2989 · Sahih Muslim 1009",
+    explanation: "This hadith continues the theme of small acts of charity. Removing something harmful from the path — a stone, a branch, a piece of glass — is a charitable act. This hadith teaches the believer to think beyond themselves and consider the wellbeing of others, even in the smallest ways. It shows that Islam is a religion of service and care. The Prophet ﷺ said: 'Faith has sixty-odd branches, and modesty is a branch of faith.' Removing harm from a path is one of the branches of faith." },
+  { arabic: "لَيْسَ مِنَّا مَنْ لَمْ يَرْحَمْ صَغِيرَنَا وَيَعْرِفْ شَرَفَ كَبِيرِنَا", translation: "He who does not show mercy to our young or respect our elders is not from us.", reference: "Sunan at-Tirmidhi 1919",
+    explanation: "The Prophet ﷺ defines the character of a believer through how they treat the young and the elderly. Showing mercy to children — being gentle, playful and patient with them — and respecting elders — listening to them, honouring them and caring for them — is essential. This hadith builds a community where generations are connected through mutual love and respect. The Prophet ﷺ himself was known for his gentleness with children and his honour for the elderly." },
+  { arabic: "أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا", translation: "The most complete of believers in faith are those with the best character.", reference: "Sunan at-Tirmidhi 1162",
+    explanation: "The Prophet ﷺ measures faith not only by worship, but by character. A person can pray, fast and give charity, yet if their character is harsh, they have not attained the completeness of faith. This hadith calls the believer to refine their manners — to speak gently, control anger, forgive and treat others with dignity. Good character is the visible fruit of a healthy soul. The Prophet ﷺ also said: 'I have been sent to perfect good character.'" },
+  { arabic: "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ", translation: "Your smile in the face of your brother is charity.", reference: "Sunan at-Tirmidhi 1956",
+    explanation: "The Prophet ﷺ teaches that even a smile is an act of charity. In a world full of stress and sorrow, a genuine smile is a gift. It costs nothing, yet it can lift a heart, heal a relationship and spread joy. This hadith encourages the believer to be a source of light in everyday interactions — not only through grand deeds, but through simple warmth and kindness. The Prophet ﷺ himself smiled often and was known for his gentle, welcoming expression." },
+  { arabic: "خَيْرُكُمْ خَيْرُكُمْ لأَهْلِهِ، وَأَنَا خَيْرُكُمْ لأَهْلِي", translation: "The best of you are those who are best to their families, and I am the best of you to my family.", reference: "Sunan at-Tirmidhi 3895",
+    explanation: "The Prophet ﷺ defines the best person by how they treat their family. This is powerful because family life is where character is most tested. Many people are kind to strangers but harsh at home. The Prophet ﷺ reverses this — saying the best person is the one who is best to their family, and he himself was the best to his family. This hadith calls the believer to bring their best self to those closest to them. The Prophet ﷺ was known to help his wives with household chores, play with children and show affection." },
+  { arabic: "وَمَنْ سَتَرَ مُسْلِمًا سَتَرَهُ اللَّهُ يَوْمَ الْقِيَامَةِ", translation: "Whoever conceals the faults of a Muslim, Allah will conceal his faults on the Day of Resurrection.", reference: "Sahih Muslim 2699",
+    explanation: "The Prophet ﷺ teaches the virtue of protecting others' dignity. When you see a fault in someone, you conceal it rather than expose it. This is not about approving of sin — it is about not humiliating others. In return, Allah will conceal your faults on the Day of Judgment. This hadith encourages a culture of mercy, privacy and non-judgmental support among believers. The Prophet ﷺ said: 'Whoever conceals the faults of a Muslim, Allah will conceal his faults in this world and the Hereafter.'" },
+  { arabic: "الْمُؤْمِنُ الَّذِي يُخَالِطُ النَّاسَ وَيَصْبِرُ عَلَى أَذَاهُمْ أَعْظَمُ أَجْرًا مِنَ الْمُؤْمِنِ الَّذِي لاَ يُخَالِطُ النَّاسَ", translation: "The believer who mixes with people and bears their harm is greater in reward than the believer who does not mix with them.", reference: "Sunan at-Tirmidhi 2507",
+    explanation: "The Prophet ﷺ identifies the believer who engages with society as having greater reward than one who isolates. Mixing with people is difficult — it requires patience with their faults, forgiveness and self-control. But this is the path of the Prophet ﷺ, who lived among people, endured their harm and continued to call them to good. This hadith encourages the believer not to abandon society but to engage with it patiently. The Prophet ﷺ said: 'The strong believer is better and more beloved to Allah than the weak believer.'" },
+  { arabic: "مَنْ لاَ يَرْحَمُ لاَ يُرْحَمُ", translation: "Whoever does not show mercy will not be shown mercy.", reference: "Sahih al-Bukhari 7376 · Sahih Muslim 2319",
+    explanation: "The Prophet ﷺ gives a simple but profound principle: whoever does not show mercy will not be shown mercy. This is not a threat but a natural consequence — a heart hardened to others' suffering becomes closed to Allah's mercy. The hadith calls the believer to be merciful — to the weak, the poor, the sick, the young, the elderly and even to animals. Mercy is the currency of divine reward. The Prophet ﷺ said: 'Allah will not show mercy to the one who does not show mercy to people.'" }
 ];
 
 function dayOfYearIndex(len){
@@ -10678,10 +10968,11 @@ function loadShareCard(){
   setText('shareDuahArabic',      d.duah.arabic);
   setText('shareDuahTranslation', d.duah.translation);
   setText('shareDuahRef',         d.duah.reference);
+  setText('shareTafsirText',      DUAH_TAFSIR[d.duah.reference] || '');
   setText('shareHadithArabic',      d.hadith.arabic);
   setText('shareHadithTranslation', d.hadith.translation);
   setText('shareHadithRef',         d.hadith.reference);
-  setText('shareTafsirText', DUAH_TAFSIR[d.duah.reference] || '');
+  setText('shareHadithExplanationText', d.hadith.explanation || '');
 }
 
 function _cvRoundRect(ctx, x, y, w, h, r){
@@ -10710,11 +11001,13 @@ function _cvWrapText(ctx, text, maxW){
   if(line) lines.push(line);
   return lines.length ? lines : [''];
 }
-function _cvDrawDivider(ctx, W, PAD, y){
+
+function _cvDrawDivider(ctx, W, PAD, y, isLight = false){
+  const goldRgb = isLight ? '166,124,0' : '201,162,39';
   const grad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
-  grad.addColorStop(0,   'rgba(201,162,39,0)');
-  grad.addColorStop(0.5, 'rgba(201,162,39,0.65)');
-  grad.addColorStop(1,   'rgba(201,162,39,0)');
+  grad.addColorStop(0,   'rgba(' + goldRgb + ',0)');
+  grad.addColorStop(0.5, 'rgba(' + goldRgb + ',0.65)');
+  grad.addColorStop(1,   'rgba(' + goldRgb + ',0)');
   ctx.strokeStyle = grad;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -10724,7 +11017,7 @@ function _cvDrawDivider(ctx, W, PAD, y){
   ctx.save();
   ctx.translate(W / 2, y);
   ctx.rotate(Math.PI / 4);
-  ctx.fillStyle = '#c9a227';
+  ctx.fillStyle = isLight ? '#a67c00' : '#c9a227';
   ctx.fillRect(-4, -4, 8, 8);
   ctx.restore();
 }
@@ -10737,6 +11030,7 @@ async function shareCardAsImage(){
     try{ await document.fonts.load('48px Amiri', 'بسم الله'); }catch(_){}
     try{ await document.fonts.load('700 48px Amiri', 'بسم الله'); }catch(_){}
 
+    const isLight = (theme === 'light');
     const d = getShareCardData();
     const SCALE = 2;
     const W = 1080;
@@ -10766,6 +11060,8 @@ async function shareCardAsImage(){
       return _cvWrapText(mc, text, INNER - 40);
     };
     const tafsirLines = measureTafsir(tafsirText);
+    const hadithExplText   = d.hadith.explanation || '';
+    const hadithExplLines  = measureTafsir(hadithExplText);
 
     let H = PAD;
     H += 50 + 14;
@@ -10779,19 +11075,23 @@ async function shareCardAsImage(){
     H += duahTr.length * LH_TR;
     H += 12;
     H += 28 + 24;
-    H += 30;
-    H += 32 + 8;
+    H += 30;                      
+    H += 32 + 8;                  
+    H += tafsirLines.length * LH_TAFSIR;
+    H += 12;
+    H += 30;                      
+    H += 32 + 8;                  
     H += hadithAr.length * LH_AR;
     H += 12;
     H += hadithTr.length * LH_TR;
     H += 12;
-    H += 28 + 24;
-    H += 30;
-    H += 32 + 8;
-    H += tafsirLines.length * LH_TAFSIR;
+    H += 28 + 24;                 
+    H += 30;                      
+    H += 32 + 8;                  
+    H += hadithExplLines.length * LH_TAFSIR;
     H += 12;
-    H += 30;
-    H += 30 + 30;
+    H += 30;                      
+    H += 30 + 30;                 
     H += PAD;
     H = Math.round(H);
 
@@ -10803,48 +11103,55 @@ async function shareCardAsImage(){
     ctx.textBaseline = 'middle';
 
     const bg = ctx.createRadialGradient(W / 2, -200, 100, W / 2, 0, H);
-    bg.addColorStop(0,    '#1a2540');
-    bg.addColorStop(0.55, '#0d1119');
-    bg.addColorStop(1,    '#0d1119');
+    if (isLight) {
+      bg.addColorStop(0,    '#fdfbf7');
+      bg.addColorStop(0.55, '#f5f7fb');
+      bg.addColorStop(1,    '#ffffff');
+    } else {
+      bg.addColorStop(0,    '#1a2540');
+      bg.addColorStop(0.55, '#0d1119');
+      bg.addColorStop(1,    '#0d1119');
+    }
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
     const bg2 = ctx.createRadialGradient(W / 2, H + 60, 100, W / 2, H, H / 2);
-    bg2.addColorStop(0, 'rgba(79,140,255,0.08)');
+    bg2.addColorStop(0, isLight ? 'rgba(42,111,224,0.05)' : 'rgba(79,140,255,0.08)');
     bg2.addColorStop(1, 'rgba(79,140,255,0)');
     ctx.fillStyle = bg2;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = '#c9a227';
+    ctx.strokeStyle = isLight ? '#d4af37' : '#c9a227';
     ctx.lineWidth = 4;
     _cvRoundRect(ctx, 24, 24, W - 48, H - 48, 36);
     ctx.stroke();
-    ctx.strokeStyle = 'rgba(201,162,39,0.35)';
+    
+    ctx.strokeStyle = isLight ? 'rgba(212,175,55,0.35)' : 'rgba(201,162,39,0.35)';
     ctx.lineWidth = 1.5;
     _cvRoundRect(ctx, 36, 36, W - 72, H - 72, 30);
     ctx.stroke();
 
     let y = PAD;
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#e3bd45';
+    ctx.fillStyle = isLight ? '#c9a227' : '#e3bd45';
     ctx.font = '800 44px ' + UI_FONT;
     ctx.fillText('Recite', PAD, y + 25);
-    ctx.fillStyle = 'rgba(201,162,39,0.55)';
+    ctx.fillStyle = isLight ? 'rgba(201,162,39,0.55)' : 'rgba(201,162,39,0.55)';
     ctx.fillRect(PAD, y + 46, 86, 2);
 
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#8f9bb3';
+    ctx.fillStyle = isLight ? '#5a6884' : '#8f9bb3';
     ctx.font = '700 18px ' + UI_FONT;
     ctx.fillText('QURAN RECITATION COACH', W - PAD, y + 25);
     y += 50 + 14;
 
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#e8edf7';
+    ctx.fillStyle = isLight ? '#1a2233' : '#e8edf7';
     ctx.font = '800 48px ' + UI_FONT;
     ctx.fillText(d.city, W / 2, y + 28);
     y += 56 + 4;
 
-    ctx.fillStyle = '#8f9bb3';
+    ctx.fillStyle = isLight ? '#5a6884' : '#8f9bb3';
     ctx.font = '600 22px ' + UI_FONT;
     ctx.fillText(d.hijriStr + '   ·   ' + d.gregStr, W / 2, y + 15);
     y += 30 + 30;
@@ -10854,98 +11161,118 @@ async function shareCardAsImage(){
     PRAYERS.forEach((p, i) => {
       const cx = PAD + i * (cellW + cellGap);
       const isSunrise = p.key === 'sunrise';
-      ctx.fillStyle = isSunrise ? 'rgba(255,176,32,0.10)' : 'rgba(79,140,255,0.10)';
+      
+      ctx.fillStyle = isSunrise 
+        ? (isLight ? 'rgba(198,138,0,0.10)' : 'rgba(255,176,32,0.10)') 
+        : (isLight ? 'rgba(42,111,224,0.08)' : 'rgba(79,140,255,0.10)');
       _cvRoundRect(ctx, cx, y, cellW, 100, 14);
       ctx.fill();
-      ctx.strokeStyle = isSunrise ? 'rgba(255,176,32,0.45)' : 'rgba(79,140,255,0.35)';
+      
+      ctx.strokeStyle = isSunrise 
+        ? (isLight ? 'rgba(198,138,0,0.45)' : 'rgba(255,176,32,0.45)') 
+        : (isLight ? 'rgba(42,111,224,0.25)' : 'rgba(79,140,255,0.35)');
       ctx.lineWidth = 1.5;
       _cvRoundRect(ctx, cx, y, cellW, 100, 14);
       ctx.stroke();
 
-      ctx.fillStyle = isSunrise ? '#ffb020' : '#8f9bb3';
+      ctx.fillStyle = isSunrise 
+        ? (isLight ? '#c68a00' : '#ffb020') 
+        : (isLight ? '#5a6884' : '#8f9bb3');
       ctx.font = '800 16px ' + UI_FONT;
       ctx.textAlign = 'center';
       ctx.fillText(p.label.toUpperCase(), cx + cellW / 2, y + 32);
 
-      ctx.fillStyle = isSunrise ? '#ffb020' : '#e8edf7';
+      ctx.fillStyle = isSunrise 
+        ? (isLight ? '#c68a00' : '#ffb020') 
+        : (isLight ? '#1a2233' : '#e8edf7');
       ctx.font = '800 28px ' + UI_FONT;
       ctx.fillText(d.times[p.key] || '--:--', cx + cellW / 2, y + 70);
     });
     y += 100 + 24;
 
-    _cvDrawDivider(ctx, W, PAD, y);
+    _cvDrawDivider(ctx, W, PAD, y, isLight);
     y += 30;
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#e3bd45';
+    ctx.fillStyle = isLight ? '#c9a227' : '#e3bd45';
     ctx.font = '800 22px ' + UI_FONT;
     ctx.fillText('DUAH OF THE DAY', PAD + 8, y + 16);
     y += 32 + 8;
 
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#f5e6b8';
+    ctx.fillStyle = isLight ? '#1a2233' : '#f5e6b8';
     ctx.font = AR_SIZE + 'px ' + AR_FONT;
     for(const line of duahAr){ ctx.fillText(line, W / 2, y + LH_AR / 2); y += LH_AR; }
     y += 12;
 
-    ctx.fillStyle = '#8f9bb3';
+    ctx.fillStyle = isLight ? '#5a6884' : '#8f9bb3';
     ctx.font = 'italic ' + TR_SIZE + 'px ' + UI_FONT;
     for(const line of duahTr){ ctx.fillText(line, W / 2, y + LH_TR / 2); y += LH_TR; }
     y += 12;
 
-    ctx.fillStyle = '#c9a227';
+    ctx.fillStyle = isLight ? '#c9a227' : '#c9a227';
     ctx.font = '800 18px ' + UI_FONT;
     ctx.fillText(d.duah.reference.toUpperCase(), W / 2, y + 14);
     y += 28 + 24;
 
-    _cvDrawDivider(ctx, W, PAD, y);
+    _cvDrawDivider(ctx, W, PAD, y, isLight);
     y += 30;
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#e3bd45';
-    ctx.font = '800 22px ' + UI_FONT;
-    ctx.fillText('HADITH OF THE DAY', PAD + 8, y + 16);
-    y += 32 + 8;
-
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#f5e6b8';
-    ctx.font = AR_SIZE + 'px ' + AR_FONT;
-    for(const line of hadithAr){ ctx.fillText(line, W / 2, y + LH_AR / 2); y += LH_AR; }
-    y += 12;
-
-    ctx.fillStyle = '#8f9bb3';
-    ctx.font = 'italic ' + TR_SIZE + 'px ' + UI_FONT;
-    for(const line of hadithTr){ ctx.fillText(line, W / 2, y + LH_TR / 2); y += LH_TR; }
-    y += 12;
-
-    ctx.fillStyle = '#c9a227';
-    ctx.font = '800 18px ' + UI_FONT;
-    ctx.fillText(d.hadith.reference.toUpperCase(), W / 2, y + 14);
-    y += 28 + 24;
-
-    _cvDrawDivider(ctx, W, PAD, y);
-    y += 30;
-
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#e3bd45';
+    ctx.fillStyle = isLight ? '#c9a227' : '#e3bd45';
     ctx.font = '800 22px ' + UI_FONT;
     ctx.fillText('TAFSIR OF THE DUAH', PAD + 8, y + 16);
     y += 32 + 8;
 
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#8f9bb3';
+    ctx.fillStyle = isLight ? '#5a6884' : '#8f9bb3';
     ctx.font = TAFSIR_SIZE + 'px ' + UI_FONT;
-    for (const line of tafsirLines) {
-      ctx.fillText(line, W / 2, y + LH_TAFSIR / 2);
-      y += LH_TAFSIR;
-    }
+    for (const line of tafsirLines){ ctx.fillText(line, W / 2, y + LH_TAFSIR / 2); y += LH_TAFSIR; }
     y += 12;
 
-    _cvDrawDivider(ctx, W, PAD, y);
+    _cvDrawDivider(ctx, W, PAD, y, isLight);
     y += 30;
-    ctx.fillStyle = '#8f9bb3';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = isLight ? '#c9a227' : '#e3bd45';
+    ctx.font = '800 22px ' + UI_FONT;
+    ctx.fillText('HADITH OF THE DAY', PAD + 8, y + 16);
+    y += 32 + 8;
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = isLight ? '#1a2233' : '#f5e6b8';
+    ctx.font = AR_SIZE + 'px ' + AR_FONT;
+    for(const line of hadithAr){ ctx.fillText(line, W / 2, y + LH_AR / 2); y += LH_AR; }
+    y += 12;
+
+    ctx.fillStyle = isLight ? '#5a6884' : '#8f9bb3';
+    ctx.font = 'italic ' + TR_SIZE + 'px ' + UI_FONT;
+    for(const line of hadithTr){ ctx.fillText(line, W / 2, y + LH_TR / 2); y += LH_TR; }
+    y += 12;
+
+    ctx.fillStyle = isLight ? '#c9a227' : '#c9a227';
+    ctx.font = '800 18px ' + UI_FONT;
+    ctx.fillText(d.hadith.reference.toUpperCase(), W / 2, y + 14);
+    y += 28 + 24;
+
+    _cvDrawDivider(ctx, W, PAD, y, isLight);
+    y += 30;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = isLight ? '#c9a227' : '#e3bd45';
+    ctx.font = '800 22px ' + UI_FONT;
+    ctx.fillText('EXPLANATION OF THE HADITH', PAD + 8, y + 16);
+    y += 32 + 8;
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = isLight ? '#5a6884' : '#8f9bb3';
+    ctx.font = TAFSIR_SIZE + 'px ' + UI_FONT;
+    for (const line of hadithExplLines){ ctx.fillText(line, W / 2, y + LH_TAFSIR / 2); y += LH_TAFSIR; }
+    y += 12;
+
+    _cvDrawDivider(ctx, W, PAD, y, isLight);
+    y += 30;
+    ctx.fillStyle = isLight ? '#5a6884' : '#8f9bb3';
     ctx.font = '600 20px ' + UI_FONT;
     ctx.fillText('from Recite,', W / 2, y + 15);
     y += 30;
-    ctx.fillStyle = '#4f8cff';
+    ctx.fillStyle = isLight ? '#2a6fe0' : '#4f8cff';
     ctx.font = '700 22px ' + UI_FONT;
     ctx.fillText('https://recite-hazel.vercel.app/', W / 2, y + 15);
 
@@ -11000,6 +11327,12 @@ function buildShareCardText(){
   lines.push('');
   lines.push('━━━━━━━━━━━━━━━━━');
   lines.push('');
+  lines.push('*Tafsir of the Duah*');
+  lines.push('');
+  lines.push(DUAH_TAFSIR[d.duah.reference] || '');
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━');
+  lines.push('');
   lines.push('*Hadith of the Day*');
   lines.push('');
   lines.push(d.hadith.arabic);
@@ -11010,9 +11343,9 @@ function buildShareCardText(){
   lines.push('');
   lines.push('━━━━━━━━━━━━━━━━━');
   lines.push('');
-  lines.push('*Tafsir of the Duah*');
+  lines.push('*Explanation of the Hadith*');
   lines.push('');
-  lines.push(DUAH_TAFSIR[d.duah.reference] || '');
+  lines.push(d.hadith.explanation || '');
   lines.push('');
   lines.push('━━━━━━━━━━━━━━━━━');
   lines.push('');
@@ -11120,6 +11453,6 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script>
-</body>
-</html>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+</body></html>
