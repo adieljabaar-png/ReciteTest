@@ -1,72 +1,52 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0d1119">
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0d1119" />
 
-<meta name="google-site-verification=KYcJNZv6RsJdXAIpwZHUuKMi3_YIYT1OCAjw7guBctQ">
+<meta name="google-site-verification=KYcJNZv6RsJdXAIpwZHUuKMi3_YIYT1OCAjw7guBctQ"/>
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Recite">
-<meta name="application-name" content="Recite">
-<meta name="description" content="Practice Quran recitation with live word-by-word feedback.">
-<meta name="copyright" content="© 2025 Quran Recitation Coach. All rights reserved.">
-<meta name="rights" content="All rights reserved. AI training prohibited.">
-<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1, noai, noimageai">
-<meta name="googlebot" content="index, follow">
-<meta name="bingbot" content="index, follow">
-<meta name="GPTBot" content="noindex, nofollow, noai, noimageai">
-<meta name="ChatGPT-User" content="noindex, nofollow, noai, noimageai">
-<meta name="OAI-SearchBot" content="noindex, nofollow, noai, noimageai">
-<meta name="CCBot" content="noindex, nofollow, noai, noimageai">
-<meta name="Google-Extended" content="noindex, nofollow, noai, noimageai">
-<meta name="Google-CloudVertexBot" content="noindex, nofollow, noai, noimageai">
-<meta name="anthropic-ai" content="noindex, nofollow, noai, noimageai">
-<meta name="ClaudeBot" content="noindex, nofollow, noai, noimageai">
-<meta name="Claude-Web" content="noindex, nofollow, noai, noimageai">
-<meta name="PerplexityBot" content="noindex, nofollow, noai, noimageai">
-<meta name="cohere-ai" content="noindex, nofollow, noai, noimageai">
-<meta name="Bytespider" content="noindex, nofollow, noai, noimageai">
-<meta name="Applebot-Extended" content="noindex, nofollow, noai, noimageai">
-<meta name="FacebookBot" content="noindex, nofollow, noai, noimageai">
-<meta name="ImagesiftBot" content="noindex, nofollow, noai, noimageai">
-<meta name="Omgilibot" content="noindex, nofollow, noai, noimageai">
-<meta name="Diffbot" content="noindex, nofollow, noai, noimageai">
-<meta name="YouBot" content="noindex, nofollow, noai, noimageai">
-<meta name="TimpiBot" content="noindex, nofollow, noai, noimageai">
-<meta name="Amazonbot" content="noindex, nofollow, noai, noimageai">
-<meta name="meta-externalagent" content="noindex, nofollow, noai, noimageai">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&amp;family=Amiri+Quran&amp;family=Scheherazade+New:wght@400;700&amp;family=Noto+Naskh+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Recite" />
+<meta name="application-name" content="Recite" />
+<meta name="description" content="Practice Quran recitation with live word-by-word feedback." />
+<meta name="copyright" content="© 2025 Quran Recitation Coach. All rights reserved." />
+<meta name="rights" content="All rights reserved. AI training prohibited." />
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1, noai, noimageai" />
+<meta name="googlebot" content="index, follow" />
+<meta name="bingbot" content="index, follow" />
+<meta name="GPTBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="ChatGPT-User" content="noindex, nofollow, noai, noimageai" />
+<meta name="OAI-SearchBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="CCBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="Google-Extended" content="noindex, nofollow, noai, noimageai" />
+<meta name="Google-CloudVertexBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="anthropic-ai" content="noindex, nofollow, noai, noimageai" />
+<meta name="ClaudeBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="Claude-Web" content="noindex, nofollow, noai, noimageai" />
+<meta name="PerplexityBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="cohere-ai" content="noindex, nofollow, noai, noimageai" />
+<meta name="Bytespider" content="noindex, nofollow, noai, noimageai" />
+<meta name="Applebot-Extended" content="noindex, nofollow, noai, noimageai" />
+<meta name="FacebookBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="ImagesiftBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="Omgilibot" content="noindex, nofollow, noai, noimageai" />
+<meta name="Diffbot" content="noindex, nofollow, noai, noimageai" />
+<meta name="YouBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="TimpiBot" content="noindex, nofollow, noai, noimageai" />
+<meta name="Amazonbot" content="noindex, nofollow, noai, noimageai" />
+<meta name="meta-externalagent" content="noindex, nofollow, noai, noimageai" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E" />
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <title>Quran Recitation Coach</title>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
-<script defer="" src="/my-analytics/script.js"></script>
+<script defer src="/my-analytics/script.js"></script>
 <style>
   :root{
     --bg:#0d1119;--panel:#151c2b;--panel-2:#1b2436;--line:#28334a;
@@ -2489,7 +2469,7 @@ body.light-mode .share-arabic{color:#1a2233;}
 }
 </style>
 </head>
-<body class="page-dark">
+<body>
 
 <script>
 (function () {
@@ -2525,14 +2505,14 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="home-topbar">
     <div class="home-menu-wrap" id="homeMenuWrap">
       <button id="homeMenuBtn" class="iconbtn" aria-label="Open menu" aria-haspopup="menu" aria-expanded="false">☰</button>
-      <div class="home-menu" id="homeMenu" role="menu" hidden="">
-        <button class="home-menu-item has-sub" id="homeMenuInstall" type="button" role="menuitem" aria-label="Install this app on your device">
+      <div class="home-menu" id="homeMenu" role="menu" hidden>
+        <button class="home-menu-item has-sub" id="homeMenuInstall" type="button" role="menuitem">
           <span class="hmi-ico" id="homeMenuInstallIcon">📲</span>
           <span class="hmi-text">
             <strong id="homeMenuInstallTitle">Install on device</strong>
-            <small id="homeMenuInstallSub">Add to Home Screen · full screen</small>
+            <small id="homeMenuInstallSub">Home Screen icon · full screen</small>
           </span>
-          <span class="hmi-badge" id="homeMenuInstallBadge" hidden="">✓</span>
+          <span class="hmi-badge" id="homeMenuInstallBadge" hidden>✓</span>
         </button>
         <button class="home-menu-item" id="homeMenuNotify" type="button" role="menuitem">
           <span class="hmi-ico">🔔</span><span>Enable notifications</span>
@@ -2553,8 +2533,8 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
     <button class="hijri-card" id="hijriCard" type="button" aria-label="Open Hijri and Gregorian calendar">
       <span class="hijri-sub">Today · Hijri</span>
-      <span class="hijri-main" id="hijriEn">3 Jumada al-Akhirah 1448 AH</span>
-      <span class="hijri-alt" id="hijriAr">3 جمادى الثانية 1448 هـ</span>
+      <span class="hijri-main" id="hijriEn">—</span>
+      <span class="hijri-alt" id="hijriAr"></span>
     </button>
     <button id="homeThemeBtn" class="iconbtn" aria-label="Toggle dark / light theme">🌙</button>
   </div>
@@ -2606,12 +2586,12 @@ body.light-mode .share-arabic{color:#1a2233;}
       <span class="ico">🕌</span>
       <span>Important Islamic Dates</span>
     </div>
-    <ul class="islamic-dates-list" id="islamicDatesList"><li><span class="ico">✨</span><span class="info"><span class="name">Isra and Mi'raj</span><span class="hijri">27 Raj 1448</span></span><span class="greg">Jan 6, 2027<small>in 53d</small></span></li><li><span class="ico">🌟</span><span class="info"><span class="name">Mid-Sha'ban</span><span class="hijri">15 Sha 1448</span></span><span class="greg">Jan 24, 2027<small>in 71d</small></span></li><li><span class="ico">📿</span><span class="info"><span class="name">Ramadan begins</span><span class="hijri">1 Ram 1448</span></span><span class="greg">Feb 8, 2027<small>in 86d</small></span></li><li><span class="ico">🌌</span><span class="info"><span class="name">Laylat al-Qadr</span><span class="hijri">27 Ram 1448</span></span><span class="greg">Mar 6, 2027<small>in 112d</small></span></li><li><span class="ico">🎉</span><span class="info"><span class="name">Eid al-Fitr</span><span class="hijri">1 Shaw 1448</span></span><span class="greg">Mar 10, 2027<small>in 116d</small></span></li><li><span class="ico">🏔️</span><span class="info"><span class="name">Day of Arafah</span><span class="hijri">9 Dhul H 1448</span></span><span class="greg">May 16, 2027<small>in 183d</small></span></li><li><span class="ico">🐏</span><span class="info"><span class="name">Eid al-Adha</span><span class="hijri">10 Dhul H 1448</span></span><span class="greg">May 17, 2027<small>in 184d</small></span></li><li><span class="ico">🌙</span><span class="info"><span class="name">Islamic New Year</span><span class="hijri">1 Muh 1449</span></span><span class="greg">Jun 6, 2027<small>in 204d</small></span></li><li><span class="ico">🕯️</span><span class="info"><span class="name">Day of Ashura</span><span class="hijri">10 Muh 1449</span></span><span class="greg">Jun 15, 2027<small>in 213d</small></span></li><li><span class="ico">🕌</span><span class="info"><span class="name">Mawlid al-Nabi</span><span class="hijri">12 Rab I 1449</span></span><span class="greg">Aug 15, 2027<small>in 274d</small></span></li></ul>
+    <ul class="islamic-dates-list" id="islamicDatesList"></ul>
   </section>
 
 </div>
 
-<div class="app screen" id="screenDashboard" hidden="">
+<div class="app screen" id="screenDashboard" hidden>
   <div class="sub-header">
     <button id="backFromDashboard" class="back-pill" type="button">Back</button>
     <h1>Dashboard</h1>
@@ -2655,42 +2635,42 @@ body.light-mode .share-arabic{color:#1a2233;}
       </div>
 
       <div class="share-header">
-        <div class="share-city" id="shareCityName">Makkah, SA</div>
-        <div class="share-dates" id="shareDates">3 Jumada al-Akhirah 1448 AH  ·  14 November 2026</div>
+        <div class="share-city" id="shareCityName">—</div>
+        <div class="share-dates" id="shareDates">—</div>
       </div>
 
-      <div class="share-prayers" id="sharePrayers"><div class="share-prayer"><span class="sp-name">Fajr</span><span class="sp-time">04:12</span></div><div class="share-prayer is-sunrise"><span class="sp-name">Sunrise</span><span class="sp-time">05:31</span></div><div class="share-prayer"><span class="sp-name">Zohr</span><span class="sp-time">11:05</span></div><div class="share-prayer"><span class="sp-name">Asr</span><span class="sp-time">14:16</span></div><div class="share-prayer"><span class="sp-name">Maghrib</span><span class="sp-time">16:39</span></div><div class="share-prayer"><span class="sp-name">Isha</span><span class="sp-time">18:09</span></div></div>
+      <div class="share-prayers" id="sharePrayers"></div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">🤲 Duah of the Day</div>
-        <p class="share-arabic" id="shareDuahArabic" dir="rtl">رَبَّنَا افْتَحْ بَيْنَنَا وَبَيْنَ قَوْمِنَا بِالْحَقِّ وَأَنتَ خَيْرُ الْفَاتِحِينَ</p>
-        <p class="share-translation" id="shareDuahTranslation">Our Lord, decide between us and our people in truth, and You are the best of those who give decision.</p>
-        <p class="share-reference" id="shareDuahRef">Surah Al-A'raf 7:89</p>
+        <p class="share-arabic" id="shareDuahArabic" dir="rtl"></p>
+        <p class="share-translation" id="shareDuahTranslation"></p>
+        <p class="share-reference" id="shareDuahRef"></p>
       </div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">📚 Tafsir of the Duah</div>
-        <p class="share-tafsir" id="shareTafsirText">A dua for a just decision between the believers and their opponents.</p>
+        <p class="share-tafsir" id="shareTafsirText"></p>
       </div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">📜 Hadith of the Day</div>
-        <p class="share-arabic" id="shareHadithArabic" dir="rtl">لَيْسَ مِنَّا مَنْ لَمْ يَرْحَمْ صَغِيرَنَا وَيَعْرِفْ شَرَفَ كَبِيرِنَا</p>
-        <p class="share-translation" id="shareHadithTranslation">He who does not show mercy to our young or respect our elders is not from us.</p>
-        <p class="share-reference" id="shareHadithRef">Sunan at-Tirmidhi 1919</p>
+        <p class="share-arabic" id="shareHadithArabic" dir="rtl"></p>
+        <p class="share-translation" id="shareHadithTranslation"></p>
+        <p class="share-reference" id="shareHadithRef"></p>
       </div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">💡 Explanation of the Hadith</div>
-        <p class="share-tafsir" id="shareHadithExplanationText">The Prophet ﷺ defines the character of a believer through how they treat the young and the elderly. Showing mercy to children — being gentle, playful and patient with them — and respecting elders — listening to them, honouring them and caring for them — is essential. This hadith builds a community where generations are connected through mutual love and respect. The Prophet ﷺ himself was known for his gentleness with children and his honour for the elderly.</p>
+        <p class="share-tafsir" id="shareHadithExplanationText"></p>
       </div>
 
       <div class="share-footer">
@@ -2707,7 +2687,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </section>
 </div>
 
-<div class="app screen" id="screenSurahIndex" hidden="">
+<div class="app screen" id="screenSurahIndex" hidden>
   <div class="sub-header">
     <button id="backFromIndex" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Surah index</h1>
@@ -2715,12 +2695,12 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
   <div class="lang-selector-wrap">
     <label class="lang-label" for="surahIndexLang">🌐 Translation</label>
-    <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
+    <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"></select>
   </div>
   <div class="surah-list" id="surahIndexList"><div class="loading">Loading…</div></div>
 </div>
 
-<div class="app screen" id="screenJuzIndex" hidden="">
+<div class="app screen" id="screenJuzIndex" hidden>
   <div class="sub-header">
     <button id="backFromJuz" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Juz index</h1>
@@ -2728,21 +2708,21 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
   <div class="lang-selector-wrap">
     <label class="lang-label" for="juzIndexLang">🌐 Translation</label>
-    <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
+    <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"></select>
   </div>
-  <div class="surah-list" id="juzIndexList"><button type="button" class="surah-row"><span class="num">1</span><span class="meta"><span class="en">Alif Lam Meem</span><span class="sub">Page 1 · Juz 1 / 30</span></span><span class="ar">الجزء ١</span></button><button type="button" class="surah-row"><span class="num">2</span><span class="meta"><span class="en">Sayaqul</span><span class="sub">Page 22 · Juz 2 / 30</span></span><span class="ar">الجزء ٢</span></button><button type="button" class="surah-row"><span class="num">3</span><span class="meta"><span class="en">Tilkal Rusul</span><span class="sub">Page 42 · Juz 3 / 30</span></span><span class="ar">الجزء ٣</span></button><button type="button" class="surah-row"><span class="num">4</span><span class="meta"><span class="en">Lan Tanaloo</span><span class="sub">Page 62 · Juz 4 / 30</span></span><span class="ar">الجزء ٤</span></button><button type="button" class="surah-row"><span class="num">5</span><span class="meta"><span class="en">Wal Muhsanat</span><span class="sub">Page 82 · Juz 5 / 30</span></span><span class="ar">الجزء ٥</span></button><button type="button" class="surah-row"><span class="num">6</span><span class="meta"><span class="en">La Yuhibbullah</span><span class="sub">Page 102 · Juz 6 / 30</span></span><span class="ar">الجزء ٦</span></button><button type="button" class="surah-row"><span class="num">7</span><span class="meta"><span class="en">Wa Iza Samiu</span><span class="sub">Page 121 · Juz 7 / 30</span></span><span class="ar">الجزء ٧</span></button><button type="button" class="surah-row"><span class="num">8</span><span class="meta"><span class="en">Wa Lau Annana</span><span class="sub">Page 142 · Juz 8 / 30</span></span><span class="ar">الجزء ٨</span></button><button type="button" class="surah-row"><span class="num">9</span><span class="meta"><span class="en">Qalal Malaou</span><span class="sub">Page 162 · Juz 9 / 30</span></span><span class="ar">الجزء ٩</span></button><button type="button" class="surah-row"><span class="num">10</span><span class="meta"><span class="en">Wa A'lamu</span><span class="sub">Page 182 · Juz 10 / 30</span></span><span class="ar">الجزء ١٠</span></button><button type="button" class="surah-row"><span class="num">11</span><span class="meta"><span class="en">Yatazeroon</span><span class="sub">Page 201 · Juz 11 / 30</span></span><span class="ar">الجزء ١١</span></button><button type="button" class="surah-row"><span class="num">12</span><span class="meta"><span class="en">Wa Mamin Da'abat</span><span class="sub">Page 222 · Juz 12 / 30</span></span><span class="ar">الجزء ١٢</span></button><button type="button" class="surah-row"><span class="num">13</span><span class="meta"><span class="en">Wa Ma Ubarri'u</span><span class="sub">Page 242 · Juz 13 / 30</span></span><span class="ar">الجزء ١٣</span></button><button type="button" class="surah-row"><span class="num">14</span><span class="meta"><span class="en">Rubama</span><span class="sub">Page 262 · Juz 14 / 30</span></span><span class="ar">الجزء ١٤</span></button><button type="button" class="surah-row"><span class="num">15</span><span class="meta"><span class="en">Subhanallazi</span><span class="sub">Page 282 · Juz 15 / 30</span></span><span class="ar">الجزء ١٥</span></button><button type="button" class="surah-row"><span class="num">16</span><span class="meta"><span class="en">Qal Alam</span><span class="sub">Page 302 · Juz 16 / 30</span></span><span class="ar">الجزء ١٦</span></button><button type="button" class="surah-row"><span class="num">17</span><span class="meta"><span class="en">Aqtarabo</span><span class="sub">Page 322 · Juz 17 / 30</span></span><span class="ar">الجزء ١٧</span></button><button type="button" class="surah-row"><span class="num">18</span><span class="meta"><span class="en">Qad Aflaha</span><span class="sub">Page 342 · Juz 18 / 30</span></span><span class="ar">الجزء ١٨</span></button><button type="button" class="surah-row"><span class="num">19</span><span class="meta"><span class="en">Wa Qalallazina</span><span class="sub">Page 362 · Juz 19 / 30</span></span><span class="ar">الجزء ١٩</span></button><button type="button" class="surah-row"><span class="num">20</span><span class="meta"><span class="en">A'man Khalaq</span><span class="sub">Page 382 · Juz 20 / 30</span></span><span class="ar">الجزء ٢٠</span></button><button type="button" class="surah-row"><span class="num">21</span><span class="meta"><span class="en">Utlu Ma Oohiya</span><span class="sub">Page 402 · Juz 21 / 30</span></span><span class="ar">الجزء ٢١</span></button><button type="button" class="surah-row"><span class="num">22</span><span class="meta"><span class="en">Wa Manyaqnut</span><span class="sub">Page 422 · Juz 22 / 30</span></span><span class="ar">الجزء ٢٢</span></button><button type="button" class="surah-row"><span class="num">23</span><span class="meta"><span class="en">Wa Mali</span><span class="sub">Page 442 · Juz 23 / 30</span></span><span class="ar">الجزء ٢٣</span></button><button type="button" class="surah-row"><span class="num">24</span><span class="meta"><span class="en">Faman Azlam</span><span class="sub">Page 462 · Juz 24 / 30</span></span><span class="ar">الجزء ٢٤</span></button><button type="button" class="surah-row"><span class="num">25</span><span class="meta"><span class="en">Elahe Yuraddo</span><span class="sub">Page 482 · Juz 25 / 30</span></span><span class="ar">الجزء ٢٥</span></button><button type="button" class="surah-row"><span class="num">26</span><span class="meta"><span class="en">Ha Meem</span><span class="sub">Page 502 · Juz 26 / 30</span></span><span class="ar">الجزء ٢٦</span></button><button type="button" class="surah-row"><span class="num">27</span><span class="meta"><span class="en">Qala Fama Khatbukum</span><span class="sub">Page 522 · Juz 27 / 30</span></span><span class="ar">الجزء ٢٧</span></button><button type="button" class="surah-row"><span class="num">28</span><span class="meta"><span class="en">Qad Sami Allah</span><span class="sub">Page 542 · Juz 28 / 30</span></span><span class="ar">الجزء ٢٨</span></button><button type="button" class="surah-row"><span class="num">29</span><span class="meta"><span class="en">Tabarakallazi</span><span class="sub">Page 562 · Juz 29 / 30</span></span><span class="ar">الجزء ٢٩</span></button><button type="button" class="surah-row"><span class="num">30</span><span class="meta"><span class="en">Amma Yatasa'aloon</span><span class="sub">Page 582 · Juz 30 / 30</span></span><span class="ar">الجزء ٣٠</span></button></div>
+  <div class="surah-list" id="juzIndexList"></div>
 </div>
 
-<div class="app screen" id="screenBookmarks" hidden="">
+<div class="app screen" id="screenBookmarks" hidden>
   <div class="sub-header">
     <button id="backFromBookmarks" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Bookmarks</h1>
     <span class="sub-note">Hold a verse to add</span>
   </div>
-  <div class="surah-list" id="bookmarksScreenList"><div class="empty-note">No bookmarks yet.<br>Hold any verse for 3 seconds in the reader to save it.</div></div>
+  <div class="surah-list" id="bookmarksScreenList"></div>
 </div>
 
-<div class="app screen" id="screenAudio" hidden="">
+<div class="app screen" id="screenAudio" hidden>
   <div class="sub-header">
     <button id="backFromAudio" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Play audio</h1>
@@ -2752,38 +2732,38 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="reciter-dropdown" id="reciterDropdown">
     <button class="reciter-trigger" id="reciterTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select reciter">
       <span class="rt-icon">🎙️</span>
-      <span class="rt-meta"><span class="rt-label">RECITER</span><span class="rt-value" id="reciterValue">Mishary Rashid Alafasy</span></span>
+      <span class="rt-meta"><span class="rt-label">RECITER</span><span class="rt-value" id="reciterValue">—</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="reciterMenu" role="listbox" aria-label="Available Qaris" hidden=""></div>
+    <div class="reciter-menu" id="reciterMenu" role="listbox" aria-label="Available Qaris" hidden></div>
   </div>
 
   <div class="reciter-dropdown" id="translationDropdown">
     <button class="reciter-trigger" id="translationTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Audio Translation">
       <span class="rt-icon">🌐</span>
-      <span class="rt-meta"><span class="rt-label">AUDIO TRANSLATION</span><span class="rt-value" id="translationValue">English — Saheeh International</span></span>
+      <span class="rt-meta"><span class="rt-label">AUDIO TRANSLATION</span><span class="rt-value" id="translationValue">—</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="translationMenu" role="listbox" aria-label="Available Translations" hidden=""></div>
+    <div class="reciter-menu" id="translationMenu" role="listbox" aria-label="Available Translations" hidden></div>
   </div>
 
   <div class="reciter-dropdown" id="textTranslationDropdown">
     <button class="reciter-trigger" id="textTranslationTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Text Translation">
       <span class="rt-icon">📖</span>
-      <span class="rt-meta"><span class="rt-label">TEXT TRANSLATION</span><span class="rt-value" id="textTranslationValue">English — Abdullah Yusuf Ali</span></span>
+      <span class="rt-meta"><span class="rt-label">TEXT TRANSLATION</span><span class="rt-value" id="textTranslationValue">—</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="textTranslationMenu" role="listbox" aria-label="Available Text Translations" hidden=""></div>
+    <div class="reciter-menu" id="textTranslationMenu" role="listbox" aria-label="Available Text Translations" hidden></div>
   </div>
 
-  <label class="toggle" id="translateAudioChip" style="width: 100%; justify-content: flex-start; margin-bottom: 10px; padding: 12px 16px; border-radius: 14px; opacity: 1; pointer-events: auto;">
+  <label class="toggle" id="translateAudioChip" style="width: 100%; justify-content: flex-start; margin-bottom: 10px; padding: 12px 16px; border-radius: 14px;">
     <input type="checkbox" id="chkTranslateAudio" style="width: 20px; height: 20px;">
     <span style="font-weight: 700; font-size: .9rem; color: var(--text);">Play translation audio</span>
   </label>
 
   <div class="surah-list" id="audioSurahList"><div class="loading">Loading…</div></div>
 </div>
-<div class="app screen" id="screenPrayer" hidden="">
+<div class="app screen" id="screenPrayer" hidden>
   <div class="sub-header">
     <button id="backFromPrayer" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Prayer Times</h1>
@@ -2792,39 +2772,39 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="prayer-top">
     <button class="prayer-settings-btn" id="prayerSettingsBtn" type="button" aria-label="Prayer settings">⚙️</button>
     <div class="prayer-city-wrap">
-      <span class="prayer-city" id="prayerCityName">Set your location</span>
-      <span class="prayer-method" id="prayerMethodName">Egyptian General Authority of Survey</span>
+      <span class="prayer-city" id="prayerCityName">—</span>
+      <span class="prayer-method" id="prayerMethodName">—</span>
     </div>
     <button class="prayer-settings-btn" id="prayerQiblaBtn" type="button" aria-label="Qibla direction">🧭</button>
   </div>
   <div class="prayer-date-row">
-    <span class="pdr-item pdr-hijri" id="pdrHijri">3 Jumada al-Akhirah 1448 AH</span>
+    <span class="pdr-item pdr-hijri" id="pdrHijri">—</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-greg" id="pdrGreg">14 November 2026</span>
+    <span class="pdr-item pdr-greg" id="pdrGreg">—</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">11:55</span>
+    <span class="pdr-item pdr-time" id="pdrTime">--:--</span>
   </div>
-  <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
+  <ul class="prayer-list" id="prayerList"></ul>
   <div class="prayer-note" id="prayerNote">
     Tap the bell next to any prayer to toggle its alarm on / off.<br><br>Please note, for the Athaan alarm to sound, do not fully close the app and leave the media volume on.
   </div>
 </div>
 
-<div class="app screen" id="screenCoach" hidden="">
+<div class="app screen" id="screenCoach" hidden>
   <header>
     <button id="btnBackHome" class="back-pill" aria-label="Back to home">Back</button>
     <span class="coach-title">Quran Recitation Coach</span>
     <button id="btnInfo" class="back-pill" aria-label="About the Recitation Coach">Info</button>
     <button id="btnTheme" class="iconbtn" aria-label="Toggle theme">🌙</button>
   </header>
-  <div id="support" class="warnbox" hidden=""></div>
+  <div id="support" class="warnbox" hidden></div>
   <div class="statusbar idle" id="statusbar" role="status" aria-live="polite">
     <span class="dot"></span>
     <span class="label" id="statusLabel">Loading…</span>
     <span class="hint" id="statusHint"></span>
   </div>
   <section class="panel hide-immersive">
-    <div class="row" id="surahNavRow" hidden="">
+    <div class="row" id="surahNavRow" hidden>
       <button id="btnPrevSurah" class="ghost icon" aria-label="Next surah">◀</button>
       <div class="surah-info">
         <span class="surah-en" id="surahEn">—</span>
@@ -2840,9 +2820,9 @@ body.light-mode .share-arabic{color:#1a2233;}
     <div class="stat"><span id="statErrors">—</span><small>Mistakes</small></div>
     <div class="stat"><span id="statAcc">—</span><small>Accuracy</small></div>
   </section>
-  <div class="barwrap"><div class="bar" id="bar" style="width: 0%;"></div></div>
+  <div class="barwrap"><div class="bar" id="bar"></div></div>
   <div class="toggles hide-immersive">
-    <button class="toggle mode-pill active" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
+    <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">Tajweed</button>
     
     <div class="progress-section" id="progressSection">
@@ -2854,7 +2834,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </span>
   <span class="pt-chev">▾</span>
 </button>
-      <div class="progress-menu" id="progressMenu" role="menu" hidden="">
+      <div class="progress-menu" id="progressMenu" role="menu" hidden>
         <button class="progress-item" id="progressFollow" type="button" role="menuitem">
           <span class="pi-icon">👂</span>
           <span class="pi-text"><strong>Follow</strong><small id="progressFollowSub">No saved session</small></span>
@@ -2866,9 +2846,10 @@ body.light-mode .share-arabic{color:#1a2233;}
       </div>
     </div>
 
-    <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
+    <span class="toggle" id="tajweedStatusChip" hidden
+          role="status" aria-live="polite" aria-atomic="true"></span>
     
-    <label class="toggle hide-text" id="hideTextChip">
+    <label class="toggle hide-text" id="hideTextChip" hidden>
       <input type="checkbox" id="chkHideText"> Hide text
     </label>
   </div>
@@ -2877,7 +2858,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button id="btnMic" class="gold-control-main">Start Reciting 🎤</button>
     <button id="btnReset" class="gold-control-small" aria-label="Restart">↺</button>
   </div>
-  <section class="mistakes-panel hide-immersive" id="mistakesPanel" hidden="">
+  <section class="mistakes-panel hide-immersive" id="mistakesPanel" hidden>
     <div class="mistakes-header">
       <span>📋 Mistakes</span>
       <span class="count" id="mistakeCountBadge">0</span>
@@ -2899,7 +2880,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </section>
 </div>
 
-<div class="app screen" id="screenHifz" hidden="">
+<div class="app screen" id="screenHifz" hidden>
   <div class="sub-header">
     <button id="backFromHifz" class="back-pill" type="button">Back</button>
     <h1>Hifz Test</h1>
@@ -2942,7 +2923,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
     <button class="primary" id="hifzStartBtn" type="button" style="width:100%">Start Test</button>
   </div>
-  <div class="hifz-test" id="hifzTestArea" hidden="">
+  <div class="hifz-test" id="hifzTestArea" hidden>
     <div class="hifz-stats-bar">
       <div class="hifz-stat"><span id="hifzAyahProg">0/0</span><small>Ayahs</small></div>
       <div class="hifz-stat"><span id="hifzHintCount">0</span><small>Hints</small></div>
@@ -2959,7 +2940,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
 </div>
 
-<div class="app screen" id="screenTajweed" hidden="">
+<div class="app screen" id="screenTajweed" hidden>
   <div class="sub-header">
     <button id="backFromTajweed" class="back-pill" type="button">Back</button>
     <h1>Tajweed Colors</h1>
@@ -2970,22 +2951,23 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select id="tajweedSurahSelect" class="ps-input" style="flex:1;min-width:0" aria-label="Choose a surah">
       <option value="">Loading surahs…</option>
     </select>
-    <button id="tajweedFullscreenBtn" class="back-pill" type="button" aria-label="Toggle fullscreen">⛶</button>
+    <button id="tajweedFullscreenBtn" class="back-pill" type="button"
+            aria-label="Toggle fullscreen">⛶</button>
   </div>
 
   <div class="tajweed-legend" id="tjLegend">
-    <button class="tj-chip active" data-rule="ham_wasl" type="button"><span class="tj-dot" style="background:#9b59b6"></span>Hamzat al‑Wasl</button>
+    <button class="tj-chip active" data-rule="ham_wasl"       type="button"><span class="tj-dot" style="background:#9b59b6"></span>Hamzat al‑Wasl</button>
     <button class="tj-chip active" data-rule="laam_shamsiyah" type="button"><span class="tj-dot" style="background:#e67e22"></span>Laam Shamsiyyah</button>
-    <button class="tj-chip active" data-rule="madda_normal" type="button"><span class="tj-dot" style="background:#f1c40f"></span>Madd (normal)</button>
+    <button class="tj-chip active" data-rule="madda_normal"   type="button"><span class="tj-dot" style="background:#f1c40f"></span>Madd (normal)</button>
     <button class="tj-chip active" data-rule="madda_permissible" type="button"><span class="tj-dot" style="background:#e67e22"></span>Madd (permissible)</button>
-    <button class="tj-chip active" data-rule="madda_necessary" type="button"><span class="tj-dot" style="background:#e74c3c"></span>Madd (necessary)</button>
-    <button class="tj-chip active" data-rule="qalqalah" type="button"><span class="tj-dot" style="background:#2980b9"></span>Qalqalah</button>
-    <button class="tj-chip active" data-rule="ghunnah" type="button"><span class="tj-dot" style="background:#27ae60"></span>Ghunnah</button>
-    <button class="tj-chip active" data-rule="ikhfa" type="button"><span class="tj-dot" style="background:#f39c12"></span>Ikhfa</button>
+    <button class="tj-chip active" data-rule="madda_necessary"  type="button"><span class="tj-dot" style="background:#e74c3c"></span>Madd (necessary)</button>
+    <button class="tj-chip active" data-rule="qalqalah"        type="button"><span class="tj-dot" style="background:#2980b9"></span>Qalqalah</button>
+    <button class="tj-chip active" data-rule="ghunnah"         type="button"><span class="tj-dot" style="background:#27ae60"></span>Ghunnah</button>
+    <button class="tj-chip active" data-rule="ikhfa"           type="button"><span class="tj-dot" style="background:#f39c12"></span>Ikhfa</button>
     <button class="tj-chip active" data-rule="idghaam_ghunnah" type="button"><span class="tj-dot" style="background:#16a085"></span>Idghaam (with ghunnah)</button>
     <button class="tj-chip active" data-rule="idghaam_no_ghunnah" type="button"><span class="tj-dot" style="background:#1abc9c"></span>Idghaam (no ghunnah)</button>
-    <button class="tj-chip active" data-rule="iqlab" type="button"><span class="tj-dot" style="background:#8e44ad"></span>Iqlab</button>
-    <button class="tj-chip active" data-rule="silent" type="button"><span class="tj-dot" style="background:#7f8c8d"></span>Silent</button>
+    <button class="tj-chip active" data-rule="iqlab"           type="button"><span class="tj-dot" style="background:#8e44ad"></span>Iqlab</button>
+    <button class="tj-chip active" data-rule="silent"          type="button"><span class="tj-dot" style="background:#7f8c8d"></span>Silent</button>
   </div>
 
   <div class="mushaf tajweed-mushaf" id="tajweedMushaf">
@@ -2997,7 +2979,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
 </div>
 
-<div class="quran-viewer" id="quranViewer" hidden="">
+<div class="quran-viewer" id="quranViewer" hidden>
   <div class="qv-stage"><div class="qv-slot" id="viewerMushafSlot"></div></div>
   <div class="qv-chrome" id="qvChrome">
     <div class="qv-top">
@@ -3019,7 +3001,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
   </div>
   <div class="qv-fs-float hidden" id="qvFsFloat">
-    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen">⛶</button>
+    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Toggle fullscreen">⛶</button>
   </div>
 </div>
 
@@ -3027,10 +3009,10 @@ body.light-mode .share-arabic{color:#1a2233;}
 <div class="fs-controls" id="fsControls" role="toolbar" aria-label="Fullscreen controls">
   <button id="fsMic" aria-label="Toggle microphone">🎤</button>
   <span class="fs-sep"></span>
-  <button id="fsPause" aria-label="Pause" disabled="">⏸</button>
-  <button id="fsContinue" aria-label="Continue" disabled="">▶</button>
+  <button id="fsPause" aria-label="Pause">⏸</button>
+  <button id="fsContinue" aria-label="Continue">▶</button>
   <button id="fsStop" aria-label="Stop">⏹</button>
-  <button id="fsReveal" class="fs-text-tab" type="button" style="display:none" aria-label="Reveal text" title="Reveal the next ayah">Reveal text</button>
+  <button id="fsReveal" class="fs-text-tab" type="button" style="display:none" aria-label="Reveal text">Reveal text</button>
   <span class="fs-sep"></span>
   <button id="fsMinimize" aria-label="Minimise fullscreen">⤡</button>
 </div>
@@ -3043,7 +3025,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
 </div>
 
-<div class="qr-fullscreen" id="qrFullscreen" hidden="">
+<div class="qr-fullscreen" id="qrFullscreen" hidden>
   <div class="qr-card">
     <div class="qr-title">Scan to open</div>
     <div class="qr-code" id="qrCodeHost"></div>
@@ -3225,10 +3207,9 @@ const TEXT_TRANSLATION_OPTIONS = [
       'English/Sahih_International',
       'English/Sahih_Intnl_Ibrahim_Walk'
     ],
-    // Corrected QuranEnc key for English audio
-    quranEncKey: 'english_sahih',
-    // Islamic Network does not host translation audio
-    islamicNetworkKey: null
+    // Independent CDN fallbacks
+    quranEncKey: 'english_saheeh',
+    islamicNetworkKey: 'en.walk'
   },
   { 
     id: 'en.sahih',    
@@ -3243,8 +3224,8 @@ const TEXT_TRANSLATION_OPTIONS = [
       'English/Sahih_International',
       'English/Sahih_Intnl_Ibrahim_Walk'
     ],
-    quranEncKey: 'english_sahih',
-    islamicNetworkKey: null
+    quranEncKey: 'english_saheeh',
+    islamicNetworkKey: 'en.walk'
   },
   {
     id: 'tr.diyanet', 
@@ -3258,7 +3239,7 @@ const TEXT_TRANSLATION_OPTIONS = [
       'Turkish/Mustafa_Ismail_128kbps'
     ],
     quranEncKey: 'turkish_rwwad',
-    islamicNetworkKey: null,
+    islamicNetworkKey: 'tr.vakfi-audio',
     label: 'Türkçe — Diyanet', 
     shortLabel: 'Diyanet'
   }
@@ -3921,8 +3902,15 @@ function buildTranslationAudioUrls(folder, surah, ayah){
   const primaryFolder = (opt && opt.audioFolder) ? opt.audioFolder : folder;
   const urls = [];
 
+  // EveryAyah hosts the English Ibrahim Walk set directly under
+  // data/English/… (verified working), while Turkish and other
+  // translation sets live under data/translations/…
+  const eaBase = (opt && opt.lang === 'en')
+    ? 'https://everyayah.com/data/'
+    : 'https://everyayah.com/data/translations/';
+
   // 1. Primary EveryAyah translation URL
-  urls.push('https://everyayah.com/data/translations/' + primaryFolder + '/' + s + a + '.mp3');
+  urls.push(eaBase + primaryFolder + '/' + s + a + '.mp3');
 
   // 2. Alternate EveryAyah folder names
   if (opt && Array.isArray(opt.fallbackAudioFolders)) {
@@ -3933,9 +3921,21 @@ function buildTranslationAudioUrls(folder, surah, ayah){
     }
   }
 
-  // 3. QuranEnc CDN (CORS-less, but plays fine as HTML audio)
+  // 3. Islamic Network CDN (highly reliable)
+  if (opt && opt.islamicNetworkKey) {
+    const globalAyah = globalAyahNumber(surah, ayah);
+    urls.push(
+      'https://cdn.islamic.network/quran/audio/128/' +
+      opt.islamicNetworkKey + '/' + globalAyah + '.mp3'
+    );
+  }
+
+  // 4. Final fallback: QuranEnc (CORS-less CDN, served as opaque)
   if (opt && opt.quranEncKey) {
-    urls.push('https://d.quranenc.com/data/audio/' + opt.quranEncKey + '/' + s + a + '.mp3');
+    urls.push(
+      'https://d.quranenc.com/data/audio/' +
+      opt.quranEncKey + '/' + s + a + '.mp3'
+    );
   }
 
   return urls;
@@ -8499,28 +8499,19 @@ async function probeTranslationAudio(url){
     return true;
   }catch(_){ return false; }
 }
-async function isUsableAudioResponse(res){
-  if(!res || !res.ok) return false;
-  const ct = (res.headers.get('content-type') || '').toLowerCase();
-  if(ct && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(ct)) return false;
-  try{
-    const blob = await res.clone().blob();
-    if(blob.size < 1000) return false;
-    if(blob.type && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(blob.type.toLowerCase())) return false;
-    const head = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
-    if(head.length >= 3 && head[0] === 0x3C) return false;
-    if(head.length >= 3 && !(head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) && !(head[0] === 0xFF && (head[1] & 0xE0) === 0xE0)) return false;
-  }catch(_){ return false; }
-  return true;
-}
 async function fetchAudioForOffline(url, parentSignal){
   const bridge = downloadAbortBridge(parentSignal, DOWNLOAD_TIMEOUT_MS);
   try{
     try{
       const res = await fetch(url, { mode: 'cors', cache: 'no-store', signal: bridge.signal });
-      if(res && res.ok && await isUsableAudioResponse(res)) {
+      if(res && res.ok) {
         return res;
       }
+    }catch(_){}
+    if(bridge.signal.aborted) return null;
+    try{ 
+      const res = await fetch(url, { mode: 'no-cors', cache: 'no-store', signal: bridge.signal }); 
+      if(res) return res; 
     }catch(_){}
     return null;
   } finally { bridge.release(); }
@@ -8528,14 +8519,7 @@ async function fetchAudioForOffline(url, parentSignal){
 async function fetchAndStoreAyah(cache, reciterId, surah, ayah, primaryUrl, signal, isTranslation){
   try{
     const hit = await cache.match(primaryUrl, { ignoreSearch: true, ignoreVary: true });
-    if(hit){
-      if(hit.type === 'opaque'){ try{ await cache.delete(primaryUrl, { ignoreSearch: true, ignoreVary: true }); }catch(_){} }
-      else {
-        const hitCt = (hit.headers.get('content-type') || '').toLowerCase();
-        if(hitCt && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(hitCt)){ try{ await cache.delete(primaryUrl, { ignoreSearch: true, ignoreVary: true }); }catch(_){} }
-        else return 'cached';
-      }
-    }
+    if(hit) return 'cached';
   }catch(_){}
   
   let sources = [primaryUrl];
@@ -8562,16 +8546,16 @@ async function fetchAndStoreAyah(cache, reciterId, surah, ayah, primaryUrl, sign
     const res = await fetchAudioForOffline(sources[i], signal);
     if(!res) continue;
     try{
-      if (res.type === 'opaque') { continue; }
+      // ── NEW FIX ──
+      // If the server doesn't allow CORS (like QuranEnc), the response is "opaque".
+      // We cannot read its body, but we CAN save it directly to the cache.
+      if (res.type === 'opaque') {
+        await cache.put(primaryUrl, res);
+        return 'ok';
+      }
+      
       const blob = await res.clone().blob();
       if (blob.size < 1000) { continue; } // Skip empty/error HTML pages
-      const blobCt = (blob.type || res.headers.get('content-type') || '').toLowerCase();
-      if (blobCt && !/audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(blobCt)) { continue; }
-      try{
-        const head = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
-        if (head.length >= 3 && head[0] === 0x3C) { continue; }
-        if (head.length >= 3 && !(head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) && !(head[0] === 0xFF && (head[1] & 0xE0) === 0xE0)) { continue; }
-      }catch(_){ continue; }
       await cache.put(primaryUrl, new Response(blob, { headers: { 'Content-Type': 'audio/mpeg' } }));
       return 'ok';
     }catch(err){ if(err && err.name === 'QuotaExceededError') return 'quota'; }
@@ -9439,16 +9423,7 @@ async function playTranslationWithHealing(urls){
         const res = await fetch(healUrl, { cache: 'no-store' });
         if (res.ok) {
           const blob = await res.blob();
-          const healCt = (blob.type || res.headers.get('content-type') || '').toLowerCase();
-          let healLooksAudio = blob.size && blob.size >= 1000 && (!healCt || /audio|mpeg|mp3|octet-stream|ogg|wav|x-m4a|mp4|aac|flac|webm/.test(healCt));
-          if (healLooksAudio) {
-            try{
-              const head = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
-              if (head.length >= 3 && head[0] === 0x3C) healLooksAudio = false;
-              else if (head.length >= 3 && !(head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) && !(head[0] === 0xFF && (head[1] & 0xE0) === 0xE0)) healLooksAudio = false;
-            }catch(_){ healLooksAudio = false; }
-          }
-          if (healLooksAudio) {
+          if (blob.size && blob.size >= 200) {
             try {
               const cache = await caches.open(AUDIO_CACHE_NAME);
               await cache.put(url, new Response(blob, {
@@ -11453,6 +11428,6 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-</body></html>
+</script>
+</body>
+</html>
