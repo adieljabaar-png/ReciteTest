@@ -1,7 +1,7 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.12 — Translation-audio fix only.
+   v2.4.13 — Translation-audio fix only.
 
      • FIX: On activate, purge poisoned entries from the persistent
        audio cache (opaque responses, non-audio Content-Type,
