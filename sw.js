@@ -1,27 +1,74 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.11 — Version bump to force clients to update to the latest
-   index.html, which fixes translation audio playback and downloads.
+   v2.4.17 — Pre-cache the renamed Read Arabic page (read.html,
+   formerly index_2.html) and the dashboard (index_3.html), and
+   serve each navigation from its own cached copy so Read Arabic
+   works offline instead of falling back to index.html.
 
-     • FIX: The app now properly handles the new translation 
-       audio source (EveryAyah, Islamic Network, QuranEnc for 
-       both English and Turkish). The SW ensures cache invalidation 
-       so old broken downloads are dropped.
+   Changes in index.html (this deployment):
 
-     • SW UPDATE: Retained the early-return in serveRangeFromCached 
-       for opaque responses just in case any future translation 
-       sources require no-CORS fetching. Opaque responses cannot 
-       be sliced or measured, so the SW immediately returns the 
-       full cached response instead of throwing an error when the 
-       media player requests a Range header.
+     • FIX (getTajweedRuleInfo): compound Ghunnah error kinds
+       (ghunnah-ikhfa, ghunnah-iqlab, ghunnah-idghaam_ghunnah)
+       now show the correct rule name AND description in the
+       mistake tooltip, rather than falling back to a generic
+       "Ghunnah — nasalisation held ~2 counts" explanation
+       for all of them.
 
-     • Every other feature carried over unchanged from v2.4.3.
+     • FIX (runStrict1Checks): the emphatic-letter check now
+       runs BEFORE the coachTajweedReady gate, so ص/ض/ط/ظ/ق/ح/خ/ع/غ
+       misuse is still detected when the Quran.com Tajweed
+       annotations fail to load. Previously every rule went
+       silent in that case.
+
+     • FIX (strict1GhunnahOk): idghaam_ghunnah now has a
+       transcript-only fallback. If the microphone waveform is
+       unavailable AND the isolated ن/م still appears in the
+       ASR transcript, a yellow warning is raised. Previously
+       this rule had zero coverage in transcript-only mode.
+
+     • IMPROVEMENT (updateTajweedStatusChip): the rule-ready
+       chip now enumerates the exact rules that are active and
+       disabled in transcript-only mode, so users know what the
+       engine is (and isn't) checking.
+
+     • IMPROVEMENT (startReciting): one-shot informational
+       feedback when the acoustic rules are disabled because
+       the browser cannot access the microphone waveform.
+
+   No functional SW logic changes in this deployment — all of
+   the fixes are client-side (index.html). This version bump
+   is purely to invalidate qc-shell-*, qc-text-*, qc-fonts-*
+   and qc-runtime-* caches so the new index.html and refreshed
+   Tajweed annotation fetches reach existing clients.
+
+   The persistent qc-audio cache is preserved across the bump —
+   users keep their downloaded surahs and translation audio.
+
+   Previously-retained features (unchanged):
+
+     • Microphone diagnostic system with four failure modes:
+       track health (mute / ended), RMS silence, ASR death when
+       audio is proven present, and a 12 s fallback. The
+       diagnostic stops after the first successful ASR result
+       so subsequent Start Reciting calls do not trigger extra
+       getUserMedia re-calls. Includes a "Test microphone" menu
+       item with live RMS level, live transcript, and copy-
+       diagnostic button.
+
+     • Translation audio sources (EveryAyah, Islamic Network,
+       QuranEnc for English and Turkish) are handled via the
+       persistent qc-audio cache.
+
+     • serveRangeFromCached early-returns for opaque responses
+       (QuranEnc without CORS) — they cannot be sliced or
+       measured, so the SW returns the full cached response
+       instead of throwing when the player requests a Range.
    ============================================================ */
 
 'use strict';
 
-const VERSION = '2.4.10';
+const VERSION = '2.4.17';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -44,6 +91,8 @@ const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-'];
 const SHELL_URLS = [
   './',
   './index.html',
+  './index_3.html',
+  './read.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -134,7 +183,10 @@ self.addEventListener('activate', event => {
    ============================================================ */
 self.addEventListener('message', event => {
   const data = event.data || {};
-  if(data.type === 'SKIP_WAITING'){ self.skipWaiting(); return; }
+  if(data.type === 'SKIP_WAITING'){
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
   if(data.type === 'CLEAR_CACHES'){
     event.waitUntil((async () => {
       const keys = await caches.keys();
@@ -157,6 +209,8 @@ self.addEventListener('message', event => {
         await Promise.all([
           cache.delete('./manifest.json', { ignoreSearch: true }),
           cache.delete('./index.html',    { ignoreSearch: true }),
+          cache.delete('./index_3.html',  { ignoreSearch: true }),
+          cache.delete('./read.html',     { ignoreSearch: true }),
           cache.delete('./',              { ignoreSearch: true })
         ]);
       }catch(_){}
@@ -467,7 +521,9 @@ async function shellNavigation(req){
     const res = await fetch(freshReq);
     if(res && res.ok && res.type === 'basic'){
       const clone = res.clone();
-      cache.put('./index.html', clone).catch(() => {});
+      // Cache the page that was actually requested (index.html,
+      // index_3.html or read.html) so each page works offline.
+      cache.put(req, clone).catch(() => {});
     }
     return res;
   }catch(_){
