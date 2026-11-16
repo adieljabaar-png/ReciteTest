@@ -19,6 +19,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style><style>
 @font-face {
   font-family: "Optimistic";
@@ -806,6 +827,19 @@ body.light-mode .read-info-btn{background:#eef2f8!important;color:var(--text-mai
 .info-modal .coach-note b{color:#fff}
 
 
+</style>
+
+<style id="read-fixes-2026-11-16">
+/* Top controls: pinned to the page itself, scroll with it (not viewport-fixed) */
+.top-dock{position:absolute!important;top:12px!important;left:12px!important;z-index:90!important}
+.dark-toggle{position:absolute!important;top:12px!important;right:12px!important}
+.read-info-btn{position:absolute!important;top:12px!important;right:64px!important}
+body{position:relative}
+/* Mic Off indicator removed (mic itself still works in lessons/tests) */
+#mic-status,.mic-status,.top-bar-left{display:none!important}
+.top-bar{justify-content:center!important}
+/* Theme toggle: same glyphs / key / behaviour as Recite (qc.theme + body.light-mode) */
+.dark-toggle{font-size:1.15rem!important}
 </style>
 </head>
 <body data-theme="emerald">
@@ -2831,6 +2865,19 @@ localStorage.removeItem('read_light_mode');
             padding: 0 !important; margin: 0 !important;
         }
     </style>
+
+<style id="read-fixes-2026-11-16">
+/* Top controls: pinned to the page itself, scroll with it (not viewport-fixed) */
+.top-dock{position:absolute!important;top:12px!important;left:12px!important;z-index:90!important}
+.dark-toggle{position:absolute!important;top:12px!important;right:12px!important}
+.read-info-btn{position:absolute!important;top:12px!important;right:64px!important}
+body{position:relative}
+/* Mic Off indicator removed (mic itself still works in lessons/tests) */
+#mic-status,.mic-status,.top-bar-left{display:none!important}
+.top-bar{justify-content:center!important}
+/* Theme toggle: same glyphs / key / behaviour as Recite (qc.theme + body.light-mode) */
+.dark-toggle{font-size:1.15rem!important}
+</style>
 </head>
 <body data-theme="emerald">
 
@@ -5093,5 +5140,36 @@ function openCoachInfoModal(){
   bg.addEventListener('click', e => { if(e.target === bg) close(); });
   bg.querySelector('#coachInfoClose').addEventListener('click', close);
 }
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+<script>
+/* READ ARABIC info — replaces the Recitation Coach copy previously shown here */
+window.openCoachInfoModal = function(){
+  var bg=document.createElement('div'); bg.className='modal-bg';
+  bg.innerHTML='<div class="modal info-modal">'
+   +'<div class="grabber"></div>'
+   +'<h2>📖 READ ARABIC</h2>'
+   +'<p style="color:var(--muted);font-size:.82rem;margin:0 0 14px;line-height:1.55">How READ ARABIC works — learn the Arabic letters, vowels and words step by step, then practise reading with voice feedback.</p>'
+   +'<div class="feature"><h3><span class="fnum">1</span> Work through the lessons in order</h3><ul>'
+   +'<li>There are <b>14 lessons</b>, from the alphabet through short vowels, long vowels, joined letters, words and short surahs.</li>'
+   +'<li>Tap a lesson tab at the top to open it. Finish the lesson you are on before moving to the next one.</li>'
+   +'<li><b>Tap any letter or word</b> to hear how it is pronounced.</li></ul></div>'
+   +'<div class="feature"><h3><span class="fnum">2</span> Practise with your voice</h3><ul>'
+   +'<li>Use <b>Practice / Test</b> in a lesson to read the target word aloud. The app listens and tells you whether it heard it correctly.</li>'
+   +'<li>Speak clearly, one word at a time, and allow a short pause between words.</li>'
+   +'<li>An internet connection is required for voice recognition.</li>'
+   +'<li>If the microphone is not hearing you, use the microphone test in the lesson to check it first.</li></ul></div>'
+   +'<div class="feature"><h3><span class="fnum">3</span> Reading tips</h3><ul>'
+   +'<li>Arabic is read <b>right to left</b>. Short vowels (fathah, kasrah, dammah) change the sound of the letter they sit on.</li>'
+   +'<li>Repeat each new letter and word out loud several times before moving on.</li>'
+   +'<li>Your progress is remembered on this device, so you can pick up where you left off.</li></ul></div>'
+   +'<div class="feature"><h3><span class="fnum">4</span> Dark / light mode</h3><ul>'
+   +'<li>Tap the <b>🌙 / ☀️</b> button at the top right to switch between dark and light mode — the same setting used by Recite.</li></ul></div>'
+   +'<div class="btn-group"><button class="btn btn-primary" onclick="this.closest(\'.modal-bg\').remove()">Got it</button></div>'
+   +'</div>';
+  bg.addEventListener('click',function(e){ if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+};
+window.openReadInfoModal = window.openCoachInfoModal;
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
