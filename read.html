@@ -768,39 +768,54 @@ p,li,span,small,strong{overflow-wrap:break-word}
 }
 
 </style>
+<style id="read-top-buttons">
+
+/* ===== BACK (top-left) + INFO (next to moon) — like coach screen ===== */
+.back-btn{width:auto!important;height:44px!important;padding:0 14px!important;font-size:.8rem!important;font-weight:800!important;border-radius:11px!important}
+.read-info-btn{position:fixed!important;top:12px!important;right:64px!important;width:auto!important;height:44px!important;padding:0 14px!important;font-size:.8rem!important;font-weight:800!important;border-radius:11px!important;background:#111827!important;border:1px solid var(--border)!important;color:var(--text-main)!important;display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;z-index:90!important;touch-action:manipulation}
+body.light-mode .read-info-btn{background:#eef2f8!important;color:var(--text-main)!important}
+.read-info-btn:active{transform:scale(.92)}
+
+</style>
+<style id="coach-info-modal">
+.modal-bg{position:fixed;inset:0;background:rgba(4,7,14,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:100;animation:fadein .2s;}
+.modal{background:linear-gradient(180deg,#1b2436,#131b2a);border:1px solid var(--line);border-bottom:none;border-radius:22px 22px 0 0;width:100%;max-width:520px;padding:20px 18px calc(20px + var(--safe-bottom));max-height:82vh;overflow-y:auto;animation:slideup .28s cubic-bezier(.2,.9,.3,1);}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal h2{margin:0 0 4px;font-size:1.1rem}
+.modal p{margin:0 0 14px;color:var(--muted);font-size:.85rem;line-height:1.55}
+.modal ol{margin:0 0 16px;padding-left:20px;color:var(--muted);font-size:.85rem;line-height:1.75}
+.modal ol b{color:var(--text)}
+.modal .grabber{width:38px;height:4px;background:#3a4863;border-radius:99px;margin:0 auto 14px}
+.modal button{width:100%;height:50px;font-size:.95rem}
+.modal .errbox{background:rgba(255,90,106,.1);border:1px solid rgba(255,90,106,.35);color:#ffb8c0;border-radius:12px;padding:11px 13px;font-size:.8rem;line-height:1.55;margin:0 0 14px;}
+.modal .okbox{background:rgba(47,208,122,.1);border:1px solid rgba(47,208,122,.35);color:#a8e6c4;border-radius:12px;padding:11px 13px;font-size:.8rem;line-height:1.55;margin:0 0 14px;}
+.modal .okbox b{color:var(--good)}
+@media (min-width:640px){.modal-bg{align-items:center;padding:20px}.modal{border-radius:22px;border-bottom:1px solid var(--line);max-height:88vh}}
+
+.info-modal h2{display:flex;align-items:center;gap:9px;font-size:1.15rem;margin-bottom:8px;}
+.info-modal .feature{background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.22);border-radius:13px;padding:12px 13px;margin-bottom:10px;}
+.info-modal .feature h3{margin:0 0 8px;font-size:.95rem;color:var(--text);display:flex;align-items:center;gap:7px;}
+.info-modal .feature h3 .fnum{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;font-family:-apple-system,sans-serif;}
+.info-modal .feature ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+.info-modal .feature ul li{position:relative;padding-left:18px;font-size:.83rem;line-height:1.55;color:var(--muted);}
+.info-modal .feature ul li::before{content:'•';color:var(--accent);font-weight:700;font-size:1.1em;line-height:1;position:absolute;left:0;top:2px;}
+.info-modal .feature ul li b{color:var(--text)}
+.info-modal .footer-note{text-align:center;color:var(--muted);font-size:.72rem;margin:6px 0 14px;font-style:italic;}
+.info-modal .btn-group{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.info-modal .coach-note{background:rgba(155,110,255,.10);border:1px solid rgba(155,110,255,.35);border-radius:13px;padding:12px 13px;margin:0 0 12px;font-size:.83rem;line-height:1.55;color:#cdb9ff;}
+.info-modal .coach-note b{color:#fff}
+
+
+</style>
 </head>
 <body data-theme="emerald">
 
     <div class="top-dock">
-        <div class="menu-container">
-            <button class="icon-btn" id="menu-btn" aria-label="Menu" title="Menu">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
-            <div class="menu-dropdown" id="menu-dropdown">
-                <div class="menu-item" onclick="handleMenuInfo()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                    <span>Information</span>
-                </div>
-                <div class="menu-item danger" onclick="handleMenuReset()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="1 4 1 10 7 10"></polyline>
-                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                    </svg>
-                    <span>Reset App</span>
-                </div>
-            </div>
-        </div>
+        <button class="icon-btn back-btn" type="button" onclick="window.location.href='./index.html'" aria-label="Back to Recite home">Back</button>
     </div>
 
-    <button id="dark-toggle" class="dark-toggle" aria-label="Toggle dark / light theme" title="Toggle dark / light theme" onclick="toggleDarkMode()">🌙</button>
+    <button id="read-info-btn" class="read-info-btn" type="button" onclick="openCoachInfoModal()" aria-label="Info">Info</button>
+      <button id="dark-toggle" class="dark-toggle" aria-label="Toggle dark / light theme" title="Toggle dark / light theme" onclick="toggleDarkMode()">🌙</button>
 
     <div class="app-header">
         <div id="install-pill" class="install-pill">
@@ -2820,63 +2835,11 @@ localStorage.removeItem('read_light_mode');
 <body data-theme="emerald">
 
     <div class="top-dock">
-        <div class="menu-container">
-            <button class="icon-btn" id="menu-btn" aria-label="Menu" title="Menu">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
-            <div class="menu-dropdown" id="menu-dropdown">
-                <div class="menu-item" onclick="closeMenu();window.scrollTo({top:0,behavior:'smooth'})">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    <span>READ ARABIC</span>
-                </div>
-                <div class="menu-item" onclick="handleMenuShare()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                    </svg>
-                    <span>Share</span>
-                </div>
-                <div class="menu-item" onclick="handleMenuScan()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-                        <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-                        <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-                        <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-                        <line x1="7" y1="12" x2="17" y2="12"></line>
-                    </svg>
-                    <span>Scan Code</span>
-                </div>
-                <div class="menu-item" onclick="handleMenuInfo()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                    <span>Information</span>
-                </div>
-                <div class="menu-item danger" onclick="handleMenuReset()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="1 4 1 10 7 10"></polyline>
-                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                    </svg>
-                    <span>Reset App</span>
-                </div>
-            </div>
-        </div>
+        <button class="icon-btn back-btn" type="button" onclick="window.location.href='./index.html'" aria-label="Back to Recite home">Back</button>
     </div>
 
-    <button id="dark-toggle" class="dark-toggle" aria-label="Toggle dark / light theme" title="Toggle dark / light theme" onclick="toggleDarkMode()">🌙</button>
+    <button id="read-info-btn" class="read-info-btn" type="button" onclick="openCoachInfoModal()" aria-label="Info">Info</button>
+      <button id="dark-toggle" class="dark-toggle" aria-label="Toggle dark / light theme" title="Toggle dark / light theme" onclick="toggleDarkMode()">🌙</button>
 
     <div class="app-header">
         <div id="install-pill" class="install-pill hidden">
@@ -5086,4 +5049,49 @@ localStorage.removeItem('read_light_mode');
 
 
 
+<script>
+function openCoachInfoModal(){
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML = '<div class="modal info-modal">' +
+    '<div class="grabber"></div>' +
+    '<h2>ℹ️ Quran Recitation Coach</h2>' +
+    '<p style="color:var(--muted);font-size:.82rem;margin:0 0 14px;line-height:1.55">How the Recitation Coach works — its two modes, the matching rules for each mode, and how progress is remembered. For everything else in the app, tap the ☰ menu on the Home screen and choose <b>About app</b>.</p>' +
+    '<div class="feature"><h3><span class="fnum">1</span> Recitation coach — two modes</h3><ul>' +
+      '<li>The top of the coach screen always shows two pill tabs — <b>Follow</b> and <b>Tajweed</b>. One is always active; tapping the other switches mode instantly.</li>' +
+      '<li>Both modes use your browser\'s <b>built-in speech recognition</b> — no custom model download. An internet connection is required.</li>' +
+      '<li>Hold any word for 3 seconds to start reciting from that point.</li>' +
+      '<li><b>Tap any coloured word</b> to see the Tajweed rule name and a short explanation.</li>' +
+     '<li>On Android phones the coach stays <b>silent and vibration-free while listening</b> so the microphone never picks up its own tones.</li>' +
+              '<li style="color:var(--warn);font-weight:600;margin-top:8px">💡 <b>Tip when reciting in Follow and Tajweed mode:</b> Add pauses in between each ayah.</li>' +
+            '</ul></div>' +
+    '<div class="feature"><h3><span class="fnum">2</span> 👂 Follow mode (memorisation aid)</h3><ul>' +
+      '<li><b>Follow</b> is designed to assist you with <b>memorisation of the Holy Qur\'an</b>. The highlight moves forward with you as you recite.</li>' +
+      '<li>Follow uses a finite-state gate: <b>τ_plausible = 0.72</b> to advance, <b>τ_jump = 0.85</b> to skip 1–2 words forward, and <b>τ_exit = 0.85</b> to leave the current ayah. The pointer never jumps across an ayah boundary unless you fully complete the last word.</li>' +
+      '<li>Look-ahead is limited to <b>k ≤ 2</b> words — out-of-bounds matches are discarded, keeping the highlight locked to the current word.</li>' +
+      '<li><b>Nothing is marked red and no mistakes are counted</b> in Follow mode.</li>' +
+    '</ul></div>' +
+    '<div class="feature"><h3><span class="fnum">3</span> 🎵 Tajweed mode (error feedback)</h3><ul>' +
+      '<li><b>Tajweed</b> is designed to highlight every mispronunciation.</li>' +
+      '<li>On a mispronounced word the coach <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
+      '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> — Haraka-based bounds: Tabee\'i [1.7–2.3], Wajib/Ja\'iz [3.6–5.4], Lazim [5.5–6.5] × Haraka.<br>• <b>Ghunnah</b> — nasal formant band 250–600 Hz verified in both transcript and spectrum.<br>• <b>Qalqalah</b> — plosive-burst detector catches missing bounce.<br>• <b>Laam Shamsiyyah</b> — onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> — glottal re-attack detection.<br>• <b>Idghaam (no ghunnah)</b> — nasalisation-overrun check.<br>• <b>Emphatic letters</b> (ص→س, ط→ت…) surfaced as warnings on every commit path.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped form.</li>' +
+      '<li><b>Rule-ready chip:</b> shows whether rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules ready · transcript-only</b> · <b>● Rules unavailable</b> · <b>● Rules not ready</b> (microphone unreachable).</li>' +
+    '</ul></div>' +
+    '<div class="feature"><h3><span class="fnum">4</span> 🙈 Hide text &amp; Reveal text</h3><ul>' +
+      '<li><b>Hide text</b> (available in Follow mode) hides the whole mushaf so you can recite from memory. Words become visible as you recite them.</li>' +
+      '<li>While hidden mode is active, a small <b>Reveal text</b> tab appears inside the fullscreen toolbar (alongside ⏸ ▶ ⏹).</li>' +
+    '</ul></div>' +
+    '<div class="feature"><h3><span class="fnum">5</span> Progress — Follow &amp; Tajweed memory</h3><ul>' +
+      '<li>Whichever mode you are in, the coach automatically remembers the <b>last surah, ayah and word</b> you reached.</li>' +
+      '<li>Tap <b>Progress</b> on the Home screen, then choose <b>Follow</b> or <b>Tajweed</b>.</li>' +
+      '<li>Progress is stored only on your device.</li>' +
+    '</ul></div>' +
+    '<div class="footer-note">All learning progress stays on your device.</div>' +
+    '<div class="btn-group"><button class="primary" id="coachInfoClose">Got it</button></div></div>';
+  document.body.appendChild(bg);
+  const close = () => bg.remove();
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  bg.querySelector('#coachInfoClose').addEventListener('click', close);
+}
+</script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
