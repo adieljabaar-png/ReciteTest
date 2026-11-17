@@ -7178,59 +7178,6 @@ function attachMicTrackListeners(stream){
   }catch(_){}
 }
 
-// ==========================================
-// 1. ADD THIS NEW HELPER FUNCTION 
-// (Place this near your other ASR utility functions)
-// ==========================================
-function updateSpeechGrammar(targetWordsArray) {
-  // Check if browser supports SpeechGrammarList (Chromium supports webkitSpeechGrammarList)
-  const GrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-  if (!GrammarList) return;
-
-  try {
-    const speechRecognitionList = new GrammarList();
-    
-    // Clean and filter target words (keeping Arabic unicode characters)
-    const cleanWords = targetWordsArray
-      .map(w => typeof w === 'string' ? w.replace(/[^\u0600-\u06FF]/g, '').trim() : '')
-      .filter(Boolean);
-
-    if (cleanWords.length === 0) return;
-
-    // Construct standard JSGF grammar rule limiting recognition to current window words
-    const jsgfRules = `#JSGF V1.0; grammar quranWindow; public <word> = ${cleanWords.join(' | ')};`;
-    
-    speechRecognitionList.addFromString(jsgfRules, 1.0);
-    
-    // Attach directly to your global or active recognition instance
-    if (typeof recognition !== 'undefined' && recognition) {
-      recognition.grammars = speechRecognitionList;
-    }
-  } catch (err) {
-    console.warn("SpeechGrammarList injection skipped or unsupported:", err);
-  }
-}
-
-
-// ==========================================
-// 2. PASTE THIS INTO YOUR EXISTING START ROUTINE
-// (Right before recognition.start() is called)
-// ==========================================
-function triggerSpeechRecognition() {
-  // Example: Gather your active sliding window words for the current verse
-  const activeVerseWords = getCurrentWindowWords(); // Replace with your actual array getter
-
-  // INJECT GRAMMAR HERE: Updates the ASR vocabulary scope instantly
-  updateSpeechGrammar(activeVerseWords);
-
-  try {
-    recognition.start();
-    console.log("ASR started with custom grammar biasing for words:", activeVerseWords);
-  } catch (error) {
-    console.error("Recognition start failed:", error);
-  }
-}
-
 function detachMicTrackListeners(){
   for(const l of micTrackListeners){
     try{ l.track.removeEventListener('mute', l.onMute); }catch(_){}
@@ -7719,6 +7666,59 @@ function setRecitationMode(modeName){
           catch(_){ speechStarting = false; }
         }
       };
+
+// ==========================================
+// 1. ADD THIS NEW HELPER FUNCTION 
+// (Place this near your other ASR utility functions)
+// ==========================================
+function updateSpeechGrammar(targetWordsArray) {
+  // Check if browser supports SpeechGrammarList (Chromium supports webkitSpeechGrammarList)
+  const GrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+  if (!GrammarList) return;
+
+  try {
+    const speechRecognitionList = new GrammarList();
+    
+    // Clean and filter target words (keeping Arabic unicode characters)
+    const cleanWords = targetWordsArray
+      .map(w => typeof w === 'string' ? w.replace(/[^\u0600-\u06FF]/g, '').trim() : '')
+      .filter(Boolean);
+
+    if (cleanWords.length === 0) return;
+
+    // Construct standard JSGF grammar rule limiting recognition to current window words
+    const jsgfRules = `#JSGF V1.0; grammar quranWindow; public <word> = ${cleanWords.join(' | ')};`;
+    
+    speechRecognitionList.addFromString(jsgfRules, 1.0);
+    
+    // Attach directly to your global or active recognition instance
+    if (typeof recognition !== 'undefined' && recognition) {
+      recognition.grammars = speechRecognitionList;
+    }
+  } catch (err) {
+    console.warn("SpeechGrammarList injection skipped or unsupported:", err);
+  }
+}
+
+
+// ==========================================
+// 2. PASTE THIS INTO YOUR EXISTING START ROUTINE
+// (Right before recognition.start() is called)
+// ==========================================
+function triggerSpeechRecognition() {
+  // Example: Gather your active sliding window words for the current verse
+  const activeVerseWords = getCurrentWindowWords(); // Replace with your actual array getter
+
+  // INJECT GRAMMAR HERE: Updates the ASR vocabulary scope instantly
+  updateSpeechGrammar(activeVerseWords);
+
+  try {
+    recognition.start();
+    console.log("ASR started with custom grammar biasing for words:", activeVerseWords);
+  } catch (error) {
+    console.error("Recognition start failed:", error);
+  }
+}
 
       ensureMicStream().then(s => {
         if(s){
