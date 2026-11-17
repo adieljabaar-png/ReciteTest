@@ -1,49 +1,40 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.17 — Pre-cache the renamed Read Arabic page (read.html,
-   formerly index_2.html) and the dashboard (index_3.html), and
-   serve each navigation from its own cached copy so Read Arabic
-   works offline instead of falling back to index.html.
+   v2.4.18 — Pre-cache the Read Arabic page (read.html) and the
+   dashboard (index_3.html), and serve each navigation from its
+   own cached copy so Read Arabic works offline instead of
+   falling back to index.html.
 
-   Changes in index.html (this deployment):
+   Changes in this deployment (all client-side — no SW logic
+   changes, purely a cache-invalidation bump):
 
-     • FIX (getTajweedRuleInfo): compound Ghunnah error kinds
-       (ghunnah-ikhfa, ghunnah-iqlab, ghunnah-idghaam_ghunnah)
-       now show the correct rule name AND description in the
-       mistake tooltip, rather than falling back to a generic
-       "Ghunnah — nasalisation held ~2 counts" explanation
-       for all of them.
+     index.html (Home / Dashboard):
+       • Added a new "Read Arabic" tile on the dashboard that
+         links to ./read.html.
+       • Shrank the Daily Streak tile to the same size as the
+         Hifz tile (removed grid-column:span 2 behaviour).
 
-     • FIX (runStrict1Checks): the emphatic-letter check now
-       runs BEFORE the coachTajweedReady gate, so ص/ض/ط/ظ/ق/ح/خ/ع/غ
-       misuse is still detected when the Quran.com Tajweed
-       annotations fail to load. Previously every rule went
-       silent in that case.
+     read.html (new — Read Arabic page):
+       • New page styled to match the Recite app: same CSS
+         variables, dark/light theme, radial background,
+         Amiri/Amiri Quran Arabic fonts, gold accent.
+       • Header: [Back] [Read Arabic] [ℹ️ info] [🌙☀️ theme]
+         — NO book icon, NO "mic off" text.
+       • Removed from the menu: install, share, scan-QR —
+         those features are simply not present on this page.
+       • Replaced the old menu with an info icon next to the
+         moon/sun; tapping it opens the same slide-up info
+         modal style as the coach screen.
+       • Moon + sun theme toggle pill behaves exactly like
+         the Recite app (saved to localStorage under
+         'read-arabic-theme').
 
-     • FIX (strict1GhunnahOk): idghaam_ghunnah now has a
-       transcript-only fallback. If the microphone waveform is
-       unavailable AND the isolated ن/م still appears in the
-       ASR transcript, a yellow warning is raised. Previously
-       this rule had zero coverage in transcript-only mode.
-
-     • IMPROVEMENT (updateTajweedStatusChip): the rule-ready
-       chip now enumerates the exact rules that are active and
-       disabled in transcript-only mode, so users know what the
-       engine is (and isn't) checking.
-
-     • IMPROVEMENT (startReciting): one-shot informational
-       feedback when the acoustic rules are disabled because
-       the browser cannot access the microphone waveform.
-
-   No functional SW logic changes in this deployment — all of
-   the fixes are client-side (index.html). This version bump
-   is purely to invalidate qc-shell-*, qc-text-*, qc-fonts-*
-   and qc-runtime-* caches so the new index.html and refreshed
-   Tajweed annotation fetches reach existing clients.
-
-   The persistent qc-audio cache is preserved across the bump —
-   users keep their downloaded surahs and translation audio.
+   Cache invalidation:
+     qc-shell-* / qc-text-* / qc-fonts-* / qc-runtime-* are
+     bumped so the new index.html and read.html are fetched.
+     The persistent qc-audio cache is preserved — users keep
+     their downloaded surahs and translation audio.
 
    Previously-retained features (unchanged):
 
@@ -68,7 +59,7 @@
 
 'use strict';
 
-const VERSION = '2.4.17';
+const VERSION = '2.4.18';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -79,7 +70,7 @@ const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE];
 
 /* Persistent caches — NEVER deleted on activation, regardless of
    version. Downloaded Quran audio (everyayah.com) and downloaded
-   translation audio (everyayah.com, Islamic Network, QuranEnc) 
+   translation audio (everyayah.com, Islamic Network, QuranEnc)
    all live here. */
 const AUDIO_CACHE = 'qc-audio';
 const PERSISTENT_CACHES = [AUDIO_CACHE];
@@ -87,7 +78,11 @@ const PERSISTENT_CACHES = [AUDIO_CACHE];
 const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-'];
 
 /* Pre-cache the shell, manifest, AND the real app icons so they
-   are available for the install prompt and offline usage. */
+   are available for the install prompt and offline usage.
+
+   Note: read.html is the new Read Arabic page. index.html is the
+   main dashboard; index_3.html is the previous dashboard copy
+   kept around for old links. */
 const SHELL_URLS = [
   './',
   './index.html',
@@ -112,7 +107,9 @@ const TEXT_CACHE_MAX = 600;
 const RUNTIME_MAX    = 120;
 const MANIFEST_TIMEOUT_MS = 2000;
 
-/* The exact Google Fonts stylesheet URL used by <link> in index.html. */
+/* The exact Google Fonts stylesheet URL used by <link> in index.html
+   and read.html. Keep these identical so the pre-cached font CSS
+   hits both pages without a second network round-trip. */
 const FONT_CSS_URL = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap';
 const FONT_FETCH_TIMEOUT_MS   = 8000;
 const FONTS_PREFETCH_TOTAL_MS = 20000;
@@ -529,6 +526,8 @@ async function shellNavigation(req){
   }catch(_){
     let hit = null;
     try{
+      // Try the exact URL first (so /read.html serves read.html
+      // offline, not the dashboard), then fall back to index.html.
       hit = await cache.match(req, { ignoreSearch: true })
          || await cache.match('./index.html', { ignoreSearch: true })
          || await cache.match('./', { ignoreSearch: true });
