@@ -6092,7 +6092,7 @@ function splitSegmentByWords(seg, wordsArr, startIdx, count){
 
 const FOLLOW_TAU_PLAUSIBLE  = 0.72;
 const FOLLOW_TAU_JUMP       = 0.85;
-const FOLLOW_TAU_EXIT       = 0.85;
+const FOLLOW_TAU_EXIT       = 0.80;
 const FOLLOW_MAX_LOOKAHEAD  = 2;
 
 function followSimilarity(heard, hPhon, hPhonLoose, w){
@@ -6448,6 +6448,19 @@ function createSpeechRecognition(forceNoPhrases){
   if(!SPEECH_SUPPORTED) return null;
   if(speechRecognition && !speechRecognition.__dead) return speechRecognition;
   if(speechRecognition){ try{ speechRecognition.abort(); }catch(_){} speechRecognition = null; }
+
+async function setupOnDeviceArabic(rec) {
+  if (!('processLocally' in rec) || !SpeechRecognitionCtor.available) return false;
+  const opts = { langs: ['ar-SA'], processLocally: true };
+  let status = await SpeechRecognitionCtor.available(opts);   // 'available' | 'downloadable' | 'downloading' | 'unavailable'
+  if (status === 'downloadable') {
+    await SpeechRecognitionCtor.install(opts);                // must be triggered by a user gesture
+    status = await SpeechRecognitionCtor.available(opts);
+  }
+  if (status === 'available') { rec.processLocally = true; return true; }
+  return false;                                               // fall back to cloud
+}
+
   const rec = new SpeechRecognitionCtor();
   rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
