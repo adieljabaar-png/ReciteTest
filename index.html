@@ -279,25 +279,6 @@ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .juz-row .juz-range{font-size:.66rem;color:var(--muted);margin-top:2px;letter-spacing:.02em;}
 .home-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .tile{
-
-/* Read Arabic tile */
-#tileReadArabic .tile-icon{
-  background:rgba(47,208,122,.14);
-  border-color:rgba(47,208,122,.30);
-}
-#tileReadArabic:hover{border-color:rgba(47,208,122,.45)}
-body.light-mode #tileReadArabic .tile-icon{
-  background:rgba(31,154,90,.14);
-  border-color:rgba(31,154,90,.30);
-}
-
-/* Ensure Daily Streak shrinks to a normal tile (same size as Hifz) */
-#tileDailyStreak{
-  grid-column:auto !important;
-  grid-row:auto !important;
-  min-height:140px;
-}
-
 display:flex;flex-direction:column;align-items:flex-start;
 gap:9px;height:auto;min-height:140px;padding:18px 16px;
 background:linear-gradient(180deg, var(--panel-2), var(--panel));
@@ -364,13 +345,6 @@ font-size:.72rem;font-weight:800;font-family:-apple-system,sans-serif;
 .install-step .t b{color:var(--text)}
 .install-step .t .glyph{font-size:1.1rem;vertical-align:-2px}
 body.light-mode .install-step{background:rgba(42,111,224,.05);border-color:rgba(42,111,224,.18)}
-
-<!-- Place after the Hifz tile, before the closing </div> of .home-tiles -->
-<button class="tile" id="tileReadArabic" onclick="window.location.href='read.html'">
-  <span class="tile-icon">📖</span>
-  <span class="tile-title">Read Arabic</span>
-  <span class="tile-sub">Practice reading Arabic text</span>
-</button>
 
 .progress-section{position:relative;}
 .progress-trigger{
@@ -7204,6 +7178,59 @@ function attachMicTrackListeners(stream){
   }catch(_){}
 }
 
+// ==========================================
+// 1. ADD THIS NEW HELPER FUNCTION 
+// (Place this near your other ASR utility functions)
+// ==========================================
+function updateSpeechGrammar(targetWordsArray) {
+  // Check if browser supports SpeechGrammarList (Chromium supports webkitSpeechGrammarList)
+  const GrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+  if (!GrammarList) return;
+
+  try {
+    const speechRecognitionList = new GrammarList();
+    
+    // Clean and filter target words (keeping Arabic unicode characters)
+    const cleanWords = targetWordsArray
+      .map(w => typeof w === 'string' ? w.replace(/[^\u0600-\u06FF]/g, '').trim() : '')
+      .filter(Boolean);
+
+    if (cleanWords.length === 0) return;
+
+    // Construct standard JSGF grammar rule limiting recognition to current window words
+    const jsgfRules = `#JSGF V1.0; grammar quranWindow; public <word> = ${cleanWords.join(' | ')};`;
+    
+    speechRecognitionList.addFromString(jsgfRules, 1.0);
+    
+    // Attach directly to your global or active recognition instance
+    if (typeof recognition !== 'undefined' && recognition) {
+      recognition.grammars = speechRecognitionList;
+    }
+  } catch (err) {
+    console.warn("SpeechGrammarList injection skipped or unsupported:", err);
+  }
+}
+
+
+// ==========================================
+// 2. PASTE THIS INTO YOUR EXISTING START ROUTINE
+// (Right before recognition.start() is called)
+// ==========================================
+function triggerSpeechRecognition() {
+  // Example: Gather your active sliding window words for the current verse
+  const activeVerseWords = getCurrentWindowWords(); // Replace with your actual array getter
+
+  // INJECT GRAMMAR HERE: Updates the ASR vocabulary scope instantly
+  updateSpeechGrammar(activeVerseWords);
+
+  try {
+    recognition.start();
+    console.log("ASR started with custom grammar biasing for words:", activeVerseWords);
+  } catch (error) {
+    console.error("Recognition start failed:", error);
+  }
+}
+
 function detachMicTrackListeners(){
   for(const l of micTrackListeners){
     try{ l.track.removeEventListener('mute', l.onMute); }catch(_){}
@@ -11113,7 +11140,7 @@ function openCoachInfoModal(){
       '<li>Hold any word for 3 seconds to start reciting from that point.</li>' +
       '<li><b>Tap any coloured word</b> to see the Tajweed rule name and a short explanation.</li>' +
      '<li>On Android phones the coach stays <b>silent and vibration-free while listening</b> so the microphone never picks up its own tones.</li>' +
-              '<li style="color:var(--warn);font-weight:600;margin-top:8px">💡 <b>Tip when reciting in Follow and Tajweed mode:</b> Add pauses in between each ayah.</li>' +
+              '<li style="color:var(--warn);font-weight:600;margin-top:8px">💡 <b>Tip when reciting in Follow and Tajweed mode:</b> Background noise may affect the Follow and Tajweed accuracy.  Add pauses in between each ayah.</li>' +
             '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">2</span> 👂 Follow mode (memorisation aid)</h3><ul>' +
       '<li><b>Follow</b> is designed to assist you with <b>memorisation of the Holy Qur\'an</b>. The highlight moves forward with you as you recite.</li>' +
