@@ -1,40 +1,40 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.21 — Pre-cache the Read Arabic page (read.html) and the
-   dashboard (index_3.html), and serve each navigation from its
-   own cached copy so Read Arabic works offline instead of
-   falling back to index.html.
+   v2.4.19 — Cache-invalidation bump for the new dashboard layout
+   and the reworked Read Arabic page, plus user-data protection.
 
-   Changes in this deployment (all client-side — no SW logic
-   changes, purely a cache-invalidation bump):
+   User data that is NEVER deleted by this service worker:
+     • Downloaded surah / translation audio  (cache 'qc-audio')
+     • Progress, streaks, achievements, bookmarks, prayer-time
+       settings and alarms, theme and Read Arabic scores — these
+       live in localStorage, which a service worker cannot touch
+       and this file never does.
+     • Cached Quran / translation text — copied forward into the
+       new text cache on every update so offline reading survives.
+
+   Changes in this deployment:
 
      index.html (Home / Dashboard):
-       • Added a new "Read Arabic" tile on the dashboard that
-         links to ./read.html.
-       • Shrank the Daily Streak tile to the same size as the
-         Hifz tile (removed grid-column:span 2 behaviour).
+       • New "Read Arabic" tab on the Dashboard, next to Daily
+         streak, linking to ./read.html.
+       • Daily streak shrunk to the same size as the Hifz /
+         Tajweed tabs; all four tabs are equal width.
 
-     read.html (new — Read Arabic page):
-       • New page styled to match the Recite app: same CSS
-         variables, dark/light theme, radial background,
-         Amiri/Amiri Quran Arabic fonts, gold accent.
-       • Header: [Back] [Read Arabic] [ℹ️ info] [🌙☀️ theme]
-         — NO book icon, NO "mic off" text.
-       • Removed from the menu: install, share, scan-QR —
-         those features are simply not present on this page.
-       • Replaced the old menu with an info icon next to the
-         moon/sun; tapping it opens the same slide-up info
-         modal style as the coach screen.
-       • Moon + sun theme toggle pill behaves exactly like
-         the Recite app (saved to localStorage under
-         'read-arabic-theme').
+     read.html (Read Arabic page):
+       • Header: [Back] on the left (returns to ./index.html),
+         [i] info and moon/sun theme toggle on the right.
+       • Menu removed (Install, Share, Scan, Reset deleted).
+       • Theme toggle uses the same 'qc.theme' setting as Recite.
+
+     sw.js:
+       • CLEAR_CACHES now clears only the versioned app caches and
+         keeps the persistent audio downloads.
+       • Old text caches are migrated, not discarded, on update.
 
    Cache invalidation:
-     qc-shell-* / qc-text-* / qc-fonts-* / qc-runtime-* are
-     bumped so the new index.html and read.html are fetched.
-     The persistent qc-audio cache is preserved — users keep
-     their downloaded surahs and translation audio.
+     qc-shell-* / qc-fonts-* / qc-runtime-* are bumped so the new
+     index.html and read.html are fetched. qc-audio is preserved.
 
    Previously-retained features (unchanged):
 
@@ -59,7 +59,7 @@
 
 'use strict';
 
-const VERSION = '2.4.18';
+const VERSION = '2.4.19';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -157,6 +157,7 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     try{
       const keys = await caches.keys();
+      await migrateTextCaches(keys);
       const toDelete = keys.filter(name => {
         if(VERSIONED_CACHES.includes(name)) return false;
         if(PERSISTENT_CACHES.includes(name)) return false;
@@ -174,6 +175,31 @@ self.addEventListener('activate', event => {
   })());
 });
 
+/* Copy cached Quran / translation text from older versioned text
+   caches into the current one, so an app update never wipes what
+   the user can already read offline. Best-effort, never throws. */
+async function migrateTextCaches(keys){
+  try{
+    const oldNames = keys.filter(k => k.startsWith('qc-text-') && k !== TEXT_CACHE);
+    if(!oldNames.length) return;
+    const target = await caches.open(TEXT_CACHE);
+    for(const name of oldNames){
+      try{
+        const src = await caches.open(name);
+        const reqs = await src.keys();
+        for(const r of reqs){
+          try{
+            if(await target.match(r, { ignoreVary: true })) continue;
+            const res = await src.match(r);
+            if(res) await target.put(r, res);
+          }catch(_){}
+        }
+      }catch(_){}
+    }
+    trimCache(TEXT_CACHE, TEXT_CACHE_MAX).catch(() => {});
+  }catch(_){}
+}
+
 /* ============================================================
    MESSAGES — SKIP_WAITING / CLEAR_CACHES / CLEAR_AUDIO_CACHE /
               REFRESH_MANIFEST
@@ -186,8 +212,11 @@ self.addEventListener('message', event => {
   }
   if(data.type === 'CLEAR_CACHES'){
     event.waitUntil((async () => {
+      // Clear app caches only — never the persistent user downloads.
       const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
+      await Promise.all(keys
+        .filter(k => !PERSISTENT_CACHES.includes(k))
+        .map(k => caches.delete(k)));
       if(event.source && event.source.postMessage) event.source.postMessage({ type: 'CACHES_CLEARED' });
     })());
     return;
