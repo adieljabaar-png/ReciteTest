@@ -1623,7 +1623,7 @@ body.light-mode .ip-checkbox{background:rgba(42,111,224,.05);border-color:rgba(4
 .streak-badges{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
 .streak-badge{font-size:1.15rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
 
-.home-feature-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:4px}
+.home-feature-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
 .feature-tab{
   display:flex;align-items:center;gap:10px;width:100%;height:auto;min-height:64px;
   padding:12px 14px;background:linear-gradient(180deg,var(--panel-2),var(--panel));
@@ -1649,32 +1649,6 @@ body.light-mode .ip-checkbox{background:rgba(42,111,224,.05);border-color:rgba(4
 .ft-text small{font-size:.64rem;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.light-mode .streak-bar{background:linear-gradient(135deg, rgba(198,138,0,.12), rgba(238,242,248,.95));border-color:rgba(198,138,0,.35)}
 body.light-mode .feature-tab{background:linear-gradient(180deg,#ffffff,#eef2f8)}
-
-
-/* Dashboard top row: compact Daily streak + Read Arabic, sized like Hifz/Tajweed tabs */
-.dash-top-tabs{margin-top:0}
-.dash-top-tabs .streak-bar{
-  width:100%;min-width:0;min-height:64px;height:auto;padding:12px 14px;gap:10px;
-  border-radius:16px;box-sizing:border-box;
-}
-.dash-top-tabs .streak-fire{font-size:1.5rem;width:44px;height:44px;flex-shrink:0;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,176,32,.14);border:1px solid rgba(255,176,32,.35)}
-.dash-top-tabs .streak-info{gap:1px;flex:1;min-width:0}
-.dash-top-tabs .streak-count{font-size:.95rem;line-height:1.1}
-.dash-top-tabs .streak-label{font-size:.58rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dash-top-tabs .streak-best{margin-left:0;font-size:.6rem;white-space:nowrap}
-.dash-top-tabs .streak-badges{display:none}
-#tileReadArabic .ft-icon{background:rgba(47,208,122,.14);border-color:rgba(47,208,122,.4)}
-#tileReadArabic:hover{border-color:rgba(47,208,122,.6)}
-
-/* Narrow phones: keep all four dashboard tabs equal and fully readable */
-@media (max-width:400px){
-  .home-feature-tabs{gap:8px}
-  .home-feature-tabs .feature-tab,.dash-top-tabs .streak-bar{padding:10px;gap:8px}
-  .home-feature-tabs .ft-icon,.dash-top-tabs .streak-fire{width:34px;height:34px;font-size:1.15rem;border-radius:10px}
-  .home-feature-tabs .ft-text strong{font-size:.76rem;white-space:normal;line-height:1.15}
-  .home-feature-tabs .ft-text small{font-size:.58rem;white-space:normal;line-height:1.2}
-  .dash-top-tabs .streak-label{letter-spacing:.02em;font-size:.54rem}
-}
 
 .hifz-config{display:flex;flex-direction:column;gap:12px;padding:4px 0}
 .hifz-field{display:flex;flex-direction:column;gap:6px}
@@ -2222,10 +2196,6 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
 .streak-fire                          { font-size: 1.6rem; }
 .streak-count                         { font-size: 1.22rem; }
 .streak-label                         { font-size: .7rem; }
-.dash-top-tabs .streak-fire           { font-size: 1.5rem; }
-@media (max-width:400px){ .dash-top-tabs .streak-fire{ font-size:1.15rem; } }
-.dash-top-tabs .streak-count          { font-size: .95rem; }
-.dash-top-tabs .streak-label          { font-size: .58rem; }
 
 /* ── Progress tab inside Coach toggles ── */
 .toggles .progress-section {
@@ -2665,23 +2635,14 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="sub-note">Overview</span>
   </div>
   
-  <div class="home-feature-tabs dash-top-tabs">
-    <div class="streak-bar" id="streakBar" role="button" tabindex="0" aria-label="View your streak and achievements">
-      <span class="streak-fire">🔥</span>
-      <div class="streak-info">
-        <span class="streak-count" id="streakCount">0</span>
-        <span class="streak-label">day streak</span>
-        <span class="streak-best">Best: <b id="streakBest">0</b></span>
-      </div>
-      <div class="streak-badges" id="streakBadges"></div>
+  <div class="streak-bar" id="streakBar" role="button" tabindex="0" aria-label="View your streak and achievements">
+    <span class="streak-fire">🔥</span>
+    <div class="streak-info">
+      <span class="streak-count" id="streakCount">0</span>
+      <span class="streak-label">day streak</span>
     </div>
-    <button class="feature-tab" id="tileReadArabic" type="button" onclick="window.location.href='read.html'">
-      <span class="ft-icon">📗</span>
-      <div class="ft-text">
-        <strong>Read Arabic</strong>
-        <small>Letters &amp; reading</small>
-      </div>
-    </button>
+    <div class="streak-badges" id="streakBadges"></div>
+    <span class="streak-best">Best: <b id="streakBest">0</b></span>
   </div>
 
   <div class="home-feature-tabs">
@@ -3470,9 +3431,11 @@ const IS_SAMSUNG_BROWSER = /SamsungBrowser/i.test(UA);
 const IS_MAC_SAFARI = /Safari/i.test(UA) && !/Chrome|Chromium|CriOS|Android|Edg|OPR/i.test(UA);
 const IS_IN_APP_BROWSER = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|WhatsApp|SnapChat|TikTok|BytedanceWebview|Musical_ly|Telegram|Twitter|LinkedInApp|Pinterest|Slack|Discord|GSA\/|KAKAOTALK|Naver|DaumApps|Everyfarm/i.test(UA);
 
+// Web Speech API owns its microphone capture and does not accept a processed
+// MediaStream. The getUserMedia DSP constraints below therefore improve our
+// local level/diagnostic stream; actual ASR noise handling remains browser/service-owned.
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 const SPEECH_SUPPORTED = !!SpeechRecognitionCtor;
-// Arabic (Saudi Arabia) is retained for Quran recitation on browser speech services.
 const SPEECH_LANG = 'ar-SA';
 
 const TASHKEEL = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\uFEFF\u0640]/g;
@@ -3487,26 +3450,21 @@ const STRICT_FEATURES = {
 };
 
 function normAr(s){
+  // Quran/Uthmani orthography normalisation. Convert small Quranic letters
+  // that carry a pronounced long vowel BEFORE removing annotation marks.
+  // This is script normalisation, not permission to change the recited word.
   return String(s).normalize('NFKC')
+    .replace(/[\u0670]/g,'\u0627')       // dagger alif -> alif
+    .replace(/\u06E5/g,'\u0648')          // small high waw -> waw
+    .replace(/\u06E6/g,'\u064A')          // small high ya -> ya
     .replace(TASHKEEL,'')
-    .replace(/\u0671/g,'\u0627')
-    .replace(/[\u0622\u0623\u0625\u0672\u0673]/g,'\u0627')
+    .replace(/[\u0671\u0672\u0673]/g,'\u0627')
+    .replace(/[\u0622\u0623\u0625]/g,'\u0627')
+    .replace(/\u0640/g,'')
     .replace(/\u0629/g,'\u0647')
     .replace(/[\u0649\u06CC\u06D2]/g,'\u064A')
     .replace(/[\u06C0\u06C1\u06D5]/g,'\u0647')
-    .replace(/[^\u0621-\u064A]/g,'').trim();
-}
-
-function normMsa(s){
-  if(!s) return '';
-  return String(s).normalize('NFKC')
-    .replace(TASHKEEL,'')
-    .replace(/\u0671/g,'\u0627')
-    .replace(/[\u0622\u0623\u0625]/g,'\u0627')
-    .replace(/\u0629/g,'\u0647')
-    .replace(/[\u0649\u06CC]/g,'\u064A')
-    .replace(/\u0624/g,'\u0648')
-    .replace(/\u0626/g,'\u064A')
+    .replace(/\u06A9/g,'\u0643')          // Persian kaf -> Arabic kaf
     .replace(/[^\u0621-\u064A]/g,'').trim();
 }
 
@@ -3529,13 +3487,21 @@ const PHON = {
 };
 
 const PHON_LOOSE = Object.assign({}, PHON, {
-  '\u062D':'\u0647',
-  '\u062E':'\u0647',
-  '\u063A':'\u0647',
-  '\u0639':'\u0627',
-  '\u0637':'\u062A',
-  '\u0638':'\u0632',
-  '\u0630':'\u0632'
+  // Broad accent/acoustic equivalences are retained as a SECONDARY hint only.
+  // The verifier below now requires close written-form agreement as well,
+  // preventing these groups from turning a different Quranic word into a pass.
+  '\u062D':'\u0647',  // ح / ه
+  '\u062E':'\u0647',  // خ / ه (accent-sensitive; never sufficient alone)
+  '\u063A':'\u0642',  // غ / ق (accent-sensitive; never sufficient alone)
+  '\u0639':'\u0621',  // ع / ء
+  '\u0637':'\u062A',  // ط / ت
+  '\u0636':'\u062F',  // ض / د
+  '\u0638':'\u0630',  // ظ / ذ
+  '\u0630':'\u0632',  // ذ / ز
+  '\u062B':'\u0633',  // ث / س
+  '\u0642':'\u0643',  // ق / ك
+  '\u0624':'\u0648',  // hamza on waw
+  '\u0626':'\u064A'   // hamza on ya
 });
 
 const EMPHATIC_FAMILY = {
@@ -3549,33 +3515,6 @@ const EMPHATIC_FAMILY = {
   '\u0639': '\u0621',
   '\u063A': '\u0642'
 };
-
-class PhonemeClass {
-  constructor() {
-    this.dialectMap = {
-      '\u0637': '\u062A',
-      '\u0635': '\u0633',
-      '\u0636': '\u0632',
-      '\u0638': '\u0632',
-      '\u0630': '\u0632',
-      '\u0642': '\u0643',
-      '\u062B': '\u0633',
-      '\u062D': '\u0647',
-      '\u062E': '\u0647',
-      '\u063A': '\u0647',
-      '\u0639': '\u0627'
-    };
-  }
-  normalize(text) {
-    const msa = normMsa(text);
-    let res = '';
-    for (let i = 0; i < msa.length; i++) {
-      res += this.dialectMap[msa[i]] || msa[i];
-    }
-    return res;
-  }
-}
-const phonemeEngine = new PhonemeClass();
 
 function phonNormAr(s){
   const n = normArCached(s);
@@ -3814,21 +3753,28 @@ function isMatchWord(hNorm, hPhon, hPhonLoose, w){
   const tol = toleranceFor(L);
   const lenDiff = la > lb ? la - lb : lb - la;
   if(lenDiff > tol + 2) return false;
-  if(lev(hNorm, wNorm) <= tol) return true;
+  const writtenDistance = lev(hNorm, wNorm);
+  if(!followOnly){
+    if(writtenDistance <= tol) return true;
+  } else {
+    // Follow is a tracker, not a forgiving examiner: a fuzzy written match
+    // must also have an exact canonical phonetic match. This avoids approving
+    // a merely similar or completely different word on edit distance alone.
+    if(writtenDistance === 0) return true;
+    if(writtenDistance <= 1 && hPhon && w.phon && hPhon === w.phon) return true;
+  }
 
-  const phonMinLen = followOnly ? 2 : 3;
+  const phonMinLen = followOnly ? 3 : 3;
   if(hPhon.length >= phonMinLen && w.phon.length >= phonMinLen){
-    if(lev(hPhon, w.phon) <= tol) return true;
+    if(followOnly ? (hPhon === w.phon && writtenDistance <= 1) : (lev(hPhon, w.phon) <= tol)) return true;
   }
 
-  if(followOnly) {
-    const pHeard = phonemeEngine.normalize(hNorm);
-    const pTarget = phonemeEngine.normalize(wNorm);
-    if(pHeard === pTarget || lev(pHeard, pTarget) <= tol) return true;
-  }
   if(followOnly && hPhonLoose && w.phonLoose &&
-     hPhonLoose.length >= 2 && w.phonLoose.length >= 2 &&
-     lev(hPhonLoose, w.phonLoose) <= tol){
+     hPhonLoose.length >= 3 && w.phonLoose.length >= 3 &&
+     lev(hPhonLoose, w.phonLoose) === 0 &&
+     // Loose phonetics may accommodate an accent, but cannot erase a
+     // substantially different written word or approve a short ambiguous token.
+     la >= 4 && lb >= 4 && lev(hNorm, wNorm) <= Math.max(1, Math.floor(Math.min(la, lb) * 0.20))){
     return true;
   }
 
@@ -3890,14 +3836,12 @@ function tryMergedTokenMatch(heard, hPhon, hPhonLoose){
     const lenDiff = Math.abs(heard.length - combined.length);
     if(lenDiff > 3) continue;
     if(heard === combined) return k + 1;
-    if(lenDiff <= 2 && lev(heard, combined) <= 1) return k + 1;
-    if(hPhon.length >= 4 && combinedPhon.length >= 4 &&
+    if(!followOnly && lenDiff <= 2 && lev(heard, combined) <= 1) return k + 1;
+    if(!followOnly && hPhon.length >= 4 && combinedPhon.length >= 4 &&
        Math.abs(hPhon.length - combinedPhon.length) <= 3 &&
        lev(hPhon, combinedPhon) <= 1) return k + 1;
-    if(followOnly && hPhonLoose && combinedPhonLoose &&
-       hPhonLoose.length >= 4 && combinedPhonLoose.length >= 4 &&
-       Math.abs(hPhonLoose.length - combinedPhonLoose.length) <= 3 &&
-       lev(hPhonLoose, combinedPhonLoose) <= 1) return k + 1;
+    if(followOnly && hPhon && combinedPhon && hPhon === combinedPhon &&
+       Math.abs(heard.length - combined.length) <= 2) return k + 1;
   }
   return 0;
 }
@@ -6176,8 +6120,8 @@ function splitSegmentByWords(seg, wordsArr, startIdx, count){
 
 const FOLLOW_TAU_PLAUSIBLE  = 0.72;
 const FOLLOW_TAU_JUMP       = 0.85;
-const FOLLOW_TAU_EXIT       = 0.80;
-const FOLLOW_MAX_LOOKAHEAD  = 0;
+const FOLLOW_TAU_EXIT       = 0.85;
+const FOLLOW_MAX_LOOKAHEAD  = 2;
 
 function followSimilarity(heard, hPhon, hPhonLoose, w){
   if (!w || !heard) return 0;
@@ -6423,32 +6367,25 @@ async function runSpeechResultProcessing(snap) {
     }
 
   }
-  if (speechRecognition && Math.abs(ptr - (speechRecognition.__lastPhrasePtr || 0)) >= 8) {
+  if (speechRecognition && Math.abs(ptr - (speechRecognition.__lastPhrasePtr || 0)) >= 24) {
     buildPhraseObjects(speechRecognition);
   }
 }
 
 function scoreAlternativeToks(toks, startPtr){
-  if(!toks || !toks.length) return 0;
-  if(!words.length || startPtr >= words.length) return 0;
-  let score = 0, ti = 0, wi = startPtr;
-  const maxAhead = followOnly ? 5 : Math.min(6, words.length - startPtr);
-  while(ti < toks.length && wi < startPtr + maxAhead){
-    const rawTok = toks[ti];
-    const heard = normArCached(rawTok);
-    if(!heard){ ti++; continue; }
-    const hPhon = phonArCached(rawTok);
-    const hPhonLoose = followOnly ? phonLooseArCached(rawTok) : null;
-    const w = words[wi];
-    if(heard === w.norm){ score += 8; ti++; wi++; continue; }
-    if(isMatchWord(heard, hPhon, hPhonLoose, w)){ score += 3; ti++; wi++; continue; }
-    let matched = false;
-    for(let k = 1; k <= 2 && wi + k < startPtr + maxAhead; k++){
-      const target = words[wi + k];
-      if(heard === target.norm){ score += 2; wi = wi + k + 1; ti++; matched = true; break; }
-      if(isMatchWord(heard, hPhon, hPhonLoose, target)){ score += 0.75; wi = wi + k + 1; ti++; matched = true; break; }
+  if(!toks || !toks.length || !words.length || startPtr >= words.length) return 0;
+  let score = 0, wi = startPtr;
+  // Rank ASR alternatives only against the next expected word in sequence.
+  // Never score a later word as a substitute for an unheard current word.
+  for(let ti = 0; ti < toks.length && wi < words.length; ti++){
+    const heard = normArCached(toks[ti]);
+    if(!heard) continue;
+    const hp = phonArCached(toks[ti]);
+    const hl = followOnly ? phonLooseArCached(toks[ti]) : null;
+    if(heard === words[wi].norm || isMatchWord(heard, hp, hl, words[wi])){
+      score += 3;
+      wi++;
     }
-    if(!matched){ ti++; }
   }
   return score;
 }
@@ -6459,24 +6396,19 @@ function buildPhraseObjects(rec) {
   if (!PhraseCtor) return false;
   if (!('phrases' in rec)) return false;
   if (!words.length) return false;
-  const end = Math.min(words.length, ptr + 60);
+  const end = Math.min(words.length, ptr + 50);
   const seen = new Set();
   const phrases = [];
   for (let i = ptr; i < end; i++) {
-    const clean = normMsa(words[i].raw || '');
+    const clean = String(words[i].raw || '').normalize('NFKC').replace(TASHKEEL, '').replace(/[^\u0621-\u064A\s]/g, '').trim();
     if (!clean || seen.has(clean)) continue;
     seen.add(clean);
     const distance = i - ptr;
-    const boost = distance <= 3 ? 12.0 : distance <= 10 ? 6.0 : 2.0;
+    const boost = distance <= 2 ? 8.0 : distance <= 5 ? 4.0 : 1.0;
     try { phrases.push(new PhraseCtor(clean, boost)); } catch (_) {}
   }
   if (!phrases.length) return false;
-  try { 
-    rec.phrases = phrases; 
-    rec.__lastPhrasePtr = ptr; 
-    if ('processLocally' in rec) rec.processLocally = true;
-    return true; 
-  }
+  try { rec.phrases = phrases; rec.__lastPhrasePtr = ptr; return true; }
   catch (e) { console.warn('[Speech] Failed to set phrases:', e); return false; }
 }
 
@@ -6537,33 +6469,17 @@ function createSpeechRecognition(forceNoPhrases){
   if(!SPEECH_SUPPORTED) return null;
   if(speechRecognition && !speechRecognition.__dead) return speechRecognition;
   if(speechRecognition){ try{ speechRecognition.abort(); }catch(_){} speechRecognition = null; }
-
-async function setupOnDeviceArabic(rec) {
-  if (!('processLocally' in rec) || !SpeechRecognitionCtor.available) return false;
-  const opts = { langs: ['ar-SA'], processLocally: true };
-  let status = await SpeechRecognitionCtor.available(opts);   // 'available' | 'downloadable' | 'downloading' | 'unavailable'
-  if (status === 'downloadable') {
-    await SpeechRecognitionCtor.install(opts);                // must be triggered by a user gesture
-    status = await SpeechRecognitionCtor.available(opts);
-  }
-  if (status === 'available') { rec.processLocally = true; return true; }
-  return false;                                               // fall back to cloud
-}
-
   const rec = new SpeechRecognitionCtor();
   rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
   rec.interimResults   = true;
-  // Request several hypotheses so the Quran-aware scorer can choose the best one.
-  // Browsers that do not support multiple alternatives simply return fewer.
-  rec.maxAlternatives  = 5;
   const phrasesAttached = forceNoPhrases ? false : buildPhraseObjects(rec);
   rec.__hasPhrases = phrasesAttached;
   rec.onstart = () => {
     speechStarting = false; recRunning = true;
     lastSpeechResultIndex = -1; interimProgress.clear();
     lastResultAt = performance.now(); armSpeechKeepalive();
-    if (Math.abs(ptr - (rec.__lastPhrasePtr || 0)) >= 8) buildPhraseObjects(rec);
+    if (Math.abs(ptr - (rec.__lastPhrasePtr || 0)) >= 24) buildPhraseObjects(rec);
   };
   rec.onresult = (event) => scheduleSpeechResult(event);
   rec.onerror = (event) => {
@@ -6693,8 +6609,7 @@ function gradeFollowFast(tokens, startIdx){
     }
 
     if (followOnly && w && currentConsensusSet.size > 0 && currentConsensusSet.has(w.norm)){
-      if (heard === w.norm || lev(heard, w.norm) <= 1 ||
-          isMatchWord(heard, hPhon, hPhonLoose, w)){
+      if (heard === w.norm || isMatchWord(heard, hPhon, hPhonLoose, w)){
         commitCorrect(ptr, null);
         advancePast(1);
         noteFollowProgress();
@@ -6706,8 +6621,7 @@ function gradeFollowFast(tokens, startIdx){
     const nextW        = words[ptr + 1];
     const isLastInAyah = !nextW || nextW.verse !== w.verse;
 
-    const directMatch = isMatchWord(heard, hPhon, hPhonLoose, w)
-                     || followAlPrefixMatch(heard, w);
+    const directMatch = isMatchWord(heard, hPhon, hPhonLoose, w);
     if (directMatch){
       let exitOk = true;
       if (isLastInAyah){
@@ -6740,41 +6654,10 @@ function gradeFollowFast(tokens, startIdx){
       used++; continue;
     }
 
-    let jumped = false;
-    for (let k = 1; k <= FOLLOW_MAX_LOOKAHEAD; k++){
-      if (ptr + k >= words.length) break;
-      const futureW = words[ptr + k];
-      if (futureW.verse !== w.verse) break;
-      if (futureW.isMuqattaat) break;
-      const sim = followSimilarity(heard, hPhon, hPhonLoose, futureW);
-      if (sim >= FOLLOW_TAU_JUMP){
-        // Only the word actually matched by the recognizer is verified.
-        // Earlier words are left unmarked rather than falsely accepted.
-        commitCorrect(ptr + k, null);
-        advancePast(k + 1);
-        noteFollowProgress();
-        pendingHeard.length = 0;
-        jumped = true;
-        break;
-      }
-    }
-    if (jumped){ used++; continue; }
-
-    if (isFollowMFAMatch(w, heard, hPhon, hPhonLoose)){
-      commitCorrect(ptr, null);
-      advancePast(1);
-      noteFollowProgress();
-      pendingHeard.length = 0;
-      used++; continue;
-    }
-
-    if (isFollowPlausible(heard, hPhon, hPhonLoose, w)){
-      commitCorrect(ptr, null);
-      advancePast(1);
-      noteFollowProgress();
-      pendingHeard.length = 0;
-      used++; continue;
-    }
+    // Deliberately do not jump to a later word. If the current word was
+    // not recognised, keep ptr here until that exact position is verified.
+    // The pointer can still keep pace by processing consecutive confirmed
+    // words from each interim/final ASR update.
 
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
@@ -7276,7 +7159,7 @@ async function ensureMicStream(){
   try{
     lastMicError = null;
     const s = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: false, autoGainControl: true }
+      audio: { channelCount: { ideal: 1 }, echoCancellation: { ideal: true }, noiseSuppression: { ideal: true }, autoGainControl: { ideal: true } }
     });
     micStream = s;
     attachMicTrackListeners(s);
@@ -11255,7 +11138,7 @@ function openCoachInfoModal(){
             '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">2</span> 👂 Follow mode (memorisation aid)</h3><ul>' +
       '<li><b>Follow</b> is designed to assist you with <b>memorisation of the Holy Qur\'an</b>. The highlight moves forward with you as you recite.</li>' +
-      '<li>Follow uses a finite-state gate: <b>τ_plausible = 0.72</b> to advance, and <b>τ_exit = 0.85</b> to leave the current ayah. The pointer never jumps across an ayah boundary unless you fully complete the last word.</li>' +
+      '<li>Follow uses a finite-state gate: <b>τ_plausible = 0.72</b> to advance, <b>τ_jump = 0.85</b> to skip 1–2 words forward, and <b>τ_exit = 0.85</b> to leave the current ayah. The pointer never jumps across an ayah boundary unless you fully complete the last word.</li>' +
       '<li>Look-ahead is limited to <b>k ≤ 2</b> words — out-of-bounds matches are discarded, keeping the highlight locked to the current word.</li>' +
       '<li><b>Nothing is marked red and no mistakes are counted</b> in Follow mode.</li>' +
     '</ul></div>' +
