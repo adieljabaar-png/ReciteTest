@@ -6093,7 +6093,7 @@ function splitSegmentByWords(seg, wordsArr, startIdx, count){
 const FOLLOW_TAU_PLAUSIBLE  = 0.72;
 const FOLLOW_TAU_JUMP       = 0.85;
 const FOLLOW_TAU_EXIT       = 0.80;
-const FOLLOW_MAX_LOOKAHEAD  = 2;
+const FOLLOW_MAX_LOOKAHEAD  = 0;
 
 function followSimilarity(heard, hPhon, hPhonLoose, w){
   if (!w || !heard) return 0;
@@ -11166,7 +11166,7 @@ function openCoachInfoModal(){
             '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">2</span> 👂 Follow mode (memorisation aid)</h3><ul>' +
       '<li><b>Follow</b> is designed to assist you with <b>memorisation of the Holy Qur\'an</b>. The highlight moves forward with you as you recite.</li>' +
-      '<li>Follow uses a finite-state gate: <b>τ_plausible = 0.72</b> to advance, <b>τ_jump = 0.85</b> to skip 1–2 words forward, and <b>τ_exit = 0.85</b> to leave the current ayah. The pointer never jumps across an ayah boundary unless you fully complete the last word.</li>' +
+      '<li>Follow uses a finite-state gate: <b>τ_plausible = 0.72</b> to advance, and <b>τ_exit = 0.85</b> to leave the current ayah. The pointer never jumps across an ayah boundary unless you fully complete the last word.</li>' +
       '<li>Look-ahead is limited to <b>k ≤ 2</b> words — out-of-bounds matches are discarded, keeping the highlight locked to the current word.</li>' +
       '<li><b>Nothing is marked red and no mistakes are counted</b> in Follow mode.</li>' +
     '</ul></div>' +
