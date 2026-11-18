@@ -15,35 +15,32 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
 
-        :root, [data-theme="indigo"] {
-            --primary: #4F46E5; --primary-hover: #4338CA;
-            --bg-main: #F3F4F6; --bg-card: #FFFFFF;
-            --text-main: #1F2937; --text-light: #6B7280;
-            --border: #E5E7EB; --panel-bg: #1E293B; --panel-text: #F8FAFC;
-            --accent: #F59E0B; --highlight: #FEF3C7;
-            --success: #10B981; --success-bg: #D1FAE5;
-            --danger: #EF4444; --danger-bg: #FEE2E2;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        /* Palette copied from the Recite app (dark = default, body.light-mode = light) */
+        :root {
+            --primary: #4f8cff; --primary-hover: #3a72e6;
+            --bg-main: #0d1119; --bg-card: #151c2b; --panel-2: #1b2436;
+            --text-main: #e8edf7; --text-light: #8f9bb3;
+            --border: #28334a; --panel-bg: #151c2b; --panel-text: #e8edf7;
+            --accent: #ffb020; --highlight: rgba(255,176,32,.12);
+            --success: #2fd07a; --success-bg: rgba(47,208,122,.14);
+            --danger: #ff5a6a; --danger-bg: rgba(255,90,106,.14);
+            --shadow: 0 8px 22px rgba(0,0,0,.28);
+            --gold: #c9a227; --gold-soft: rgba(201,162,39,.65);
+            --bar-bg: rgba(13,17,25,.88);
+            --glow: rgba(79,140,255,.20);
         }
-        [data-theme="emerald"] {
-            --primary: #059669; --primary-hover: #047857;
-            --bg-main: #ECFDF5; --bg-card: #FFFFFF;
-            --text-main: #064E3B; --text-light: #6B7280;
-            --border: #A7F3D0; --panel-bg: #064E3B; --panel-text: #ECFDF5;
-            --accent: #F59E0B; --highlight: #FEF3C7;
-            --success: #10B981; --success-bg: #D1FAE5;
-            --danger: #EF4444; --danger-bg: #FEE2E2;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        [data-theme="midnight"] {
-            --primary: #6366F1; --primary-hover: #818CF8;
-            --bg-main: #111827; --bg-card: #1F2937;
-            --text-main: #F9FAFB; --text-light: #9CA3AF;
-            --border: #374151; --panel-bg: #0F172A; --panel-text: #F8FAFC;
-            --accent: #FBBF24; --highlight: #374151;
-            --success: #34D399; --success-bg: #064E3B;
-            --danger: #F87171; --danger-bg: #7F1D1D;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        body.light-mode {
+            --primary: #2a6fe0; --primary-hover: #1f5bc4;
+            --bg-main: #f5f7fb; --bg-card: #ffffff; --panel-2: #eef2f8;
+            --text-main: #1a2233; --text-light: #5a6884;
+            --border: #d1dae8; --panel-bg: #ffffff; --panel-text: #1a2233;
+            --accent: #c68a00; --highlight: rgba(198,138,0,.10);
+            --success: #1f9a5a; --success-bg: rgba(31,154,90,.12);
+            --danger: #d63d52; --danger-bg: rgba(214,61,82,.10);
+            --shadow: 0 8px 22px rgba(0,0,0,.08);
+            --gold: #a67c00; --gold-soft: rgba(166,124,0,.65);
+            --bar-bg: rgba(245,247,251,.88);
+            --glow: rgba(42,111,224,.16);
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -541,15 +538,85 @@
             white-space: nowrap !important; font-size: 1.6rem !important;
             padding: 0 !important; margin: 0 !important;
         }
+
+        /* ===== Recite look: gradient background, gold frames, shaded surfaces ===== */
+        body {
+            background: radial-gradient(1200px 600px at 50% -220px, #1a2540 0%, var(--bg-main) 60%);
+            background-attachment: fixed; min-height: 100vh; min-height: 100dvh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        body.light-mode {
+            background: radial-gradient(1200px 600px at 50% -220px, #e6edfa 0%, #f5f7fb 60%);
+            background-attachment: fixed;
+        }
+        .page-bar { background: var(--bar-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+        .nav-tab, .back-pill, .iconbtn, .top-bar, .screen, .content-card, .vowel-desc,
+        .score-progress-container, .test-panel, .practice-banner, .instruction-box, .btn-secondary,
+        .grid-cell:not(.correct):not(.incorrect):not(.highlight),
+        .practice-cell:not(.correct):not(.incorrect):not(.highlight) {
+            border: 1px solid var(--gold) !important;
+        }
+        .nav-tab, .back-pill, .iconbtn, .grid-cell, .practice-cell {
+            background: linear-gradient(180deg, var(--panel-2), var(--bg-card));
+        }
+        .top-bar, .screen, .content-card {
+            background:
+                radial-gradient(260px 140px at 30% -20%, var(--glow), transparent 70%),
+                linear-gradient(180deg, var(--panel-2), var(--bg-card));
+            box-shadow: var(--shadow);
+        }
+        .nav-tab, .back-pill, .iconbtn { box-shadow: var(--shadow); }
+        .nav-tab.active {
+            background: linear-gradient(180deg, #5c96ff, #3a72e6); color: #fff;
+            box-shadow: 0 5px 16px rgba(79,140,255,.32);
+        }
+        .nav-tab:hover, .back-pill:hover, .iconbtn:hover { filter: brightness(1.08); }
+        .top-bar { justify-content: center; }
+        .overview-summary { text-align: center; flex: 1 1 100%; }
+        .btn { background: linear-gradient(180deg, #5c96ff, #3a72e6); color: #fff; box-shadow: 0 5px 16px rgba(79,140,255,.32); }
+        .btn.btn-secondary { background: linear-gradient(180deg, var(--panel-2), var(--bg-card)); color: var(--text-main); box-shadow: var(--shadow); }
+        .btn.btn-danger { background: linear-gradient(180deg, #ff6b7a, #e04555); }
+
+        /* ===== Info pop-up (same style as the Recite coach Info pop-up) ===== */
+        .modal-bg { position: fixed; inset: 0; background: rgba(4,7,14,.82); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            display: flex; align-items: flex-end; justify-content: center; z-index: 1000; animation: rdFade .2s; }
+        body.light-mode .modal-bg { background: rgba(230,235,245,.85); }
+        .modal { background: linear-gradient(180deg, #1b2436, #131b2a); border: 1px solid var(--gold); border-bottom: none;
+            border-radius: 22px 22px 0 0; width: 100%; max-width: 520px; padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px));
+            max-height: 82vh; overflow-y: auto; animation: rdSlide .28s cubic-bezier(.2,.9,.3,1); color: var(--text-main); }
+        body.light-mode .modal { background: linear-gradient(180deg, #ffffff, #eef2f8); }
+        @keyframes rdSlide { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes rdFade { from { opacity: 0; } to { opacity: 1; } }
+        .modal .grabber { width: 38px; height: 4px; background: #3a4863; border-radius: 99px; margin: 0 auto 14px; }
+        body.light-mode .modal .grabber { background: #c8d3e6; }
+        .info-modal h2 { display: flex; align-items: center; gap: 9px; font-size: 1.15rem; margin: 0 0 8px; }
+        .info-modal > p { margin: 0 0 14px; color: var(--text-light); font-size: .82rem; line-height: 1.55; }
+        .info-modal .feature { background: rgba(79,140,255,.06); border: 1px solid rgba(79,140,255,.22); border-radius: 13px; padding: 12px 13px; margin-bottom: 10px; }
+        body.light-mode .info-modal .feature { background: rgba(42,111,224,.05); border-color: rgba(42,111,224,.20); }
+        .info-modal .feature h3 { margin: 0 0 8px; font-size: .95rem; color: var(--text-main); display: flex; align-items: center; gap: 7px; }
+        .info-modal .feature h3 .fnum { background: var(--primary); color: #fff; width: 22px; height: 22px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; flex-shrink: 0; }
+        .info-modal .feature ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+        .info-modal .feature ul li { position: relative; padding-left: 18px; font-size: .83rem; line-height: 1.55; color: var(--text-light); }
+        .info-modal .feature ul li::before { content: '•'; color: var(--primary); font-weight: 700; font-size: 1.1em; line-height: 1; position: absolute; left: 0; top: 2px; }
+        .info-modal .feature ul li b { color: var(--text-main); }
+        .info-modal .footer-note { text-align: center; color: var(--text-light); font-size: .72rem; margin: 6px 0 14px; font-style: italic; }
+        .info-modal .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+        .info-modal .btn-group button { width: 100%; height: 50px; font: inherit; font-weight: 600; font-size: .95rem; cursor: pointer; border-radius: 12px; }
+        .info-modal .btn-group .primary { background: linear-gradient(180deg, #5c96ff, #3a72e6); border: 1px solid #3a72e6; color: #fff; box-shadow: 0 5px 16px rgba(79,140,255,.32); }
+        .info-modal .btn-group .secondary { background: linear-gradient(180deg, var(--panel-2), var(--bg-card)); border: 1px solid var(--gold); color: var(--text-main); }
+        @media (min-width: 640px) { .modal-bg { align-items: center; padding: 20px; } .modal { border-radius: 22px; border-bottom: 1px solid var(--gold); max-height: 88vh; } }
     </style>
 </head>
 <body data-theme="midnight">
+    <script>try{if(localStorage.getItem('qc.theme')==='light')document.body.classList.add('light-mode');}catch(e){}</script>
 
     <div class="page-bar">
         <div class="page-bar-inner">
             <button id="back-btn" class="back-pill" type="button" aria-label="Back to Recite home screen">Back</button>
             <div class="page-bar-right">
-                <button id="info-btn" class="iconbtn" type="button" aria-label="Read Arabic instructions and information" title="Info"><span class="info-glyph">i</span></button>
+                <button id="info-btn" class="back-pill" type="button" aria-label="About Read Arabic">Info</button>
                 <button id="theme-btn" class="iconbtn" type="button" aria-label="Toggle dark / light theme">🌙</button>
             </div>
         </div>
@@ -558,11 +625,6 @@
     <div id="practice-banner" class="practice-banner"></div>
 
     <div class="top-bar">
-        <div class="top-bar-left">
-            <div id="mic-status" class="mic-status">
-                <div class="mic-dot"></div> <span id="mic-text">Mic Off</span>
-            </div>
-        </div>
         <div class="overview-summary">
             <div class="app-title">READ</div>
             <strong>📖 Overview</strong>
@@ -828,61 +890,6 @@
         <div class="status-bar" id="status-screen-14-surah-114"></div>
     </div>
 
-    <div id="screen-15" class="screen">
-        <h2 style="text-align:center;">ℹ️ Read Arabic — Instructions &amp; Information</h2>
-        <div class="content-card">
-            <h3>🚀 Getting Started</h3>
-            <ol>
-                <li>Pick a lesson from the tabs at the top (<strong>Lesson 1</strong> to <strong>Lesson 14</strong>) and work through them in order.</li>
-                <li>Tap any Arabic letter or word to hear it read aloud.</li>
-                <li>Use the <strong>🌙 / ☀️</strong> button to switch between dark and light mode (shared with Recite).</li>
-                <li>Tap <strong>Back</strong> (top left) to return to the Recite home screen.</li>
-                <li>Tap the <strong>i</strong> button again, or any lesson tab, to leave this page.</li>
-            </ol>
-        </div>
-        <div class="content-card">
-            <h3>📖 Overview</h3>
-            <p>READ is a voice-powered trainer for Arabic letters, vowels, words, and short surahs. Practice your current lesson before advancing.</p>
-        </div>
-        <div class="content-card">
-            <h3>🎧 Listening Mode (Practice vs Test)</h3>
-            <ol>
-                <li><strong>Tap any Arabic letter or word</strong> — the app pronounces it aloud with the final Fat'hah, Dhammah, or Kasrah clearly audible. The microphone is <strong>not</strong> used on tap.</li>
-                <li>Press <strong>Start Test</strong> on <strong>Lessons 12–14</strong> to turn the microphone on and be scored. The mic is used <em>only</em> while a test is running.</li>
-                <li><strong>Lessons 1–11</strong> are <strong>practice-only</strong> — tap any Arabic text to hear it read aloud.</li>
-                <li><strong>Lessons 3–11</strong> use the Tajweed stopping rule (<em>Madd al-'Iwad</em>) so the last vowel is lengthened for teaching clarity.</li>
-                <li><strong>Lesson 14</strong> (Recite Ayah) covers Surahs 112, 113, and 114.</li>
-                <li>On <strong>every Start Test</strong> (Lessons 12–14), the target must be heard clearly.</li>
-                <li>When a phrase has more than one word, <strong>every word must be spoken</strong> before it counts.</li>
-            </ol>
-        </div>
-        <div class="content-card">
-            <h3>⏱ Per-Word Time Window</h3>
-            <p>Each word gets a fresh time window, tuned to the browser's actual recogniser latency. It calibrates silently from your very first answers.</p>
-            <ul>
-                <li>Correct → the cell turns <strong style="color:var(--success);">green</strong> and the test moves on.</li>
-                <li>Miss the window → the cell turns <strong style="color:var(--danger);">red</strong> and the test moves on automatically.</li>
-                <li>The bar turns red during the final seconds.</li>
-            </ul>
-        </div>
-        <div class="content-card">
-            <h3>⏸ Silence Pause</h3>
-            <p>If no speech is heard for <strong>7 seconds</strong>, the app pauses the test and switches the mic off. Press <strong>▶ Continue</strong> to resume, or <strong>■ Stop Test</strong> to end.</p>
-        </div>
-        <div class="content-card">
-            <h3>🌐 Browser Requirements</h3>
-            <p>Speech recognition requires <strong>Google Chrome</strong>, <strong>Microsoft Edge</strong>, or <strong>Safari</strong>, served over <code>HTTPS</code> or <code>localhost</code>. If you see a "Microphone blocked" warning, allow mic access in your browser settings.</p>
-            <div class="instruction-box" style="margin-top:12px;">
-                <p style="margin:0;"><strong>⚠️ Note on some Chinese phones:</strong> Certain phones sold in mainland China without Google Play Services have no speech-recognition engine. On those devices the app automatically switches to <strong>Practice Mode</strong> — you can still tap any Arabic text to hear it read aloud.</p>
-            </div>
-        </div>
-        <div class="content-card">
-            <h3>🔊 Arabic Voice Setup</h3>
-            <p>If tapping a letter produces no sound, your device may be missing an Arabic Text‑to‑Speech voice. The app now detects this automatically and will show you a setup guide. You can also open it at any time with the button below.</p>
-            <button class="btn btn-secondary" onclick="showVoiceWizard()">Open Arabic Voice Setup</button>
-        </div>
-    </div>
-
     <div id="screen-18" class="screen">
         <h2 style="text-align:center;">🎙 Test Microphone</h2>
         <p style="text-align:center;color:var(--text-light);font-size:0.9rem;margin:4px 0 12px 0;">
@@ -1048,9 +1055,9 @@
         const longFatHa = ['بَا','تَا','ثَا','جَا','حَا','خَا','دَا','ذَا','رَا','زَا','سَا','شَا','صَا','ضَا','طَا','ظَا','عَا','غَا','فَا','قَا','كَا','لَا','مَا','نَا','هَا','وَا','يَا'];
         const longFatHaPractice = ['زَادَ','خَافَ','تَابَ','جَاهَدَ','حَاسَبَ','جُنَاحُ','شَارَبَ','فَرَاغٌ','خَادِعَ','قَاتَلَ','صَابَرَ','تَعَالَ'];
 
-        const longKasrah = ['إِي','بِي','تِي','ثِي','جِي','حِي','خِي','دِي','ذِي','رِي','زِي','سِي','شِي','صِي','ضِي','طِي','ظِي','عِي','غِي','فِي','قِي','كِي','لِي','مِي','نِي','وِي','هِ','ئِي','يِي'];
+        const longKasrah = ['إِي','بِي','تِي','ثِي','جِي','حِي','خِي','دِي','ذِي','رِي','زِي','سِي','شِي','صِي','ضِي','طِي','ظِي','عِي','غِي','فِي','قِي','كِي','لِي','مِي','نِي','وِي','هِي','ئِي','يِي'];
         const longKasrahPractice = ['دِينِي','فِيهِ','أَرِنِي','كِتَابِي','أَحِيبُ','بُوَارِي','مَفَاتِيحُ','رَازِقِينَ','عِبَادِي','عَذَابِي','تَمَاثِيلُ','مَقَادِيرُ','أَخِيهِ','بَنِيهِ'];
-        const longDhammah = ['أُو','بُو','تُو','ثُو','جُو','حُو','خُو','دُو','ذُو','رُو','زُو','سُو','شُو','صُو','ضُو','طُو','ظُو','عُو','غُو','فُو','قُو','كُو','لُو','مُو','نُو','هُ','وُ','يُ'];
+        const longDhammah = ['أُو','بُو','تُو','ثُو','جُو','حُو','خُو','دُو','ذُو','رُو','زُو','سُو','شُو','صُو','ضُو','طُو','ظُو','عُو','غُو','فُو','قُو','كُو','لُو','مُو','نُو','هُو','وُو','يُو'];
         const longDhammahPractice = ['نُوحٌ','طُورٌ','تُوبُوا','نُورٌ','قَالُوا','يَرْجُو','يَقُومُ','تَكُونُ','هَارُونَ','قَارُونَ','دَاخِرُونَ','سَبَقُونَا','بَاسِطُونَ','رَاجِعُونَ'];
         const reviewWords = [].concat(shortPractice, longFatHaPractice, longKasrahPractice, longDhammahPractice);
         const imageFatHa = ['أَ','بَ','تَ','ثَ','جَ','حَ','خَ','دَ','ذَ','رَ','زَ','سَ','شَ','صَ','ضَ','طَ','ظَ','عَ','غَ','فَ','قَ','كَ','لَ','مَ','نَ','هَ','وَ','يَ'];
@@ -1208,6 +1215,31 @@
             }
         }
 
+
+        // Letter names — a bare single letter (ب و ف ي …) is read by many Arabic TTS
+        // engines as a word or preposition ("with", "and", "so") instead of the letter.
+        // Speaking the letter's name is what every engine pronounces correctly.
+        const LETTER_NAMES = {
+            'ا':'أَلِف','ء':'هَمْزَة','أ':'هَمْزَة','إ':'هَمْزَة','ب':'بَاء','ت':'تَاء','ث':'ثَاء','ج':'جِيم','ح':'حَاء','خ':'خَاء',
+            'د':'دَال','ذ':'ذَال','ر':'رَاء','ز':'زَاي','س':'سِين','ش':'شِين','ص':'صَاد','ض':'ضَاد','ط':'طَاء','ظ':'ظَاء',
+            'ع':'عَيْن','غ':'غَيْن','ف':'فَاء','ق':'قَاف','ك':'كَاف','ل':'لَام','م':'مِيم','ن':'نُون','ه':'هَاء','و':'وَاو','ي':'يَاء'
+        };
+        function letterNameFor(text) {
+            const t = (text || '').replace(/[\u0640\s]/g, '');
+            if (t.length === 1 && LETTER_NAMES[t]) return LETTER_NAMES[t];
+            return null;
+        }
+
+
+        // Letters whose lone "consonant + short vowel" syllable is mispronounced by some Arabic
+        // voices (e.g. شَ). These are spoken with the same lengthened carrier used in Lessons 3–11.
+        // Add any other letter here if a voice mispronounces it.
+        const CLEAR_SYLLABLE_LETTERS = 'ش';
+        function needsClearSyllable(text) {
+            const t = (text || '').replace(/[\u0640\s]/g, '');
+            return t.length === 2 && CLEAR_SYLLABLE_LETTERS.indexOf(t.charAt(0)) !== -1 && /[\u064E\u064F\u0650]/.test(t.charAt(1));
+        }
+
         function addFinalVowelCarrier(text) {
             const t = (text || '').trim();
             if (!t) return t;
@@ -1248,7 +1280,7 @@
                 done(); return;
             }
 
-            const prepared = forceFinalTajweed ? forceFinalTajweedVowel(text) : addFinalVowelCarrier(text);
+            const prepared = letterNameFor(text) || ((forceFinalTajweed || needsClearSyllable(text)) ? forceFinalTajweedVowel(text) : addFinalVowelCarrier(text));
 
             function speakNow() {
                 const u = new SpeechSynthesisUtterance(prepared);
@@ -2580,19 +2612,57 @@
             try { localStorage.setItem('qc.theme', theme); } catch (e) {}
             applyTheme();
         }
-        let lastLessonScreen = 'screen-1';
-        function toggleInfo() {
-            const infoActive = document.getElementById('screen-15').classList.contains('active');
-            if (infoActive) {
-                const tab = document.querySelector('.nav-tab[data-screen="' + lastLessonScreen + '"]');
-                switchScreen(lastLessonScreen, tab);
-            } else {
-                const cur = document.querySelector('.screen.active');
-                if (cur && cur.id !== 'screen-15') lastLessonScreen = cur.id;
-                switchScreen('screen-15', null);
-            }
-            const ib = document.getElementById('info-btn');
-            if (ib) ib.classList.toggle('active', document.getElementById('screen-15').classList.contains('active'));
+        function openReadInfoModal() {
+            if (document.getElementById('read-info-modal-bg')) return;
+            const bg = document.createElement('div');
+            bg.className = 'modal-bg';
+            bg.id = 'read-info-modal-bg';
+            bg.innerHTML = '<div class="modal info-modal" role="dialog" aria-modal="true" aria-label="About Read Arabic">' +
+                '<div class="grabber"></div>' +
+                '<h2>ℹ️ Read Arabic</h2>' +
+                '<p>How the Read Arabic trainer works — the lessons, tapping to listen, the scored tests and what you need for the microphone and voice.</p>' +
+                '<div class="feature"><h3><span class="fnum">1</span> 🚀 Getting started</h3><ul>' +
+                    '<li>Pick a lesson from the tabs at the top — <b>Lesson 1</b> to <b>Lesson 14</b> — and work through them in order.</li>' +
+                    '<li><b>Tap any Arabic letter or word</b> to hear it read aloud.</li>' +
+                    '<li>Use the <b>🌙 / ☀️</b> button to switch between dark and light mode (shared with Recite).</li>' +
+                    '<li>Tap <b>Back</b> (top left) to return to the Recite home screen.</li>' +
+                '</ul></div>' +
+                '<div class="feature"><h3><span class="fnum">2</span> 🎧 Listening mode (practice vs test)</h3><ul>' +
+                    '<li>When you tap a letter or word the app pronounces it aloud with the final Fat\'hah, Dhammah or Kasrah clearly audible. The microphone is <b>not</b> used on tap.</li>' +
+                    '<li>Press <b>Start Test</b> on <b>Lessons 12–14</b> to turn the microphone on and be scored. The mic is used <b>only</b> while a test is running.</li>' +
+                    '<li><b>Lessons 1–11</b> are <b>practice-only</b> — tap any Arabic text to hear it.</li>' +
+                    '<li><b>Lessons 3–11</b> use the Tajweed stopping rule (<b>Madd al-\'Iwad</b>) so the last vowel is lengthened for teaching clarity.</li>' +
+                    '<li><b>Lesson 14</b> (Recite Ayah) covers Surahs 112, 113 and 114.</li>' +
+                    '<li>When a phrase has more than one word, <b>every word must be spoken</b> before it counts.</li>' +
+                '</ul></div>' +
+                '<div class="feature"><h3><span class="fnum">3</span> ⏱ Per-word time window</h3><ul>' +
+                    '<li>Each word gets a fresh time window, tuned to your browser\'s speech recogniser. It calibrates silently from your first answers.</li>' +
+                    '<li>Correct → the cell turns <b style="color:var(--success)">green</b> and the test moves on.</li>' +
+                    '<li>Miss the window → the cell turns <b style="color:var(--danger)">red</b> and the test moves on automatically.</li>' +
+                    '<li>The bar turns red during the final seconds.</li>' +
+                '</ul></div>' +
+                '<div class="feature"><h3><span class="fnum">4</span> ⏸ Silence pause</h3><ul>' +
+                    '<li>If no speech is heard for <b>7 seconds</b>, the test pauses and the mic switches off.</li>' +
+                    '<li>Press <b>▶ Continue</b> to resume, or <b>■ Stop Test</b> to end.</li>' +
+                '</ul></div>' +
+                '<div class="feature"><h3><span class="fnum">5</span> 🌐 Browser requirements</h3><ul>' +
+                    '<li>Speech recognition needs <b>Google Chrome</b>, <b>Microsoft Edge</b> or <b>Safari</b>, served over <b>HTTPS</b> or localhost.</li>' +
+                    '<li>If you see a "Microphone blocked" warning, allow mic access in your browser settings.</li>' +
+                    '<li>Some phones sold in mainland China have no speech-recognition engine. The app then switches to <b>Practice Mode</b> — you can still tap any Arabic text to hear it.</li>' +
+                '</ul></div>' +
+                '<div class="feature"><h3><span class="fnum">6</span> 🔊 Arabic voice setup</h3><ul>' +
+                    '<li>If tapping a letter makes no sound, your device may be missing an Arabic Text-to-Speech voice. The app detects this and shows a setup guide.</li>' +
+                '</ul></div>' +
+                '<div class="footer-note">Your scores and progress stay on your device.</div>' +
+                '<div class="btn-group"><button class="secondary" id="read-info-voice" type="button">Open Arabic Voice Setup</button>' +
+                '<button class="primary" id="read-info-close" type="button">Got it</button></div></div>';
+            document.body.appendChild(bg);
+            const close = function () { bg.remove(); document.removeEventListener('keydown', onKey); };
+            function onKey(e) { if (e.key === 'Escape') close(); }
+            document.addEventListener('keydown', onKey);
+            bg.addEventListener('click', function (e) { if (e.target === bg) close(); });
+            bg.querySelector('#read-info-close').addEventListener('click', close);
+            bg.querySelector('#read-info-voice').addEventListener('click', function () { close(); showVoiceWizard(); });
         }
         function wireHeader() {
             const back = document.getElementById('back-btn');
@@ -2600,10 +2670,7 @@
             const tb = document.getElementById('theme-btn');
             if (tb) tb.addEventListener('click', flipTheme);
             const ib = document.getElementById('info-btn');
-            if (ib) ib.addEventListener('click', toggleInfo);
-            document.querySelectorAll('.nav-tab').forEach(function (t) {
-                t.addEventListener('click', function () { if (ib) ib.classList.remove('active'); });
-            });
+            if (ib) ib.addEventListener('click', openReadInfoModal);
         }
         // apply saved theme immediately to avoid a flash
         document.body.setAttribute('data-theme', theme === 'light' ? 'emerald' : 'midnight');
