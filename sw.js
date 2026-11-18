@@ -1,7 +1,7 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.20 — Pre-cache the Read Arabic page (read.html) and the
+   v2.4.21 — Pre-cache the Read Arabic page (read.html) and the
    dashboard (index_3.html), and serve each navigation from its
    own cached copy so Read Arabic works offline instead of
    falling back to index.html.
