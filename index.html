@@ -3497,6 +3497,19 @@ function normAr(s){
     .replace(/[^\u0621-\u064A]/g,'').trim();
 }
 
+function normMsa(s){
+  if(!s) return '';
+  return String(s).normalize('NFKC')
+    .replace(TASHKEEL,'')
+    .replace(/\u0671/g,'\u0627')
+    .replace(/[\u0622\u0623\u0625]/g,'\u0627')
+    .replace(/\u0629/g,'\u0647')
+    .replace(/[\u0649\u06CC]/g,'\u064A')
+    .replace(/\u0624/g,'\u0648')
+    .replace(/\u0626/g,'\u064A')
+    .replace(/[^\u0621-\u064A]/g,'').trim();
+}
+
 function cleanTranslation(s){
   if(s === null || s === undefined) return '';
   let t = String(s);
@@ -3536,6 +3549,33 @@ const EMPHATIC_FAMILY = {
   '\u0639': '\u0621',
   '\u063A': '\u0642'
 };
+
+class PhonemeClass {
+  constructor() {
+    this.dialectMap = {
+      '\u0637': '\u062A',
+      '\u0635': '\u0633',
+      '\u0636': '\u0632',
+      '\u0638': '\u0632',
+      '\u0630': '\u0632',
+      '\u0642': '\u0643',
+      '\u062B': '\u0633',
+      '\u062D': '\u0647',
+      '\u062E': '\u0647',
+      '\u063A': '\u0647',
+      '\u0639': '\u0627'
+    };
+  }
+  normalize(text) {
+    const msa = normMsa(text);
+    let res = '';
+    for (let i = 0; i < msa.length; i++) {
+      res += this.dialectMap[msa[i]] || msa[i];
+    }
+    return res;
+  }
+}
+const phonemeEngine = new PhonemeClass();
 
 function phonNormAr(s){
   const n = normArCached(s);
@@ -3781,6 +3821,11 @@ function isMatchWord(hNorm, hPhon, hPhonLoose, w){
     if(lev(hPhon, w.phon) <= tol) return true;
   }
 
+  if(followOnly) {
+    const pHeard = phonemeEngine.normalize(hNorm);
+    const pTarget = phonemeEngine.normalize(wNorm);
+    if(pHeard === pTarget || lev(pHeard, pTarget) <= tol) return true;
+  }
   if(followOnly && hPhonLoose && w.phonLoose &&
      hPhonLoose.length >= 2 && w.phonLoose.length >= 2 &&
      lev(hPhonLoose, w.phonLoose) <= tol){
@@ -6414,19 +6459,24 @@ function buildPhraseObjects(rec) {
   if (!PhraseCtor) return false;
   if (!('phrases' in rec)) return false;
   if (!words.length) return false;
-  const end = Math.min(words.length, ptr + 50);
+  const end = Math.min(words.length, ptr + 60);
   const seen = new Set();
   const phrases = [];
   for (let i = ptr; i < end; i++) {
-    const clean = String(words[i].raw || '').normalize('NFKC').replace(TASHKEEL, '').replace(/[^\u0621-\u064A\s]/g, '').trim();
+    const clean = normMsa(words[i].raw || '');
     if (!clean || seen.has(clean)) continue;
     seen.add(clean);
     const distance = i - ptr;
-    const boost = distance <= 2 ? 8.0 : distance <= 5 ? 4.0 : 1.0;
+    const boost = distance <= 3 ? 12.0 : distance <= 10 ? 6.0 : 2.0;
     try { phrases.push(new PhraseCtor(clean, boost)); } catch (_) {}
   }
   if (!phrases.length) return false;
-  try { rec.phrases = phrases; rec.__lastPhrasePtr = ptr; return true; }
+  try { 
+    rec.phrases = phrases; 
+    rec.__lastPhrasePtr = ptr; 
+    if ('processLocally' in rec) rec.processLocally = true;
+    return true; 
+  }
   catch (e) { console.warn('[Speech] Failed to set phrases:', e); return false; }
 }
 
