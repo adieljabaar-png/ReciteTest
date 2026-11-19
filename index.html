@@ -2921,7 +2921,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">19 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">14:11</span>
+    <span class="pdr-item pdr-time" id="pdrTime">14:26</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3897,29 +3897,31 @@ function toleranceFor(L){
 
 function confidenceFloor(){ return 0.35; }
 
-/* FOLLOW-ONLY ASR confusion map (Option 1).
-   The browser ASR language model sometimes returns تنزيل (from the
-   preceding ayah تنزيل العزيز الرحيم) when the reciter says تنذر,
-   and أنزل when they say أنذر. Acoustically the matcher cannot tell
-   these apart reliably, and no tolerance change should be loosened
-   elsewhere to accommodate them. So in Follow mode ONLY, a heard
-   token that is exactly one of these known ASR substitutions is
-   accepted for its expected word. Exact-match only: no prefix /
-   suffix / lev loosening, no other words, Tajweed mode untouched.
-   It never skips a word: it only lets the pointer advance past the
-   word the reciter actually said. */
-const FOLLOW_CONFUSION_MAP = {
-  'تنزيل': 'تنذر',
-  'لتنزيل': 'لتنذر',
-  'أنزل': 'أنذر',
-  'انزل': 'انذر'
-};
+/* FOLLOW-ONLY similar-letter equivalence: س~ص, ت~ط, د~ض, ذ~ز~ظ,
+   ح~ه~خ, ع~غ, ق~ك, ا~ء, ي~ى, ة~ه. Canonicalises both strings to a
+   class representative before lev(). Stored words are never rewritten;
+   Tajweed never calls it. */
+const FOLLOW_SIMILAR_CLASSES = [['س','ص'],['ت','ط'],['د','ض'],['ذ','ز','ظ'],['ح','ه','خ'],['ع','غ'],['ق','ك'],['ا','ء','ؤ','ئ'],['ي','ى'],['ة','ه'],['ث','س']];
+const FOLLOW_SIMILAR_MAP = {};
+FOLLOW_SIMILAR_CLASSES.forEach(g => g.forEach(ch => { FOLLOW_SIMILAR_MAP[ch] = g[0]; }));
+function followSimilarCanon(s){ let out=''; for(let i=0;i<(s||'').length;i++) out += FOLLOW_SIMILAR_MAP[s[i]] || s[i]; return out; }
+function isFollowSimilarLooseMatch(heard, hPhonLoose, w){
+  if(!followOnly || !heard || !w || !w.norm) return false;
+  const L = Math.max(heard.length, w.norm.length);
+  const tol = toleranceFor(L);
+  if(lev(followSimilarCanon(heard), followSimilarCanon(w.norm)) <= tol + 1) return true;
+  if(hPhonLoose && w.phonLoose && hPhonLoose.length >= 3 && w.phonLoose.length >= 3 &&
+     lev(followSimilarCanon(hPhonLoose), followSimilarCanon(w.phonLoose)) <= tol + 1) return true;
+  return false;
+}
+/* FOLLOW-ONLY ASR confusion map (Option 1). Exact-match only:
+   heard تنزيل -> expected تنذر, لتنزيل -> لتنذر, أنزل/انزل -> أنذر.
+   Never skips a word; Tajweed untouched. */
+const FOLLOW_CONFUSION_MAP = { 'تنزيل':'تنذر', 'لتنزيل':'لتنذر', 'أنزل':'أنذر', 'انزل':'انذر' };
 function isFollowConfusionMatch(heard, w){
-  if(!followOnly) return false;
-  if(!heard || !w || !w.norm) return false;
+  if(!followOnly || !heard || !w || !w.norm) return false;
   return FOLLOW_CONFUSION_MAP[heard] === w.norm;
 }
-
 function isMatchWord(hNorm, hPhon, hPhonLoose, w){
   const wNorm = w.norm;
   const la = hNorm.length, lb = wNorm.length;
@@ -3945,9 +3947,10 @@ function isMatchWord(hNorm, hPhon, hPhonLoose, w){
   }
   if(followOnly && hPhonLoose && w.phonLoose &&
      hPhonLoose.length >= 3 && w.phonLoose.length >= 3 &&
-     lev(hPhonLoose, w.phonLoose) <= tol){
+     lev(hPhonLoose, w.phonLoose) <= tol + 1){
     return true;
   }
+  if(followOnly && isFollowSimilarLooseMatch(hNorm, hPhonLoose, w)) return true;
 
   if(la >= 5 && lb >= 5 && lenDiff <= 1){
     const S = la < lb ? la : lb;
@@ -6419,11 +6422,14 @@ function isFollowPlausible(heard, hPhon, hPhonLoose, w) {
   if (targetLen === 0) return false;
   if (heardLen < 2 && targetLen > 1) return false;
   const ratio = heardLen / targetLen;
-  if (ratio < 0.60 || ratio > 1.65) return false;
+  if (ratio < 0.50 || ratio > 1.80) return false;
   const L = Math.max(heardLen, targetLen);
   const tol = toleranceFor(L);
   if (lev(heard, w.norm) <= tol) return true;
   if (L >= 4 && hPhon.length >= 3 && w.phon.length >= 3 && lev(hPhon, w.phon) <= tol) return true;
+  if (hPhonLoose && w.phonLoose && hPhonLoose.length >= 3 && w.phonLoose.length >= 3 &&
+      lev(hPhonLoose, w.phonLoose) <= tol + 1) return true;
+  if (isFollowSimilarLooseMatch(heard, hPhonLoose, w)) return true;
   return false;
 }
 
@@ -6536,9 +6542,32 @@ async function runSpeechResultProcessing(snap) {
       const newToks = toks.slice(already);
       if (!newToks.length) continue;
       recPush(newToks);
-      const used = await grade(recTokens, recCursor);
+      let used = await grade(recTokens, recCursor);
       recCursor = Math.min(recCursor + used, recTokens.length);
       if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
+      /* FOLLOW ONLY (4): best transcript advanced nothing — grade the
+         other alternatives in score order until one advances the
+         pointer. Best transcript's tokens were unmatched, so they are
+         discarded, not stacked on the fallback's. */
+      if (followOnly && used === 0 && alternatives.length > 1) {
+        const ranked = alternatives.map(a => {
+          const tr2 = (a.transcript || '').trim();
+          const cf2 = (typeof a.confidence === 'number') ? a.confidence : 0;
+          return { tr: tr2, conf: cf2, score: (tr2 ? scoreAlternativeToks(tr2.split(/\s+/).filter(Boolean), ptr) : -1) * 3 + cf2 * 1.5 };
+        }).sort((a, b) => b.score - a.score);
+        for (const alt of ranked) {
+          if (!alt.tr || alt.tr === bestTranscript) continue;
+          if (isFinal && alt.conf > 0 && alt.conf < floor) continue;
+          const altToks = alt.tr.split(/\s+/).filter(Boolean).slice(already);
+          if (!altToks.length) continue;
+          recTokens.length = 0; recCursor = 0;
+          recPush(altToks);
+          used = await grade(recTokens, recCursor);
+          recCursor = Math.min(recCursor + used, recTokens.length);
+          if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
+          if (used > 0) break;
+        }
+      }
       scheduleHUD();
     } else {
       const bestConf = (typeof bestAlt.confidence === 'number') ? bestAlt.confidence : 0;
@@ -6550,9 +6579,31 @@ async function runSpeechResultProcessing(snap) {
         if (newToks.length) {
           interimProgress.set(i, safeEnd);
           recPush(newToks);
-          const used = await grade(recTokens, recCursor);
+          let used = await grade(recTokens, recCursor);
           recCursor = Math.min(recCursor + used, recTokens.length);
           if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
+          if (followOnly && used === 0 && alternatives.length > 1) {
+            const ranked = alternatives.map(a => {
+              const tr2 = (a.transcript || '').trim();
+              const cf2 = (typeof a.confidence === 'number') ? a.confidence : 0;
+              return { tr: tr2, conf: cf2, score: (tr2 ? scoreAlternativeToks(tr2.split(/\s+/).filter(Boolean), ptr) : -1) * 3 + cf2 * 1.5 };
+            }).sort((a, b) => b.score - a.score);
+            for (const alt of ranked) {
+              if (!alt.tr || alt.tr === bestTranscript) continue;
+              if (alt.conf > 0 && alt.conf < floor) continue;
+              const altToksAll = alt.tr.split(/\s+/).filter(Boolean);
+              const altSafe = Math.max(already, altToksAll.length - 1);
+              const altToks = altToksAll.slice(already, altSafe);
+              if (!altToks.length) continue;
+              interimProgress.set(i, altSafe);
+              recTokens.length = 0; recCursor = 0;
+              recPush(altToks);
+              used = await grade(recTokens, recCursor);
+              recCursor = Math.min(recCursor + used, recTokens.length);
+              if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
+              if (used > 0) break;
+            }
+          }
           scheduleHUD();
         }
       }
@@ -6598,11 +6649,6 @@ function buildPhraseObjects(rec) {
   if (!PhraseCtor) return false;
   if (!('phrases' in rec)) return false;
   if (!words.length || ptr >= words.length) return false;
-  // NARROW WINDOW: remaining words of the CURRENT ayah only, plus the
-  // first 3 words of the next ayah (so a verse boundary never starves
-  // the recogniser). Previously this was the next 50 words, which kept
-  // words from 2-3 ayahs ago (e.g. تنزيل from the preceding ayah) in
-  // the bias set while the reciter was already on تنذر.
   const curVerse = words[ptr].verse;
   let end = ptr;
   while (end < words.length && words[end].verse === curVerse) end++;
@@ -6616,17 +6662,9 @@ function buildPhraseObjects(rec) {
     seen.add(clean);
     try { phrases.push(new PhraseCtor(clean, 6.0)); } catch (_) {}
   }
-  // FULL-AYAH PHRASE: the remaining ayah as one sequence, not just a
-  // bag of single words. Sequence context is what disambiguates
-  // لتنذر قوما (fits) from تنزيل (does not fit here).
   const ayahPhrase = [];
-  for (let i = ptr; i < end; i++) {
-    const clean = cleanWord(words[i]);
-    if (clean) ayahPhrase.push(clean);
-  }
-  if (ayahPhrase.length >= 2) {
-    try { phrases.push(new PhraseCtor(ayahPhrase.join(' '), 6.0)); } catch (_) {}
-  }
+  for (let i = ptr; i < end; i++) { const clean = cleanWord(words[i]); if (clean) ayahPhrase.push(clean); }
+  if (ayahPhrase.length >= 2) { try { phrases.push(new PhraseCtor(ayahPhrase.join(' '), 6.0)); } catch (_) {} }
   if (!phrases.length) return false;
   try { rec.phrases = phrases; rec.__lastPhrasePtr = ptr; rec.__lastPhraseVerse = curVerse; return true; }
   catch (e) { console.warn('[Speech] Failed to set phrases:', e); return false; }
@@ -8249,15 +8287,7 @@ function advancePast(n){
   for(let i = ptr; i < endPtr; i++){ if(words[i]) leaving.add(words[i].verse); }
   ptr = endPtr;
   const nextVerse = ptr < words.length ? words[ptr].verse : null;
-  // Ayah-boundary phrase refresh: rebuild the (narrow) hint set for the
-  // new ayah. Some engines apply rec.phrases live, others only on the
-  // next start() — onstart above re-checks by verse, so the refresh is
-  // picked up at the next recogniser restart either way. Never drops
-  // or skips a word: this only changes the ASR bias hints.
-  try {
-    if (speechRecognition && speechRecognition.__hasPhrases && nextVerse &&
-        speechRecognition.__lastPhraseVerse !== nextVerse) buildPhraseObjects(speechRecognition);
-  } catch (_) {}
+  try { if (speechRecognition && speechRecognition.__hasPhrases && nextVerse && speechRecognition.__lastPhraseVerse !== nextVerse) buildPhraseObjects(speechRecognition); } catch (_) {}
   leaving.forEach(v => { if(v !== nextVerse) completeVerse(v); });
   updateCurrent(); noteAdvance(advanced); scheduleSaveProgress();
 }
@@ -12368,7 +12398,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   // The full Tajweed engine needs live speech input.
