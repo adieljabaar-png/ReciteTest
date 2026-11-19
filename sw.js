@@ -1,7 +1,7 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.20 — Cache-invalidation bump for the install-tab and
+   v2.4.21 — Cache-invalidation bump for the install-tab and
    Quran-loading fixes. No caching behaviour changes: this bump
    exists so the new index.html is fetched instead of the stale
    2.4.19 shell being served offline.
