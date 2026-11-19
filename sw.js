@@ -1,65 +1,37 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.20 — Cache-invalidation bump for the new dashboard layout
-   and the reworked Read Arabic page, plus user-data protection.
+   v2.4.20 — Cache-invalidation bump for the install-tab and
+   Quran-loading fixes. No caching behaviour changes: this bump
+   exists so the new index.html is fetched instead of the stale
+   2.4.19 shell being served offline.
 
-   User data that is NEVER deleted by this service worker:
-     • Downloaded surah / translation audio  (cache 'qc-audio')
-     • Progress, streaks, achievements, bookmarks, prayer-time
-       settings and alarms, theme and Read Arabic scores — these
-       live in localStorage, which a service worker cannot touch
-       and this file never does.
-     • Cached Quran / translation text — copied forward into the
-       new text cache on every update so offline reading survives.
+   App changes this SW version supports (index.html):
+     • Install tab: "already installed" is now only true when the
+       app is really installed (appinstalled event / true
+       standalone). A recorded install attempt no longer marks the
+       app installed, and fullscreen / minimal-ui no longer count
+       as standalone — so the tab can no longer get stuck dead.
+       Tapping Install clears the "don't show again" flag.
+     • Quran loading: the surah list and the Coach surah now fall
+       back to api.quran.com when api.alquran.cloud does not
+       answer, and both error screens have a Retry button. The SW
+       already routes both APIs through networkFirst (qc-text-*),
+       and its synthetic 503 on offline correctly triggers the
+       app's fallback instead of being cached.
+     • Manifest link is now relative (manifest.json), so the
+       install prompt works when the app is hosted in a subfolder.
 
-   Changes in this deployment:
+   DANGER — do NOT deploy the simplified sw.js from the earlier
+   install-fix turn: its activate handler deleted every cache
+   except qrc-v1, including qc-audio (downloaded audio). This
+   file is the only SW that should be deployed, as sw.js.
 
-     index.html (Home / Dashboard):
-       • New "Read Arabic" tab on the Dashboard, next to Daily
-         streak, linking to ./read.html.
-       • Daily streak shrunk to the same size as the Hifz /
-         Tajweed tabs; all four tabs are equal width.
-
-     read.html (Read Arabic page):
-       • Header: [Back] on the left (returns to ./index.html),
-         [i] info and moon/sun theme toggle on the right.
-       • Menu removed (Install, Share, Scan, Reset deleted).
-       • Theme toggle uses the same 'qc.theme' setting as Recite.
-
-     sw.js:
-       • CLEAR_CACHES now clears only the versioned app caches and
-         keeps the persistent audio downloads.
-       • Old text caches are migrated, not discarded, on update.
-
-   Cache invalidation:
-     qc-shell-* / qc-fonts-* / qc-runtime-* are bumped so the new
-     index.html and read.html are fetched. qc-audio is preserved.
-
-   Previously-retained features (unchanged):
-
-     • Microphone diagnostic system with four failure modes:
-       track health (mute / ended), RMS silence, ASR death when
-       audio is proven present, and a 12 s fallback. The
-       diagnostic stops after the first successful ASR result
-       so subsequent Start Reciting calls do not trigger extra
-       getUserMedia re-calls. Includes a "Test microphone" menu
-       item with live RMS level, live transcript, and copy-
-       diagnostic button.
-
-     • Translation audio sources (EveryAyah, Islamic Network,
-       QuranEnc for English and Turkish) are handled via the
-       persistent qc-audio cache.
-
-     • serveRangeFromCached early-returns for opaque responses
-       (QuranEnc without CORS) — they cannot be sliced or
-       measured, so the SW returns the full cached response
-       instead of throwing when the player requests a Range.
    ============================================================ */
 
 'use strict';
 
-const VERSION = '2.4.19';
+const VERSION = '2.4.20';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -210,12 +182,17 @@ self.addEventListener('message', event => {
     event.waitUntil(self.skipWaiting());
     return;
   }
+  if(data.type === 'GET_VERSION'){
+    if(event.source && event.source.postMessage) event.source.postMessage({ type: 'SW_VERSION', version: VERSION });
+    return;
+  }
   if(data.type === 'CLEAR_CACHES'){
     event.waitUntil((async () => {
       // Clear app caches only — never the persistent user downloads.
       const keys = await caches.keys();
       await Promise.all(keys
         .filter(k => !PERSISTENT_CACHES.includes(k))
+        .filter(k => k.startsWith('qc-') || k.startsWith('qrc-'))
         .map(k => caches.delete(k)));
       if(event.source && event.source.postMessage) event.source.postMessage({ type: 'CACHES_CLEARED' });
     })());

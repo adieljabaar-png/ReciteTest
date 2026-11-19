@@ -2919,7 +2919,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">19 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">09:40</span>
+    <span class="pdr-item pdr-time" id="pdrTime">09:52</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -4395,12 +4395,22 @@ async function fetchWithTimeout(url, ms){
 
 async function ensureChapters(){
   if(chaptersCache) return chaptersCache;
-  const res = await fetchWithTimeout(ALQURAN_API + '/surah', FETCH_TIMEOUT_MS);
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const json = await res.json();
-  if(json.code !== 200 || !Array.isArray(json.data)) throw new Error('Bad response');
-  chaptersCache = json.data;
-  return chaptersCache;
+  try{
+    const res = await fetchWithTimeout(ALQURAN_API + '/surah', FETCH_TIMEOUT_MS);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if(json.code !== 200 || !Array.isArray(json.data)) throw new Error('Bad response');
+    chaptersCache = json.data;
+    return chaptersCache;
+  }catch(e1){
+    // Fallback: Quran.com chapters API, mapped to the AlQuran shape the rest of the app expects
+    const res = await fetchWithTimeout(QURAN_API_V4 + '/chapters?language=en', FETCH_TIMEOUT_MS);
+    if(!res.ok) throw new Error('Chapters unavailable (AlQuran: ' + (e1 && e1.message) + ', Quran.com: HTTP ' + res.status + ')');
+    const json = await res.json();
+    if(!json || !Array.isArray(json.chapters)) throw new Error('Chapters unavailable');
+    chaptersCache = json.chapters.map(c => ({ number: c.id, name: c.name_arabic || '', englishName: c.name_simple || '', englishNameTranslation: (c.translated_name && c.translated_name.name) || '', revelationType: (c.revelation_place === 'makkah' ? 'Meccan' : 'Medinan'), numberOfAyahs: c.verses_count || 0 }));
+    return chaptersCache;
+  }
 }
 
 async function ensureChaptersLocalized(lang) {
@@ -7133,7 +7143,32 @@ async function loadSurah(n, keepFeedback){
   const enUrl = ALQURAN_API + '/surah/' + surahNum + '/' + translationTextId;
   try{
     const [arSettled, enSettled] = await Promise.allSettled([fetchWithTimeout(arUrl, FETCH_TIMEOUT_MS), fetchWithTimeout(enUrl, FETCH_TIMEOUT_MS)]);
-    if(arSettled.status !== 'fulfilled' || !arSettled.value.ok) throw new Error('Arabic edition: ' + explainFetchFailure(arSettled));
+    if(arSettled.status !== 'fulfilled' || !arSettled.value.ok){
+      // Fallback: Quran.com verses API (text_uthmani + translation), mapped to the AlQuran shape
+      const qVerses = []; let qPage = 1; const qTransId = (typeof currentTextTranslationQuranComId === 'function') ? currentTextTranslationQuranComId() : 131;
+      for(let safety = 0; safety < 12; safety++){
+        const qUrl = QURAN_API_V4 + '/verses/by_chapter/' + surahNum + '?fields=text_uthmani&translations=' + encodeURIComponent(qTransId) + '&per_page=50&page=' + qPage;
+        const qRes = await fetchWithTimeout(qUrl, FETCH_TIMEOUT_MS);
+        if(!qRes.ok) throw new Error('Arabic edition: ' + explainFetchFailure(arSettled) + ' (Quran.com fallback: HTTP ' + qRes.status + ')');
+        const qJson = await qRes.json();
+        if(!qJson.verses || !qJson.verses.length) break;
+        qVerses.push.apply(qVerses, qJson.verses);
+        if(qJson.pagination && qPage >= qJson.pagination.total_pages) break;
+        qPage++;
+      }
+      if(!qVerses.length) throw new Error('Arabic edition: ' + explainFetchFailure(arSettled));
+      let ch = null;
+      try{ const allCh = await ensureChapters(); ch = allCh.find(c => c.number === surahNum) || null; }catch(_){}
+      surahMeta = { number: surahNum, name: (ch && ch.name) || '', englishName: (ch && ch.englishName) || ('Surah ' + surahNum), numberOfAyahs: (ch && ch.numberOfAyahs) || qVerses.length };
+      const qTrans = qVerses.map(v => { const tr = (v.translations && v.translations[0] && v.translations[0].text) || ''; return cleanTranslation(tr); });
+      const qAyahs = qVerses.map(v => { const key = String(v.verse_key || ''); const parts = key.split(':'); return { text: v.text_uthmani || '', numberInSurah: parseInt(parts[1], 10) || 0, surah: { number: surahNum }, page: v.page_number || 1 }; });
+      renderVerses(qAyahs, qTrans);
+      setStatus('Ready', 'idle', surahMeta.numberOfAyahs + ' ayahs · ' + (micPermission==='granted' ? 'Mic on' : 'Tap Start reciting to allow mic'));
+      if(!keepFeedback) feedbackEl.innerHTML = '<div class="line"><b>' + surahMeta.englishName + '</b> <span class="ar">' + surahMeta.name + '</span> — loaded.</div>';
+      if (!followOnly){ coachTajweedApplied = false; coachTajweedReady = false; applyTajweedColorsToCoach(); }
+      else { fetchCoachTajweed(surahNum).catch(() => {}); }
+      return;
+    }
     const arJson = await arSettled.value.json();
     if(arJson.code !== 200 || !arJson.data || !arJson.data.ayahs) throw new Error('Unexpected Arabic API response');
     surahMeta = { number: arJson.data.number, name: arJson.data.name, englishName: arJson.data.englishName, numberOfAyahs: arJson.data.numberOfAyahs };
@@ -7932,7 +7967,7 @@ async function renderSurahIndex(){
       surahIndexList.appendChild(row);
     });
   }catch(e){
-    surahIndexList.innerHTML = '<div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div>';
+    surahIndexList.innerHTML = '<div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.<div style="margin-top:10px"><button class="primary" id="btnRetrySurahList" type="button">↻ Retry</button></div></div>';   const rb = document.getElementById('btnRetrySurahList');   if(rb) rb.addEventListener('click', () => renderSurahIndex());
   }
 }
 const JUZ_NAMES = ['Alif Lam Meem','Sayaqul','Tilkal Rusul','Lan Tanaloo','Wal Muhsanat','La Yuhibbullah','Wa Iza Samiu','Wa Lau Annana','Qalal Malaou','Wa A\'lamu','Yatazeroon','Wa Mamin Da\'abat','Wa Ma Ubarri\'u','Rubama','Subhanallazi','Qal Alam','Aqtarabo','Qad Aflaha','Wa Qalallazina','A\'man Khalaq','Utlu Ma Oohiya','Wa Manyaqnut','Wa Mali','Faman Azlam','Elahe Yuraddo','Ha Meem','Qala Fama Khatbukum','Qad Sami Allah','Tabarakallazi','Amma Yatasa\'aloon'];
@@ -8776,7 +8811,7 @@ async function loadReaderPage(pageNumber){
   }catch(e){
     if(token !== readerState.token) return;
     readerState.loading = false;
-    pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load page ' + n + '.</span>Check your connection and try again.</div></div>';
+    pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load page ' + n + '.</span>Check your connection and try again.<div style="margin-top:10px"><button class="primary" id="btnRetryPage" type="button">↻ Retry</button></div></div>';   const rbp = document.getElementById('btnRetryPage');   if(rbp) rbp.addEventListener('click', () => loadReaderPage(n));
     qvTitle.textContent = 'Error';
   }
 }
