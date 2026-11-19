@@ -1,67 +1,4 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -121,7 +58,7 @@
 <meta name="TimpiBot" content="noindex, nofollow, noai, noimageai">
 <meta name="Amazonbot" content="noindex, nofollow, noai, noimageai">
 <meta name="meta-externalagent" content="noindex, nofollow, noai, noimageai">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000000'/%3E%3Cpath d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='%23F5C542'/%3E%3Cpath d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='%23D9A32B'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&amp;family=Amiri+Quran&amp;family=Scheherazade+New:wght@400;700&amp;family=Noto+Naskh+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
@@ -2665,7 +2602,9 @@ body.light-mode .share-arabic{color:#1a2233;}
         <button class="home-menu-item" id="homeMenuNotify" type="button" role="menuitem">
           <span class="hmi-ico">🔔</span><span>Enable notifications</span>
         </button>
-        
+        <button class="home-menu-item" id="homeMenuMicTest" type="button" role="menuitem">
+          <span class="hmi-ico">🎤</span><span>Test microphone</span>
+        </button>
         <button class="home-menu-item" id="homeMenuAbout" type="button" role="menuitem">
           <span class="hmi-ico">ℹ️</span><span>About app</span>
         </button>
@@ -2682,8 +2621,8 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
     <button class="hijri-card" id="hijriCard" type="button" aria-label="Open Hijri and Gregorian calendar">
       <span class="hijri-sub">Today · Hijri</span>
-      <span class="hijri-main" id="hijriEn">8 Jumada al-Akhirah 1448 AH</span>
-      <span class="hijri-alt" id="hijriAr">8 جمادى الثانية 1448 هـ</span>
+      <span class="hijri-main" id="hijriEn">7 Jumada al-Akhirah 1448 AH</span>
+      <span class="hijri-alt" id="hijriAr">7 جمادى الثانية 1448 هـ</span>
     </button>
     <button id="homeThemeBtn" class="iconbtn" aria-label="Toggle dark / light theme">🌙</button>
   </div>
@@ -2735,7 +2674,7 @@ body.light-mode .share-arabic{color:#1a2233;}
       <span class="ico">🕌</span>
       <span>Important Islamic Dates</span>
     </div>
-    <ul class="islamic-dates-list" id="islamicDatesList"><li><span class="ico">✨</span><span class="info"><span class="name">Isra and Mi'raj</span><span class="hijri">27 Raj 1448</span></span><span class="greg">Jan 6, 2027<small>in 48d</small></span></li><li><span class="ico">🌟</span><span class="info"><span class="name">Mid-Sha'ban</span><span class="hijri">15 Sha 1448</span></span><span class="greg">Jan 24, 2027<small>in 66d</small></span></li><li><span class="ico">📿</span><span class="info"><span class="name">Ramadan begins</span><span class="hijri">1 Ram 1448</span></span><span class="greg">Feb 8, 2027<small>in 81d</small></span></li><li><span class="ico">🌌</span><span class="info"><span class="name">Laylat al-Qadr</span><span class="hijri">27 Ram 1448</span></span><span class="greg">Mar 6, 2027<small>in 107d</small></span></li><li><span class="ico">🎉</span><span class="info"><span class="name">Eid al-Fitr</span><span class="hijri">1 Shaw 1448</span></span><span class="greg">Mar 10, 2027<small>in 111d</small></span></li><li><span class="ico">🏔️</span><span class="info"><span class="name">Day of Arafah</span><span class="hijri">9 Dhul H 1448</span></span><span class="greg">May 16, 2027<small>in 178d</small></span></li><li><span class="ico">🐏</span><span class="info"><span class="name">Eid al-Adha</span><span class="hijri">10 Dhul H 1448</span></span><span class="greg">May 17, 2027<small>in 179d</small></span></li><li><span class="ico">🌙</span><span class="info"><span class="name">Islamic New Year</span><span class="hijri">1 Muh 1449</span></span><span class="greg">Jun 6, 2027<small>in 199d</small></span></li><li><span class="ico">🕯️</span><span class="info"><span class="name">Day of Ashura</span><span class="hijri">10 Muh 1449</span></span><span class="greg">Jun 15, 2027<small>in 208d</small></span></li><li><span class="ico">🕌</span><span class="info"><span class="name">Mawlid al-Nabi</span><span class="hijri">12 Rab I 1449</span></span><span class="greg">Aug 15, 2027<small>in 269d</small></span></li></ul>
+    <ul class="islamic-dates-list" id="islamicDatesList"><li><span class="ico">✨</span><span class="info"><span class="name">Isra and Mi'raj</span><span class="hijri">27 Raj 1448</span></span><span class="greg">Jan 6, 2027<small>in 49d</small></span></li><li><span class="ico">🌟</span><span class="info"><span class="name">Mid-Sha'ban</span><span class="hijri">15 Sha 1448</span></span><span class="greg">Jan 24, 2027<small>in 67d</small></span></li><li><span class="ico">📿</span><span class="info"><span class="name">Ramadan begins</span><span class="hijri">1 Ram 1448</span></span><span class="greg">Feb 8, 2027<small>in 82d</small></span></li><li><span class="ico">🌌</span><span class="info"><span class="name">Laylat al-Qadr</span><span class="hijri">27 Ram 1448</span></span><span class="greg">Mar 6, 2027<small>in 108d</small></span></li><li><span class="ico">🎉</span><span class="info"><span class="name">Eid al-Fitr</span><span class="hijri">1 Shaw 1448</span></span><span class="greg">Mar 10, 2027<small>in 112d</small></span></li><li><span class="ico">🏔️</span><span class="info"><span class="name">Day of Arafah</span><span class="hijri">9 Dhul H 1448</span></span><span class="greg">May 16, 2027<small>in 179d</small></span></li><li><span class="ico">🐏</span><span class="info"><span class="name">Eid al-Adha</span><span class="hijri">10 Dhul H 1448</span></span><span class="greg">May 17, 2027<small>in 180d</small></span></li><li><span class="ico">🌙</span><span class="info"><span class="name">Islamic New Year</span><span class="hijri">1 Muh 1449</span></span><span class="greg">Jun 6, 2027<small>in 200d</small></span></li><li><span class="ico">🕯️</span><span class="info"><span class="name">Day of Ashura</span><span class="hijri">10 Muh 1449</span></span><span class="greg">Jun 15, 2027<small>in 209d</small></span></li><li><span class="ico">🕌</span><span class="info"><span class="name">Mawlid al-Nabi</span><span class="hijri">12 Rab I 1449</span></span><span class="greg">Aug 15, 2027<small>in 270d</small></span></li></ul>
   </section>
 
 </div>
@@ -2794,41 +2733,41 @@ body.light-mode .share-arabic{color:#1a2233;}
 
       <div class="share-header">
         <div class="share-city" id="shareCityName">Makkah, SA</div>
-        <div class="share-dates" id="shareDates">8 Jumada al-Akhirah 1448 AH  ·  19 November 2026</div>
+        <div class="share-dates" id="shareDates">7 Jumada al-Akhirah 1448 AH  ·  18 November 2026</div>
       </div>
 
-      <div class="share-prayers" id="sharePrayers"><div class="share-prayer"><span class="sp-name">Fajr</span><span class="sp-time">04:14</span></div><div class="share-prayer is-sunrise"><span class="sp-name">Sunrise</span><span class="sp-time">05:34</span></div><div class="share-prayer"><span class="sp-name">Zohr</span><span class="sp-time">11:06</span></div><div class="share-prayer"><span class="sp-name">Asr</span><span class="sp-time">14:16</span></div><div class="share-prayer"><span class="sp-name">Maghrib</span><span class="sp-time">16:38</span></div><div class="share-prayer"><span class="sp-name">Isha</span><span class="sp-time">18:08</span></div></div>
+      <div class="share-prayers" id="sharePrayers"><div class="share-prayer"><span class="sp-name">Fajr</span><span class="sp-time">04:14</span></div><div class="share-prayer is-sunrise"><span class="sp-name">Sunrise</span><span class="sp-time">05:33</span></div><div class="share-prayer"><span class="sp-name">Zohr</span><span class="sp-time">11:06</span></div><div class="share-prayer"><span class="sp-name">Asr</span><span class="sp-time">14:16</span></div><div class="share-prayer"><span class="sp-name">Maghrib</span><span class="sp-time">16:38</span></div><div class="share-prayer"><span class="sp-name">Isha</span><span class="sp-time">18:08</span></div></div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">🤲 Duah of the Day</div>
-        <p class="share-arabic" id="shareDuahArabic" dir="rtl">رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَثَبِّتْ أَقْدَامَنَا وَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ</p>
-        <p class="share-translation" id="shareDuahTranslation">Our Lord, pour upon us patience and plant firmly our feet and give us victory over the disbelieving people.</p>
-        <p class="share-reference" id="shareDuahRef">Surah Al-Baqarah 2:250</p>
+        <p class="share-arabic" id="shareDuahArabic" dir="rtl">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
+        <p class="share-translation" id="shareDuahTranslation">Our Lord, give us in this world [that which is] good and in the Hereafter [that which is] good and protect us from the punishment of the Fire.</p>
+        <p class="share-reference" id="shareDuahRef">Surah Al-Baqarah 2:201</p>
       </div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">📚 Tafsir of the Duah</div>
-        <p class="share-tafsir" id="shareTafsirText">Talut's believing army made this dua before facing Jalut's forces. They asked for patience, steadfast feet, and victory.</p>
+        <p class="share-tafsir" id="shareTafsirText">This is the most balanced of all duas — seeking good in both this world and the Hereafter while being protected from the Fire.</p>
       </div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">📜 Hadith of the Day</div>
-        <p class="share-arabic" id="shareHadithArabic" dir="rtl">الْمُؤْمِنُ الَّذِي يُخَالِطُ النَّاسَ وَيَصْبِرُ عَلَى أَذَاهُمْ أَعْظَمُ أَجْرًا مِنَ الْمُؤْمِنِ الَّذِي لاَ يُخَالِطُ النَّاسَ</p>
-        <p class="share-translation" id="shareHadithTranslation">The believer who mixes with people and bears their harm is greater in reward than the believer who does not mix with them.</p>
-        <p class="share-reference" id="shareHadithRef">Sunan at-Tirmidhi 2507</p>
+        <p class="share-arabic" id="shareHadithArabic" dir="rtl">وَمَنْ سَتَرَ مُسْلِمًا سَتَرَهُ اللَّهُ يَوْمَ الْقِيَامَةِ</p>
+        <p class="share-translation" id="shareHadithTranslation">Whoever conceals the faults of a Muslim, Allah will conceal his faults on the Day of Resurrection.</p>
+        <p class="share-reference" id="shareHadithRef">Sahih Muslim 2699</p>
       </div>
 
       <div class="share-divider" role="separator"></div>
 
       <div class="share-block">
         <div class="share-block-title">💡 Explanation of the Hadith</div>
-        <p class="share-tafsir" id="shareHadithExplanationText">The Prophet ﷺ identifies the believer who engages with society as having greater reward than one who isolates. Mixing with people is difficult — it requires patience with their faults, forgiveness and self-control. But this is the path of the Prophet ﷺ, who lived among people, endured their harm and continued to call them to good. This hadith encourages the believer not to abandon society but to engage with it patiently. The Prophet ﷺ said: 'The strong believer is better and more beloved to Allah than the weak believer.'</p>
+        <p class="share-tafsir" id="shareHadithExplanationText">The Prophet ﷺ teaches the virtue of protecting others' dignity. When you see a fault in someone, you conceal it rather than expose it. This is not about approving of sin — it is about not humiliating others. In return, Allah will conceal your faults on the Day of Judgment. This hadith encourages a culture of mercy, privacy and non-judgmental support among believers. The Prophet ﷺ said: 'Whoever conceals the faults of a Muslim, Allah will conceal his faults in this world and the Hereafter.'</p>
       </div>
 
       <div class="share-footer">
@@ -2936,11 +2875,11 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button class="prayer-settings-btn" id="prayerQiblaBtn" type="button" aria-label="Qibla direction">🧭</button>
   </div>
   <div class="prayer-date-row">
-    <span class="pdr-item pdr-hijri" id="pdrHijri">8 Jumada al-Akhirah 1448 AH</span>
+    <span class="pdr-item pdr-hijri" id="pdrHijri">7 Jumada al-Akhirah 1448 AH</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-greg" id="pdrGreg">19 November 2026</span>
+    <span class="pdr-item pdr-greg" id="pdrGreg">18 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">10:02</span>
+    <span class="pdr-item pdr-time" id="pdrTime">16:53</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3004,7 +2943,18 @@ body.light-mode .share-arabic{color:#1a2233;}
       </div>
     </div>
 
-
+<div id="tajweedNotice" class="tajweed-notice" hidden="">
+  <b>Limited Tajweed mode:</b> This device doesn't expose the Speech
+  Recognition features needed for full Tajweed rule detection, so only
+  the core rules below will be highlighted while you recite.
+  <div class="tj-rules">
+    <span class="tj-rule">Ghunnah</span>
+    <span class="tj-rule">Madd</span>
+    <span class="tj-rule">Qalqalah</span>
+    <span class="tj-rule">Idgham</span>
+    <span class="tj-rule">Ikhfa</span>
+  </div>
+</div>
 
     <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
     
@@ -3488,7 +3438,6 @@ const SAJDAH_VERSES = new Set([
   '7:206','13:15','16:50','17:109','19:58','22:18','22:77','25:60',
   '27:26','32:15','38:24','41:38','53:62','84:21','96:19'
 ]);
-
 const MUQATTAAT_BY_SURAH = {
   2:  [['الم', ['ا','ل','م']]],
   3:  [['الم', ['ا','ل','م']]],
@@ -3520,7 +3469,6 @@ const MUQATTAAT_BY_SURAH = {
   50: [['ق', ['ق']]],
   68: [['ن', ['ن']]]
 };
-
 const LETTER_NAMES = {
   'ا': ['الف', 'ألف', 'اليف', 'أليف', 'الفا', 'ألفا', 'الفي'],
   'ل': ['لام', 'لم', 'لامو', 'لامي'],
@@ -3537,6 +3485,10 @@ const LETTER_NAMES = {
   'ق': ['قاف', 'قا', 'كاف', 'كا', 'قافي', 'قافو'],
   'ن': ['نون', 'نوني', 'نونو']
 };
+
+
+
+
 
 const UA = navigator.userAgent || '';
 const IS_IOS = /iPad|iPhone|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -3566,6 +3518,32 @@ const STRICT_FEATURES = {
   silent:    () => localStorage.getItem('qc.strictSilent')         === '1',
   hamWasl:   () => localStorage.getItem('qc.strictHamWasl')        !== '0'
 };
+const VARIANT_MAP = {
+  '\u06BE':'\u0647', // ھ Do-chashmi heh -> ه
+  '\u06C2':'\u0647', // ۂ Heh goal -> ه
+  '\u06C3':'\u0647', // ۃ Teh marbuta goal (Uthmani) -> ه
+  '\u0620':'\u064A', // ؠ Kashmiri yeh -> ي
+  '\u06D0':'\u064A', // ې Yeh with tail -> ي
+  '\u06D1':'\u064A', // ۑ Yeh with two dots below -> ي
+  '\u06D3':'\u064A', // ۓ Yeh with tail -> ي
+  '\u06CB':'\u0648', // ۋ Waw with ring -> و
+  '\u06AF':'\u0643', // گ Gaf (ASR hears Egyptian ج as g) -> ك
+  '\u0686':'\u062C', // چ Cheh (ASR hears ج / ش) -> ج
+  '\u067E':'\u0628', // پ Peh (ASR hears ب / ف) -> ب
+  '\u0698':'\u0632'  // ژ Jeh (ASR hears ز / ج) -> ز
+};
+function mapVariantLetters(s){
+  let out = '';
+  for(let i = 0; i < s.length; i++) out += VARIANT_MAP[s[i]] || s[i];
+  return out;
+}
+
+// Variant / Uthmani / ASR letter forms that normAr()/normMsa() would
+// otherwise DELETE with the [^\u0621-\u064A] filter, before PHON_LOOSE
+// ever sees them. Applied BEFORE the range filter, in both norm functions.
+
+
+
 
 function normAr(s){
   return String(s).normalize('NFKC')
@@ -3575,8 +3553,24 @@ function normAr(s){
     .replace(/\u0629/g,'\u0647')
     .replace(/[\u0649\u06CC\u06D2]/g,'\u064A')
     .replace(/[\u06C0\u06C1\u06D5]/g,'\u0647')
+    .replace(/[^\u0621-\u064A]/g, function(ch){ return VARIANT_MAP[ch] || ''; })
     .replace(/[^\u0621-\u064A]/g,'').trim();
 }
+function normMsa(s){
+  if(!s) return '';
+  return String(s).normalize('NFKC')
+    .replace(TASHKEEL,'')
+    .replace(/\u0671/g,'\u0627')
+    .replace(/[\u0622\u0623\u0625]/g,'\u0627')
+    .replace(/\u0629/g,'\u0647')
+    .replace(/[\u0649\u06CC]/g,'\u064A')
+    .replace(/\u0624/g,'\u0648')
+    .replace(/\u0626/g,'\u064A')
+    .replace(/[^\u0621-\u064A]/g, function(ch){ return VARIANT_MAP[ch] || ''; })
+    .replace(/[^\u0621-\u064A]/g,'').trim();
+}
+
+
 
 function cleanTranslation(s){
   if(s === null || s === undefined) return '';
@@ -3588,22 +3582,20 @@ function cleanTranslation(s){
   return t;
 }
 
+// STRICT map — used by Strict / Tajweed grading. DO NOT loosen this.
 const PHON = {
   '\u0621':'\u0627','\u0622':'\u0627','\u0623':'\u0627','\u0625':'\u0627','\u0671':'\u0627',
   '\u0624':'\u0648','\u0626':'\u064A','\u0629':'\u0647','\u0649':'\u064A',
-  '\u0637':'\u062A','\u0635':'\u0633','\u0636':'\u0632','\u0638':'\u0632','\u0630':'\u0632',
+  '\u0637':'\u062A','\u0635':'\u0633','\u0636':'\u062F','\u0638':'\u0632','\u0630':'\u0632',
   '\u0642':'\u0643','\u062B':'\u0633','\u06CC':'\u064A','\u06D2':'\u064A',
   '\u06C0':'\u0647','\u06C1':'\u0647','\u06D5':'\u0647'
 };
 
+// LOOSE map — Follow mode ONLY (word detection, not Tajweed grading).
+// One char can only map to ONE target, so loose picks the most common
+// ASR / dialect hearing. The other hearing is left to lev() tolerance.
 const PHON_LOOSE = Object.assign({}, PHON, {
-  '\u062D':'\u0647',
-  '\u062E':'\u0647',
-  '\u063A':'\u0647',
-  '\u0639':'\u0627',
-  '\u0637':'\u062A',
-  '\u0638':'\u0632',
-  '\u0630':'\u0632'
+  '\u062D':'\u0647','\u062E':'\u0647','\u063A':'\u0642','\u0639':'\u0621'
 });
 
 const EMPHATIC_FAMILY = {
@@ -3617,6 +3609,28 @@ const EMPHATIC_FAMILY = {
   '\u0639': '\u0621',
   '\u063A': '\u0642'
 };
+class PhonemeClass {
+  constructor() {
+    // Single source of truth — no more drift between dialectMap and PHON_LOOSE.
+    // PHON_LOOSE is defined above this class in the file.
+    this.dialectMap = PHON_LOOSE;
+  }
+  normalize(text) {
+    // Map variant letters BEFORE normMsa(), otherwise normMsa() deletes
+    // U+06xx letters with its [^\u0621-\u064A] filter.
+    const pre = mapVariantLetters(String(text || ''));
+    const msa = normMsa(pre);
+    let res = '';
+    for (let i = 0; i < msa.length; i++) {
+      res += Object.prototype.hasOwnProperty.call(this.dialectMap, msa[i]) ? this.dialectMap[msa[i]] : msa[i];
+    }
+    return res;
+  }
+}
+const phonemeEngine = new PhonemeClass();
+
+
+
 
 function phonNormAr(s){
   const n = normArCached(s);
@@ -3833,16 +3847,13 @@ function lev(a, b){
   return r;
 }
 
-const TOL_TABLE = {
-  strict: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
-  follow: [0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3]
-};
+const TOL_TABLE = { strict: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2] };
 function toleranceFor(L){
-  const t = followOnly ? TOL_TABLE.follow : TOL_TABLE.strict;
+  const t = TOL_TABLE.strict;
   return L >= t.length ? t[t.length - 1] : t[L];
 }
 
-function confidenceFloor(){ return followOnly ? 0.20 : 0.35; }
+function confidenceFloor(){ return 0.35; }
 
 function isMatchWord(hNorm, hPhon, hPhonLoose, w){
   const wNorm = w.norm;
@@ -3862,6 +3873,11 @@ function isMatchWord(hNorm, hPhon, hPhonLoose, w){
     if(lev(hPhon, w.phon) <= tol) return true;
   }
 
+  if(followOnly) {
+    const pHeard = phonemeEngine.normalize(hNorm);
+    const pTarget = phonemeEngine.normalize(wNorm);
+    if(pHeard === pTarget || lev(pHeard, pTarget) <= tol) return true;
+  }
   if(followOnly && hPhonLoose && w.phonLoose &&
      hPhonLoose.length >= 2 && w.phonLoose.length >= 2 &&
      lev(hPhonLoose, w.phonLoose) <= tol){
@@ -3870,7 +3886,7 @@ function isMatchWord(hNorm, hPhon, hPhonLoose, w){
 
   if(la >= 4 && lb >= 4){
     const S = la < lb ? la : lb;
-    const prefixThreshold = followOnly ? 0.72 : 0.85;
+    const prefixThreshold = followOnly ? 0.85 : 0.70;
     if(S / L >= prefixThreshold){
       if(hNorm.startsWith(wNorm) || wNorm.startsWith(hNorm)) return true;
       if(hNorm.endsWith(wNorm)   || wNorm.endsWith(hNorm))   return true;
@@ -3947,7 +3963,6 @@ function trySplitTokenMatch(heard, rawTok){
   return (Math.abs(combinedNorm.length - target.length) <= 2 &&
           lev(combinedNorm, target) <= 1);
 }
-
 function detectMuqattaat(surahId, ayahNum, nrm){
   const entries = MUQATTAAT_BY_SURAH[surahId];
   if(!entries) return null;
@@ -3959,7 +3974,6 @@ function detectMuqattaat(surahId, ayahNum, nrm){
   if(normArCached(entry[0]) !== nrm) return null;
   return entry[1].slice();
 }
-
 function isSingleLetterName(heard, letters){
   if(!heard || !letters || !letters.length) return false;
   for(let i = 0; i < letters.length; i++){
@@ -3970,7 +3984,6 @@ function isSingleLetterName(heard, letters){
   }
   return false;
 }
-
 function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
   if(!w || !w.isMuqattaat) return 'no-match';
   if(!heard) return 'no-match';
@@ -4047,6 +4060,12 @@ function tryMuqattaatProgress(heard, hPhon, hPhonLoose, w){
 
   return 'no-match';
 }
+
+
+
+
+
+
 
 function isStrongPartialPrefix(heard){
   if(ptr >= words.length) return false;
@@ -4242,7 +4261,8 @@ let recCursor = 0;
 let pendingHeard = [];
 let consecutiveReds = 0;
 const interimProgress = new Map();
-let currentConsensusSet = new Set();
+
+
 
 let speechRecognition = null;
 let speechStarting = false;
@@ -4253,10 +4273,46 @@ let sessionHadResult = false;
 let speechServiceNotified = false;
 let speechKeepaliveTimer = null;
 let _phrasesRetryDone = false;
+
 const SPEECH_KEEPALIVE_MS = 40000;
 
 let micStream = null;
 let lastMicError = null;
+let micDiagnosedWorking = false;
+let micDiagTimer = null;
+let micDiagSoftToastShown = false;
+let micTrackMutedTimer = null;
+let micTrackListeners = [];
+const MIC_DIAG_TICK_MS = 500;
+const MIC_DIAG_SOFT_MS = 4000;
+const MIC_DIAG_HARD_MS = 8000;
+const MIC_DIAG_FALLBACK_MS = 12000;
+const MIC_DIAG = {
+  startedAt: 0,
+  rmsSupported: false,
+  rmsPeak: 0,
+  rmsVoiceWindows: 0,
+  asrResultCount: 0,
+  lastAsrResultAt: 0,
+  hardCheckDone: false,
+  fallbackCheckDone: false
+};
+
+/* ── Microphone diagnostic state ─────────────────────────────
+   micDiagnosedWorking = true once the mic has been verified
+   working in this page session. Once true, startMicDiagnostic()
+   bails out — we never re-run the full diagnostic on every
+   Start Reciting. Only on a page reload does it reset to false,
+   or on an unexpected stream disconnect (handleMicTrackIssue). */
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4731,7 +4787,6 @@ const rmsAnalyser = (function(){
   };
 })();
 
-/* ── Recognizer token buffer ──────────────────────────────── */
 function recPush(newToks){
   if(!newToks || !newToks.length) return;
   for(let i = 0; i < newToks.length; i++) recTokens.push(newToks[i]);
@@ -4741,7 +4796,6 @@ function recPush(newToks){
 function recReset(){
   recTokens = []; recCursor = 0; pendingHeard = []; consecutiveReds = 0;
   interimProgress.clear(); followWrongTokens = 0; cancelFollowPinTimer();
-  currentConsensusSet = new Set();
 }
 
 function showScreen(name){
@@ -4759,6 +4813,7 @@ function showScreen(name){
 
 async function openCoachScreen(){
   showScreen('coach');
+  refreshProgressMenu();
   if(coachLoading) return;
   if(coachLoaded && !mushafDirtyForViewer) return;
   coachLoading = true; mushafDirtyForViewer = false;
@@ -4769,7 +4824,6 @@ async function openCoachScreen(){
   } finally { coachLoading = false; }
 }
 
-/* ── Achievements modal ──────────────────────────────────── */
 function openAchievementsModal(){
   const a = loadAchievements();
   const unlocked = Object.keys(a).length;
@@ -5146,6 +5200,8 @@ let coachTajweedGen = 0;
 let coachTajweedApplied = false;
 let coachTajweedReady = false;
 let coachTajweedDegraded = false;
+let coachTajweedMicFailed = false;
+
 
 function decorateTajweedToSpans(html){
   let out = String(html || '');
@@ -5158,6 +5214,7 @@ function decorateTajweedToSpans(html){
   out = out.replace(/<span[^>]*class=["']?end["']?[^>]*>[\s\S]*?<\/span>/g, '');
   return out;
 }
+
 function splitTajweedIntoWords(tajweedHtml){
   const decorated = decorateTajweedToSpans(tajweedHtml);
   const tpl = document.createElement('template');
@@ -5211,6 +5268,7 @@ function splitTajweedIntoWords(tajweedHtml){
   }
   return out;
 }
+
 function fallbackSplitTajweedIntoWords(decoratedHtml){
   const out = [];
   const pushWord = (html) => {
@@ -5236,12 +5294,14 @@ function fallbackSplitTajweedIntoWords(decoratedHtml){
   if (cur) pushWord(cur);
   return out;
 }
+
 async function fetchCoachTajweed(surahNumber){
   if (coachTajweedCache.has(surahNumber)) return coachTajweedCache.get(surahNumber);
   const verses = await fetchTajweedSurah(surahNumber);
   coachTajweedCache.set(surahNumber, verses);
   return verses;
 }
+
 async function applyTajweedColorsToCoach(){
   const gen = ++coachTajweedGen;
   coachTajweedReady = false;
@@ -5301,7 +5361,6 @@ async function applyTajweedColorsToCoach(){
     return pairs;
   };
 
-  /* ══════ FIX 5 — count alignment failures and surface them ══════ */
   let applied = 0, mismatches = 0;
   wordsByVerse.forEach((verseWords, verseKey) => {
     const tajWords = tajMap.get(verseKey);
@@ -5340,36 +5399,55 @@ async function applyTajweedColorsToCoach(){
   }
   updateTajweedStatusChip();
   const tjPill = document.getElementById('modeTajweedBtn');
-  if (tjPill){ tjPill.textContent = '🎵 Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
+  if (tjPill){ tjPill.textContent = 'Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
   if (mismatches > 0){ console.warn('[Coach] Tajweed: ' + mismatches + ' word(s) could not be aligned.'); }
   addFeedback('🎨 Tajweed colors applied — ' + applied + ' colored word' + (applied === 1 ? '' : 's') + '.', false, true);
 }
+
 function removeTajweedColorsFromCoach(){
   coachTajweedGen++;
   coachTajweedReady = false;
   coachTajweedDegraded = false;
   updateTajweedStatusChip();
   const tjPill = document.getElementById('modeTajweedBtn');
-  if (tjPill){ tjPill.textContent = '🎵 Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
+  if (tjPill){ tjPill.textContent = 'Tajweed'; tjPill.setAttribute('aria-label', 'Tajweed mode'); }
   if (!coachTajweedApplied) return;
   words.forEach(w => { w.el.textContent = w.raw; w.tjRules = null; w.normNoSilent = null; w.el.removeAttribute('title'); w.el.removeAttribute('aria-label'); });
   coachTajweedApplied = false;
 }
+
 function updateTajweedStatusChip(){
   const chip = document.getElementById('tajweedStatusChip');
   if(!chip) return;
   if(followOnly){ chip.hidden = true; return; }
   chip.hidden = false;
+  if(coachTajweedMicFailed){
+    chip.className = 'toggle tj-status-error';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Rules not ready';
+    chip.title = 'Tajweed rules require microphone access for real-time acoustic analysis. The microphone could not be accessed on this device. Try updating Chrome, checking Settings → Apps → Chrome → Permissions → Microphone, or switching to Follow mode.';
+    chip.setAttribute('aria-label', 'Tajweed rules not ready — microphone unavailable');
+    return;
+  }
   if(coachTajweedDegraded){
     chip.className = 'toggle tj-status-error';
     chip.innerHTML = '<span class="tj-status-dot"></span>Rules unavailable';
     chip.title = 'Tajweed annotations could not be fully aligned — some rule checks may be disabled. Check your connection, then switch surahs or reload.';
     chip.setAttribute('aria-label', 'Tajweed rule checks partially unavailable');
   } else if(coachTajweedReady){
-    chip.className = 'toggle tj-status-ready';
-    chip.innerHTML = '<span class="tj-status-dot"></span>Rules ready';
-    chip.title = 'Tajweed rule checks are active: madd length, ghunnah length & letters, qalqalah, silent letters.';
-    chip.setAttribute('aria-label', 'Tajweed rule checks active');
+    if(!isRmsSupported() || (wantMic && !rmsAnalyser.isRunning())){
+      chip.className = 'toggle tj-status-ready';
+      chip.innerHTML = '<span class="tj-status-dot"></span>Rules ready · transcript-only';
+      chip.title =
+        'ACTIVE (transcript): madd (ASR timing), ghunnah, ikhfa, iqlab, silent letters, emphatic letters, qalqalah letter-presence.\n\n' +
+        'DISABLED — need microphone waveform: laam shamsiyyah, idghaam_ghunnah, idghaam_no_ghunnah, ham_wasl, qalqalah plosive-echo.\n\n' +
+        'Enable the microphone and reload to arm the acoustic rules.';
+      chip.setAttribute('aria-label', 'Tajweed transcript-only — 5 acoustic rules disabled');
+    } else {
+      chip.className = 'toggle tj-status-ready';
+      chip.innerHTML = '<span class="tj-status-dot"></span>Rules ready';
+      chip.title = 'All 12 Tajweed rules active: madd length, ghunnah length & letters, qalqalah echo, laam shamsiyyah, hamzat al-wasl, idghaam (with & without ghunnah), iqlab, silent letters, emphatics.';
+      chip.setAttribute('aria-label', 'All Tajweed rule checks active');
+    }
   } else {
     chip.className = 'toggle tj-status-loading';
     chip.innerHTML = '<span class="tj-status-dot"></span>Loading rules…';
@@ -5377,10 +5455,73 @@ function updateTajweedStatusChip(){
     chip.setAttribute('aria-label', 'Loading Tajweed rule checks');
   }
 }
+let _rmsSupportedCached = null;
+function isRmsSupported(){
+  if (_rmsSupportedCached !== null) return _rmsSupportedCached;
+  _rmsSupportedCached = !!(window.AudioContext || window.webkitAudioContext);
+  return _rmsSupportedCached;
+}
+let _rmsUnavailableNotified = false;
+function notifyRmsUnavailable(){
+  const msg = isRmsSupported()
+    ? '⚠️ Acoustic analysis could not start on this device. Tajweed rule checks will use transcript-only mode.'
+    : '⚠️ This browser does not support acoustic analysis (AudioContext). Tajweed rule checks will use transcript-only mode.';
+  showToast(msg, 6000);
+  addFeedback('ℹ️ ' + msg.replace(/^⚠️ /, ''), false, true);
+  try{ updateTajweedStatusChip(); }catch(_){}
+}
+let _lastTajweedMicFailedAt = 0;
+function markTajweedMicFailed(){
+  const now = performance.now();
+  coachTajweedMicFailed = true;
+  updateTajweedStatusChip();
+  if(now - _lastTajweedMicFailedAt > 60000){
+    _lastTajweedMicFailedAt = now;
+    showTajweedMicFailedModal();
+  }
+  addFeedback('⚠️ <b>Tajweed rules not ready</b> — the microphone is not reaching the Tajweed engine. Try updating Chrome, checking microphone permissions, or switching to Follow mode.', true);
+}
+function showTajweedMicFailedModal(){
+  if(document.getElementById('tajweedMicFailedBg')) return;
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.id = 'tajweedMicFailedBg';
+  bg.innerHTML =
+    '<div class="modal"><div class="grabber"></div>' +
+    '<h2>⚠️ Tajweed rules not ready</h2>' +
+    '<div class="errbox">' +
+      'The microphone is not reaching the Tajweed engine on this device. Tajweed rule detection requires ' +
+      '<b>both speech recognition and real-time waveform analysis (RMS)</b> — this browser or device ' +
+      'combination may not support them working together.' +
+    '</div>' +
+    '<div class="okbox"><b>Try these steps:</b><br>' +
+      '• <b>Update Google Chrome</b> to the latest version from the Play Store.<br>' +
+      '• Check <b>Settings → Apps → Chrome → Permissions → Microphone</b> and set it to <b>Allow</b>.<br>' +
+      '• Close other apps that might be using the microphone.<br>' +
+      '• Switch to <b>Follow</b> mode — it uses the same microphone path as the Hifz Test and works on more devices.' +
+    '</div>' +
+    '<p style="font-size:.8rem;color:var(--muted);line-height:1.55">' +
+      'Tajweed acoustic rules (madd, ghunnah, qalqalah) are currently <b>disabled</b>. ' +
+      'Transcript-based checks will continue where possible.' +
+    '</p>' +
+    '<button class="primary" id="tajMicFailedClose">Got it</button></div>';
+  document.body.appendChild(bg);
+  const close = () => bg.remove();
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  bg.querySelector('#tajMicFailedClose').addEventListener('click', close);
+}
 
-/* ═══════════════════════════════════════════════════════════════════
-   UPGRADE 1 & 2 — Madd / Ghunnah / Qalqalah timing constants
-   ═══════════════════════════════════════════════════════════════════ */
+
+
+
+
+
+
+
+
+
+
+
 const MADD_MIN_DELTA_MS = { normal: 180, permissible: 380, necessary: 600 };
 const MADD_MIN_HARAKAT  = { normal: 1.7, permissible: 3.6, necessary: 5.5 };
 const MADD_MAX_HARAKAT  = { normal: 2.3, permissible: 5.4, necessary: 6.5 };
@@ -5394,6 +5535,7 @@ const PACE_SAMPLE_MIN_MS         = 120;
 const PACE_SAMPLE_MAX_MS         = 5000;
 
 const paceSamples = [];
+
 function recordPaceSample(voicedMs, letterCount){
   if (!isFinite(voicedMs) || !isFinite(letterCount)) return;
   if (letterCount < 2) return;
@@ -5416,6 +5558,7 @@ function getBaseMsPerLetter(){
   return sum / (hi - lo);
 }
 function resetPaceSamples(){ paceSamples.length = 0; }
+
 function maddRequiredMs(kind){
   const T_mora = getBaseMsPerLetter();
   if (T_mora !== null){
@@ -5448,7 +5591,6 @@ function ghunnahRequiredMs(kind){
   return Math.round(base * paceScale());
 }
 
-/* ── Strict-mode state ──────────────────────────────────── */
 let lastDirectCommitIdx = -1;
 let lastDirectCommitAt  = 0;
 let lastCommitBatchId   = -1;
@@ -5457,7 +5599,6 @@ let silentWarned        = false;
 let batchTimingCtx      = null;
 let prevWordAudio       = null;
 
-/* ── Tajweed rule info & parse helpers ──────────────────── */
 const TAJWEED_RULE_INFO = {
   ham_wasl:             { name: 'Hamzat al-Wasl',            desc: 'connecting hamza — silent when joining speech' },
   laam_shamsiyah:       { name: 'Laam Shamsiyyah',           desc: 'solar lām — assimilated into the following sun letter' },
@@ -5480,7 +5621,6 @@ function buildRuleTooltip(rules, sep){
   }).join(sep || '\n');
 }
 
-/* ══════ FIX 1 — parse idghaam_no_ghunnah ══════ */
 function parseTajweedWordRules(decoratedHtml){
   const rules = {
     madd: null, ghunnahLetters: [], silentLetters: [],
@@ -5555,7 +5695,8 @@ let _lastRuleExplainAt = 0;
 const RULE_EXPLAIN_THROTTLE_MS = 2000;
 function maybeExplainRules(w){
   if(followOnly) return;
-  if(!w || !w.tjRules || !w.tjRules.allRules || !w.tjRules.allRules.length) return;
+  if(!w || w.isMuqattaat) return;
+  if(!w.tjRules || !w.tjRules.allRules || !w.tjRules.allRules.length) return;
   const now = performance.now();
   if(now - _lastRuleExplainAt < RULE_EXPLAIN_THROTTLE_MS) return;
   _lastRuleExplainAt = now;
@@ -5564,12 +5705,12 @@ function maybeExplainRules(w){
   addFeedback('🎵 <b>' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</b> — ' + escapeHtml(explanation), false, true);
 }
 
-/* ── Strict rule evaluators ─────────────────────────────── */
 function strict1MaddOk(prevW, deltaMs){
   if (!prevW || !prevW.tjRules || !prevW.tjRules.madd) return true;
   const need = maddRequiredMs(prevW.tjRules.madd);
   return deltaMs >= need;
 }
+
 function strict1GhunnahOk(w, heard){
   if (!w || !w.tjRules || !w.tjRules.hasGhunnahContext) return true;
   if (!STRICT_FEATURES.ghunnah()) return true;
@@ -5604,6 +5745,7 @@ function strict1GhunnahOk(w, heard){
   }
   return true;
 }
+
 function emphaticViolation(heardNorm, targetNorm){
   const viol = [];
   for (let i = 0; i < targetNorm.length; i++){
@@ -5616,7 +5758,6 @@ function emphaticViolation(heardNorm, targetNorm){
   return viol;
 }
 
-/* ══════ UPGRADE 2 — Nasal band widened to 250–600 Hz ══════ */
 function nasalPresent(samples){
   if (!samples || samples.length < 4) return false;
   let count = 0, total = 0;
@@ -5639,6 +5780,7 @@ function nasalPresent(samples){
   }
   return total > 3 && count / total > 0.55;
 }
+
 function countPeaks(samples, threshold, minSepMs){
   if (!samples || !samples.length) return 0;
   let peaks = 0, lastPeakT = -Infinity, prevRms = 0, rising = false;
@@ -5653,6 +5795,7 @@ function countPeaks(samples, threshold, minSepMs){
   }
   return peaks;
 }
+
 function checkLaamShamsiyyah(w){
   if (!w || !w.tjRules || !w.tjRules.laamShamsiyyahPositions.length) return true;
   if (!STRICT_FEATURES.laam()) return true;
@@ -5666,6 +5809,7 @@ function checkLaamShamsiyyah(w){
   }
   return true;
 }
+
 function checkExtraSyllable(w){
   if (!w || !w.tjRules || !w.tjRules.hasSilent) return true;
   if (!STRICT_FEATURES.silent()) return true;
@@ -5679,7 +5823,6 @@ function checkExtraSyllable(w){
   return true;
 }
 
-/* ══════ FIX 4 — checkQalqalah accepts heard + text fallback ══════ */
 function checkQalqalah(w, heard){
   if (!w || !w.tjRules || !w.tjRules.allRules) return true;
   if (w.tjRules.allRules.indexOf('qalqalah') === -1) return true;
@@ -5721,7 +5864,6 @@ function checkQalqalah(w, heard){
   return true;
 }
 
-/* ══════ FIX 1b — new idghaam_no_ghunnah check ══════ */
 function checkIdghaamNoGhunnah(w, heard){
   if (!w || !w.tjRules || !w.tjRules.hasIdghaamNoGhunnah) return true;
   if (!w.audio || w.audio.durationMs < 100 || !rmsAnalyser.isRunning()) return true;
@@ -5734,6 +5876,7 @@ function checkIdghaamNoGhunnah(w, heard){
   }
   return true;
 }
+
 function strict1SilentOk(w, heard){
   if (!w || !w.tjRules || !w.tjRules.hasSilent) return true;
   const full = w.norm;
@@ -5803,6 +5946,8 @@ const TAJWEED_ERROR_NAMES = {
   'emphatic-ع': 'ʿAyn (ع) sounded as Hamza (ء)',
   'emphatic-غ': 'Ghayn (غ) sounded as Qāf (ق)'
 };
+const TAJWEED_WARN_THROTTLE_MS = 4000;
+const _tajweedWarnThrottle = new Map();
 function getTajweedRuleInfo(kind){
   if (kind.startsWith('emphatic-')){
     const letter = kind.slice(9);
@@ -5840,7 +5985,6 @@ function getTajweedRuleInfo(kind){
     : tajweedName;
   return { tajweedName, tajweedExplanation };
 }
-
 function markTajweedIssue(w, kind, detail, severity){
   if (!w) return;
   if (followOnly) return;
@@ -5889,67 +6033,34 @@ function markTajweedIssue(w, kind, detail, severity){
   }
 }
 
+
+
+
+
+
+
+
 function markStrict1Error(w, kind, detail){
-  if (!w) return;
-  if (w._tajweedErrs && w._tajweedErrs.has(kind)) return;
-  if (!w._tajweedErrs) w._tajweedErrs = new Set();
-  w._tajweedErrs.add(kind);
-  if (!w.el.classList.contains('error')) w.el.className = 'w error';
-  errors++;
-  const tajweedName = TAJWEED_ERROR_NAMES[kind] || ('Tajweed — ' + kind);
-  const rule = kind.split('-')[0];
-  const ruleInfo = TAJWEED_RULE_INFO[rule];
-  const tajweedExplanation = ruleInfo ? (ruleInfo.name + ' — ' + ruleInfo.desc) : tajweedName;
-  const m = {
-    idx: mistakeCounter++, correct: w.raw.replace(TASHKEEL, ''), heard: detail,
-    verse: w.verse, kind: 'tajweed-' + kind, tajweedType: kind,
-    tajweedName: tajweedName, tajweedExplanation: tajweedExplanation
-  };
-  mistakes.push(m); appendMistake(m); scheduleHUD();
-  if (beepOn) beepThrottled('error');
-  const now = performance.now();
-  if (now - (markStrict1Error._lastFeedbackAt || 0) > 1200){
-    markStrict1Error._lastFeedbackAt = now;
-    addFeedback('🎵 <b>Tajweed mistake — ' + escapeHtml(tajweedName) + '</b> · ' +
-      '<span class="ar">' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</span> · ' +
-      escapeHtml(detail), true);
-  }
+  markTajweedIssue(w, kind, detail, 'red');
 }
 function markStrict1Warning(w, kind, detail){
-  if (!w) return;
-  if (w.el.classList.contains('warned') || w.el.classList.contains('error')) return;
-  w.el.classList.add('warned');
-  if (!w.el.classList.contains('correct') && !w.el.classList.contains('corrected')) w.el.classList.add('correct');
-  if (!silentWarned){
-    silentWarned = true;
-    addFeedback('⚠️ <b>' + w.raw.replace(TASHKEEL,'') + '</b> — ' + detail, false, true);
-  }
+  markTajweedIssue(w, kind, detail, 'yellow');
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   FIX 3 + FIX 6a — runStrict1Checks with:
-   • Segment-based timing gate independent of adjacency
-   • Emphatic check runs on EVERY commit path
-   • Qalqalah gets `heard` for text fallback
-   • Idghaam-no-ghunnah check invoked
-   ═══════════════════════════════════════════════════════════════════ */
 function runStrict1Checks(idx, heard, opts){
   opts = opts || {};
   if (followOnly) return;
   if (!coachTajweedReady) return;
   const w = words[idx];
   if (!w) return;
+  if (w.isMuqattaat) return;
 
   /* ── FIX 6a — emphatic check on every commit path ── */
   if (STRICT_FEATURES.emphatics() && heard && w.norm && heard !== w.norm){
     const viol = emphaticViolation(heard, w.norm);
     if (viol.length){
-      w.el.classList.add('warned');
-      if (!silentWarned){
-        silentWarned = true;
-        const label = TAJWEED_ERROR_NAMES['emphatic-' + viol[0].expected] || ('emphatic ' + viol[0].expected);
-        addFeedback('⚠️ <b>' + w.raw.replace(TASHKEEL, '') + '</b> — ' + label, false, true);
-      }
+      markTajweedIssue(w, 'emphatic-' + viol[0].expected,
+        'sounded as ' + viol[0].heard, 'yellow');
     }
   }
 
@@ -6055,8 +6166,6 @@ function runStrict1Checks(idx, heard, opts){
     lastDirectCommitIdx = idx; lastDirectCommitAt = now; lastCommitBatchId = currentBatchId;
   }
 }
-
-/* ══════ FIX 2 — distribute merged transcript + split merged segment ══════ */
 function distributeMergedHeard(heard, wordsArr, startIdx, count){
   const out = new Array(count).fill('');
   if (!heard || count <= 0) return out;
@@ -6100,8 +6209,8 @@ function splitSegmentByWords(seg, wordsArr, startIdx, count){
 
 const FOLLOW_TAU_PLAUSIBLE  = 0.72;
 const FOLLOW_TAU_JUMP       = 0.85;
-const FOLLOW_TAU_EXIT       = 0.85;
-const FOLLOW_MAX_LOOKAHEAD  = 0; // disabled: no jumping over unheard words
+const FOLLOW_TAU_EXIT       = 0.80;
+const FOLLOW_MAX_LOOKAHEAD  = 0;
 
 function followSimilarity(heard, hPhon, hPhonLoose, w){
   if (!w || !heard) return 0;
@@ -6121,6 +6230,7 @@ function followSimilarity(heard, hPhon, hPhonLoose, w){
   }
   return best;
 }
+
 function followExitConfidence(heard, hPhon, hPhonLoose, w){
   if (!w) return 0;
   if (heard === w.norm) return 1.0;
@@ -6135,6 +6245,7 @@ const FOLLOW_PIN_STOP_MS = 10000;
 let followWrongTokens = 0;
 let followPinTimer    = null;
 let followPinPtr      = -1;
+
 function cancelFollowPinTimer(){
   if(followPinTimer){ clearTimeout(followPinTimer); followPinTimer = null; }
   followPinPtr = -1;
@@ -6160,6 +6271,7 @@ function noteFollowWrongToken(){
     setStatus('Paused (word not recognised)', 'idle', 'Tap Start reciting to resume');
   }, FOLLOW_PIN_STOP_MS);
 }
+
 function isFollowMFAMatch(w, heard, hPhon, hPhonLoose) {
   if (!w || !heard) return false;
   if (heard === w.norm) return true;
@@ -6170,6 +6282,7 @@ function isFollowMFAMatch(w, heard, hPhon, hPhonLoose) {
   if (hPhonLoose && w.phonLoose && hPhonLoose.length >= 2 && w.phonLoose.length >= 2 && lev(hPhonLoose, w.phonLoose) <= tol) return true;
   return false;
 }
+
 function isFollowPlausible(heard, hPhon, hPhonLoose, w) {
   if (!w || !heard || !w.norm) return false;
   const heardLen  = heard.length;
@@ -6186,32 +6299,20 @@ function isFollowPlausible(heard, hPhon, hPhonLoose, w) {
   return false;
 }
 
-/* ── Speech pipeline ───────────────────────────────────── */
 let pendingSpeechEvent = null;
 let speechResultTimer = null;
 let speechInFlight = false;
 const speechQueue = [];
-const SPEECH_THROTTLE_MS = 100;
+const SPEECH_THROTTLE_MS = 25;
+
 function resetSpeechPipeline(){
   speechQueue.length = 0;
   pendingSpeechEvent = null;
   if (speechResultTimer) { clearTimeout(speechResultTimer); speechResultTimer = null; }
 }
-function buildConsensusSet(alternatives){
-  currentConsensusSet = new Set();
-  if (!alternatives || alternatives.length < 2) return;
-  const counts = new Map();
-  for (let ai = 0; ai < alternatives.length; ai++){
-    const toks = String((alternatives[ai] && alternatives[ai].transcript) || '').trim().split(/\s+/).filter(Boolean);
-    for (let ti = 0; ti < toks.length; ti++){
-      const n = normArCached(toks[ti]);
-      if (n.length >= 2) counts.set(n, (counts.get(n) || 0) + 1);
-    }
-  }
-  for (const [k, v] of counts){
-    if (v >= 2) currentConsensusSet.add(k);
-  }
-}
+
+
+
 
 function scheduleSpeechResult(event) {
   if (!event || !wantMic || fsPaused || micPaused) return;
@@ -6248,6 +6349,7 @@ function scheduleSpeechResult(event) {
     processSpeechQueue();
   }, SPEECH_THROTTLE_MS);
 }
+
 async function processSpeechQueue() {
   if (speechInFlight) return;
   if (!speechQueue.length) return;
@@ -6264,11 +6366,14 @@ async function processSpeechQueue() {
     if (speechQueue.length) processSpeechQueue();
   }
 }
+
 async function runSpeechResultProcessing(snap) {
   if (!snap || fsPaused || micPaused || !wantMic) return;
   lastResultAt = performance.now();
   sessionHadResult = true;
-  confirmMicAudio();
+  MIC_DIAG.asrResultCount++;
+  MIC_DIAG.lastAsrResultAt = performance.now();
+  if (!micDiagnosedWorking) markMicVerified();
   resetSilenceTimer(true);
   currentBatchId++;
   for (let ri = 0; ri < snap.results.length; ri++) {
@@ -6327,6 +6432,7 @@ async function runSpeechResultProcessing(snap) {
     buildPhraseObjects(speechRecognition);
   }
 }
+
 function scoreAlternativeToks(toks, startPtr){
   if(!toks || !toks.length) return 0;
   if(!words.length || startPtr >= words.length) return 0;
@@ -6349,6 +6455,7 @@ function scoreAlternativeToks(toks, startPtr){
   }
   return score;
 }
+
 function buildPhraseObjects(rec) {
   if (!rec) return false;
   const PhraseCtor = window.SpeechRecognitionPhrase || window.webkitSpeechRecognitionPhrase;
@@ -6368,15 +6475,27 @@ function buildPhraseObjects(rec) {
   try { rec.phrases = phrases; rec.__lastPhrasePtr = ptr; return true; }
   catch (e) { console.warn('[Speech] Failed to set phrases:', e); return false; }
 }
-function createSpeechRecognition(){
+
+
+
+// Build a very small grammar window: the remaining words in the current
+// verse, followed by only the next three words from the following verse.
+
+
+// SpeechGrammarList is optional and is ignored by some browser speech engines.
+// Keep the grammar deliberately narrow to avoid adding decoding overhead.
+
+
+function createSpeechRecognition(forceNoPhrases){
   if(!SPEECH_SUPPORTED) return null;
   if(speechRecognition && !speechRecognition.__dead) return speechRecognition;
   if(speechRecognition){ try{ speechRecognition.abort(); }catch(_){} speechRecognition = null; }
+
   const rec = new SpeechRecognitionCtor();
   rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
   rec.interimResults   = true;
-  const phrasesAttached = buildPhraseObjects(rec);
+  const phrasesAttached = forceNoPhrases ? false : buildPhraseObjects(rec);
   rec.__hasPhrases = phrasesAttached;
   rec.onstart = () => {
     speechStarting = false; recRunning = true;
@@ -6390,24 +6509,26 @@ function createSpeechRecognition(){
     console.warn('[Speech] error:', err);
     if(err === 'no-speech' || err === 'aborted') return;
     if(err === 'service-not-allowed'){
-      releaseMicStream(); stopMicWatchdog();
+      releaseMicStream(); stopMicDiagnostic();
       speechFatalError = true; wantMic = false; disarmSpeechKeepalive();
       setMicButton(); updateFsMicBtn(); syncFsButtons();
       notifySpeechServiceUnreachable();
       return;
     }
     if(err === 'not-allowed'){
-      releaseMicStream(); stopMicWatchdog();
+      releaseMicStream(); stopMicDiagnostic();
       speechFatalError = true; wantMic = false; disarmSpeechKeepalive();
       setMicButton();
       setStatus('Microphone blocked', 'error');
       addFeedback('⚠️ Microphone access denied. Enable it in your browser settings and try again.', true);
-      micPermission = 'denied'; localStorage.setItem('micPermission','denied');
+      micPermission = 'denied'; try{ localStorage.setItem('micPermission','denied'); }catch(_){}
+      if(readerFullscreen) exitReaderFullscreen();
+      showPermissionHelp('Microphone access denied. Enable it in your browser settings and try again.');
       updateFsMicBtn(); syncFsButtons();
       return;
     }
     if(err === 'audio-capture'){
-      releaseMicStream(); stopMicWatchdog();
+      releaseMicStream(); stopMicDiagnostic();
       speechFatalError = true; wantMic = false; disarmSpeechKeepalive();
       setMicButton(); setStatus('No microphone', 'error');
       addFeedback('⚠️ No microphone was found on this device.', true);
@@ -6429,6 +6550,7 @@ function createSpeechRecognition(){
   speechRecognition = rec;
   return rec;
 }
+
 function armSpeechKeepalive(){
   clearTimeout(speechKeepaliveTimer);
   speechKeepaliveTimer = null;
@@ -6442,12 +6564,14 @@ function armSpeechKeepalive(){
   }, SPEECH_KEEPALIVE_MS);
 }
 function disarmSpeechKeepalive(){ clearTimeout(speechKeepaliveTimer); speechKeepaliveTimer = null; }
+
 async function grade(tokens, startIdx){
   const start = startIdx || 0;
   if(!words.length || ptr >= words.length) return tokens.length - start;
   if(followOnly) return gradeFollowFast(tokens, start);
   return await gradeFull(tokens, start);
 }
+
 function isAcousticWordShapeMatch(w, seg) {
   if (!seg || !w || seg.durationMs < 60) return false;
   const samples = rmsAnalyser.samplesIn(seg.start, seg.end);
@@ -6464,6 +6588,7 @@ function isAcousticWordShapeMatch(w, seg) {
   if (maxRms < rmsAnalyser.minRms() * 1.0) return false;
   return true;
 }
+
 async function runMFAInference(w, seg, heard) {
   if (!seg || !w || !heard) return false;
   const T = getBaseMsPerLetter();
@@ -6478,7 +6603,6 @@ async function runMFAInference(w, seg, heard) {
   return durationOk && (normOk || phonOk);
 }
 
-/* ═══════ Follow-mode grade: FSM with τ_plausible / τ_jump / τ_exit ═══════ */
 function gradeFollowFast(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -6490,6 +6614,20 @@ function gradeFollowFast(tokens, startIdx){
     const hPhon      = phonArCached(rawTok);
     const hPhonLoose = followOnly ? phonLooseArCached(rawTok) : null;
     const w          = words[ptr];
+
+    if (w && w.isMuqattaat) {
+      const mr = tryMuqattaatProgress(heard, hPhon, hPhonLoose, w);
+      if (mr === 'complete') {
+        commitCorrect(ptr, null);
+        advancePast(1);
+        noteFollowProgress();
+        pendingHeard.length = 0;
+        used++; continue;
+      }
+      noteFollowWrongToken();
+      used++; continue;
+    }
+
     const nextW        = words[ptr + 1];
     const isLastInAyah = !nextW || nextW.verse !== w.verse;
 
@@ -6575,8 +6713,8 @@ function gradeFollowFast(tokens, startIdx){
   return used;
 }
 
-/* ═══════ gradeFull — Tajweed mode ═══════ */
 const FULL_LOOKAHEAD = 5;
+
 async function gradeFull(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -6589,6 +6727,30 @@ async function gradeFull(tokens, startIdx){
       if(!heard){ used++; continue; }
       if(ptr >= words.length){ used++; continue; }
       const hPhon = phonArCached(rawTok);
+      const hPhonLoose = phonLooseArCached(rawTok);
+
+      {
+        const mqW = words[ptr];
+        if (mqW && mqW.isMuqattaat) {
+          const mr = tryMuqattaatProgress(heard, hPhon, hPhonLoose, mqW);
+          if (mr === 'complete') {
+            const seg = rmsAnalyser.isRunning() ? rmsAnalyser.segmentEndingBefore(performance.now()) : null;
+            commitCorrect(ptr, seg);
+            lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; prevWordAudio = null;
+            advancePast(1);
+            pendingHeard.length = 0; consecutiveReds = 0;
+            noteFollowProgress();
+            mqW._muqStuckCount = 0;
+            used++; continue;
+          }
+          mqW._muqStuckCount = (mqW._muqStuckCount || 0) + 1;
+          if (mqW._muqStuckCount === 6) {
+            const names = (mqW.muqattaatLetters || []).map(l => (LETTER_NAMES[l] || [l])[0]).join(' · ');
+            addFeedback('⚠️ Muqattaat not recognised — try the letter names one by one: ' + escapeHtml(names), false, true);
+          }
+          used++; continue;
+        }
+      }
       const matchesCurrent = heard === words[ptr].norm || isMatchWord(heard, hPhon, null, words[ptr]);
       if(ptr > 0 && !matchesCurrent && isMatchWord(heard, hPhon, null, words[ptr - 1])){ pendingHeard.length = 0; used++; continue; }
       if(heard.length < 2 && heard !== words[ptr].norm && words[ptr].norm.length > 1){ used++; continue; }
@@ -6730,7 +6892,6 @@ async function gradeFull(tokens, startIdx){
   return used;
 }
 
-/* ── Adaptive pace tracking ─────────────────────────────── */
 function noteAdvance(n){
   if(n <= 0) return;
   const now = performance.now();
@@ -6756,7 +6917,6 @@ function resetPace(){
   advanceTimes = []; currentPaceWPS = 0; adaptiveSilenceMs = 10000; pendingJumpTarget = -1;
 }
 
-/* ── Status & feedback primitives ────────────────────────── */
 function setStatus(label, state, hint){
   if(!statusLabel) return;
   statusLabel.textContent = label;
@@ -6833,7 +6993,6 @@ function showPermissionHelp(msg){
   bg.querySelector('#permRetry').addEventListener('click', async () => { close(); const ok = await promptForMic(); if(ok && !wantMic) startReciting(); });
 }
 
-/* ── Audio context, beeps, prime ─────────────────────────── */
 let audioCtx=null, audioUnlocked=false;
 function unlockAudio(){
   if(audioUnlocked){ return audioCtx; }
@@ -6865,7 +7024,6 @@ function beep(kind){
 }
 let lastBeepAt = -1e9;
 function beepThrottled(kind){ const now = performance.now(); if(now - lastBeepAt < 300) return; lastBeepAt = now; beep(kind); }
-
 let _audioPrimed = false;
 const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
 
@@ -6875,6 +7033,7 @@ sharedAudio.setAttribute('webkit-playsinline', '');
 sharedAudio.setAttribute('preload', 'auto');
 sharedAudio.style.display = 'none';
 document.body.appendChild(sharedAudio);
+
 function primeAudioElement(){
   if(_audioPrimed) return;
   if(sharedAudio && (sharedAudio._finish || sharedAudio._playToken)){ _audioPrimed = true; return; }
@@ -6887,6 +7046,7 @@ function primeAudioElement(){
   }catch(e){}
 }
 ['pointerdown','touchstart','touchend','click'].forEach(evt => { document.addEventListener(evt, primeAudioElement, {passive:true, capture:true}); });
+
 function playUrl(url, opts){
   opts = opts || {};
   return new Promise(resolve => {
@@ -6935,6 +7095,7 @@ function playUrl(url, opts){
     armSafety(); audioPaused = false; updateAudioOverlay();
   });
 }
+
 async function requestWakeLock(){ try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release',()=>{ wakeLock=null; }); } }catch(e){} }
 function releaseWakeLock(){ if(wakeLock){ try{wakeLock.release();}catch(e){} wakeLock=null; } }
 
@@ -7026,24 +7187,527 @@ async function ensureMicStream(){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
     if(live){
       try{ micStream.getAudioTracks().forEach(t => { t.enabled = true; }); }catch(_){}
-      if(!rmsAnalyser.isRunning()) rmsAnalyser.start(micStream);
+      if(!rmsAnalyser.isRunning()){
+        const ok = rmsAnalyser.start(micStream);
+        if(!ok && !_rmsUnavailableNotified){
+          _rmsUnavailableNotified = true;
+          notifyRmsUnavailable();
+        }
+      }
       return micStream;
     }
   }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return null;
   try{
     lastMicError = null;
-    const s = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: false, autoGainControl: true } });
+    const s = await navigator.mediaDevices.getUserMedia({
+      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: false, autoGainControl: true }
+    });
     micStream = s;
-    rmsAnalyser.start(s);
+    attachMicTrackListeners(s);
+    const rmsOk = rmsAnalyser.start(s);
+    if(!rmsOk && !_rmsUnavailableNotified){
+      _rmsUnavailableNotified = true;
+      notifyRmsUnavailable();
+    }
     return s;
   }catch(e){ lastMicError = e; micStream = null; rmsAnalyser.stop(); return null; }
 }
 function muteMicStream(){ if(micStream){ try{ micStream.getAudioTracks().forEach(t => { t.enabled = false; }); }catch(e){} } rmsAnalyser.stop(); }
 function releaseMicStream(){
+  detachMicTrackListeners();
+  if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; }
   rmsAnalyser.stop();
   if(micStream){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(e){} micStream = null; }
 }
+function resetMicDiagState(){
+  MIC_DIAG.startedAt = 0;
+  MIC_DIAG.rmsPeak = 0;
+  MIC_DIAG.rmsVoiceWindows = 0;
+  MIC_DIAG.asrResultCount = 0;
+  MIC_DIAG.lastAsrResultAt = 0;
+  MIC_DIAG.hardCheckDone = false;
+  MIC_DIAG.fallbackCheckDone = false;
+  micDiagSoftToastShown = false;
+}
+function attachMicTrackListeners(stream){
+  detachMicTrackListeners();
+  if(!stream) return;
+  try{
+    const tracks = stream.getAudioTracks();
+    for(const t of tracks){
+      const onMute   = () => handleMicTrackIssue('muted');
+      const onUnmute = () => { if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; } };
+      const onEnded  = () => handleMicTrackIssue('ended');
+      t.addEventListener('mute', onMute);
+      t.addEventListener('unmute', onUnmute);
+      t.addEventListener('ended', onEnded);
+      micTrackListeners.push({ track: t, onMute, onUnmute, onEnded });
+    }
+  }catch(_){}
+}
+function detachMicTrackListeners(){
+  for(const l of micTrackListeners){
+    try{ l.track.removeEventListener('mute', l.onMute); }catch(_){}
+    try{ l.track.removeEventListener('unmute', l.onUnmute); }catch(_){}
+    try{ l.track.removeEventListener('ended', l.onEnded); }catch(_){}
+  }
+  micTrackListeners = [];
+}
+function handleMicTrackIssue(kind){
+  if(!wantMic) return;
+  if(kind === 'muted'){
+    if(micTrackMutedTimer) clearTimeout(micTrackMutedTimer);
+    micTrackMutedTimer = setTimeout(() => {
+      micTrackMutedTimer = null;
+      if(!wantMic) return;
+      const t = micStream && micStream.getAudioTracks()[0];
+      if(t && t.muted) reportMicProblem('track-muted');
+    }, 1500);
+    return;
+  }
+  if(kind === 'ended'){
+    (async () => {
+      const s = await ensureMicStream().catch(() => null);
+      if(!wantMic) return;
+      if(s){
+        showToast('🔄 Microphone reconnected.', 2600);
+        micDiagnosedWorking = false;
+        startMicDiagnostic();
+        if(!recRunning && !speechStarting && speechRecognition){
+          try{ speechStarting = true; speechRecognition.start(); }
+          catch(e){ speechStarting = false; }
+        }
+      } else {
+        reportMicProblem('reacquire-failed');
+      }
+    })();
+    return;
+  }
+}
+function checkMicTrackHealth(){
+  if(!micStream) return;
+  const tracks = micStream.getAudioTracks();
+  if(!tracks.length) return;
+  const t = tracks[0];
+  if(t.muted){ handleMicTrackIssue('muted'); return; }
+  if(t.readyState !== 'live'){ handleMicTrackIssue('ended'); return; }
+  if(!t.enabled){ try{ t.enabled = true; }catch(_){} }
+}
+function retrySpeechWithoutPhrases(){
+  if(!speechRecognition || !speechRecognition.__hasPhrases) return false;
+  try{ speechRecognition.abort(); }catch(_){}
+  speechRecognition = null;
+  try{
+    speechRecognition = createSpeechRecognition(true);
+    if(!speechRecognition) return false;
+    speechRecognition.maxAlternatives = followOnly ? 3 : 6;
+    try{ speechRecognition.start(); }catch(_){ return false; }
+    recRunning = true;
+    lastResultAt = performance.now();
+    setStatus('Listening', 'listening', contextLabel() + ' (retry)');
+    addFeedback('🔄 Retrying microphone without phrase hints…', false, true);
+    armSpeechKeepalive();
+    return true;
+  }catch(e){ return false; }
+}
+function startMicDiagnostic(){
+  if(micDiagnosedWorking) return;   // already verified — never re-run
+  stopMicDiagnostic();
+  resetMicDiagState();
+  MIC_DIAG.startedAt = performance.now();
+  MIC_DIAG.rmsSupported = !followOnly && rmsAnalyser.isRunning();
+  micDiagTimer = setInterval(micDiagTick, MIC_DIAG_TICK_MS);
+}
+function stopMicDiagnostic(){
+  if(micDiagTimer){ clearInterval(micDiagTimer); micDiagTimer = null; }
+}
+function markMicVerified(){
+  if(micDiagnosedWorking) return;
+  micDiagnosedWorking = true;
+  stopMicDiagnostic();
+  // Clear the soft "not hearing" toast if it's currently showing
+  if(toastEl && toastEl._timer && /Not hearing|not hearing/i.test(toastEl.textContent || '')){
+    clearTimeout(toastEl._timer);
+    toastEl._timer = null;
+    toastEl.classList.remove('visible');
+  }
+}
+function micDiagTick(){
+  if(micDiagnosedWorking){ stopMicDiagnostic(); return; }
+  if(!wantMic || fsPaused || micPaused) return;
+  const now = performance.now();
+  const elapsed = now - MIC_DIAG.startedAt;
+
+  // ── Layer 1 (Tajweed only): track health ──
+  if(!followOnly) checkMicTrackHealth();
+
+  // ── Layer 2 (Tajweed only): RMS silence detection ──
+  if(!followOnly && MIC_DIAG.rmsSupported){
+    const samples = rmsAnalyser.samplesIn(MIC_DIAG.startedAt, now);
+    if(samples.length){
+      let peak = 0, voiceCount = 0;
+      const minRms = rmsAnalyser.minRms();
+      for(const s of samples){
+        if(s.rms > peak) peak = s.rms;
+        if(s.rms >= minRms) voiceCount++;
+      }
+      if(peak > MIC_DIAG.rmsPeak) MIC_DIAG.rmsPeak = peak;
+      if(voiceCount > MIC_DIAG.rmsVoiceWindows) MIC_DIAG.rmsVoiceWindows = voiceCount;
+    }
+    if(!micDiagSoftToastShown && elapsed >= MIC_DIAG_SOFT_MS &&
+       MIC_DIAG.rmsVoiceWindows === 0 && MIC_DIAG.asrResultCount === 0){
+      micDiagSoftToastShown = true;
+      showToast('🎤 Not hearing anything yet — check your mic isn\'t muted or covered.', 4200);
+    }
+  }
+
+  // ── Layer 3: hard check at 8 s ──
+  if(!MIC_DIAG.hardCheckDone && elapsed >= MIC_DIAG_HARD_MS && MIC_DIAG.asrResultCount === 0){
+    MIC_DIAG.hardCheckDone = true;
+
+    // One-shot phrases-free retry before showing any modal
+    if(!_phrasesRetryDone && speechRecognition && speechRecognition.__hasPhrases){
+      _phrasesRetryDone = true;
+      if(retrySpeechWithoutPhrases()){
+        MIC_DIAG.startedAt = performance.now();
+        MIC_DIAG.hardCheckDone = false;
+        MIC_DIAG.fallbackCheckDone = false;
+        return;
+      }
+    }
+
+    if(followOnly){
+      // Follow mode can't verify RMS — treat as ASR-dead with combined guidance
+      reportMicProblem('asr-dead');
+    } else if(MIC_DIAG.rmsVoiceWindows >= 3){
+      reportMicProblem('asr-dead');
+    } else {
+      reportMicProblem('mic-silent');
+    }
+    return;
+  }
+
+  // ── Layer 4: 12 s fallback ──
+  if(!MIC_DIAG.fallbackCheckDone && elapsed >= MIC_DIAG_FALLBACK_MS && MIC_DIAG.asrResultCount === 0){
+    MIC_DIAG.fallbackCheckDone = true;
+    if(!MIC_DIAG.hardCheckDone){
+      reportMicProblem('generic');
+    }
+  }
+}
+function getMicProblemConfig(kind){
+  const configs = {
+    'track-muted': {
+      icon: '🔇',
+      title: 'The microphone is muted',
+      body: 'Your device or browser has muted the microphone. The app cannot hear you.',
+      steps: '1. Check for a <b>physical mute switch</b> on your phone (some models have one on the side).<br>2. Swipe down the notification shade and look for a <b>microphone</b> or <b>privacy</b> toggle — make sure it\'s not disabled.<br>3. If using <b>Bluetooth headphones</b>, check they\'re not set to "headset mode" that mutes the phone\'s built-in mic.<br>4. <b>Settings → Apps → Browser → Permissions → Microphone</b> → Allow.'
+    },
+    'track-ended': {
+      icon: '🔌',
+      title: 'The microphone was disconnected',
+      body: 'Another app may have taken over the microphone, or the device ended the stream.',
+      steps: '1. Close any <b>phone, voice recorder, video call or music</b> app.<br>2. Unplug and replug any wired headset.<br>3. Tap <b>Start Reciting</b> again.<br>4. If it keeps happening, restart your phone.'
+    },
+    'mic-silent': {
+      icon: '🤫',
+      title: 'The microphone is on but hearing nothing',
+      body: 'The microphone has permission, but no sound is reaching the app. Speak clearly and check the microphone isn\'t covered.',
+      steps: '1. <b>Speak loudly</b> into the phone\'s bottom microphone.<br>2. Remove any case or finger covering the mic.<br>3. <b>Disconnect Bluetooth headphones</b> or check their microphone setting.<br>4. Try a <b>wired headset</b> to test a different microphone.<br>5. Tap <b>🎤 Run microphone test</b> below to check live levels.'
+    },
+    'asr-dead': {
+      icon: '📡',
+      title: 'The microphone works, but the speech service is not responding',
+      body: 'Your microphone is picking up sound, but no words are reaching the recognition service. This is usually a network or Google Play Services issue.',
+      steps: '1. <b>Check your internet connection</b> — speech recognition is online-only.<br>2. <b>Huawei / Honor</b>: install <b>Google Chrome</b> from the AppGallery and open the page there — the speech service needs Google Play Services.<br>3. <b>Xiaomi / Redmi / Realme</b>: Settings → Apps → Chrome → Battery → <b>Unrestricted</b> (MIUI kills background services).<br>4. Update the <b>Google</b> app from the Play Store.<br>5. Tap <b>Start Reciting</b> again.'
+    },
+    'reacquire-failed': {
+      icon: '⚠️',
+      title: 'Could not restart the microphone',
+      body: 'The microphone became unavailable and could not be reconnected.',
+      steps: '1. Close other apps that might be using the microphone.<br>2. Tap <b>Start Reciting</b> again.<br>3. If it still fails, restart your phone.<br>4. Tap <b>🎤 Run microphone test</b> to verify the mic works at all.'
+    },
+    'generic': {
+      icon: '🎤',
+      title: 'The microphone isn\'t reaching the app',
+      body: 'The app is running but not receiving speech. Check your microphone and connection.',
+      steps: '1. Check that the microphone isn\'t muted.<br>2. Close any other app using the mic.<br>3. Check your internet connection.<br>4. Tap <b>🎤 Run microphone test</b> below.'
+    }
+  };
+  // Follow-mode variant for asr-dead: we can't verify RMS, so be honest
+  if(kind === 'asr-dead' && followOnly){
+    return {
+      icon: '📡',
+      title: 'Not hearing your recitation',
+      body: 'No speech is reaching the recognition service. Follow mode cannot verify the microphone signal directly, so this is usually a network, Google Play Services, or muted-microphone issue.',
+      steps: '1. <b>Check your internet connection</b> — speech recognition is online-only.<br>2. <b>Check the microphone isn\'t muted</b> (privacy switch, Bluetooth headphones, or System mic settings).<br>3. <b>Huawei / Honor</b>: install <b>Google Chrome</b> from the AppGallery — the speech service needs Google Play Services.<br>4. Update the <b>Google</b> app from the Play Store.<br>5. Tap <b>🎤 Run microphone test</b> below, then tap <b>Start Reciting</b> again.'
+    };
+  }
+  return configs[kind] || configs['generic'];
+}
+function reportMicProblem(kind){
+  if(reportMicProblem._shown) return;
+  reportMicProblem._shown = true;
+  stopMicDiagnostic();
+  micDiagnosedWorking = false;   // so the user's next Start Reciting runs a fresh check
+  if(!followOnly){
+    coachTajweedMicFailed = true;
+    try{ updateTajweedStatusChip(); }catch(_){}
+  }
+  const cfg = getMicProblemConfig(kind);
+  addFeedback('⚠️ <b>' + cfg.title + '</b>', true);
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML =
+    '<div class="modal">' +
+      '<div class="grabber"></div>' +
+      '<h2>' + cfg.icon + ' ' + cfg.title + '</h2>' +
+      '<div class="errbox">' + cfg.body + '</div>' +
+      '<div class="okbox"><b>Try these steps:</b><br>' + cfg.steps + '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">' +
+        '<button class="primary" id="micProbRetry" type="button">🔄 Try reciting again</button>' +
+        '<button class="ghost" id="micProbTest" type="button">🎤 Run microphone test</button>' +
+        '<button class="ghost" id="micProbClose" type="button">Close</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(bg);
+  const close = () => { bg.remove(); reportMicProblem._shown = false; };
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  bg.querySelector('#micProbClose').addEventListener('click', close);
+  bg.querySelector('#micProbRetry').addEventListener('click', () => {
+    close();
+    if(wantMic) stopReciting();
+    setTimeout(() => { if(!wantMic) startReciting(); }, 300);
+  });
+  bg.querySelector('#micProbTest').addEventListener('click', () => { close(); openMicTestModal(); });
+}
+async function openMicTestModal(){
+  // Avoid competing with an active recognizer
+  const wasReciting = wantMic;
+  if(wasReciting){ try{ stopReciting(true); }catch(_){} }
+  stopMicDiagnostic();
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML =
+    '<div class="modal">' +
+      '<div class="grabber"></div>' +
+      '<h2>🎤 Microphone test</h2>' +
+      '<p>Speak normally for a few seconds — you\'ll see your voice level and the words recognised.</p>' +
+      '<div id="micTestStatus">' +
+        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)"><span style="color:var(--muted)">Permission</span><b id="mtPerm">—</b></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)"><span style="color:var(--muted)">Microphone</span><b id="mtDev">—</b></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)"><span style="color:var(--muted)">Audio track</span><b id="mtTrack">—</b></div>' +
+        '<div style="padding:10px 0;border-bottom:1px solid var(--line)">' +
+          '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">Picking sound</span><b id="mtPeak">—</b></div>' +
+          '<div style="height:12px;background:#0b101b;border-radius:99px;overflow:hidden;border:1px solid var(--line)"><div id="mtBar" style="height:100%;width:0;background:linear-gradient(90deg,#4f8cff,#2fd07a);transition:width .1s"></div></div>' +
+        '</div>' +
+        '<div style="padding:10px 0"><span style="color:var(--muted)">Speech heard</span><br><span id="mtTranscript" style="font-family:Amiri,serif;font-size:1.1rem;color:var(--text);direction:rtl;display:block;margin-top:6px;min-height:2em">⏳ waiting…</span></div>' +
+      '</div>' +
+      '<div id="mtDiag" style="margin-top:10px;padding:10px;background:rgba(79,140,255,.08);border-radius:10px;font-size:.82rem;line-height:1.5;color:var(--muted)">Starting test…</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">' +
+        '<button class="primary" id="mtRetry" type="button">🔄 Try again</button>' +
+        '<button class="ghost" id="mtCopy" type="button">📋 Copy diagnostic</button>' +
+        '<button class="ghost" id="mtClose" type="button">Close</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(bg);
+
+  const permEl = bg.querySelector('#mtPerm');
+  const devEl = bg.querySelector('#mtDev');
+  const trackEl = bg.querySelector('#mtTrack');
+  const peakEl = bg.querySelector('#mtPeak');
+  const barEl = bg.querySelector('#mtBar');
+  const transcriptEl = bg.querySelector('#mtTranscript');
+  const diagEl = bg.querySelector('#mtDiag');
+
+  let cleanup = () => {};
+  let stream = null;
+  let barTimer = null;
+  let testRecog = null;
+  let diagTimer1 = null, diagTimer2 = null;
+  let heardSomething = false;
+  let testRms = null;
+
+  const close = () => { try{ cleanup(); }catch(_){} bg.remove(); };
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  bg.querySelector('#mtClose').addEventListener('click', close);
+  bg.querySelector('#mtRetry').addEventListener('click', () => { close(); setTimeout(() => openMicTestModal(), 100); });
+  bg.querySelector('#mtCopy').addEventListener('click', () => {
+    const t = stream && stream.getAudioTracks()[0];
+    const payload = {
+      ua: navigator.userAgent,
+      platform: navigator.platform,
+      standalone: detectStandalone(),
+      permission: micPermission,
+      stream: stream ? 'active' : 'none',
+      track: t ? {
+        readyState: t.readyState,
+        muted: t.muted,
+        enabled: t.enabled,
+        settings: (t.getSettings ? t.getSettings() : {})
+      } : null,
+      rmsPeak: MIC_DIAG.rmsPeak,
+      rmsVoiceWindows: MIC_DIAG.rmsVoiceWindows,
+      asrResults: MIC_DIAG.asrResultCount,
+      speechSupported: SPEECH_SUPPORTED,
+      heardSomething,
+      lastTranscript: transcriptEl.textContent
+    };
+    const txt = JSON.stringify(payload, null, 2);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(() => showToast('📋 Diagnostic copied.')).catch(() => showToast('⚠️ Could not copy.'));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = txt; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); showToast('📋 Diagnostic copied.'); }
+      catch(_){ showToast('⚠️ Could not copy.'); }
+      ta.remove();
+    }
+  });
+
+  try{ await refreshPermissionState(); }catch(_){}
+  permEl.textContent = micPermission === 'granted' ? '✅ ' + micPermission : '⚠️ ' + micPermission;
+  devEl.textContent = '⏳ acquiring';
+  trackEl.textContent = '—';
+
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const t = stream.getAudioTracks()[0];
+    devEl.textContent = '✅ ' + (t.label || 'Audio input');
+    const trackState = t.readyState + (t.muted ? ' · 🔇 muted' : ' · 🔊 live');
+    trackEl.innerHTML = (t.muted || t.readyState !== 'live') ? '⚠️ ' + trackState : '✅ ' + trackState;
+
+    try{
+      const shared = window.__sharedAudioCtx;
+      const ctx = (shared && shared.state === 'running') ? shared : new (window.AudioContext || window.webkitAudioContext)();
+      const src = ctx.createMediaStreamSource(stream);
+      const an = ctx.createAnalyser();
+      an.fftSize = 1024; an.smoothingTimeConstant = 0.3;
+      src.connect(an);
+      const buf = new Float32Array(an.fftSize);
+      testRms = { ctx, src, an, buf, owns: ctx !== shared };
+    }catch(e){ console.warn('[MicTest] RMS failed:', e); }
+
+    barTimer = setInterval(() => {
+      if(!testRms){ barEl.style.width = '0%'; peakEl.textContent = '— (no analyser)'; return; }
+      testRms.an.getFloatTimeDomainData(testRms.buf);
+      let sum = 0; for(let i = 0; i < testRms.buf.length; i++) sum += testRms.buf[i] * testRms.buf[i];
+      const rms = Math.sqrt(sum / testRms.buf.length);
+      const pct = Math.min(100, Math.round(rms * 800));
+      barEl.style.width = pct + '%';
+      peakEl.textContent = pct + '%';
+      if(rms > 0.02) heardSomething = true;
+    }, 100);
+
+    if(SPEECH_SUPPORTED){
+      try{
+        testRecog = new SpeechRecognitionCtor();
+        testRecog.lang = 'ar-SA';
+        testRecog.continuous = true;
+        testRecog.interimResults = true;
+        testRecog.onresult = (ev) => {
+          let txt = '';
+          for(let i = ev.resultIndex; i < ev.results.length; i++) txt += (ev.results[i][0].transcript || '') + ' ';
+          if(txt.trim()) transcriptEl.textContent = txt.trim();
+        };
+        testRecog.onerror = (ev) => { transcriptEl.textContent = '⚠️ ' + (ev.error || 'error'); };
+        testRecog.start();
+      }catch(e){
+        transcriptEl.textContent = '⚠️ ' + (e.message || 'Could not start recogniser');
+      }
+    } else {
+      transcriptEl.textContent = '⚠️ Speech recognition not available in this browser';
+    }
+
+    diagTimer1 = setTimeout(() => {
+      if(!heardSomething && testRms){
+        diagEl.innerHTML = '🤫 <b>Microphone is not hearing any sound.</b><br>Speak loudly into the phone\'s bottom microphone, or check that no case or finger is covering it.';
+        diagEl.style.color = 'var(--warn)';
+      } else if(!testRms){
+        diagEl.innerHTML = '⚠️ <b>Acoustic test unavailable.</b> Watch the "Speech heard" line below — if it stays empty after you speak, the issue is with the microphone or speech service.';
+      }
+    }, 3000);
+
+    diagTimer2 = setTimeout(() => {
+      if(!heardSomething && transcriptEl.textContent === '⏳ waiting…'){
+        diagEl.innerHTML = '🚫 <b>No speech detected after 8 seconds.</b><br>Check your microphone permission and your internet connection.';
+        diagEl.style.color = 'var(--bad)';
+      } else if(heardSomething && transcriptEl.textContent === '⏳ waiting…'){
+        diagEl.innerHTML = '📡 <b>The microphone is working, but no words were recognised.</b><br>This is a speech service issue — check your internet connection, or install the Google app / Google Chrome.';
+        diagEl.style.color = 'var(--warn)';
+      } else if(transcriptEl.textContent !== '⏳ waiting…'){
+        diagEl.innerHTML = '✅ <b>Microphone and speech recognition are working.</b><br>You\'re ready to recite.';
+        diagEl.style.color = 'var(--good)';
+      }
+    }, 8000);
+
+    cleanup = () => {
+      if(barTimer){ clearInterval(barTimer); barTimer = null; }
+      if(diagTimer1){ clearTimeout(diagTimer1); diagTimer1 = null; }
+      if(diagTimer2){ clearTimeout(diagTimer2); diagTimer2 = null; }
+      if(testRms){
+        try{ testRms.src.disconnect(); testRms.an.disconnect(); if(testRms.owns) testRms.ctx.close(); }catch(_){}
+        testRms = null;
+      }
+      if(testRecog){ try{ testRecog.abort(); }catch(_){} testRecog = null; }
+      if(stream){ try{ stream.getTracks().forEach(tr => tr.stop()); }catch(_){} stream = null; }
+    };
+  }catch(e){
+    devEl.textContent = '❌ ' + (e.message || 'Failed');
+    trackEl.textContent = '—';
+    diagEl.innerHTML = '⚠️ <b>Could not acquire microphone.</b><br>' + escapeHtml(e.message || e.name || 'Unknown error') + '<br>Check permissions in your browser settings.';
+    diagEl.style.color = 'var(--bad)';
+  }
+}
+
+/* ── Microphone diagnostic ───────────────────────────────────
+   4-layer detection:
+     Layer 1 — track health (500 ms polling + onmute/onended events)
+     Layer 2 — RMS silence detection (4 s soft toast, 8 s hard modal)
+     Layer 3 — ASR death detection (8 s, when RMS shows speech)
+     Layer 4 — 12 s fallback (only if nothing earlier fired)
+
+   In Follow mode, `releaseMicStream()` runs in startReciting, so
+   micStream is null and rmsAnalyser isn't running — therefore
+   Layers 1 & 2 are silently skipped. Layers 3 & 4 still fire.
+
+   Once an ASR result is received, `markMicVerified()` sets
+   micDiagnosedWorking = true and stops the diagnostic for the
+   remainder of the page session. Subsequent Start Reciting calls
+   bail out of startMicDiagnostic immediately — no more
+   getUserMedia re-calls on every mic start. */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let lastSilenceResetAt = 0;
 function resetSilenceTimer(force){
   const now = performance.now();
   if(!force && now - lastSilenceResetAt < 800) return;
@@ -7060,22 +7724,20 @@ function resetSilenceTimer(force){
 }
 function clearSilenceTimer(){ clearTimeout(silenceTimer); silenceTimer = null; }
 
-/* ── Mode UI ─────────────────────────────────────────────── */
 let updatingMutex = false;
 function applyMutexUI(){
-  if(!followOnly && !beepOn){ followOnly = true; }
   beepOn = !followOnly;
   if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly); modeFollowBtn.setAttribute('aria-pressed', followOnly ? 'true' : 'false'); }
   if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly); modeTajweedBtn.setAttribute('aria-pressed', !followOnly ? 'true' : 'false'); }
   if(hideTextChip) hideTextChip.hidden = !followOnly;
-  const tjNoiseChip = document.getElementById('tajweedNoiseChip');
-  if(tjNoiseChip) tjNoiseChip.hidden = followOnly;
   if(chkHideText) chkHideText.checked = hideText;
   if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
   applyHideTextUI();
   updateTajweedStatusChip();
   syncRevealButtons();
+
 }
+
 function setRecitationMode(modeName){
   const newFollow = (modeName === 'follow');
   if(newFollow === followOnly && !updatingMutex) return;
@@ -7086,16 +7748,59 @@ function setRecitationMode(modeName){
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   followWrongTokens = 0; cancelFollowPinTimer();
+  _phrasesRetryDone = false;
   applyMutexUI(); applyFollowOnlyUI();
   if(followOnly){
+    releaseMicStream();
+    coachTajweedMicFailed = false;
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
+    updateTajweedStatusChip();
   } else {
-    addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are beeped and marked red.', false, true);
+    addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
+    if(wantMic && !rmsAnalyser.isRunning()){
+      const wasRunning = recRunning;
+      if(wasRunning){ try{ speechRecognition && speechRecognition.stop(); }catch(_){} }
+
+      const restartRecognizer = () => {
+        if(wasRunning && wantMic && !fsPaused && !micPaused){
+          try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
+          catch(_){ speechStarting = false; }
+        }
+      };
+
+      ensureMicStream().then(s => {
+        if(s){
+          coachTajweedMicFailed = false;
+          updateTajweedStatusChip();
+          if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
+            _rmsUnavailableNotified = true;
+            notifyRmsUnavailable();
+          }
+        } else {
+          const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
+          if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
+             nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
+            markTajweedMicFailed();
+          } else {
+            coachTajweedMicFailed = false;
+            updateTajweedStatusChip();
+          }
+        }
+        restartRecognizer();
+      }).catch(() => {
+        coachTajweedMicFailed = false;
+        updateTajweedStatusChip();
+        restartRecognizer();
+      });
+    } else {
+      updateTajweedStatusChip();
+    }
   }
   updatingMutex = false;
 }
+
 if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
 if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); }
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
@@ -7136,7 +7841,6 @@ function applyModeUI(){
   nextSurahBtn.disabled = (surahNum <= 1);
 }
 
-/* ── Load surah / render words ──────────────────────────── */
 function explainFetchFailure(settled){
   if(settled.status !== 'fulfilled'){ const reason = settled.reason; if(reason && reason.name === 'AbortError') return 'timed out after ' + (FETCH_TIMEOUT_MS/1000) + ' s'; return (reason && reason.message) || 'network error'; }
   if(!settled.value.ok) return 'HTTP ' + settled.value.status + ' ' + (settled.value.statusText || '');
@@ -7149,6 +7853,7 @@ async function loadSurah(n, keepFeedback){
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   coachTajweedApplied = false; coachTajweedReady = false; coachTajweedDegraded = false;
+  coachTajweedMicFailed = false;
   coachTajweedGen++;
   updateTajweedStatusChip();
   applyModeUI();
@@ -7204,7 +7909,10 @@ function renderVerses(ayahs, translations){
     span.dataset.idx = String(myIndex);
     parent.appendChild(span);
     const nrm = normArCached(tok);
-    words.push({ raw: tok, norm: nrm, phon: phonArCached(tok), phonLoose: phonLooseArCached(tok), len: nrm.length, el: span, surah: surahId, ayah: ayahNum, verse: surahId + ':' + ayahNum, tjRules: null, normNoSilent: null });
+    const w = { raw: tok, norm: nrm, phon: phonArCached(tok), phonLoose: phonLooseArCached(tok), len: nrm.length, el: span, surah: surahId, ayah: ayahNum, verse: surahId + ':' + ayahNum, tjRules: null, normNoSilent: null, _muqStuckCount: 0 };
+    const muq = detectMuqattaat(surahId, ayahNum, nrm);
+    if(muq){ w.isMuqattaat = true; w.muqattaatLetters = muq; w.muqattaatCursor = 0; }
+    words.push(w);
   }
   function pushDecoration(tok, parent){
     const span = document.createElement('span');
@@ -7268,7 +7976,6 @@ function renderVerses(ayahs, translations){
   resetProgress(true);
 }
 
-/* ── HUD / progress / feedback ──────────────────────────── */
 let scrollScheduled = false;
 function scrollElementIntoView(el, force){
   if(!el) return;
@@ -7339,6 +8046,7 @@ function jumpToCurrent(){
   el.classList.add('pressing'); setTimeout(() => el.classList.remove('pressing'), 450);
   scrollCurrentIntoView(true);
 }
+
 function appendMistake(m){
   if(followOnly) return;
   mistakesPanel.hidden = false;
@@ -7368,8 +8076,10 @@ function completeVerse(verseKey){
   const count = mistakes.filter(m => m.verse === verseKey).length;
   if(count > 0){
     const ayahNum = verseKey.split(':')[1];
-    addFeedback('🔔 <b>End of ayah ' + ayahNum + '</b> — ' + count + ' mistake' + (count===1?'':'s') + '.', true);
-    setStatus('Ayah ' + ayahNum + ' — ' + count + ' mistake' + (count===1?'':'s'), 'correcting', '');
+    const label = (ayahNum === '0') ? 'Bismillah' : ('ayah ' + ayahNum);
+    const statusLabel = (ayahNum === '0') ? 'Bismillah' : ('Ayah ' + ayahNum);
+    addFeedback('🔔 <b>End of ' + label + '</b> — ' + count + ' mistake' + (count===1?'':'s') + '.', true);
+    setStatus(statusLabel + ' — ' + count + ' mistake' + (count===1?'':'s'), 'correcting', '');
   }
 }
 function advancePast(n){
@@ -7421,10 +8131,8 @@ function recordMistake(i, kind, heardRaw){
   const heard   = heardRaw ? String(heardRaw).replace(TASHKEEL, '') : '';
   const m = { idx: mistakeCounter++, correct, heard, verse: w.verse, kind };
   mistakes.push(m); appendMistake(m); scheduleHUD();
-  if(beepOn && kind === 'misread') beepThrottled('error');
 }
 
-/* ── Reset / jump-to-word ──────────────────────────────── */
 function resetProgress(fullReset){
   ptr=0; errors=0; finished=false; recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
@@ -7436,12 +8144,14 @@ function resetProgress(fullReset){
     resetPaceSamples();
   }
   lastCurrentEl = null; longPressTriggered = false; hudPending = false;
-  words.forEach(w=>{ w.el.className='w'; w.audio = null; w._tajweedErrs = null; });
+  words.forEach(w=>{ w.el.className='w'; w.audio = null; w._tajweedErrs = null; w._tajweedWarns = null; w.muqattaatCursor = 0; w._muqStuckCount = 0; });
+  _tajweedWarnThrottle.clear();
   pageEl.querySelectorAll('.ayah').forEach(a=>a.classList.remove('done','playing'));
   document.body.classList.remove('listen-mode');
   updateCurrent(); updateHUD(); applyFollowOnlyUI(); applyHideTextUI();
   pageEl.scrollTop = 0;
 }
+
 function jumpToWordAndListen(idx){
   if(viewerOpen && viewerMode === 'audio') return;
   if(idx < 0 || idx >= words.length) return;
@@ -7528,6 +8238,7 @@ function setMicButton(){
   micButton.classList.toggle('on',wantMic);
   syncFsButtons();
 }
+
 async function startReciting(){
   unlockAudio();
   if(!words.length){
@@ -7536,13 +8247,46 @@ async function startReciting(){
   }
   if(!SPEECH_SUPPORTED){ addFeedback('⚠️ Browser speech recognition is not available here. Try <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> on a device with internet.', true); setStatus('Speech not supported', 'error'); return; }
   if(!navigator.onLine){ speechServiceNotified = false; notifySpeechServiceUnreachable(); return; }
-  if(micPermission !== 'granted'){ const ok = await promptForMic(); if(!ok) return; }
-  if(!followOnly && mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
-    addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
+
+    if(followOnly){
+    releaseMicStream();
+  } else {
+    if(micPermission !== 'granted'){
+      const ok = await promptForMic();
+      if(!ok){
+        coachTajweedMicFailed = true;
+        updateTajweedStatusChip();
+        return;
+      }
+    }
+    if(mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
+      addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
+    }
+    const _tajStream = await ensureMicStream();
+    if(!_tajStream){
+      const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
+      if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
+         nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
+        coachTajweedMicFailed = true;
+        updateTajweedStatusChip();
+      } else {
+        coachTajweedMicFailed = false;
+        updateTajweedStatusChip();
+      }
+    } else {
+      coachTajweedMicFailed = false;
+      updateTajweedStatusChip();
+      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
+        _rmsUnavailableNotified = true;
+        notifyRmsUnavailable();
+      }
+    }
   }
-  await ensureMicStream().catch(() => {});
+  
+
   if(finished) resetProgress(true);
   fsPaused = false; micPaused = false; wantMic = true; speechFatalError = false; speechServiceNotified = false;
+  _phrasesRetryDone = false;
   recReset(); pendingJumpTarget = -1;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
@@ -7556,46 +8300,60 @@ async function startReciting(){
     speechRecognition.maxAlternatives = followOnly ? 3 : 6;
     if(speechStarting){}
     else { try{ speechStarting = true; speechRecognition.start(); }catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') throw e; } }
-    recRunning = true; lastResultAt = performance.now(); sessionHadResult = false; micWarningShown = false;
-    startMicWatchdog(); armSpeechKeepalive();
+    recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
+    startMicDiagnostic(); armSpeechKeepalive();
     setStatus('Listening', 'listening', contextLabel());
     addFeedback('🎧 Listening — recite from anywhere in the page or surah.');
+    // Inform the user when acoustic rules are unavailable
+    if (!followOnly && !rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
+      _rmsUnavailableNotified = true;
+      addFeedback(
+        'ℹ️ <b>Acoustic Tajweed rules are off</b> — this browser cannot access the microphone waveform. ' +
+        'Active: madd, ghunnah, ikhfa, iqlab, silent, emphatics, qalqalah letters. ' +
+        'Disabled: laam shamsiyyah, idghaam_ghunnah, idghaam_no_ghunnah, ham_wasl, qalqalah echo.',
+        false, true
+      );
+    }
     updateFsMicBtn(); syncFsButtons();
   }catch(e){
     console.error('[Speech] start failed:', e);
     addFeedback('⚠️ Could not start listening: ' + (e.message || e), true);
-    wantMic = false; releaseMicStream(); stopMicWatchdog(); setMicButton(); updateFsMicBtn(); syncFsButtons();
+    wantMic = false; releaseMicStream(); stopMicDiagnostic(); setMicButton(); updateFsMicBtn(); syncFsButtons();
   }
 }
+
 function stopReciting(silent){
   if(wantMic && !suppressProgressSave) saveProgressNow();
   wantMic=false; micPaused = false;
   resetSpeechPipeline();
   disarmSpeechKeepalive(); pendingJumpTarget = -1;
   cancelFollowPinTimer();
+  _phrasesRetryDone = false;
   pendingHeard.length = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
   prevWordAudio = null;
   setMicButton(); recRunning = false; speechStarting = false;
   if(speechRecognition){ try{ speechRecognition.stop(); }catch(e){} try{ speechRecognition.abort(); }catch(e){} }
-  releaseWakeLock(); clearSilenceTimer(); stopMicWatchdog();
+  releaseWakeLock(); clearSilenceTimer(); stopMicDiagnostic();
   releaseMicStream();
   if(!silent) setStatus('Ready','idle', micPermission==='granted'?'Mic ready':'Tap Start reciting to allow mic');
   updateFsMicBtn(); syncFsButtons();
 }
 function pauseMic(){
   micPaused = true; recRunning = false;
-  disarmSpeechKeepalive(); stopMicWatchdog();
+  disarmSpeechKeepalive(); stopMicDiagnostic();
   if(speechRecognition){ try{ speechRecognition.stop(); }catch(e){} }
   releaseMicStream();
 }
 function resumeMic(){
   if(wantMic && !finished && !fsPaused){
     micPaused = false;
-    ensureMicStream().catch(() => {});
-    recRunning = true; speechFatalError = false; micWarningShown = false;
+    if(!followOnly){
+      ensureMicStream().then(s => { if(!s) markTajweedMicFailed(); }).catch(() => {});
+    }
+    recRunning = true; speechFatalError = false;
     lastResultAt = performance.now();
-    startMicWatchdog(); armSpeechKeepalive();
+    startMicDiagnostic(); armSpeechKeepalive();
     try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
     catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') console.warn('[Speech] resume failed:', e); }
     setStatus('Listening', 'listening', contextLabel());
@@ -7605,7 +8363,7 @@ function stopEverything(silent){ stopPlayback(); stopReciting(true); if(!silent)
 function finish(){
   finished=true; wantMic=false;
   disarmSpeechKeepalive(); setMicButton(); recRunning = false; releaseWakeLock();
-  clearSilenceTimer(); stopMicWatchdog();
+  clearSilenceTimer(); stopMicDiagnostic();
   cancelFollowPinTimer();
   releaseMicStream();
   if(speechRecognition){ try{ speechRecognition.stop(); }catch(e){} try{ speechRecognition.abort(); }catch(e){} }
@@ -7633,7 +8391,6 @@ function stopPlayback(){
   hideAudioOverlay(); syncFsButtons();
 }
 
-/* ── Speech-service unreachable modal ───────────────────── */
 function notifySpeechServiceUnreachable(){
   setStatus('Speech service unreachable', 'error', 'Check your internet connection');
   addFeedback('⚠️ The speech recognition service could not be reached. Live recitation needs an internet connection.', true);
@@ -7648,7 +8405,6 @@ function notifySpeechServiceUnreachable(){
   bg.querySelector('#speechInfoClose').addEventListener('click', close);
 }
 
-/* ── Fullscreen reader controls ─────────────────────────── */
 function enterReaderFullscreen(){
   if(readerFullscreen) return;
   if(viewerOpen) return;
@@ -7784,8 +8540,9 @@ function findWordIndexInWords(surah, ayah, offset){
 }
 function refreshProgressMenu(){
   const f = loadSavedProgress('follow'); const t = loadSavedProgress('tajweed');
-  if(progressFollowSub) progressFollowSub.textContent = f ? ('Surah ' + f.surah + ' · ayah ' + f.ayah) : 'No saved session';
-  if(progressTajweedSub) progressTajweedSub.textContent = t ? ('Surah ' + t.surah + ' · ayah ' + t.ayah) : 'No saved session';
+  const fmt = d => d ? ('Surah ' + d.surah + ' · ' + (d.ayah === 0 ? 'Bismillah' : ('ayah ' + d.ayah))) : 'No saved session';
+  if(progressFollowSub) progressFollowSub.textContent = fmt(f);
+  if(progressTajweedSub) progressTajweedSub.textContent = fmt(t);
 }
 async function resumeRecitationSession(modeKey){
   const data = loadSavedProgress(modeKey);
@@ -7814,7 +8571,6 @@ async function resumeRecitationSession(modeKey){
   } finally { suppressProgressSave = false; }
 }
 
-/* ── Islamic dates + calendar modal ─────────────────────── */
 function fmtGregShort(date){ return GREG_MONTHS_SHORT[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear(); }
 function renderImportantDates(){
   if(!islamicDatesList) return;
@@ -7966,7 +8722,7 @@ async function renderSurahIndex(){
       surahIndexList.appendChild(row);
     });
   }catch(e){
-    surahIndexList.innerHTML = '<div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.<div style="margin-top:10px"><button class="primary" id="btnRetrySurahList" type="button">↻ Retry</button></div></div>';   const rb = document.getElementById('btnRetrySurahList');   if(rb) rb.addEventListener('click', () => renderSurahIndex());
+    surahIndexList.innerHTML = '<div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div>';
   }
 }
 const JUZ_NAMES = ['Alif Lam Meem','Sayaqul','Tilkal Rusul','Lan Tanaloo','Wal Muhsanat','La Yuhibbullah','Wa Iza Samiu','Wa Lau Annana','Qalal Malaou','Wa A\'lamu','Yatazeroon','Wa Mamin Da\'abat','Wa Ma Ubarri\'u','Rubama','Subhanallazi','Qal Alam','Aqtarabo','Qad Aflaha','Wa Qalallazina','A\'man Khalaq','Utlu Ma Oohiya','Wa Manyaqnut','Wa Mali','Faman Azlam','Elahe Yuraddo','Ha Meem','Qala Fama Khatbukum','Qad Sami Allah','Tabarakallazi','Amma Yatasa\'aloon'];
@@ -8810,7 +9566,7 @@ async function loadReaderPage(pageNumber){
   }catch(e){
     if(token !== readerState.token) return;
     readerState.loading = false;
-    pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load page ' + n + '.</span>Check your connection and try again.<div style="margin-top:10px"><button class="primary" id="btnRetryPage" type="button">↻ Retry</button></div></div>';   const rbp = document.getElementById('btnRetryPage');   if(rbp) rbp.addEventListener('click', () => loadReaderPage(n));
+    pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load page ' + n + '.</span>Check your connection and try again.</div></div>';
     qvTitle.textContent = 'Error';
   }
 }
@@ -10066,11 +10822,11 @@ function isInstallRecorded(){ try{ return localStorage.getItem(INSTALL_DONE_KEY)
 function setInstallRecorded(){ try{ localStorage.setItem(INSTALL_DONE_KEY, '1'); }catch(e){} }
 function detectStandalone(){
   if(window.navigator.standalone === true) return true;
-  try{ return window.matchMedia('(display-mode: standalone)').matches; }
+  try{ return window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: minimal-ui)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches; }
   catch(e){ return IS_STANDALONE; }
 }
 function isRunningAsInstalledApp(){ return detectStandalone(); }
-function isAppInstalled(){ return appInstalledFlag || detectStandalone(); }
+function isAppInstalled(){ return appInstalledFlag || detectStandalone() || isInstallRecorded(); }
 function updateInstallMenuItem(){
   if(!homeMenuInstall) return;
   const title = homeMenuInstallTitle || homeMenuInstall.querySelector('.hmi-text strong');
@@ -10136,7 +10892,6 @@ function showInstallInstructions(){
   bg.querySelector('#installHelpShare').addEventListener('click', () => { close(); shareApp(); });
 }
 async function handleInstallMenuTap(){
-  try{ localStorage.removeItem(INSTALL_PROMPT_DISMISSED_KEY); }catch(e){}
   if(isRunningAsInstalledApp()){ showToast('✅ You are already running the installed app.'); return; }
   if(isAppInstalled()){ showToast('✅ The app is already installed. Open it from your Home Screen or app drawer.', 4600); return; }
   if(deferredPrompt){
@@ -10218,6 +10973,8 @@ btnBackHome.addEventListener('click', () => { if(readerFullscreen) exitReaderFul
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && !homeMenu.hidden) closeMenu(); });
   if(homeMenuInstall) homeMenuInstall.addEventListener('click', () => { closeMenu(); handleInstallMenuTap(); });
   if(homeMenuNotify) homeMenuNotify.addEventListener('click', () => { closeMenu(); enableNotifications(); });
+  const homeMenuMicTest = document.getElementById('homeMenuMicTest');
+  if(homeMenuMicTest) homeMenuMicTest.addEventListener('click', () => { closeMenu(); openMicTestModal(); });
   if(homeMenuShare) homeMenuShare.addEventListener('click', () => { closeMenu(); shareApp(); });
   if(homeMenuQr)    homeMenuQr.addEventListener('click',    () => { closeMenu(); openQrScreen(); });
   if(homeMenuFeedback) homeMenuFeedback.addEventListener('click', () => { closeMenu(); openFeedbackModal(); });
@@ -10342,8 +11099,15 @@ function openCopyrightModal(){
   chip.addEventListener('click', (e) => {
     e.stopPropagation();
     if(followOnly) return;
-    if(coachTajweedDegraded){ showToast('⚠️ Tajweed annotations could not be fully aligned — some rule checks may be disabled. Check your connection, then switch surah or reload.', 5000); }
-    else if(coachTajweedReady){ showToast('✓ Tajweed rules active: madd length, ghunnah length & letters, qalqalah, silent letters.', 4200); }
+    if(coachTajweedMicFailed){ showTajweedMicFailedModal(); }
+    else if(coachTajweedDegraded){ showToast('⚠️ Tajweed annotations could not be fully aligned — some rule checks may be disabled. Check your connection, then switch surah or reload.', 5000); }
+    else if(coachTajweedReady){
+      if(!isRmsSupported() || (wantMic && !rmsAnalyser.isRunning())){
+        showToast('ℹ️ Tajweed rules are active in transcript-only mode — acoustic analysis (RMS) is unavailable in this browser.', 5000);
+      } else {
+        showToast('✓ Tajweed rules active: madd length, ghunnah length & letters, qalqalah, silent letters.', 4200);
+      }
+    }
     else { showToast('⏳ Fetching Tajweed annotations from Quran.com…', 3000); }
   });
 })();
@@ -10441,11 +11205,11 @@ function openCoachInfoModal(){
       '<li>Hold any word for 3 seconds to start reciting from that point.</li>' +
       '<li><b>Tap any coloured word</b> to see the Tajweed rule name and a short explanation.</li>' +
      '<li>On Android phones the coach stays <b>silent and vibration-free while listening</b> so the microphone never picks up its own tones.</li>' +
-              '<li style="color:var(--warn);font-weight:600;margin-top:8px">💡 <b>Tip when reciting in Follow and Tajweed mode:</b> Add pauses in between each ayah.</li>' +
+              '<li style="color:var(--warn);font-weight:600;margin-top:8px">💡 <b>Tip when reciting in Follow and Tajweed mode:</b> Background noise may affect the Follow and Tajweed accuracy.  Add pauses in between each ayah.</li>' +
             '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">2</span> 👂 Follow mode (memorisation aid)</h3><ul>' +
       '<li><b>Follow</b> is designed to assist you with <b>memorisation of the Holy Qur\'an</b>. The highlight moves forward with you as you recite.</li>' +
-      '<li>Follow uses a finite-state gate: <b>τ_plausible = 0.72</b> to advance, <b>τ_jump = 0.85</b> to skip 1–2 words forward, and <b>τ_exit = 0.85</b> to leave the current ayah. The pointer never jumps across an ayah boundary unless you fully complete the last word.</li>' +
+      '<li>Follow uses a finite-state gate: <b>τ_plausible = 0.72</b> to advance, and <b>τ_exit = 0.85</b> to leave the current ayah. The pointer never jumps across an ayah boundary unless you fully complete the last word.</li>' +
       '<li>Look-ahead is limited to <b>k ≤ 2</b> words — out-of-bounds matches are discarded, keeping the highlight locked to the current word.</li>' +
       '<li><b>Nothing is marked red and no mistakes are counted</b> in Follow mode.</li>' +
     '</ul></div>' +
@@ -11370,29 +12134,6 @@ function showTextShareModal(text){
   if(textBtn) textBtn.addEventListener('click', shareCardAsText);
 })();
 
-function startMicWatchdog(){
-  clearTimeout(micWatchdogTimer); micAudioConfirmed = false;
-  micWatchdogTimer = setTimeout(() => { if(!wantMic || micAudioConfirmed) return; if(micWarningShown) return; micWarningShown = true; showBrokenMicWarning(); }, 10000);
-}
-
-function stopMicWatchdog(){ clearTimeout(micWatchdogTimer); micWatchdogTimer = null; }
-
-function confirmMicAudio(){ micAudioConfirmed = true; clearTimeout(micWatchdogTimer); micWatchdogTimer = null; }
-
-function showBrokenMicWarning(){
-  const bg = document.createElement('div');
-  bg.className = 'modal-bg';
-  bg.innerHTML = '<div class="modal"><div class="grabber"></div><h2>Microphone isn\'t hearing you</h2><div class="errbox">Your browser reports the microphone as allowed, but no speech is reaching the recognition service after several seconds.</div><div class="okbox"><b>Try these steps:</b><br>1. Unmute your microphone.<br>2. Close any other app using the mic.<br>3. Reload the page.<br>4. On iPhone: Settings → Safari → Microphone → Allow.<br>5. Check that you are connected to the internet — the recognition service is online.</div><button class="primary" id="micWarnClose">Got it</button></div>';
-  document.body.appendChild(bg);
-  const close = () => bg.remove();
-  bg.addEventListener('click', e => { if(e.target === bg) close(); });
-  bg.querySelector('#micWarnClose').addEventListener('click', close);
-  addFeedback('⚠️ The browser is not passing speech to the recognition service.', true);
-}
-
-/* ── Silence timer ──────────────────────────────────────── */
-let lastSilenceResetAt = 0;
-
 (function boot(){
   initServiceWorker().catch(err => console.warn('[SW] boot init failed:', err));
   updateHijriDate(); setInterval(updateHijriDate, 30 * 60 * 1000);
@@ -11420,8 +12161,26 @@ let lastSilenceResetAt = 0;
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=="></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+<script>
+(function () {
+  // The full Tajweed engine needs live speech input.
+  var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
+  // Also mark body so existing CSS (mistakes panel, tj-kind pill, etc.)
+  // can keep working in the reduced mode.
+  document.body.classList.add(hasASR ? 'tajweed-full' : 'tajweed-minimal');
+
+  if (!hasASR) {
+    var n = document.getElementById('tajweedNotice');
+    if (n) n.hidden = false;
+
+    // Make the existing Tajweed pill still "do something":
+    // force it into its active style even without ASR.
+    document.querySelectorAll('.toggle.mode-pill[data-mode="tajweed"]')
+      .forEach(function (el) { el.classList.add('active'); });
+  }
+})();
+</script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+</body></html>
