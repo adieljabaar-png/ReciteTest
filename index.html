@@ -2921,7 +2921,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">19 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">13:43</span>
+    <span class="pdr-item pdr-time" id="pdrTime">14:11</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3896,6 +3896,29 @@ function toleranceFor(L){
 }
 
 function confidenceFloor(){ return 0.35; }
+
+/* FOLLOW-ONLY ASR confusion map (Option 1).
+   The browser ASR language model sometimes returns تنزيل (from the
+   preceding ayah تنزيل العزيز الرحيم) when the reciter says تنذر,
+   and أنزل when they say أنذر. Acoustically the matcher cannot tell
+   these apart reliably, and no tolerance change should be loosened
+   elsewhere to accommodate them. So in Follow mode ONLY, a heard
+   token that is exactly one of these known ASR substitutions is
+   accepted for its expected word. Exact-match only: no prefix /
+   suffix / lev loosening, no other words, Tajweed mode untouched.
+   It never skips a word: it only lets the pointer advance past the
+   word the reciter actually said. */
+const FOLLOW_CONFUSION_MAP = {
+  'تنزيل': 'تنذر',
+  'لتنزيل': 'لتنذر',
+  'أنزل': 'أنذر',
+  'انزل': 'انذر'
+};
+function isFollowConfusionMatch(heard, w){
+  if(!followOnly) return false;
+  if(!heard || !w || !w.norm) return false;
+  return FOLLOW_CONFUSION_MAP[heard] === w.norm;
+}
 
 function isMatchWord(hNorm, hPhon, hPhonLoose, w){
   const wNorm = w.norm;
@@ -6554,7 +6577,7 @@ function scoreAlternativeToks(toks, startPtr){
     const hPhon = phonArCached(rawTok);
     const hPhonLoose = followOnly ? phonLooseArCached(rawTok) : null;
     const w = words[wi];
-    if(heard === w.norm || isMatchWord(heard, hPhon, hPhonLoose, w)){ score += 3; ti++; wi++; continue; }
+    if(heard === w.norm || isMatchWord(heard, hPhon, hPhonLoose, w) || isFollowConfusionMatch(heard, w)){ score += 3; ti++; wi++; continue; }
     if(followOnly){
       const mergedN = tryMergedTokenMatchAt(heard, hPhon, hPhonLoose, wi);
       if(mergedN > 0){ score += 3 * mergedN; ti++; wi += mergedN; continue; }
@@ -6574,29 +6597,41 @@ function buildPhraseObjects(rec) {
   const PhraseCtor = window.SpeechRecognitionPhrase || window.webkitSpeechRecognitionPhrase;
   if (!PhraseCtor) return false;
   if (!('phrases' in rec)) return false;
-  if (!words.length) return false;
-  const end = Math.min(words.length, ptr + 50);
+  if (!words.length || ptr >= words.length) return false;
+  // NARROW WINDOW: remaining words of the CURRENT ayah only, plus the
+  // first 3 words of the next ayah (so a verse boundary never starves
+  // the recogniser). Previously this was the next 50 words, which kept
+  // words from 2-3 ayahs ago (e.g. تنزيل from the preceding ayah) in
+  // the bias set while the reciter was already on تنذر.
+  const curVerse = words[ptr].verse;
+  let end = ptr;
+  while (end < words.length && words[end].verse === curVerse) end++;
+  const nextEnd = Math.min(words.length, end + 3);
   const seen = new Set();
   const phrases = [];
-  for (let i = ptr; i < end; i++) {
-    const clean = String(words[i].raw || '').normalize('NFKC').replace(TASHKEEL, '').replace(/[^\u0621-\u064A\s]/g, '').trim();
+  const cleanWord = (w) => String(w.raw || '').normalize('NFKC').replace(TASHKEEL, '').replace(/[^\u0621-\u064A\s]/g, '').trim();
+  for (let i = ptr; i < nextEnd; i++) {
+    const clean = cleanWord(words[i]);
     if (!clean || seen.has(clean)) continue;
     seen.add(clean);
     try { phrases.push(new PhraseCtor(clean, 6.0)); } catch (_) {}
   }
+  // FULL-AYAH PHRASE: the remaining ayah as one sequence, not just a
+  // bag of single words. Sequence context is what disambiguates
+  // لتنذر قوما (fits) from تنزيل (does not fit here).
+  const ayahPhrase = [];
+  for (let i = ptr; i < end; i++) {
+    const clean = cleanWord(words[i]);
+    if (clean) ayahPhrase.push(clean);
+  }
+  if (ayahPhrase.length >= 2) {
+    try { phrases.push(new PhraseCtor(ayahPhrase.join(' '), 6.0)); } catch (_) {}
+  }
   if (!phrases.length) return false;
-  try { rec.phrases = phrases; rec.__lastPhrasePtr = ptr; return true; }
+  try { rec.phrases = phrases; rec.__lastPhrasePtr = ptr; rec.__lastPhraseVerse = curVerse; return true; }
   catch (e) { console.warn('[Speech] Failed to set phrases:', e); return false; }
 }
 
-
-
-// Build a very small grammar window: the remaining words in the current
-// verse, followed by only the next three words from the following verse.
-
-
-// SpeechGrammarList is optional and is ignored by some browser speech engines.
-// Keep the grammar deliberately narrow to avoid adding decoding overhead.
 
 
 function createSpeechRecognition(forceNoPhrases){
@@ -6614,7 +6649,7 @@ function createSpeechRecognition(forceNoPhrases){
     speechStarting = false; recRunning = true;
     lastSpeechResultIndex = -1; interimProgress.clear();
     lastResultAt = performance.now(); armSpeechKeepalive();
-    if (Math.abs(ptr - (rec.__lastPhrasePtr || 0)) >= 24) buildPhraseObjects(rec);
+    if (rec.__lastPhraseVerse !== (words[ptr] && words[ptr].verse)) buildPhraseObjects(rec);
   };
   rec.onresult = (event) => scheduleSpeechResult(event);
   rec.onerror = (event) => {
@@ -6746,7 +6781,8 @@ function gradeFollowFast(tokens, startIdx){
 
     /* 1. Direct match */
     const directMatch = isMatchWord(heard, hPhon, hPhonLoose, w)
-                     || followAlPrefixMatch(heard, w);
+                     || followAlPrefixMatch(heard, w)
+                     || isFollowConfusionMatch(heard, w);
     if (directMatch){
       let exitOk = true;
       if (isLastInAyah){
@@ -8213,6 +8249,15 @@ function advancePast(n){
   for(let i = ptr; i < endPtr; i++){ if(words[i]) leaving.add(words[i].verse); }
   ptr = endPtr;
   const nextVerse = ptr < words.length ? words[ptr].verse : null;
+  // Ayah-boundary phrase refresh: rebuild the (narrow) hint set for the
+  // new ayah. Some engines apply rec.phrases live, others only on the
+  // next start() — onstart above re-checks by verse, so the refresh is
+  // picked up at the next recogniser restart either way. Never drops
+  // or skips a word: this only changes the ASR bias hints.
+  try {
+    if (speechRecognition && speechRecognition.__hasPhrases && nextVerse &&
+        speechRecognition.__lastPhraseVerse !== nextVerse) buildPhraseObjects(speechRecognition);
+  } catch (_) {}
   leaving.forEach(v => { if(v !== nextVerse) completeVerse(v); });
   updateCurrent(); noteAdvance(advanced); scheduleSaveProgress();
 }
@@ -12323,7 +12368,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   // The full Tajweed engine needs live speech input.
