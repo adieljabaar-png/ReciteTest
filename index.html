@@ -894,7 +894,14 @@ background:transparent;touch-action:pan-y;
 }
 body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book{--page-bg:#ffffff;--page-fg:#111111;--page-border:#111111;}
 body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book{--page-bg:#000000;--page-fg:#ffffff;--page-border:#ffffff;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner{padding:0;max-width:none;margin:0 auto;position:relative;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner{padding:0;max-width:none;margin:0 auto;position:relative;background:var(--page-bg,#fff);transform:none;}
+.mushaf-book-content{-webkit-font-smoothing:antialiased;}
+/* Decorated opening pages (1-2): green / gold / blue mushaf bands + medallion, outside the contained script */
+.mushaf-book-page.mushaf-decorated{padding-top:22px;}
+.mushaf-book-page.mushaf-decorated::before{content:'';position:absolute;top:0;left:0;right:0;height:14px;background:repeating-linear-gradient(90deg,#1a6b4a 0 14px,#c9a227 14px 18px,#1f4e8c 18px 32px,#c9a227 32px 36px);border-bottom:1px solid #c9a227;}
+.mushaf-book-page.mushaf-decorated::after{content:'';position:absolute;bottom:0;left:0;right:0;height:14px;background:repeating-linear-gradient(90deg,#1a6b4a 0 14px,#c9a227 14px 18px,#1f4e8c 18px 32px,#c9a227 32px 36px);border-top:1px solid #c9a227;}
+.mushaf-book-page.mushaf-decorated .mushaf-book-content::before{content:'◆';display:block;text-align:center;color:#1a6b4a;font-size:1.1em;line-height:1.6;}
+.mushaf-book-page.mushaf-decorated .mushaf-bismillah-line{border:1px solid #c9a227;border-radius:10px;padding:4px 8px;}
 
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book @font-face{
 font-family:'IndoPakNastaleeq';
@@ -911,7 +918,7 @@ position:relative;
 font-family:'Amiri','Amiri Quran','Al Majeed Quranic','PDMS Saleem Quran','Al Qalam Quran','KFGQPC Uthmanic Script HAFS','Scheherazade New','Noto Naskh Arabic',serif;
 font-weight:400;
 font-feature-settings:"kern" 1,"liga" 1,"calt" 1,"rlig" 1;
-text-rendering:optimizeLegibility;will-change:transform;backface-visibility:hidden;
+text-rendering:optimizeLegibility;will-change:auto;backface-visibility:visible;
 direction:rtl;box-sizing:border-box;
 }
 body.light-mode.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{box-shadow:0 18px 46px rgba(0,0,0,.35);}
@@ -931,7 +938,7 @@ direction:ltr;-webkit-text-stroke:0.2px currentColor;
 
 .mushaf-book-content{
 text-align:justify;text-align-last:justify;text-justify:inter-word;width:100%;max-width:none;
-line-height:2.2;font-size:calc(.58em + 3px);padding:0;word-spacing:-0.03em;font-family:'IndoPakNastaleeq';font-weight:700;max-height:28.6em;overflow-y:auto;
+line-height:2.2;font-size:calc(.58em + 3px);padding:0 6px;word-spacing:-0.03em;font-family:'IndoPakNastaleeq';font-weight:700;max-height:28.6em;overflow-y:auto;
 }
 
 .mushaf-book-content .waqf-mark{position:relative;top:-0.08em;display:inline;font-size:1em;line-height:1;-webkit-text-stroke:0.15px currentColor;}
@@ -3071,7 +3078,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">21 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">19:11</span>
+    <span class="pdr-item pdr-time" id="pdrTime">19:23</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -10401,6 +10408,7 @@ function renderReaderPage(pageNumber, token){
   pageEl.innerHTML = '';
   const inner = document.createElement('div'); inner.className = 'mushaf-inner';
   const frame = document.createElement('div'); frame.className = 'mushaf-book-page';
+  if(pageNumber === 1 || pageNumber === 2) frame.classList.add('mushaf-decorated');
   const firstAyah = page.ayahs[0] || {};
   const pageJuz = firstAyah.juz || 1;
   const pageManzil = firstAyah.manzil || 1;
@@ -10982,12 +10990,12 @@ const SWIPE_MIN_X = 55;
 let readerGesture = null;
 let pageTurning = false;
 function getMushafInner(){ return pageEl.querySelector('.mushaf-inner'); }
-function clearInnerTransform(el){ if(!el) return; el.style.transition = ''; el.style.transform = ''; el.style.willChange = ''; }
+function clearInnerTransform(el){ if(!el) return; el.style.transition = ''; el.style.transform = ''; el.style.willChange = ''; el.style.filter = ''; el.style.opacity = ''; }
 function applyPageDrag(dx){
   const inner = getMushafInner(); if(!inner) return;
   const canPrev = readerState.currentPage > 1; const canNext = readerState.currentPage < 604;
-  let x = dx; if(x > 0 && !canNext) x *= 0.30; if(x < 0 && !canPrev) x *= 0.30;
-  inner.style.willChange = 'transform'; inner.style.transition = 'none'; inner.style.transform = 'translate3d(' + x + 'px,0,0)';
+  let x = dx; if(x < 0 && !canNext) x *= 0.30; if(x > 0 && !canPrev) x *= 0.30;
+  inner.style.willChange = 'transform'; inner.style.transition = 'none'; inner.style.transform = 'translate3d(' + Math.round(x) + 'px,0,0)';
 }
 function snapPageBack(){
   const inner = getMushafInner(); if(!inner) return;
@@ -11057,7 +11065,7 @@ function readerGestureMove(e){
   const g = readerGesture; g.x = e.clientX; g.y = e.clientY;
   const dx = g.x - g.x0; const dy = g.y - g.y0;
   if(!g.moved && (Math.abs(dx) > 8 || Math.abs(dy) > 8)){ g.moved = true; if(g.holdTimer){ clearTimeout(g.holdTimer); g.holdTimer = null; } }
-  if(!g.dragging){ if(Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.1){ g.dragging = true; try{ pageEl.setPointerCapture(e.pointerId); }catch(_){} hideViewerChromeNow(); } }
+  if(!g.dragging){ if(Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.4){ g.dragging = true; try{ pageEl.setPointerCapture(e.pointerId); }catch(_){} hideViewerChromeNow(); } }
   if(g.dragging) applyPageDrag(dx);
 }
 function readerGestureEnd(e){
@@ -11071,10 +11079,10 @@ function readerGestureEnd(e){
     const W = pageEl.clientWidth || window.innerWidth || 400;
     const dist = Math.abs(dx); const speed = dist / dt;
     const threshold = Math.max(38, W * 0.11);
-    const isFlick = dist > 22 && speed > 0.35;
+    const isFlick = dist > 40 && speed > 0.35;
     const canPrev = readerState.currentPage > 1; const canNext = readerState.currentPage < 604;
-    if(dx > 0 && canNext && (dist > threshold || (isFlick && dx > 0))) completePageTurn(1);
-    else if(dx < 0 && canPrev && (dist > threshold || (isFlick && dx < 0))) completePageTurn(-1);
+    if(dx < 0 && canNext && (dist > threshold || (isFlick && dx < 0))) completePageTurn(1);
+    else if(dx > 0 && canPrev && (dist > threshold || (isFlick && dx > 0))) completePageTurn(-1);
     else snapPageBack();
     return;
   }
