@@ -1,67 +1,30 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }
+/* === Index + Quran window: 12px bold IndoPak, tight spacing, 14 rows/page === */
+.surah-row .ar,
+.mushaf-book-content, .mushaf-book-content .w, .mushaf-book-content .ayah,
+.mushaf-book-content .mushaf-ayah-mark, .mushaf-book-header, .mushaf-book-header-row{
+  font-family:'Al Qalam Quran','IndoPak','Gulzar','Amiri Quran','Amiri',serif !important;
+  font-size:12px !important; font-weight:700 !important;
+  word-spacing:0 !important; letter-spacing:0 !important; line-height:1.35 !important;
 }
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+.surah-row .ar{ white-space:normal; text-align:right; }
+.mushaf-book-content .ayah{ margin-bottom:2px !important; padding:1px 0 !important; }
+.index-nav{ margin:10px 0 12px; }
+.index-tabs{ display:flex; gap:8px; }
+.index-tab{ flex:1; padding:9px 6px; border:1px solid var(--gold,#c9a24b); border-radius:10px; background:var(--panel-2,#f4f1e8); color:var(--text); font:inherit; font-weight:800; font-size:.82rem; cursor:pointer; }
+.index-tab.active{ background:#2a6fe0; color:#fff; border-color:#2a6fe0; }
+.index-panel{ display:none; margin-top:8px; padding:10px; border:1px solid var(--line); border-radius:12px; background:var(--panel); gap:8px; }
+.index-panel.open{ display:flex; flex-wrap:wrap; align-items:center; }
+.index-panel .hint{ width:100%; font-size:.72rem; color:var(--muted); font-weight:600; }
+.index-panel select, .index-panel input{ flex:1 1 90px; min-width:0; padding:9px 10px; border:1px solid var(--line); border-radius:10px; font:inherit; font-weight:700; background:var(--panel-2); color:var(--text); }
+.index-panel .go-btn{ padding:9px 16px; border:none; border-radius:10px; background:#2a6fe0; color:#fff; font:inherit; font-weight:800; cursor:pointer; }
+.index-panel .go-btn:disabled{ opacity:.55; cursor:default; }
+.index-err{ width:100%; font-size:.72rem; color:#c0392b; font-weight:700; display:none; }
+.index-err.show{ display:block; }
+.index-pager{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 2px 14px; font-size:.78rem; font-weight:700; }
+.index-pager button{ padding:8px 14px; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--text); font:inherit; font-weight:800; cursor:pointer; }
+.index-pager button:disabled{ opacity:.45; cursor:default; }
+</style><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -2730,117 +2693,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   .share-prayer .sp-time{font-size:.78rem;}
 }
 </style>
-
-<!-- INDOPAK UNIFY: Surah-opened + Juz-opened Quran window = IndoPak Quran window. Search/resume JS untouched. -->
-<style id="indopak-unify">
-/* Quran window width / frame = IndoPak window */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book,
-body.viewer-read-mode .qv-slot .mushaf{
-  padding-top:calc(var(--safe-top) + 62px) !important;
-  padding-bottom:calc(var(--safe-bottom) + 96px) !important;
-  padding-left:calc(var(--safe-left) + 10px) !important;
-  padding-right:calc(var(--safe-right) + 10px) !important;
-  font-size:clamp(1.4rem,5.8vw,2rem) !important;
-  line-height:2.15 !important; letter-spacing:0 !important; word-spacing:0.02em !important;
-  background:transparent !important; touch-action:pan-y;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner,
-body.viewer-read-mode .qv-slot .mushaf .mushaf-inner{
-  padding:0 clamp(28px,6.5vw,50px) !important; max-width:900px !important; width:100% !important; margin:0 auto !important; position:relative;
-}
-/* Quran window border = IndoPak window */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{
-  width:100% !important; box-sizing:border-box;
-  background:var(--page-bg,#000) !important; color:var(--page-fg,#fff) !important;
-  border:5px double var(--page-border,#fff) !important; border-radius:4px !important;
-  padding:14px 18px 8px !important; box-shadow:0 18px 46px rgba(0,0,0,.55);
-  min-height:calc(100vh - var(--safe-top) - var(--safe-bottom) - 170px);
-}
-/* Quran text + gap spacing = IndoPak text/spacing */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
-  text-align:justify; text-align-last:center; text-justify:inter-word;
-  line-height:2.15 !important; font-size:1em !important; padding:0 2px 2px !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah{display:inline !important; padding:0 !important; background:transparent !important; box-shadow:none !important; border-radius:0 !important;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.current,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.correct,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.error,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.skipped,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.pressing{
-  color:inherit !important; background:transparent !important; box-shadow:none !important; text-decoration:none !important; transform:none !important; animation:none !important; padding:0 4px !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .waqf-mark{font-size:1em !important; line-height:1 !important;}
-.mushaf-ayah-mark{font-size:.68em !important; padding:0 .22em !important; margin:0 .2em !important; line-height:1.55 !important; min-width:1.75em !important;}
-/* Top corners + page number = IndoPak: same place, same size */
-.mushaf-book-header-row{display:flex !important; align-items:center !important; justify-content:space-between !important; gap:8px !important; padding:2px 2px 8px !important; margin-bottom:12px !important; border-bottom:1px solid currentColor !important; font-size:.82em !important; line-height:1.25 !important; direction:ltr !important;}
-.mushaf-book-header-row .mbh-left,.mushaf-book-header-row .mbh-right{flex:1 1 0 !important; min-width:0; white-space:nowrap !important; overflow:hidden; text-overflow:ellipsis; direction:rtl !important; font-size:1em !important;}
-.mushaf-book-header-row .mbh-left{text-align:left !important;} .mushaf-book-header-row .mbh-right{text-align:right !important;}
-.mushaf-book-header-row .mbh-center{flex:0 0 auto !important; font-weight:800 !important; font-size:1em !important; text-align:center !important;}
-/* Surah header = IndoPak */
-.mushaf-book-header{text-align:center !important; padding:2px 0 14px !important; margin-bottom:16px !important; border-bottom:1px solid currentColor !important;}
-.mushaf-surah-name{font-size:1.35em !important; line-height:1.35 !important; font-weight:700 !important;}
-.mushaf-surah-meta{margin-top:6px !important; font-size:.66em !important; letter-spacing:.10em !important; font-weight:700 !important; opacity:.8;}
-/* Bismillah for Surah start = IndoPak Bismillah */
-.mushaf-bismillah-line{display:flex !important; align-items:center !important; justify-content:center !important; gap:14px !important; text-align:center !important; padding:8px 0 18px !important; margin:6px 0 10px !important; font-size:1.08em !important; line-height:1.85 !important; font-weight:400 !important; white-space:nowrap !important;}
-.mushaf-bismillah-line .bism-orn{font-size:1.05em !important; opacity:.9; line-height:1 !important;}
-.mushaf-bismillah-line .bism-text{padding:0 4px !important;}
-/* Juz start inverted colour = IndoPak (unchanged rule, restated so Surah/Juz pages cannot lose it) */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start{display:block !important; position:relative !important; background:transparent !important; color:inherit !important; padding:0 !important; margin:10px 0 !important; box-shadow:none !important; opacity:1 !important;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{content:'' !important; position:absolute !important; left:-6px !important; right:-6px !important; top:0 !important; height:1lh !important; background:#ffffff !important; border-radius:8px !important; mix-blend-mode:difference !important; -webkit-mix-blend-mode:difference !important; pointer-events:none !important; z-index:0 !important;}
-/* Footer / Manzil + page number line = IndoPak */
-.mushaf-book-footer-row{display:block !important; text-align:center !important; padding:8px 0 2px !important; margin-top:12px !important; border-top:1px solid currentColor !important; font-size:.82em !important; line-height:1.4 !important;}
-.mushaf-page-num{display:block !important; text-align:center !important; margin:0 0 14px !important; padding:0 !important; font-size:1.05rem !important; letter-spacing:.14em !important; opacity:.8;}
-/* NOTE: .mushaf-ruku-mark (ع, outside in line) and .mushaf-sajdah-mark / Sajdah popup intentionally NOT restated here — left exactly as-is. */
-</style>
-
-<!-- INDOPAK 13-LINE: -2px script, wider frame, 13 ruled rows, bold IndoPak. Search/resume JS untouched. -->
-<style id="indopak-13line">
-/* 1) Quran script -2px, bold IndoPak style */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book,
-body.viewer-read-mode .qv-slot .mushaf{
-  font-size:clamp(calc(1.4rem - 2px),calc(5.8vw - 2px),calc(2rem - 2px)) !important;
-  --mushaf-row:calc((100vh - var(--safe-top) - var(--safe-bottom) - 285px) / 13);
-  line-height:var(--mushaf-row) !important;
-}
-/* Bold IndoPak: heavy weight + slight stroke so it reads like the printed bold IndoPak naskh in the photo */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w{
-  font-family:'Gulzar','Al Qalam Quran','Amiri Quran','Amiri','PDMS Saleem Quran','KFGQPC Uthmanic Script HAFS','Scheherazade New','Noto Naskh Arabic',serif !important;
-  font-weight:700 !important; -webkit-text-stroke:0.35px currentColor;
-}
-/* 2) Widened script border frame — thick solid frame like the photo (was 5px double) */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{
-  border:9px solid var(--page-border,#fff) !important; border-radius:2px !important;
-  padding:16px 20px 10px !important;
-  box-shadow:0 18px 46px rgba(0,0,0,.55), inset 0 0 0 1px var(--page-border,#fff) !important;
-  min-height:calc(100vh - var(--safe-top) - var(--safe-bottom) - 170px);
-}
-/* 3) 13 rows per page — ruled lines, one row per line of Quran text */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
-  line-height:var(--mushaf-row) !important; font-size:1em !important;
-  min-height:calc(var(--mushaf-row) * 13) !important;
-  padding:0 2px 0 !important;
-  /* ruled line at the bottom of every row, like the printed page */
-  background-image:linear-gradient(to bottom, transparent calc(100% - 1px), currentColor calc(100% - 1px)) !important;
-  background-size:100% var(--mushaf-row) !important; background-repeat:repeat-y !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w{line-height:inherit !important;}
-/* Ayah medallion + waqf marks stay inside the row, not bold-stroked */
-.mushaf-ayah-mark{-webkit-text-stroke:0 !important; font-weight:700 !important;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .waqf-mark{-webkit-text-stroke:0.15px currentColor !important;}
-/* Juz-start inverted row keeps its height = one ruled row */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{height:var(--mushaf-row) !important;}
-/* Bismillah / Surah header keep IndoPak look, sit above the 13 text rows */
-.mushaf-bismillah-line{line-height:1.85 !important;}
-/* NOTE: .mushaf-ruku-mark (ع) and Sajdah popup intentionally untouched. */
-</style>
 </head>
-
-
 <body class="page-dark tajweed-full">
 
 <script>
@@ -3071,7 +2924,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
   </section>
 </div>
 
-<style>.quran-jump{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 12px}.quran-jump-label{display:block;font-size:.78rem;font-weight:800;color:var(--muted);letter-spacing:.04em;margin-bottom:8px}.quran-jump-row{display:flex;gap:8px}.quran-jump-row input{flex:1;min-width:0;height:44px;padding:0 12px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;font:inherit;font-size:.9rem;outline:none}.quran-jump-row input:focus{border-color:var(--accent)}.quran-jump-row select{height:44px;padding:0 10px;background:var(--bg);color:var(--text);border:1px solid var(--gold);border-radius:12px;font:inherit;font-size:.85rem;font-weight:700;outline:none}.quran-jump-go{height:44px;padding:0 18px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-weight:800;cursor:pointer}.quran-jump-hint{margin:8px 0 0;font-size:.68rem;color:var(--muted);font-weight:600;line-height:1.5}.quran-resume{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--gold);border-radius:14px;padding:12px;margin:0 0 12px}.quran-resume-sub{font-size:.7rem;color:var(--muted);margin-top:3px}.quran-resume-btn{flex-shrink:0;height:40px;padding:0 16px;border:0;border-radius:11px;background:var(--good);color:#fff;font:inherit;font-weight:800;cursor:pointer}.quran-filter{margin:0 0 12px}.quran-filter input{width:100%;height:44px;padding:0 12px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;font:inherit;font-size:.9rem;outline:none}.quran-filter input:focus{border-color:var(--accent)}body.light-mode .quran-jump-row input,body.light-mode .quran-jump-row select,body.light-mode .quran-filter input{background:#fff}</style><div class="app screen" id="screenSurahIndex" hidden="">
+<div class="app screen" id="screenSurahIndex" hidden="">
   <div class="sub-header">
     <button id="backFromIndex" class="back-pill" type="button" aria-label="Back to home">Back</button>
     <h1>Surah index</h1>
@@ -3081,7 +2934,24 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
     <label class="lang-label" for="surahIndexLang">🌐 Translation</label>
     <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
-  <div class="quran-jump" role="search"><label class="quran-jump-label" for="quranJumpInput">Jump to page or Surah</label><div class="quran-jump-row"><input id="quranJumpInput" inputmode="numeric" placeholder="e.g. 79 - Surah 79, or 115+ - page" aria-label="Page or Surah number"><select id="quranJumpMode" aria-label="Jump type"><option value="auto">Auto</option><option value="surah">Surah</option><option value="page">Page</option></select><button id="quranJumpBtn" class="quran-jump-go" type="button">Go</button></div><p class="quran-jump-hint">Auto: 1-114 opens a Surah, 115-604 opens a page. Choose Surah / Page to force it.</p></div><div class="quran-resume" id="quranResumeSurah" hidden=""><div><strong>Continue where you left off?</strong><div class="quran-resume-sub" id="quranResumeSurahText"></div></div><button id="quranResumeSurahBtn" class="quran-resume-btn" type="button">Continue</button></div><div class="quran-filter"><input id="surahFilterInput" placeholder="Filter Surahs by name or number..." aria-label="Filter Surahs"></div>
+  
+  <div class="index-nav" data-index-nav="surah">
+    <div class="index-tabs" role="tablist">
+      <button type="button" class="index-tab" data-tab="continue">Continue…</button>
+      <button type="button" class="index-tab" data-tab="jump">Jump to…</button>
+    </div>
+    <div class="index-panel" data-panel="continue">
+      <span class="hint" data-last-label="">No saved page yet. Open any page in the Quran window first.</span>
+      <button type="button" class="go-btn" data-continue-go="" disabled="">Continue on page <span data-last-page="">—</span></button>
+    </div>
+    <div class="index-panel" data-panel="jump">
+      <select data-jump-kind="" aria-label="Jump to page, juz or surah"><option value="page">Page</option><option value="juz">Juz</option><option value="surah">Surah</option></select>
+      <input type="number" inputmode="numeric" min="1" data-jump-num="" placeholder="Enter number" aria-label="Number to jump to">
+      <button type="button" class="go-btn" data-jump-go="">Go</button>
+      <span class="index-err" data-jump-err=""></span>
+      <span class="hint">Page 1–604 · Juz 1–30 · Surah 1–114</span>
+    </div>
+  </div>
   <div class="surah-list" id="surahIndexList"><div class="loading">Loading…</div></div>
 </div>
 
@@ -3095,7 +2965,24 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
     <label class="lang-label" for="juzIndexLang">🌐 Translation</label>
     <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
-  <div class="quran-jump" role="search"><label class="quran-jump-label" for="quranJumpInputJuz">Jump to page or Juz</label><div class="quran-jump-row"><input id="quranJumpInputJuz" inputmode="numeric" placeholder="e.g. 3 - Juz 3, or 42 - page 42" aria-label="Page or Juz number"><select id="quranJumpModeJuz" aria-label="Jump type"><option value="auto">Auto</option><option value="juz">Juz</option><option value="page">Page</option></select><button id="quranJumpBtnJuz" class="quran-jump-go" type="button">Go</button></div><p class="quran-jump-hint">Auto: 1-30 opens a Juz, 31-604 opens a page. Choose Juz / Page to force it.</p></div><div class="quran-resume" id="quranResumeJuz" hidden=""><div><strong>Continue where you left off?</strong><div class="quran-resume-sub" id="quranResumeJuzText"></div></div><button id="quranResumeJuzBtn" class="quran-resume-btn" type="button">Continue</button></div>
+  
+  <div class="index-nav" data-index-nav="juz">
+    <div class="index-tabs" role="tablist">
+      <button type="button" class="index-tab" data-tab="continue">Continue…</button>
+      <button type="button" class="index-tab" data-tab="jump">Jump to…</button>
+    </div>
+    <div class="index-panel" data-panel="continue">
+      <span class="hint" data-last-label="">No saved page yet. Open any page in the Quran window first.</span>
+      <button type="button" class="go-btn" data-continue-go="" disabled="">Continue on page <span data-last-page="">—</span></button>
+    </div>
+    <div class="index-panel" data-panel="jump">
+      <select data-jump-kind="" aria-label="Jump to page, juz or surah"><option value="page">Page</option><option value="juz">Juz</option><option value="surah">Surah</option></select>
+      <input type="number" inputmode="numeric" min="1" data-jump-num="" placeholder="Enter number" aria-label="Number to jump to">
+      <button type="button" class="go-btn" data-jump-go="">Go</button>
+      <span class="index-err" data-jump-err=""></span>
+      <span class="hint">Page 1–604 · Juz 1–30 · Surah 1–114</span>
+    </div>
+  </div>
   <div class="surah-list" id="juzIndexList"><button type="button" class="surah-row"><span class="num">1</span><span class="meta"><span class="en">Alif Lam Meem</span><span class="sub">Page 1 · Juz 1 / 30</span></span><span class="ar">الجزء ١</span></button><button type="button" class="surah-row"><span class="num">2</span><span class="meta"><span class="en">Sayaqul</span><span class="sub">Page 22 · Juz 2 / 30</span></span><span class="ar">الجزء ٢</span></button><button type="button" class="surah-row"><span class="num">3</span><span class="meta"><span class="en">Tilkal Rusul</span><span class="sub">Page 42 · Juz 3 / 30</span></span><span class="ar">الجزء ٣</span></button><button type="button" class="surah-row"><span class="num">4</span><span class="meta"><span class="en">Lan Tanaloo</span><span class="sub">Page 62 · Juz 4 / 30</span></span><span class="ar">الجزء ٤</span></button><button type="button" class="surah-row"><span class="num">5</span><span class="meta"><span class="en">Wal Muhsanat</span><span class="sub">Page 82 · Juz 5 / 30</span></span><span class="ar">الجزء ٥</span></button><button type="button" class="surah-row"><span class="num">6</span><span class="meta"><span class="en">La Yuhibbullah</span><span class="sub">Page 102 · Juz 6 / 30</span></span><span class="ar">الجزء ٦</span></button><button type="button" class="surah-row"><span class="num">7</span><span class="meta"><span class="en">Wa Iza Samiu</span><span class="sub">Page 121 · Juz 7 / 30</span></span><span class="ar">الجزء ٧</span></button><button type="button" class="surah-row"><span class="num">8</span><span class="meta"><span class="en">Wa Lau Annana</span><span class="sub">Page 142 · Juz 8 / 30</span></span><span class="ar">الجزء ٨</span></button><button type="button" class="surah-row"><span class="num">9</span><span class="meta"><span class="en">Qalal Malaou</span><span class="sub">Page 162 · Juz 9 / 30</span></span><span class="ar">الجزء ٩</span></button><button type="button" class="surah-row"><span class="num">10</span><span class="meta"><span class="en">Wa A'lamu</span><span class="sub">Page 182 · Juz 10 / 30</span></span><span class="ar">الجزء ١٠</span></button><button type="button" class="surah-row"><span class="num">11</span><span class="meta"><span class="en">Yatazeroon</span><span class="sub">Page 201 · Juz 11 / 30</span></span><span class="ar">الجزء ١١</span></button><button type="button" class="surah-row"><span class="num">12</span><span class="meta"><span class="en">Wa Mamin Da'abat</span><span class="sub">Page 222 · Juz 12 / 30</span></span><span class="ar">الجزء ١٢</span></button><button type="button" class="surah-row"><span class="num">13</span><span class="meta"><span class="en">Wa Ma Ubarri'u</span><span class="sub">Page 242 · Juz 13 / 30</span></span><span class="ar">الجزء ١٣</span></button><button type="button" class="surah-row"><span class="num">14</span><span class="meta"><span class="en">Rubama</span><span class="sub">Page 262 · Juz 14 / 30</span></span><span class="ar">الجزء ١٤</span></button><button type="button" class="surah-row"><span class="num">15</span><span class="meta"><span class="en">Subhanallazi</span><span class="sub">Page 282 · Juz 15 / 30</span></span><span class="ar">الجزء ١٥</span></button><button type="button" class="surah-row"><span class="num">16</span><span class="meta"><span class="en">Qal Alam</span><span class="sub">Page 302 · Juz 16 / 30</span></span><span class="ar">الجزء ١٦</span></button><button type="button" class="surah-row"><span class="num">17</span><span class="meta"><span class="en">Aqtarabo</span><span class="sub">Page 322 · Juz 17 / 30</span></span><span class="ar">الجزء ١٧</span></button><button type="button" class="surah-row"><span class="num">18</span><span class="meta"><span class="en">Qad Aflaha</span><span class="sub">Page 342 · Juz 18 / 30</span></span><span class="ar">الجزء ١٨</span></button><button type="button" class="surah-row"><span class="num">19</span><span class="meta"><span class="en">Wa Qalallazina</span><span class="sub">Page 362 · Juz 19 / 30</span></span><span class="ar">الجزء ١٩</span></button><button type="button" class="surah-row"><span class="num">20</span><span class="meta"><span class="en">A'man Khalaq</span><span class="sub">Page 382 · Juz 20 / 30</span></span><span class="ar">الجزء ٢٠</span></button><button type="button" class="surah-row"><span class="num">21</span><span class="meta"><span class="en">Utlu Ma Oohiya</span><span class="sub">Page 402 · Juz 21 / 30</span></span><span class="ar">الجزء ٢١</span></button><button type="button" class="surah-row"><span class="num">22</span><span class="meta"><span class="en">Wa Manyaqnut</span><span class="sub">Page 422 · Juz 22 / 30</span></span><span class="ar">الجزء ٢٢</span></button><button type="button" class="surah-row"><span class="num">23</span><span class="meta"><span class="en">Wa Mali</span><span class="sub">Page 442 · Juz 23 / 30</span></span><span class="ar">الجزء ٢٣</span></button><button type="button" class="surah-row"><span class="num">24</span><span class="meta"><span class="en">Faman Azlam</span><span class="sub">Page 462 · Juz 24 / 30</span></span><span class="ar">الجزء ٢٤</span></button><button type="button" class="surah-row"><span class="num">25</span><span class="meta"><span class="en">Elahe Yuraddo</span><span class="sub">Page 482 · Juz 25 / 30</span></span><span class="ar">الجزء ٢٥</span></button><button type="button" class="surah-row"><span class="num">26</span><span class="meta"><span class="en">Ha Meem</span><span class="sub">Page 502 · Juz 26 / 30</span></span><span class="ar">الجزء ٢٦</span></button><button type="button" class="surah-row"><span class="num">27</span><span class="meta"><span class="en">Qala Fama Khatbukum</span><span class="sub">Page 522 · Juz 27 / 30</span></span><span class="ar">الجزء ٢٧</span></button><button type="button" class="surah-row"><span class="num">28</span><span class="meta"><span class="en">Qad Sami Allah</span><span class="sub">Page 542 · Juz 28 / 30</span></span><span class="ar">الجزء ٢٨</span></button><button type="button" class="surah-row"><span class="num">29</span><span class="meta"><span class="en">Tabarakallazi</span><span class="sub">Page 562 · Juz 29 / 30</span></span><span class="ar">الجزء ٢٩</span></button><button type="button" class="surah-row"><span class="num">30</span><span class="meta"><span class="en">Amma Yatasa'aloon</span><span class="sub">Page 582 · Juz 30 / 30</span></span><span class="ar">الجزء ٣٠</span></button></div>
 </div>
 
@@ -3168,7 +3055,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">21 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">10:54</span>
+    <span class="pdr-item pdr-time" id="pdrTime">09:44</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3264,8 +3151,10 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
     </div>
     <ol class="mistakes-list" id="mistakesList"></ol>
   </section>
-  
-  <section class="mushaf" id="pageEl" aria-label="Quran text"><div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load page 1.</span>Check your connection and try again.</div></div></section><div class="legend hide-immersive">
+  <section class="mushaf" id="pageEl" aria-label="Quran text">
+    <div class="mushaf-inner"><div class="loading">Loading…</div></div>
+  </section>
+  <div class="legend hide-immersive">
     <span><i style="background:#2fd07a"></i>correct</span>
     <span><i style="background:#ff5a6a"></i>misread</span>
     <span>· Scrolls automatically as you recite</span>
@@ -3380,13 +3269,13 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
   <div class="qv-chrome" id="qvChrome">
     <div class="qv-top">
       <button class="qv-btn qv-back" id="qvBack" aria-label="Back">Back</button>
-      <span class="qv-title" id="qvTitle">Error</span>
+      <span class="qv-title" id="qvTitle">Quran</span>
       <button class="qv-btn qv-bookmark" id="qvBookmark" type="button" aria-label="Bookmark this page" title="Bookmark this page">🔖</button>
       <button class="qv-btn" id="qvDark" aria-label="Toggle theme">🌙</button>
     </div>
     <div class="qv-bottom">
       <button class="qv-btn qv-page-nav" id="qvPrevPage" aria-label="Previous page">‹</button>
-      <button class="qv-btn qv-play" id="qvPlay" aria-label="Play">▶</button>
+      <button class="qv-btn qv-play" id="qvPlay" aria-label="Play / pause">▶</button>
       <div class="qv-vol-wrap" id="qvVolWrap">
         <span class="qv-vol-icon" id="qvVolIcon" role="button" tabindex="0" aria-label="Mute or unmute">🔊</span>
         <input type="range" class="qv-vol-slider" id="qvVolSlider" min="0" max="1" step="0.01" value="1" aria-label="Volume">
@@ -3396,8 +3285,8 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
       <button class="qv-btn" id="qvSurahBtn" aria-label="Surah picker">📖</button>
     </div>
   </div>
-  <div class="qv-fs-float hidden" id="qvFsFloat" style="">
-    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen" style="">⛶</button>
+  <div class="qv-fs-float hidden" id="qvFsFloat">
+    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen">⛶</button>
   </div>
 </div>
 
@@ -9475,53 +9364,15 @@ function askForInternet(label){
   });
 }
 
-async function renderSurahIndex(){
-  surahIndexList.innerHTML = '<div class="loading">Loading…</div>';
-  try{
-    const chapters = await ensureChaptersLocalized(surahIndexLang);
-    surahIndexList.innerHTML = '';
-    chapters.forEach(s => {
-      const row = document.createElement('button');
-      row.className = 'surah-row'; row.type = 'button';
-      const subParts = [];
-      if (s.translatedName) subParts.push(escapeHtml(s.translatedName));
-      subParts.push(s.numberOfAyahs + ' ayahs');
-      subParts.push(escapeHtml(s.revelationType));
-      row.innerHTML =
-        '<span class="num">' + String(s.number).padStart(3,'0') + '</span>' +
-        '<span class="meta">' +
-          '<span class="en">' + escapeHtml(s.englishName) + '</span>' +
-          '<span class="sub">' + subParts.join(' · ') + '</span>' +
-        '</span>' +
-        '<span class="ar">' + escapeHtml(s.name) + '</span>';
-      row.addEventListener('click', () => openSurahInReader(s.number));
-      surahIndexList.appendChild(row);
-    });
-  }catch(e){
-    surahIndexList.innerHTML = '<div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div>';
-  }
+async function renderSurahIndex(){ surahIndexList.innerHTML='<div class="loading">Loading\u2026</div>'; try{ const chapters=await ensureChaptersLocalized(surahIndexLang); renderIndexPaged(surahIndexList, chapters.map(buildSurahRow), 'surah'); }catch(e){ surahIndexList.innerHTML='<div class="loading"><span class="err">\u26a0\ufe0f Could not load the surah list.</span>Check your connection and try again.</div>'; } };
+    if(jumpBtn) jumpBtn.addEventListener('click',doJump);
+    if(numInp) numInp.addEventListener('keydown',e=>{ if(e.key==='Enter') doJump(); });
+    refreshLast();
+  });
 }
-const JUZ_NAMES = ['Alif Lam Meem','Sayaqul','Tilkal Rusul','Lan Tanaloo','Wal Muhsanat','La Yuhibbullah','Wa Iza Samiu','Wa Lau Annana','Qalal Malaou','Wa A\'lamu','Yatazeroon','Wa Mamin Da\'abat','Wa Ma Ubarri\'u','Rubama','Subhanallazi','Qal Alam','Aqtarabo','Qad Aflaha','Wa Qalallazina','A\'man Khalaq','Utlu Ma Oohiya','Wa Manyaqnut','Wa Mali','Faman Azlam','Elahe Yuraddo','Ha Meem','Qala Fama Khatbukum','Qad Sami Allah','Tabarakallazi','Amma Yatasa\'aloon'];
-const JUZ_NAMES_AR = ['الم','سيقول','تلك الرسل','لن تنالوا','والمحصنات','لا يحب الله','وإذا سمعوا','ولو أننا','قال الملأ','واعلموا','يعتذرون','وما من دابة','وما أبرئ','ربما','سبحان الذي','قال ألم','اقترب','قد أفلح','وقال الذين','أمن خلق','اتل ما أوحي','ومن يقنت','وما لي','فمن أظلم','إليه يرد','حم','قال فما خطبكم','قد سمع الله','تبارك الذي','عم يتساءلون'];
-const JUZ_START_PAGES_FALLBACK = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
-function renderJuzIndex(){
-  juzIndexList.innerHTML = '';
-  const label = { en: 'Juz', tr: 'Cüz' }[surahIndexLang] || 'Juz';
-  for(let i = 1; i <= 30; i++){
-    const row = document.createElement('button');
-    row.type = 'button'; row.className = 'surah-row';
-    const startPage = JUZ_START_PAGES_FALLBACK[i - 1];
-    row.innerHTML =
-      '<span class="num">' + i + '</span>' +
-      '<span class="meta">' +
-        '<span class="en">' + escapeHtml(JUZ_NAMES[i - 1] || ('Juz ' + i)) + '</span>' +
-        '<span class="sub">Page ' + startPage + ' · ' + label + ' ' + i + ' / 30</span>' +
-      '</span>' +
-      '<span class="ar">الجزء ' + toAr(i) + '</span>';
-    row.addEventListener('click', () => openJuzInReader(i));
-    juzIndexList.appendChild(row);
-  }
-}
+document.addEventListener('DOMContentLoaded', wireIndexNav);
+wireIndexNav();
+function renderJuzIndex(){ const rows=[]; for(let i=1;i<=30;i++) rows.push(buildJuzRow(i)); renderIndexPaged(juzIndexList, rows, 'juz'); }
 function populateLangSelectors() {
   const ids = ['surahIndexLang', 'juzIndexLang'];
   ids.forEach(id => {
@@ -10408,6 +10259,7 @@ function renderReaderPage(pageNumber, token){
   const page = readerState.pages.get(pageNumber);
   if(!page) return;
   readerState.currentPage = pageNumber;
+  try{ localStorage.setItem('qc.lastReaderPage', String(pageNumber)); }catch(e){}
   updateBookmarkButton();
   STORE.mode = 'page'; STORE.page = pageNumber;
   pageEl.classList.add('mushaf-book');
@@ -12999,7 +12851,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   // The full Tajweed engine needs live speech input.
@@ -13037,106 +12889,21 @@ function showTextShareModal(text){
       console.log = console.warn = console.error = function() {};
     }
   }, 1000);
-</script><style>
+</script>
+<style>
 .protected-element {
-  user-select: none;        /* Prevents text selection */
-  -webkit-user-select: none; /* For Safari */
-  pointer-events: none;      /* Disables ALL mouse interactions (use with care) */
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
 }
-</style><script>
-(function(){
-var JUZ_STARTS=[[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[16,129],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
-var KEY='qc.quranLastPlace';
-function loadPlace(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
-function savePlace(p){try{localStorage.setItem(KEY,JSON.stringify(Object.assign({at:Date.now()},p)))}catch(e){}}
-function fmtPlace(p){if(!p)return'';var d=new Date(p.at).toLocaleString();if(p.kind==='page')return'Page '+p.page+' - saved '+d;if(p.kind==='surah')return'Surah '+p.surah+' - Page '+(p.page||'')+' - saved '+d;if(p.kind==='juz')return'Juz '+p.juz+' - Page '+(p.page||'')+' - saved '+d;return'Page '+(p.page||'');}
-function resumePlace(){var p=loadPlace();if(!p||!p.page)return;try{if(typeof openViewer==='function')openViewer('read',{hideFullscreen:true});}catch(e){}loadReaderPage(p.page);}
-function showResume(){var p=loadPlace();if(!p)return;[['quranResumeSurah','quranResumeSurahText','quranResumeSurahBtn'],['quranResumeJuz','quranResumeJuzText','quranResumeJuzBtn']].forEach(function(ids){var box=document.getElementById(ids[0]);if(!box)return;document.getElementById(ids[1]).textContent=fmtPlace(p);box.hidden=false;document.getElementById(ids[2]).onclick=function(){resumePlace();};});}
-if(typeof window.openSurahInReader==='function'){var _s=window.openSurahInReader;window.openSurahInReader=async function(n){var pg=null;try{pg=await getSurahStartPage(n)}catch(e){}savePlace({kind:'surah',surah:n,page:pg||1});return _s(n);};}
-if(typeof window.openJuzInReader==='function'){var _j=window.openJuzInReader;window.openJuzInReader=async function(n){var pg=null;try{pg=await getJuzStartPage(n)}catch(e){}savePlace({kind:'juz',juz:n,page:pg||1});return _j(n);};}
-if(typeof window.loadReaderPage==='function'){var _l=window.loadReaderPage;window.loadReaderPage=function(n){var prev=loadPlace()||{kind:'page'};savePlace(Object.assign({},prev,{page:n}));return _l(n);};}
-window.addEventListener('pagehide',function(){var p=loadPlace();if(p)savePlace(p);});
-document.addEventListener('visibilitychange',function(){if(document.hidden){var p=loadPlace();if(p)savePlace(p);}});
-if(typeof window.renderJuzIndex==='function'){var _rj=window.renderJuzIndex;window.renderJuzIndex=function(){_rj();try{var list=document.getElementById('juzIndexList');if(list){Array.prototype.forEach.call(list.querySelectorAll('.surah-row'),function(row,i){if(i>=30)return;var sub=row.querySelector('.sub');if(sub&&!sub.dataset.enriched){sub.dataset.enriched='1';var s=JUZ_STARTS[i];sub.textContent=sub.textContent+' - Starts Surah '+s[0]+' : Ayah '+s[1];}});}}catch(e){}showResume();};}
-if(typeof window.renderSurahIndex==='function'){var _rs=window.renderSurahIndex;window.renderSurahIndex=function(){var r=_rs();showResume();return r;};}
-var f=document.getElementById('surahFilterInput');if(f){f.addEventListener('input',function(){var q=f.value.trim().toLowerCase();document.querySelectorAll('#surahIndexList .surah-row').forEach(function(row){row.style.display=!q||row.textContent.toLowerCase().indexOf(q)>-1?'':'none';});});}
-function toast(msg){if(typeof window.showToast==='function')showToast(msg,2200);else alert(msg);}
-async function doJump(inputId,modeId,isJuz){var v=parseInt(document.getElementById(inputId).value,10);var mode=document.getElementById(modeId).value;if(!v||v<1){toast('Enter a number first.');return;}try{if(mode==='page'||(mode==='auto'&&v>(isJuz?30:114))){if(v>604){toast('Page must be 1-604.');return;}savePlace({kind:'page',page:v});if(typeof openViewer==='function')openViewer('read',{hideFullscreen:true});loadReaderPage(v);return;}if(mode==='juz'||(isJuz&&mode==='auto'&&v<=30)){openJuzInReader(v);return;}if(v>114){toast('Surah must be 1-114.');return;}openSurahInReader(v);}catch(e){toast('Could not jump - check your connection.');}}
-var b1=document.getElementById('quranJumpBtn');if(b1)b1.addEventListener('click',function(){doJump('quranJumpInput','quranJumpMode',false);});
-var i1=document.getElementById('quranJumpInput');if(i1)i1.addEventListener('keydown',function(e){if(e.key==='Enter')doJump('quranJumpInput','quranJumpMode',false);});
-var b2=document.getElementById('quranJumpBtnJuz');if(b2)b2.addEventListener('click',function(){doJump('quranJumpInputJuz','quranJumpModeJuz',true);});
-var i2=document.getElementById('quranJumpInputJuz');if(i2)i2.addEventListener('keydown',function(e){if(e.key==='Enter')doJump('quranJumpInputJuz','quranJumpModeJuz',true);});
-showResume();
-})();
-</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<!-- SCOPED FIX — ONLY Surah index + Juz index screens. Nothing else touched. 132% kept as-is. -->
-<style id="spec-index-only">
-  /* Scope is strictly the two index lists. Sub-header, back pill, tabs, lang selector,
-     jump box, Play Audio, Coach, viewer and all other app text are NOT selected here. */
-  #screenSurahIndex .surah-list,
-  #screenJuzIndex .surah-list,
-  #screenSurahIndex .surah-list *,
-  #screenJuzIndex .surah-list *{
-    font-size:14px !important;
-    line-height:1.9 !important;
-    letter-spacing:0 !important;
-    text-shadow:none !important;
-    filter:none !important;
-  }
-  /* Keep each row's original flex layout — do not re-flow / mis-align tabs or rows */
-  #screenSurahIndex .surah-list .surah-row,
-  #screenJuzIndex .surah-list .surah-row{
-    display:flex !important;
-    align-items:center !important;
-    overflow:visible !important;
-  }
-  /* Quran / Arabic name in the row: neatly centred in its own cell, no overlap / clipping */
-  #screenSurahIndex .surah-list .ar,
-  #screenJuzIndex .surah-list .ar{
-    text-align:center !important;
-    direction:rtl !important;
-    unicode-bidi:embed;
-    overflow:visible !important;
-    white-space:normal !important;
-    overflow-wrap:normal;
-    flex:0 0 auto !important;
-  }
-  /* English name + Page/Juz meta: same 14px, no overlap, keep their place in the row */
-  #screenSurahIndex .surah-list .meta,
-  #screenJuzIndex .surah-list .meta,
-  #screenSurahIndex .surah-list .en,
-  #screenJuzIndex .surah-list .en,
-  #screenSurahIndex .surah-list .sub,
-  #screenJuzIndex .surah-list .sub{
-    overflow:visible !important;
-    white-space:normal !important;
-  }
-  /* Number badge: keep its shape, just centre the 14px number inside it */
-  #screenSurahIndex .surah-list .num,
-  #screenJuzIndex .surah-list .num{
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    flex-shrink:0 !important;
-    line-height:1.4 !important;
-  }
-  /* Any Tajweed / mark inside these two lists only: inline, never absolute / overlapping */
-  #screenSurahIndex .surah-list [class*="tajweed"],
-  #screenJuzIndex .surah-list [class*="tajweed"],
-  #screenSurahIndex .surah-list [class*="taj"],
-  #screenJuzIndex .surah-list [class*="taj"],
-  #screenSurahIndex .surah-list sup,
-  #screenJuzIndex .surah-list sup{
-    position:static !important;
-    transform:none !important;
-    top:auto !important; left:auto !important; right:auto !important; bottom:auto !important;
-    display:inline-block !important;
-    vertical-align:baseline !important;
-    margin:0 1px !important;
-    font-size:14px !important;
-    line-height:1 !important;
-    overflow:visible !important;
-  }
 </style>
+<script>
+window.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+}, true);
+</script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
