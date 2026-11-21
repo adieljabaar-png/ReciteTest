@@ -2646,50 +2646,51 @@ body.light-mode .share-arabic{color:#1a2233;}
   .share-prayer .sp-time{font-size:.78rem;}
 }
 
-/* ══ IndoPak reading page: 12px bold, 14 ruled rows, tight word gaps ══ */
+/* ══ IndoPak reading page: 16px bold, 14 centred ruled rows per page, tight word gaps ══ */
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book{
-  --indopak-font:'Scheherazade New','Noto Naskh Arabic','Amiri','Amiri Quran','Al Qalam Quran','PDMS Saleem Quran',serif;
-  --row-h:clamp(30px,calc((100vh - var(--safe-top,0px) - var(--safe-bottom,0px) - 250px) / 14),40px);
-  font-size:12px;line-height:var(--row-h);
+  --indopak-font:'Scheherazade New','Amiri Quran','Amiri','Noto Naskh Arabic','Al Qalam Quran','PDMS Saleem Quran',serif;
+  --quran-font:16px;      /* Quran text size */
+  --row-ratio:2.5;        /* row height = text size x this (keeps marks clear of the lines) */
+  font-size:var(--quran-font);line-height:var(--row-ratio);
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner{padding:0 clamp(20px,5vw,34px);}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{
-  font-family:var(--indopak-font);font-weight:700;font-size:12px;
+  font-family:var(--indopak-font);font-weight:700;font-size:var(--quran-font);
   min-height:0;padding:0 6px;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header-row{padding:6px 4px;margin-bottom:0;font-size:13px;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-footer-row{margin-top:0;padding:6px 0;font-size:13px;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
-  font-family:var(--indopak-font);font-weight:700;font-size:12px;
-  line-height:var(--row-h);letter-spacing:0;word-spacing:-0.04em;padding:0;
-  -webkit-text-stroke:0.25px currentColor;
+  font-family:var(--indopak-font);font-weight:700;font-size:var(--quran-font);
+  line-height:var(--row-ratio);letter-spacing:0;word-spacing:-0.1em;padding:0;
+  -webkit-text-stroke:0.25px currentColor;position:relative;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .rw{
-  display:inline-block;white-space:nowrap;vertical-align:top;
-  height:var(--row-h);line-height:var(--row-h);
+  display:inline-block;white-space:nowrap;vertical-align:top;line-height:var(--row-ratio);
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start{
   display:inline;margin:0;background:rgba(201,162,39,.16) !important;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{display:none;}
-/* ruled rows (not used while English translation is shown under each verse) */
+/* ruled, centred rows (switched off while the English translation is shown under each verse) */
 body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-book-content{
-  text-align:justify;text-align-last:justify;text-justify:inter-word;
-  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--row-h) - 1px),#8a8a8a calc(var(--row-h) - 1px),#8a8a8a var(--row-h));
-  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--row-h) - 1px),color-mix(in srgb,var(--page-fg,#888) 55%,transparent) calc(var(--row-h) - 1px),color-mix(in srgb,var(--page-fg,#888) 55%,transparent) var(--row-h));
+  text-align:center;text-align-last:center;overflow:hidden;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--pitch,40px) - 1px),#8a8a8a calc(var(--pitch,40px) - 1px),#8a8a8a var(--pitch,40px));
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--pitch,40px) - 1px),color-mix(in srgb,var(--page-fg,#888) 55%,transparent) calc(var(--pitch,40px) - 1px),color-mix(in srgb,var(--page-fg,#888) 55%,transparent) var(--pitch,40px));
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content.rows-on{white-space:nowrap;}
 body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-book-header{
-  height:var(--row-h);box-sizing:border-box;margin:0;padding:0;border-bottom:none;
-  display:flex;align-items:center;justify-content:center;
+  display:block;margin:0;padding:0;border-bottom:none;text-align:center;line-height:var(--row-ratio);
 }
 body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-book-header::after{display:none;}
-body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-surah-name{font-size:17px;line-height:1;font-family:var(--indopak-font);}
+body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-surah-name{display:inline;font-size:1.15em;line-height:1;font-family:var(--indopak-font);}
 body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-surah-meta{display:none;}
 body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-bismillah-line{
-  height:var(--row-h);box-sizing:border-box;margin:0;padding:0;line-height:1;
-  font-family:var(--indopak-font);font-weight:700;font-size:14px;
+  display:block;margin:0;padding:0;text-align:center;line-height:var(--row-ratio);
+  font-family:var(--indopak-font);font-weight:700;font-size:var(--quran-font);
 }
+body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-bismillah-line .bism-orn,
+body.viewer-read-mode:not(.viewer-translation-mode) .qv-slot .mushaf.mushaf-book .mushaf-bismillah-line .bism-text{display:inline;line-height:1;font-size:1em;padding:0 6px;}
 
 /* ══ Continue… / Jump to… tabs on Surah + Juz index ══ */
 .index-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 2px 12px;}
@@ -10309,6 +10310,8 @@ function placeRukuMarks(inner, content){
     const anchor = medallion || el;
     const r = anchor.getBoundingClientRect();
     if(!r || !r.width) continue;
+    const crect = content.getBoundingClientRect();
+    if(r.top < crect.top - 1 || r.bottom > crect.bottom + 1) continue;
     const top = (r.top + r.height / 2) - innerRect.top;
     if(!isFinite(rightOffset) || !isFinite(top)) continue;
     const m = document.createElement('span');
@@ -10403,7 +10406,6 @@ function renderReaderPage(pageNumber, token){
   frame.appendChild(footer);
   inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTop = 0;
   applyRowLayout();
-  saveLastRead(pageNumber);
   scheduleRukuReplace();
   if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
   else if(surahsOnPage.length > 1) qvTitle.textContent = surahsOnPage.map(a => a.surahEnglishName).join(' · ');
@@ -10418,7 +10420,7 @@ function renderReaderPage(pageNumber, token){
   }
   prefetchAdjacentPages(pageNumber);
 }
-function goToReaderPage(n){ if(n < 1 || n > 604) return; loadReaderPage(n); }
+function goToReaderPage(n){ if(n < 1 || n > 604) return; const d = n - readerState.currentPage; if((d === 1 || d === -1) && stepSubPage(d)) return; readerState.wantSub = (d === -1) ? 'end' : 0; loadReaderPage(n); }
 async function openSurahInReader(surahNumber){
   if(!navigator.onLine){ const ok = await askForInternet('Surah ' + surahNumber); if(!ok) return; }
   openViewer('read', { hideFullscreen: true });
@@ -10945,6 +10947,8 @@ function snapPageBack(){
 async function completePageTurn(dir){
   const target = readerState.currentPage + dir;
   if(target < 1 || target > 604){ snapPageBack(); return; }
+  if(stepSubPage(dir)){ snapPageBack(); return; }
+  readerState.wantSub = (dir === -1) ? 'end' : 0;
   if(pageTurning) return;
   pageTurning = true;
   try{
@@ -12931,18 +12935,25 @@ function showTextShareModal(text){
   showScreen('home');
 })();
 
-/* ══ 14-row IndoPak page layout ═════════════════════════════════════════ */
+/* ══ 14-row IndoPak page layout (long mushaf pages split into 14-row pages) ══ */
 var ROWS_PER_PAGE = 14;
-function clearRowLayout(content){
-  content.querySelectorAll('br.rb').forEach(b => b.remove());
-  content.classList.remove('rows-on');
-  content.style.letterSpacing = ''; content.style.wordSpacing = '';
-  delete content.dataset.rows;
+var ROW_RATIO = 2.5;
+function rowsFlowOf(content){
+  let f = content.querySelector(':scope > .rows-flow');
+  if(!f){ f = document.createElement('div'); f.className = 'rows-flow'; while(content.firstChild) f.appendChild(content.firstChild); content.appendChild(f); }
+  return f;
 }
-function tokenizeRows(content){
-  if(content.dataset.rw === '1') return;
-  const NON_LETTER = /^[^ء-ؿف-يٮ-ۓۺ-ۿ]+$/;
-  content.querySelectorAll('.ayah').forEach(ay => {
+function clearRowLayout(content, flow){
+  flow.querySelectorAll('br.rb').forEach(b => b.remove());
+  flow.querySelectorAll('.rw').forEach(u => { u.style.marginLeft = ''; });
+  flow.style.transform = '';
+  content.classList.remove('rows-on');
+  content.style.height = ''; content.style.removeProperty('--pitch');
+}
+function tokenizeRows(flow){
+  if(flow.dataset.rw === '1') return;
+  const NON_LETTER = /^[^\u0621-\u063F\u0641-\u064A\u066E-\u06D3\u06FA-\u06FF]+$/;
+  flow.querySelectorAll('.ayah').forEach(ay => {
     const first = ay.firstChild;
     if(!first || first.nodeType !== 3) return;
     const toks = first.nodeValue.trim().split(/\s+/).filter(Boolean);
@@ -12965,7 +12976,7 @@ function tokenizeRows(content){
     }
     ay.appendChild(document.createTextNode(' '));
   });
-  content.dataset.rw = '1';
+  flow.dataset.rw = '1';
 }
 function breakIntoRows(w, s, W, rows){
   const n = w.length; if(rows > n) rows = n; if(rows < 1) rows = 1;
@@ -12989,80 +13000,113 @@ function breakIntoRows(w, s, W, rows){
   for(let r = rows; r >= 1; r--){ ends.unshift(j); j = from[r][j]; }
   return ends;
 }
+function planRows(widths, s, W){
+  const n = widths.length;
+  const tot = widths.reduce((a, b) => a + b, 0) + Math.max(0, n - 1) * s;
+  for(let r = Math.max(1, Math.ceil(tot / W)); r <= n; r++){ const p = breakIntoRows(widths, s, W, r); if(p) return p; }
+  return [n];
+}
+function updateSubUI(){
+  const sub = readerState.sub;
+  const el = pageEl.querySelector('.mbh-center');
+  if(!el || !sub) return;
+  el.textContent = toAr(readerState.currentPage) + (sub.count > 1 ? '  ·  ' + (sub.index + 1) + '/' + sub.count : '');
+}
+function showSubPage(i){
+  const sub = readerState.sub; if(!sub) return;
+  i = Math.max(0, Math.min(sub.count - 1, i)); sub.index = i;
+  sub.flow.style.transform = i ? 'translateY(' + (-(i * ROWS_PER_PAGE * sub.pitch)) + 'px)' : '';
+  const rowsHere = Math.min(ROWS_PER_PAGE, sub.total - i * ROWS_PER_PAGE);
+  sub.content.style.height = (rowsHere * sub.pitch) + 'px';
+  updateSubUI();
+  saveLastRead(readerState.currentPage, i);
+  pageEl.scrollTop = 0;
+  scheduleRukuReplace();
+}
+function stepSubPage(dir){
+  const sub = readerState.sub;
+  if(!sub || sub.page !== readerState.currentPage || !sub.content.isConnected) return false;
+  const ni = sub.index + dir;
+  if(ni < 0 || ni >= sub.count) return false;
+  showSubPage(ni);
+  return true;
+}
 function applyRowLayout(){
   const inner = pageEl.querySelector('.mushaf-inner');
   const content = inner ? inner.querySelector('.mushaf-book-content') : null;
   if(!content) return;
-  clearRowLayout(content);
-  if(document.body.classList.contains('viewer-translation-mode')) return;
-  tokenizeRows(content);
+  const flow = rowsFlowOf(content);
+  clearRowLayout(content, flow);
+  const want = readerState.wantSub; readerState.wantSub = null;
+  readerState.sub = null;
+  if(document.body.classList.contains('viewer-translation-mode')){ saveLastRead(readerState.currentPage, 0); return; }
+  tokenizeRows(flow);
   const W = content.clientWidth;
   if(W < 80) return;
-  const segs = []; let cur = null;
-  Array.from(content.children).forEach(ch => {
+  content.classList.add('rows-on');
+  const pr = document.createElement('div');
+  pr.style.cssText = 'position:absolute;left:0;right:0;top:0;visibility:hidden;'; pr.textContent = 'x';
+  content.appendChild(pr); const pitch = pr.getBoundingClientRect().height; pr.remove();
+  if(!(pitch > 10)){ content.classList.remove('rows-on'); return; }
+  content.style.setProperty('--pitch', pitch + 'px');
+  const probe = document.createElement('span');
+  probe.style.cssText = 'display:inline-block;white-space:pre;position:absolute;visibility:hidden;';
+  probe.textContent = '\u0628 \u0628'; content.appendChild(probe); const a = probe.getBoundingClientRect().width;
+  probe.textContent = '\u0628\u0628'; const b = probe.getBoundingClientRect().width; probe.remove();
+  const s = Math.max(0.5, a - b);
+  const cap = 0.45 * (pitch / ROW_RATIO);   // widest extra gap between words (about 0.45 of the text size)
+  // segments of verses between surah headers / bismillah rows
+  const children = Array.from(flow.children);
+  let totalRows = 0; const segs = []; let cur = null;
+  children.forEach(ch => {
     if(ch.classList.contains('ayah')){
       if(!cur){ cur = { units: [] }; segs.push(cur); }
       Array.from(ch.children).forEach(u => { if(u.classList.contains('rw')) cur.units.push(u); });
-    } else cur = null;
+    } else { cur = null; totalRows += 1; }
   });
-  const segsOk = segs.filter(sg => sg.units.length);
-  if(!segsOk.length) return;
-  const blocks = content.querySelectorAll('.mushaf-book-header, .mushaf-bismillah-line').length;
-  const R = Math.max(3, ROWS_PER_PAGE - blocks);
-  content.classList.add('rows-on');
-  const presets = [['0px', '-0.04em'], ['0px', '-0.1em'], ['-0.15px', '-0.14em']];
-  let result = null;
-  for(let pi = 0; pi < presets.length && !result; pi++){
-    content.style.letterSpacing = presets[pi][0]; content.style.wordSpacing = presets[pi][1];
-    // measure the real width of one word gap in the current spacing
-    const probe = document.createElement('span');
-    probe.style.cssText = 'display:inline-block;white-space:pre;position:absolute;visibility:hidden;';
-    probe.textContent = 'ب ب'; content.appendChild(probe); const a = probe.getBoundingClientRect().width;
-    probe.textContent = 'بب'; const b = probe.getBoundingClientRect().width; probe.remove();
-    const s = Math.max(0.5, a - b);
-    const widths = segsOk.map(sg => sg.units.map(u => u.getBoundingClientRect().width));
-    const totals = widths.map(ws => ws.reduce((x, y) => x + y, 0) + Math.max(0, ws.length - 1) * s);
-    const all = totals.reduce((x, y) => x + y, 0);
-    let alloc;
-    if(all / (R * W) >= 0.7 || segsOk.length === 1 && false){
-      const raw = totals.map(t => R * t / all);
-      alloc = raw.map(x => Math.max(1, Math.floor(x)));
-      let diff = R - alloc.reduce((x, y) => x + y, 0);
-      const order = raw.map((x, i) => [x - Math.floor(x), i]).sort((m, n) => n[0] - m[0]);
-      for(let k = 0; diff > 0 && order.length; k++, diff--) alloc[order[k % order.length][1]]++;
-      for(let k = 0; diff < 0 && k < 50; k++){ const i = alloc.indexOf(Math.max.apply(null, alloc)); if(alloc[i] > 1){ alloc[i]--; diff++; } else break; }
-    } else {
-      alloc = totals.map(t => Math.max(1, Math.ceil(t / (0.92 * W))));
-    }
-    const lastPreset = (pi === presets.length - 1);
-    const plans = []; let ok = true;
-    for(let si = 0; si < segsOk.length && ok; si++){
-      let plan = null;
-      const extra = lastPreset ? 10 : 0;
-      for(let e = 0; e <= extra && !plan; e++){ plan = breakIntoRows(widths[si], s, W, alloc[si] + e); }
-      if(!plan) ok = false; else plans.push(plan);
-    }
-    if(ok) result = plans;
-  }
-  if(!result){ content.classList.remove('rows-on'); return; }
-  let total = 0;
-  result.forEach((ends, si) => {
-    const units = segsOk[si].units; total += ends.length;
-    ends.forEach((end, ri) => {
-      if(ri === ends.length - 1) return;
-      const u = units[end - 1];
-      const nx = u.nextSibling;
-      if(nx && nx.nodeType === 3 && !nx.nodeValue.trim()) nx.remove();
-      const br = document.createElement('br'); br.className = 'rb';
-      u.after(br);
+  segs.forEach(sg => {
+    if(!sg.units.length){ sg.plan = []; return; }
+    const widths = sg.units.map(u => u.getBoundingClientRect().width);
+    sg.widths = widths; sg.plan = planRows(widths, s, W); totalRows += sg.plan.length;
+  });
+  segs.forEach(sg => {
+    if(!sg.units.length) return;
+    let start = 0;
+    sg.plan.forEach((end, ri) => {
+      const row = sg.units.slice(start, end); const rw = sg.widths.slice(start, end);
+      const k = row.length;
+      const nat = rw.reduce((x, y) => x + y, 0) + (k - 1) * s;
+      if(k > 1){
+        let per = Math.min((W - nat - 1) / (k - 1), cap);
+        if(per > 0.2){ per = Math.floor(per * 100) / 100; row.forEach((u, ui) => { if(ui < k - 1) u.style.marginLeft = per + 'px'; }); }
+      }
+      if(ri < sg.plan.length - 1){
+        const u = row[k - 1]; const nx = u.nextSibling;
+        if(nx && nx.nodeType === 3 && !nx.nodeValue.trim()) nx.remove();
+        const br = document.createElement('br'); br.className = 'rb'; u.after(br);
+      }
+      start = end;
     });
   });
-  content.dataset.rows = String(total + blocks);
+  const count = Math.max(1, Math.ceil(totalRows / ROWS_PER_PAGE));
+  readerState.sub = { page: readerState.currentPage, index: 0, count: count, total: totalRows, pitch: pitch, content: content, flow: flow };
+  let idx = 0;
+  if(readerState.highlightVerse){
+    try{
+      const el = flow.querySelector('.ayah[data-verse="' + readerState.highlightVerse.replace(/["\\]/g, '\\$&') + '"]');
+      if(el){ const r = el.getClientRects()[0]; if(r) idx = Math.floor((r.top - flow.getBoundingClientRect().top + 2) / pitch / ROWS_PER_PAGE); }
+    }catch(_){}
+  } else if(want === 'end') idx = count - 1;
+  else if(typeof want === 'number') idx = want;
+  showSubPage(Math.max(0, Math.min(count - 1, idx)));
 }
 var _rowLayoutTimer = null;
 function scheduleRowLayout(){
   clearTimeout(_rowLayoutTimer);
-  _rowLayoutTimer = setTimeout(() => { applyRowLayout(); scheduleRukuReplace(); }, 120);
+  _rowLayoutTimer = setTimeout(() => {
+    if(readerState.sub && readerState.sub.page === readerState.currentPage) readerState.wantSub = readerState.sub.index;
+    applyRowLayout(); scheduleRukuReplace();
+  }, 120);
 }
 window.addEventListener('resize', scheduleRowLayout);
 window.addEventListener('orientationchange', scheduleRowLayout);
@@ -13073,8 +13117,8 @@ if(document.fonts){
 
 /* ══ Continue… and Jump to… ═════════════════════════════════════════════ */
 var LAST_READ_KEY = 'qc.lastRead';
-function saveLastRead(page){
-  try{ localStorage.setItem(LAST_READ_KEY, JSON.stringify({ page: page, ts: Date.now() })); }catch(_){}
+function saveLastRead(page, sub){
+  try{ localStorage.setItem(LAST_READ_KEY, JSON.stringify({ page: page, sub: sub || 0, ts: Date.now() })); }catch(_){}
 }
 function readLastRead(){
   try{ const d = JSON.parse(localStorage.getItem(LAST_READ_KEY) || 'null'); if(d && d.page >= 1 && d.page <= 604) return d; }catch(_){}
@@ -13083,7 +13127,7 @@ function readLastRead(){
 function latestContinueTarget(){
   let best = null;
   const lr = readLastRead();
-  if(lr) best = { kind: 'page', page: lr.page, ts: lr.ts || 0 };
+  if(lr) best = { kind: 'page', page: lr.page, sub: lr.sub || 0, ts: lr.ts || 0 };
   ['follow', 'tajweed'].forEach(k => {
     const d = loadSavedProgress(k);
     if(d && (d.ts || 0) > (best ? best.ts : -1)){
@@ -13096,7 +13140,7 @@ function refreshContinueTabs(){
   const t = latestContinueTarget();
   let txt = 'Nothing read yet';
   if(t){
-    if(t.kind === 'page') txt = 'Page ' + t.page;
+    if(t.kind === 'page') txt = 'Page ' + t.page + (t.sub ? ' · part ' + (t.sub + 1) : '');
     else txt = 'Surah ' + t.surah + (t.ayah > 0 ? ' · ayah ' + t.ayah : '') + (t.page ? ' · page ' + t.page : '');
   }
   document.querySelectorAll('[data-continue-sub]').forEach(el => { el.textContent = txt; });
@@ -13113,17 +13157,18 @@ async function getVersePage(surah, ayah){
   }catch(_){}
   return getSurahStartPage(surah);
 }
-async function openPageInReader(n, verseKey){
+async function openPageInReader(n, verseKey, sub){
   if(!navigator.onLine){ const ok = await askForInternet('Page ' + n); if(!ok) return; }
   openViewer('read', { hideFullscreen: true });
   qvTitle.textContent = 'Loading…';
   readerState.highlightVerse = verseKey || null;
+  readerState.wantSub = (typeof sub === 'number') ? sub : 0;
   loadReaderPage(n);
 }
 async function continueReading(){
   const t = latestContinueTarget();
   if(!t){ showToast('Nothing to continue yet — open a page, surah or juz first.'); return; }
-  if(t.kind === 'page'){ openPageInReader(t.page); return; }
+  if(t.kind === 'page'){ openPageInReader(t.page, null, t.sub); return; }
   if(!navigator.onLine){ const ok = await askForInternet('your last page'); if(!ok) return; }
   const page = t.page || await getVersePage(t.surah, t.ayah);
   openPageInReader(page, t.ayah > 0 ? (t.surah + ':' + t.ayah) : null);
