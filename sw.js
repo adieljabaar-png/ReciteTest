@@ -1,7 +1,7 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.19 — Keep the Surah / Juz index “Jump to” + “Continue”
+   v2.4.20 — Keep the Surah / Juz index “Jump to” + “Continue”
    changes safe (new index.html).
 
    Changes in this deployment:
