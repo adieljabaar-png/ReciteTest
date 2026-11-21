@@ -2624,6 +2624,69 @@ body.light-mode .share-arabic{color:#1a2233;}
   .share-prayers{grid-template-columns:repeat(3,1fr);}
   .share-prayer .sp-time{font-size:.78rem;}
 }
+/* ═════════ 13-line IndoPak mushaf page ═════════ */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner.m13{padding:0;max-width:none;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
+.m13-page{
+  --m13-fs:22px;--m13-rule:rgba(0,0,0,.62);
+  width:var(--m13-w,100%);direction:rtl;color:var(--page-fg,#111);
+  font-family:'Mushaf13','IndoPak Nastaleeq','Scheherazade New','Amiri Quran','Noto Naskh Arabic','Amiri',serif;
+  will-change:transform;backface-visibility:hidden;-webkit-user-select:none;user-select:none;
+}
+body.page-dark .m13-page{--m13-rule:rgba(255,255,255,.55);}
+.m13-head{display:flex;align-items:center;justify-content:space-between;direction:ltr;height:28px;padding:0 3px 4px;font-size:15px;font-weight:700;line-height:1.2;-webkit-text-stroke:.2px currentColor;}
+.m13-head .l,.m13-head .r{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;}
+.m13-head .l{text-align:left;}.m13-head .r{text-align:right;}
+.m13-head .c{flex:0 0 auto;font-size:20px;font-weight:800;padding:0 10px;}
+.m13-box{
+  height:var(--m13-h,560px);display:grid;grid-template-rows:repeat(var(--m13-n,13),minmax(0,1fr));
+  background:var(--page-bg,#fff);border:3px solid var(--page-border,#111);box-shadow:0 14px 40px rgba(0,0,0,.38);
+}
+.m13-line{
+  display:flex;align-items:center;justify-content:space-between;gap:.22em;padding:0 6px;
+  border-bottom:1px solid var(--m13-rule);min-width:0;white-space:nowrap;overflow:visible;
+  font-size:var(--m13-fs);font-weight:700;line-height:1.5;direction:rtl;
+}
+.m13-line:last-child{border-bottom:none;}
+.m13-line.c{justify-content:center;}
+.m13-w{flex:0 0 auto;display:inline-block;-webkit-text-stroke:.25px currentColor;font-feature-settings:"ccmp" 1,"calt" 1,"liga" 1,"mark" 1,"mkmk" 1,"kern" 1;font-variant-ligatures:common-ligatures contextual;letter-spacing:0;text-rendering:geometricPrecision;}
+.m13-w.mw.located{animation:ayahFlash 1.3s ease;border-radius:6px;}
+.m13-end{display:inline-flex;align-items:center;justify-content:center;font-size:.56em;min-width:2em;height:2em;padding:0 .2em;border:1.5px solid currentColor;border-radius:50%;font-weight:800;line-height:1;-webkit-text-stroke:0;font-family:'Scheherazade New','Amiri',serif;}
+.m13-end.g{border:none;font-size:.95em;min-width:0;height:auto;padding:0;border-radius:0;font-family:inherit;}
+.m13-line .mushaf-sajdah-mark{margin:0;font-size:.8em;-webkit-text-stroke:0;}
+.m13-surah{justify-content:space-between;margin:2px 3px;border:2px double currentColor;border-radius:8px;background:linear-gradient(180deg,rgba(201,162,39,.14),rgba(201,162,39,.04));border-bottom-width:2px;}
+.m13-surah .nm{flex:1 1 auto;text-align:center;font-size:1.12em;font-weight:800;display:flex;align-items:center;justify-content:center;gap:.5em;}
+.m13-surah .nm i{font-style:normal;font-size:.8em;opacity:.8;-webkit-text-stroke:0;}
+.m13-surah .sm{flex:0 0 auto;font-size:.5em;font-weight:700;opacity:.85;padding:0 .4em;}
+.m13-surah.located{animation:ayahFlash 1.6s ease;}
+.m13-bism{font-size:calc(var(--m13-fs)*1.02);font-weight:800;}
+.m13-empty{}
+.m13-foot{text-align:center;padding:5px 0 2px;font-size:15px;font-weight:700;-webkit-text-stroke:.2px currentColor;}
+/* English translation is not part of a printed mushaf page */
+body.viewer-read-mode .qv-btn.qv-translate{display:none;}
+body.viewer-audio-mode #qvJump{display:none;}
+.qv-btn#qvJump{font-size:.95rem;}
+.m13-note{font-size:.82rem;color:var(--muted);line-height:1.5;margin:0 0 12px;}
+.m13-note code{font-size:.78rem;color:var(--text);}
+.m13-status{font-size:.8rem;padding:9px 12px;border-radius:10px;margin-bottom:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);}
+.m13-status.ok{color:var(--good);border-color:rgba(47,208,122,.5);}
+.m13-status.bad{color:var(--bad);border-color:rgba(255,90,106,.5);}
+.m13-file{display:block;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:12px;}
+.m13-file input{display:block;width:100%;margin-top:6px;font-size:.8rem;color:var(--muted);}
+.m13-jump{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;}
+.m13-seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:0 0 auto;}
+.m13-seg button{border:none;border-radius:0;background:transparent;height:40px;padding:0 14px;font-size:.82rem;color:var(--muted);}
+.m13-seg button.on{background:var(--accent);color:#fff;}
+.m13-in{flex:1 1 90px;min-width:0;height:40px;border-radius:10px;border:1px solid var(--line);background:#0d1421;color:var(--text);padding:0 12px;font:inherit;font-size:1.05rem;font-weight:700;text-align:center;}
+.m13-go{height:40px;padding:0 20px;border-radius:10px;background:var(--accent);border-color:transparent;color:#fff;}
+.m13-hint{flex:0 0 100%;font-size:.72rem;color:var(--muted);}
+.m13-hint.err{color:var(--bad);font-weight:700;}
+.m13-jump.shake{animation:m13shake .35s;}
+@keyframes m13shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+body.light-mode .m13-in{background:#fff;}
+body.light-mode .m13-status{background:rgba(0,0,0,.04);}
+.surah-row.m13-last{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-glow) inset;}
+.m13-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:.6rem;font-weight:800;letter-spacing:.03em;background:var(--gold);color:#241a00;vertical-align:middle;}
+
 </style>
 </head>
 <body class="page-dark tajweed-full">
@@ -3166,6 +3229,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <div class="qv-top">
       <button class="qv-btn qv-back" id="qvBack" aria-label="Back">Back</button>
       <span class="qv-title" id="qvTitle">Quran</span>
+      <button class="qv-btn" id="qvJump" type="button" aria-label="Go to page or surah" title="Go to page / surah">🔎</button>
       <button class="qv-btn qv-bookmark" id="qvBookmark" type="button" aria-label="Bookmark this page" title="Bookmark this page">🔖</button>
       <button class="qv-btn" id="qvDark" aria-label="Toggle theme">🌙</button>
     </div>
@@ -3357,6 +3421,7 @@ const qvSurahBtn         = document.getElementById('qvSurahBtn');
 const qvTranslate        = document.getElementById('qvTranslate');
 const qvPrevPage         = document.getElementById('qvPrevPage');
 const qvNextPage         = document.getElementById('qvNextPage');
+const qvJump             = document.getElementById('qvJump');
 const qvFullscreen       = document.getElementById('qvFullscreen');
 
 /* ── API endpoints ────────────────────────────────────────── */
@@ -4490,7 +4555,7 @@ let followingWrongCount = 0;
 const STORE = {
   get mode(){ return localStorage.getItem('qc.mode') || 'page'; },
   set mode(v){ localStorage.setItem('qc.mode', v); },
-  get page(){ return Math.max(1, Math.min(604, parseInt(localStorage.getItem('qc.page')||'1',10)||1)); },
+  get page(){ return Math.max(1, Math.min(2000, parseInt(localStorage.getItem('qc.page')||'1',10)||1)); },
   set page(v){ localStorage.setItem('qc.page', String(v)); },
   get surah(){ return Math.max(1, Math.min(114, parseInt(localStorage.getItem('qc.surah')||'1',10)||1)); },
   set surah(v){ localStorage.setItem('qc.surah', String(v)); }
@@ -4967,6 +5032,7 @@ function recReset(){
 
 function showScreen(name){
   currentScreenName = name;
+  try{ m13OnScreen(name); }catch(_){}
   const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed, dashboard: screenDashboard };
   Object.entries(map).forEach(([k, el]) => { if(!el) return; el.hidden = (k !== name); });
   if(name !== 'coach' && readerFullscreen) exitReaderFullscreen();
@@ -9260,53 +9326,8 @@ function askForInternet(label){
   });
 }
 
-async function renderSurahIndex(){
-  surahIndexList.innerHTML = '<div class="loading">Loading…</div>';
-  try{
-    const chapters = await ensureChaptersLocalized(surahIndexLang);
-    surahIndexList.innerHTML = '';
-    chapters.forEach(s => {
-      const row = document.createElement('button');
-      row.className = 'surah-row'; row.type = 'button';
-      const subParts = [];
-      if (s.translatedName) subParts.push(escapeHtml(s.translatedName));
-      subParts.push(s.numberOfAyahs + ' ayahs');
-      subParts.push(escapeHtml(s.revelationType));
-      row.innerHTML =
-        '<span class="num">' + String(s.number).padStart(3,'0') + '</span>' +
-        '<span class="meta">' +
-          '<span class="en">' + escapeHtml(s.englishName) + '</span>' +
-          '<span class="sub">' + subParts.join(' · ') + '</span>' +
-        '</span>' +
-        '<span class="ar">' + escapeHtml(s.name) + '</span>';
-      row.addEventListener('click', () => openSurahInReader(s.number));
-      surahIndexList.appendChild(row);
-    });
-  }catch(e){
-    surahIndexList.innerHTML = '<div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div>';
-  }
-}
 const JUZ_NAMES = ['Alif Lam Meem','Sayaqul','Tilkal Rusul','Lan Tanaloo','Wal Muhsanat','La Yuhibbullah','Wa Iza Samiu','Wa Lau Annana','Qalal Malaou','Wa A\'lamu','Yatazeroon','Wa Mamin Da\'abat','Wa Ma Ubarri\'u','Rubama','Subhanallazi','Qal Alam','Aqtarabo','Qad Aflaha','Wa Qalallazina','A\'man Khalaq','Utlu Ma Oohiya','Wa Manyaqnut','Wa Mali','Faman Azlam','Elahe Yuraddo','Ha Meem','Qala Fama Khatbukum','Qad Sami Allah','Tabarakallazi','Amma Yatasa\'aloon'];
 const JUZ_NAMES_AR = ['الم','سيقول','تلك الرسل','لن تنالوا','والمحصنات','لا يحب الله','وإذا سمعوا','ولو أننا','قال الملأ','واعلموا','يعتذرون','وما من دابة','وما أبرئ','ربما','سبحان الذي','قال ألم','اقترب','قد أفلح','وقال الذين','أمن خلق','اتل ما أوحي','ومن يقنت','وما لي','فمن أظلم','إليه يرد','حم','قال فما خطبكم','قد سمع الله','تبارك الذي','عم يتساءلون'];
-const JUZ_START_PAGES_FALLBACK = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
-function renderJuzIndex(){
-  juzIndexList.innerHTML = '';
-  const label = { en: 'Juz', tr: 'Cüz' }[surahIndexLang] || 'Juz';
-  for(let i = 1; i <= 30; i++){
-    const row = document.createElement('button');
-    row.type = 'button'; row.className = 'surah-row';
-    const startPage = JUZ_START_PAGES_FALLBACK[i - 1];
-    row.innerHTML =
-      '<span class="num">' + i + '</span>' +
-      '<span class="meta">' +
-        '<span class="en">' + escapeHtml(JUZ_NAMES[i - 1] || ('Juz ' + i)) + '</span>' +
-        '<span class="sub">Page ' + startPage + ' · ' + label + ' ' + i + ' / 30</span>' +
-      '</span>' +
-      '<span class="ar">الجزء ' + toAr(i) + '</span>';
-    row.addEventListener('click', () => openJuzInReader(i));
-    juzIndexList.appendChild(row);
-  }
-}
 function populateLangSelectors() {
   const ids = ['surahIndexLang', 'juzIndexLang'];
   ids.forEach(id => {
@@ -9365,6 +9386,7 @@ function addBookmark(surah, ayah, pageNumber){
   if(bookmarks.some(b => b.key === key)){ showToast('🔖 Already bookmarked'); return false; }
   let surahName = ''; let surahEnglishName = '';
   if(chaptersCache){ const ch = chaptersCache.find(c => c.number === surah); if(ch){ surahName = ch.name; surahEnglishName = ch.englishName; } }
+  if(!surahName && typeof M13_CHAPTERS !== 'undefined'){ const c0 = M13_CHAPTERS[surah - 1]; if(c0){ surahName = c0.name; surahEnglishName = c0.englishName; } }
   bookmarks.unshift({ key, surah, ayah, page: pageNumber || 1, surahName, surahEnglishName, ts: Date.now() });
   saveBookmarks(); renderBookmarksScreen(); updateBookmarkButton();
   try{ bumpStreak(); checkAchievements(); }catch(_){}
@@ -9384,7 +9406,7 @@ function renderBookmarksScreen(){
     const surahEn = b.surahEnglishName || ('Surah ' + b.surah);
     const surahAr = b.surahName || '';
     row.innerHTML = '<span class="num">' + b.surah + ':' + b.ayah + '</span>' +
-      '<span class="meta"><span class="en">' + escapeHtml(surahEn) + '</span><span class="sub">Ayah ' + b.ayah + ' · Page ' + (b.page || 1) + '</span></span>' +
+      '<span class="meta"><span class="en">' + escapeHtml(surahEn) + '</span><span class="sub">Ayah ' + b.ayah + ' · Page ' + m13BmPage(b) + '</span></span>' +
       '<span class="ar">' + escapeHtml(surahAr) + '</span>' +
       '<button class="bm-del" type="button" aria-label="Remove bookmark" style="width:36px;height:36px;border-radius:50%;background:transparent;border:1px solid transparent;color:var(--muted);font-size:.85rem;flex-shrink:0;cursor:pointer;padding:0">✕</button>';
     row.addEventListener('click', (e) => { if(e.target && e.target.closest && e.target.closest('.bm-del')) return; openBookmark(b); });
@@ -9395,10 +9417,13 @@ function renderBookmarksScreen(){
 }
 function openBookmark(b){
   if(!b) return;
-  const pg = (typeof b.page === 'number' && b.page >= 1 && b.page <= 604) ? b.page : 1;
-  readerState.highlightVerse = b.key;
-  openViewer('read');
-  loadReaderPage(pg);
+  (async () => {
+    if(!(await m13EnsureData(true))) return;
+    const pg = M13.verseFirst.get(b.surah * 1000 + b.ayah) || ((typeof b.page === 'number' && b.page >= 1 && b.page <= M13.total) ? b.page : 1);
+    readerState.highlightVerse = b.key;
+    openViewer('read');
+    loadReaderPage(pg);
+  })();
 }
 async function bookmarkCurrentPage(){
   if(!viewerOpen || viewerMode !== 'read'){ showToast('🔖 Bookmarks work in reading mode.'); return; }
@@ -10045,150 +10070,224 @@ const QRGen = (function(){
   return { encode: encode, toSvg: toSvg };
 })();
 
-const readerState = { pages: new Map(), currentPage: 0, token: 0, highlightVerse: null, loading: false };
-const _surahStartPageCache = new Map();
-async function getSurahStartPage(surahNumber){
-  if(_surahStartPageCache.has(surahNumber)) return _surahStartPageCache.get(surahNumber);
-  try{ const res = await fetchWithTimeout(QURAN_API_V4 + '/verses/by_chapter/' + surahNumber + '?fields=' + READER_EDITION + '&per_page=1', FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.verses && j.verses.length && typeof j.verses[0].page_number === 'number'){ _surahStartPageCache.set(surahNumber, j.verses[0].page_number); return j.verses[0].page_number; } } }catch(e){}
-  try{ const res = await fetchWithTimeout(ALQURAN_API + '/ayah/' + surahNumber + ':1/' + EDITION_FALLBACK, FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.code === 200 && j.data && typeof j.data.page === 'number'){ _surahStartPageCache.set(surahNumber, j.data.page); return j.data.page; } } }catch(e){}
-  return 1;
-}
-const _juzStartPageCache = new Map();
-async function getJuzStartPage(juzNumber){
-  if(_juzStartPageCache.has(juzNumber)) return _juzStartPageCache.get(juzNumber);
-  const fallback = JUZ_START_PAGES_FALLBACK[juzNumber - 1] || 1;
-  try{ const res = await fetchWithTimeout(QURAN_API_V4 + '/verses/by_juz/' + juzNumber + '?fields=' + READER_EDITION + '&per_page=1', FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.verses && j.verses.length && typeof j.verses[0].page_number === 'number'){ _juzStartPageCache.set(juzNumber, j.verses[0].page_number); return j.verses[0].page_number; } } }catch(e){}
-  _juzStartPageCache.set(juzNumber, fallback);
-  return fallback;
-}
-async function fetchPageIndopak(pageNumber){
-  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&word_fields=text_indopak&translations=' + currentTextTranslationQuranComId();
-  const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const json = await res.json();
-  if(!json || !Array.isArray(json.verses)) throw new Error('Bad response');
-  return { pageNumber, ayahs: json.verses.map(v => {
-    const key = v.verse_key || '';
-    const [sStr, aStr] = key.split(':');
-    const s = parseInt(sStr, 10) || 1; const a = parseInt(aStr, 10) || 1;
-    let translation = '';
-    if(Array.isArray(v.translations) && v.translations.length){ translation = cleanTranslation(v.translations.map(t => t.text || '').join(' ')); }
-    return { text: v.text_indopak || '', numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
-  })};
-}
-async function _fetchPageByEditionFallback(pageNumber){
-  const arUrl = ALQURAN_API + '/page/' + pageNumber + '/quran-indopak';
-  const res = await fetchWithTimeout(arUrl, FETCH_TIMEOUT_MS);
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const json = await res.json();
-  if(json.code !== 200 || !json.data || !Array.isArray(json.data.ayahs)) throw new Error('Bad response');
-  return json.data;
-}
-async function fetchPageData(pageNumber){
-  let data = null;
-  try{ data = await fetchPageIndopak(pageNumber); }
-  catch(e1){
-    try{
-      const fb = await _fetchPageByEditionFallback(pageNumber);
-      data = { pageNumber, ayahs: fb.ayahs.map(a => ({ text: a.text, numberInSurah: a.numberInSurah, surah: a.surah ? a.surah.number : 1, surahName: a.surah ? a.surah.name : '', surahEnglishName: a.surah ? a.surah.englishName : '', surahNumberOfAyahs: (a.surah && a.surah.numberOfAyahs) ? a.surah.numberOfAyahs : 0, juz: (typeof a.juz === 'number') ? a.juz : 1, manzil: (typeof a.manzil === 'number') ? a.manzil : 1, ruku: (typeof a.ruku === 'number') ? a.ruku : null, sajda: !!a.sajda, translation: null })) };
-    }catch(e2){ throw new Error('Could not load page'); }
-  }
-  const hasTranslations = data.ayahs.some(a => a.translation && a.translation.length);
-  if(!hasTranslations){
-    try{
-      const enRes = await fetchWithTimeout(ALQURAN_API + '/page/' + pageNumber + '/' + translationTextId, FETCH_TIMEOUT_MS).catch(() => null);
-      if(enRes && enRes.ok){ const enJson = await enRes.json(); if(enJson.code === 200 && enJson.data && Array.isArray(enJson.data.ayahs)){ const trans = enJson.data.ayahs.map(a => cleanTranslation(a.text)); data.ayahs.forEach((a, i) => { a.translation = trans[i] || null; }); } }
-    }catch(_){}
-  }
-  return data;
-}
-function prefetchAdjacentPages(n){
-  [n + 1, n - 1].forEach(p => {
-    if(p < 1 || p > 604) return;
-    if(readerState.pages.has(p)) return;
-    fetchPageData(p).then(data => { readerState.pages.set(p, data); if(readerState.currentPage + 1 === p) scheduleRukuReplace(); }).catch(() => {});
-  });
-}
-async function loadReaderPage(pageNumber){
-  const n = Math.max(1, Math.min(604, Math.round(pageNumber) || 1));
-  const token = ++readerState.token;
-  readerState.loading = true;
-  words = []; ptr = 0; lastCurrentEl = null; recReset(); mushafDirtyForViewer = true;
-  if(readerState.pages.has(n)){ readerState.loading = false; renderReaderPage(n, token); return; }
-  qvTitle.textContent = 'Loading page ' + n + '…';
-  pageEl.classList.add('mushaf-book');
-  pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading">Loading page ' + n + '…</div></div>';
-  try{
-    const data = await fetchPageData(n);
-    if(token !== readerState.token) return;
-    readerState.pages.set(n, data);
-    readerState.loading = false;
-    renderReaderPage(n, token);
-  }catch(e){
-    if(token !== readerState.token) return;
-    readerState.loading = false;
-    pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load page ' + n + '.</span>Check your connection and try again.</div></div>';
-    qvTitle.textContent = 'Error';
-  }
-}
-function placeRukuMarks(inner, content){
-  if(!inner || !content) return;
-  inner.querySelectorAll('.mushaf-ruku-mark').forEach(m => m.remove());
-  const list = Array.from(content.querySelectorAll('.ayah'));
-  if(!list.length) return;
-  const frame = content.closest('.mushaf-book-page') || content.parentElement;
-  const innerRect = inner.getBoundingClientRect();
-  const frameRect = frame ? frame.getBoundingClientRect() : innerRect;
-  const rightOffset = (innerRect.right - frameRect.left) + 4;
-  const nextPageData = readerState.pages.get(readerState.currentPage + 1);
-  for(let i = 0; i < list.length; i++){
-    const el = list[i];
-    const ruku = parseInt(el.dataset.ruku, 10);
-    const totalAyahs = parseInt(el.dataset.surahAyahs, 10);
-    const numInSurah = parseInt(el.dataset.ayah, 10);
-    let isEnd = false;
-    if(i + 1 < list.length){
-      const next = list[i + 1];
-      if(next.dataset.surah !== el.dataset.surah) isEnd = true;
-      else { const nr = parseInt(next.dataset.ruku, 10); if(Number.isFinite(ruku) && Number.isFinite(nr) && nr !== ruku) isEnd = true; }
-    } else {
-      if(Number.isFinite(totalAyahs) && totalAyahs > 0 && numInSurah === totalAyahs) isEnd = true;
-      else if(Number.isFinite(ruku) && nextPageData && Array.isArray(nextPageData.ayahs) && nextPageData.ayahs.length){
-        const na = nextPageData.ayahs[0];
-        const curSurah = parseInt(el.dataset.surah, 10);
-        const naRuku = (typeof na.ruku === 'number') ? na.ruku : null;
-        if(na.surah !== curSurah) isEnd = true;
-        else if(naRuku !== null && naRuku !== ruku) isEnd = true;
+/* ══════════════════════════════════════════════════════════════════════
+   13-LINE INDOPAK MUSHAF READER
+   Replaces the old API-driven page reader, the surah index and the juz index.
+   Page/line layout and the full IndoPak script (every tajweed / waqf mark)
+   come from mushaf13.json, built from the QUL "Indopak 13 lines" layout.
+   ══════════════════════════════════════════════════════════════════════ */
+const M13_AR = ['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
+const M13_EN = ['Al-Fatihah','Al-Baqarah',"Ali 'Imran",'An-Nisa',"Al-Ma'idah","Al-An'am","Al-A'raf",'Al-Anfal','At-Tawbah','Yunus','Hud','Yusuf',"Ar-Ra'd",'Ibrahim','Al-Hijr','An-Nahl','Al-Isra','Al-Kahf','Maryam','Ta-Ha','Al-Anbiya','Al-Hajj',"Al-Mu'minun",'An-Nur','Al-Furqan',"Ash-Shu'ara",'An-Naml','Al-Qasas',"Al-'Ankabut",'Ar-Rum','Luqman','As-Sajdah','Al-Ahzab','Saba','Fatir','Ya-Sin','As-Saffat','Sad','Az-Zumar','Ghafir','Fussilat','Ash-Shura','Az-Zukhruf','Ad-Dukhan','Al-Jathiyah','Al-Ahqaf','Muhammad','Al-Fath','Al-Hujurat','Qaf','Adh-Dhariyat','At-Tur','An-Najm','Al-Qamar','Ar-Rahman',"Al-Waqi'ah",'Al-Hadid','Al-Mujadila','Al-Hashr','Al-Mumtahanah','As-Saff',"Al-Jumu'ah",'Al-Munafiqun','At-Taghabun','At-Talaq','At-Tahrim','Al-Mulk','Al-Qalam','Al-Haqqah',"Al-Ma'arij",'Nuh','Al-Jinn','Al-Muzzammil','Al-Muddaththir','Al-Qiyamah','Al-Insan','Al-Mursalat','An-Naba',"An-Nazi'at",'Abasa','At-Takwir','Al-Infitar','Al-Mutaffifin','Al-Inshiqaq','Al-Buruj','At-Tariq',"Al-A'la",'Al-Ghashiyah','Al-Fajr','Al-Balad','Ash-Shams','Al-Layl','Ad-Duha','Ash-Sharh','At-Tin',"Al-'Alaq",'Al-Qadr','Al-Bayyinah','Az-Zalzalah',"Al-'Adiyat","Al-Qari'ah",'At-Takathur',"Al-'Asr",'Al-Humazah','Al-Fil','Quraysh',"Al-Ma'un",'Al-Kawthar','Al-Kafirun','An-Nasr','Al-Masad','Al-Ikhlas','Al-Falaq','An-Nas'];
+const M13_AY = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+const M13_MEDINAN = new Set([2,3,4,5,8,9,13,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);
+const M13_CHAPTERS = M13_AR.map((ar, i) => ({ number: i + 1, name: ar, englishName: M13_EN[i], numberOfAyahs: M13_AY[i], revelationType: M13_MEDINAN.has(i + 1) ? 'Medinan' : 'Meccan' }));
+const M13_JUZ_STARTS = Object.keys(JUZ_START_VERSE).map(k => { const p = k.split(':'); return { s: +p[0], a: +p[1], j: JUZ_START_VERSE[k] }; }).sort((x, y) => x.j - y.j);
+function m13JuzOf(s, a){ let j = 1; for(const t of M13_JUZ_STARTS){ if(s > t.s || (s === t.s && a >= t.a)) j = t.j; else break; } return j; }
+function m13ManzilOf(s){ return s >= 50 ? 7 : s >= 37 ? 6 : s >= 26 ? 5 : s >= 17 ? 4 : s >= 10 ? 3 : s >= 5 ? 2 : 1; }
+
+const M13_FILES = ['mushaf13.json', 'data/mushaf13.json'];
+const M13_FONT_FILES = ['mushaf13-font.woff2', 'mushaf13-font.ttf', 'mushaf13-font.otf', 'mushaf13-font.woff'];
+const M13_NUM_RE = /^(?:\u06DD?[0-9\u0660-\u0669\u06F0-\u06F9]+|[\uE000-\uF8FF]+)$/;
+const M13_LETTER_RE = /[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FF]/;
+const M13 = { ready: false, data: null, total: 0, surahPage: [], surahLine: [], verseFirst: new Map(), juzPage: [], basm: null, loading: null, source: '', fontOk: false, tried: false };
+const M13_TOTAL_DEFAULT = 847;
+function mushafTotalPages(){ return M13.ready ? M13.total : 0; }
+
+/* ── persistent storage (IndexedDB for the big files) ───────────────── */
+function m13Idb(){ return new Promise((res, rej) => { let r; try{ r = indexedDB.open('qc-mushaf', 1); }catch(e){ return rej(e); } r.onupgradeneeded = () => { r.result.createObjectStore('kv'); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function m13Get(k){ try{ const db = await m13Idb(); return await new Promise(res => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(undefined); }); }catch(e){ return undefined; } }
+async function m13Put(k, v){ try{ const db = await m13Idb(); return await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(true); tx.onerror = () => res(false); tx.onabort = () => res(false); }); }catch(e){ return false; } }
+async function m13Del(k){ try{ const db = await m13Idb(); return await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').delete(k); tx.oncomplete = () => res(true); tx.onerror = () => res(false); }); }catch(e){ return false; } }
+
+/* ── data install + lookup tables ───────────────────────────────────── */
+function m13Install(obj){
+  if(!obj || obj.v !== 1 || !Array.isArray(obj.words) || !Array.isArray(obj.pages) || !obj.pages.length) throw new Error('This is not a mushaf13.json file.');
+  const words = obj.words, base = obj.base | 0, pages = obj.pages;
+  const surahPage = new Array(115).fill(0), surahLine = new Array(115).fill(0), vf = new Map();
+  for(let p = 0; p < pages.length; p++){
+    const P = pages[p];
+    for(let li = 0; li < P.length; li++){
+      const L = P[li];
+      if(L[0] === 1){ const sn = L[4]; if(sn >= 1 && sn <= 114 && !surahPage[sn]){ surahPage[sn] = p + 1; surahLine[sn] = li; } }
+      else if(L[0] === 0){
+        for(let w = L[2]; w <= L[3]; w++){
+          const x = words[w - base]; if(!x || !x[0]) continue;
+          const k = x[0] * 1000 + x[1];
+          if(!vf.has(k)) vf.set(k, p + 1);
+        }
       }
     }
-    if(!isEnd) continue;
-    const medallion = el.querySelector('.mushaf-ayah-mark');
-    const anchor = medallion || el;
-    const r = anchor.getBoundingClientRect();
-    if(!r || !r.width) continue;
-    const top = (r.top + r.height / 2) - innerRect.top;
-    if(!isFinite(rightOffset) || !isFinite(top)) continue;
-    const m = document.createElement('span');
-    m.className = 'mushaf-ruku-mark';
-    m.textContent = 'ع';
-    m.setAttribute('aria-hidden', 'true');
-    m.style.left = 'auto';
-    m.style.right = Math.round(rightOffset) + 'px';
-    m.style.top = Math.round(top) + 'px';
-    inner.appendChild(m);
+  }
+  for(let s = 1; s <= 114; s++){ if(!surahPage[s]) surahPage[s] = vf.get(s * 1000 + 1) || 0; }
+  const juzPage = [0];
+  for(const t of M13_JUZ_STARTS) juzPage[t.j] = vf.get(t.s * 1000 + t.a) || 0;
+  M13.data = obj; M13.total = pages.length; M13.surahPage = surahPage; M13.surahLine = surahLine; M13.verseFirst = vf; M13.juzPage = juzPage; M13.basm = null; M13.ready = true;
+  try{ readerState.pages.clear(); }catch(_){}
+}
+function m13Basm(){
+  if(M13.basm) return M13.basm;
+  let out = BISMILLAH_TEXT;
+  try{
+    const d = M13.data, f = M13.verseFirst.get(1001);
+    if(f){
+      const P = d.pages[f - 1];
+      const ws = [];
+      for(const L of P){ if(L[0] !== 0) continue; for(let i = L[2]; i <= L[3]; i++){ const x = d.words[i - d.base]; if(x && x[0] === 1 && x[1] === 1 && x[2] && !M13_NUM_RE.test(x[2])) ws.push(x[2]); } }
+      if(ws.length === 4) out = ws.join(' ');
+    }
+  }catch(_){}
+  M13.basm = out; return out;
+}
+async function m13LoadStored(){
+  if(M13.ready) return true;
+  if(M13.loading) return M13.loading;
+  if(M13.tried) return false;
+  M13.loading = (async () => {
+    try{ const raw = await m13Get('data'); if(raw){ m13Install(JSON.parse(raw)); M13.source = 'device'; return true; } }catch(e){}
+    for(const u of M13_FILES){
+      try{ const r = await fetch(u, { cache: 'no-cache' }); if(!r.ok) continue; const txt = await r.text(); m13Install(JSON.parse(txt)); M13.source = 'site'; m13Put('data', txt); return true; }catch(e){}
+    }
+    return false;
+  })();
+  const ok = await M13.loading; M13.loading = null; M13.tried = true; return ok;
+}
+async function m13ApplyFont(buf){
+  const ff = new FontFace('Mushaf13', buf, { weight: '100 900' });
+  await ff.load(); document.fonts.add(ff); M13.fontOk = true;
+  m13RefitSoon();
+}
+async function m13LoadFont(){
+  try{ const f = await m13Get('font'); if(f && f.buf){ await m13ApplyFont(f.buf); return; } }catch(e){}
+  if(M13.source !== 'site') return;
+  for(const u of M13_FONT_FILES){
+    try{ const r = await fetch(u); if(!r.ok) continue; if(/text\/html/.test(r.headers.get('content-type') || '')) continue; const buf = await r.arrayBuffer(); await m13ApplyFont(buf); m13Put('font', { buf }); return; }catch(e){}
   }
 }
-let rukuReplaceTimer = null;
-function scheduleRukuReplace(){
-  clearTimeout(rukuReplaceTimer);
-  rukuReplaceTimer = setTimeout(() => {
-    const inner = pageEl.querySelector('.mushaf-inner');
-    const content = inner ? inner.querySelector('.mushaf-book-content') : null;
-    if(inner && content) placeRukuMarks(inner, content);
-  }, 140);
+async function m13EnsureData(interactive){
+  if(M13.ready) return true;
+  if(await m13LoadStored()) return true;
+  if(!interactive) return false;
+  return await m13OpenImport();
 }
-window.addEventListener('resize', scheduleRukuReplace);
-window.addEventListener('orientationchange', scheduleRukuReplace);
+
+/* ── import dialog (data file + optional IndoPak font) ──────────────── */
+function m13OpenImport(){
+  return new Promise(resolve => {
+    const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.style.zIndex = 200;
+    bg.innerHTML = '<div class="modal"><div class="grabber"></div><h2>📖 Quran page data</h2>' +
+      '<p class="m13-note">The 13-line IndoPak pages are drawn from <b>mushaf13.json</b> — the QUL "Indopak 13 lines" layout and script, converted with <code>build_mushaf_data.py</code>. Choose that file once; it is then kept on this device and works offline.</p>' +
+      '<div class="m13-status" id="m13Stat"></div>' +
+      '<label class="m13-file">① Data file (mushaf13.json)<input type="file" id="m13FileData" accept=".json,application/json"></label>' +
+      '<label class="m13-file">② IndoPak font (optional, .ttf / .otf / .woff2)<input type="file" id="m13FileFont" accept=".ttf,.otf,.woff,.woff2,font/*"></label>' +
+      '<div style="height:10px"></div><button class="ghost" id="m13ImpClose" type="button" style="width:100%;height:46px">Close</button></div>';
+    document.body.appendChild(bg);
+    const stat = bg.querySelector('#m13Stat');
+    const paint = () => { stat.textContent = M13.ready ? ('✓ Loaded: ' + (M13.data.meta && M13.data.meta.name || 'Mushaf') + ' · ' + M13.total + ' pages · ' + (M13.fontOk ? 'IndoPak font installed' : 'no IndoPak font yet (using fallback)')) : 'No data loaded yet.'; stat.className = 'm13-status' + (M13.ready ? ' ok' : ''); };
+    paint();
+    let done = false;
+    const close = v => { if(done) return; done = true; bg.remove(); resolve(!!v && M13.ready); };
+    bg.addEventListener('click', e => { if(e.target === bg) close(M13.ready); });
+    bg.querySelector('#m13ImpClose').addEventListener('click', () => close(M13.ready));
+    bg.querySelector('#m13FileData').addEventListener('change', async e => {
+      const f = e.target.files && e.target.files[0]; if(!f) return;
+      stat.textContent = 'Reading ' + f.name + '…'; stat.className = 'm13-status';
+      try{ const txt = await f.text(); m13Install(JSON.parse(txt)); M13.source = 'device'; await m13Put('data', txt); paint(); showToast('✓ Quran page data loaded'); setTimeout(() => close(true), 500); }
+      catch(err){ stat.textContent = '⚠️ ' + (err && err.message ? err.message : 'Could not read that file.'); stat.className = 'm13-status bad'; }
+    });
+    bg.querySelector('#m13FileFont').addEventListener('change', async e => {
+      const f = e.target.files && e.target.files[0]; if(!f) return;
+      try{ const buf = await f.arrayBuffer(); await m13ApplyFont(buf); await m13Put('font', { buf }); paint(); showToast('✓ IndoPak font installed'); }
+      catch(err){ stat.textContent = '⚠️ That font file could not be loaded.'; stat.className = 'm13-status bad'; }
+    });
+  });
+}
+
+/* ── page model ─────────────────────────────────────────────────────── */
+function m13BuildPage(n){
+  const d = M13.data, base = d.base | 0, W = d.words, P = d.pages[n - 1];
+  if(!P) return null;
+  const lines = [], ayahs = [], seen = new Set();
+  let firstSurah = 0, lastSurah = 0, firstVerse = null;
+  for(const L of P){
+    const t = L[0];
+    if(t === 1){ lines.push({ t: 'surah', s: L[4] }); if(!firstSurah) firstSurah = L[4]; lastSurah = L[4]; continue; }
+    if(t === 2){ lines.push({ t: 'bism' }); continue; }
+    const ws = [];
+    for(let i = L[2]; i <= L[3]; i++){
+      const x = W[i - base]; if(!x || !x[2]) continue;
+      const txt = x[2], isNum = M13_NUM_RE.test(txt);
+      const key = x[0] + ':' + x[1];
+      if(!seen.has(key)){ seen.add(key); ayahs.push({ surah: x[0], numberInSurah: x[1], text: '', juz: m13JuzOf(x[0], x[1]) }); }
+      if(!firstSurah) firstSurah = x[0];
+      lastSurah = x[0];
+      if(!firstVerse) firstVerse = { s: x[0], a: x[1] };
+      if(!isNum && !M13_LETTER_RE.test(txt) && ws.length){ ws[ws.length - 1].text += txt; continue; }
+      ws.push({ text: txt, s: x[0], a: x[1], end: isNum });
+    }
+    lines.push({ t: 'ayah', c: !!L[1] || ws.length < 2, words: ws });
+  }
+  const fv = firstVerse || { s: firstSurah || 1, a: 1 };
+  const juz = m13JuzOf(fv.s, fv.a);
+  ayahs.forEach(a => { a.manzil = m13ManzilOf(a.surah); });
+  return { pageNumber: n, lines, ayahs, firstSurah: firstSurah || fv.s, lastSurah: lastSurah || fv.s, juz, manzil: m13ManzilOf(firstSurah || fv.s), nLines: Math.max((d.meta && d.meta.lines) || 13, P.length) };
+}
+
+/* ── layout / fitting (13 equal ruled rows, widest line fills the width) */
+let m13FitTimer = null;
+function m13RefitSoon(){ clearTimeout(m13FitTimer); m13FitTimer = setTimeout(m13Layout, 90); }
+function m13Layout(){
+  const inner = pageEl.querySelector('.mushaf-inner.m13'); if(!inner) return;
+  const wrap = inner.querySelector('.m13-page'), box = inner.querySelector('.m13-box'); if(!wrap || !box) return;
+  const n = parseInt(box.style.getPropertyValue('--m13-n'), 10) || 13;
+  const cs = getComputedStyle(pageEl);
+  const availW = pageEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const availH = pageEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const boxH = Math.max(n * 40, availH - 62);
+  const w = Math.max(280, Math.min(availW, boxH * 0.74, 680));
+  wrap.style.setProperty('--m13-w', w + 'px'); box.style.setProperty('--m13-h', boxH + 'px');
+  const rowH = boxH / n;
+  let f = Math.max(12, Math.min(rowH * 0.56, 40));
+  wrap.style.setProperty('--m13-fs', f + 'px');
+  const lines = Array.prototype.slice.call(box.querySelectorAll('.m13-line.a'));
+  const usable = box.clientWidth - 6 - 12;
+  for(let pass = 0; pass < 4 && lines.length; pass++){
+    let ratio = Infinity;
+    for(const ln of lines){
+      const kids = ln.children; if(!kids.length) continue;
+      let sum = 0; for(let i = 0; i < kids.length; i++) sum += kids[i].getBoundingClientRect().width;
+      sum += (kids.length - 1) * 0.22 * f;
+      if(sum > 0) ratio = Math.min(ratio, usable / sum);
+    }
+    if(!isFinite(ratio)) break;
+    const nf = Math.max(9, Math.min(f * ratio * 0.985, rowH * 0.64));
+    if(Math.abs(nf - f) < 0.25) break;
+    f = nf; wrap.style.setProperty('--m13-fs', f + 'px');
+  }
+}
+window.addEventListener('resize', m13RefitSoon);
+window.addEventListener('orientationchange', m13RefitSoon);
+try{ document.fonts.addEventListener('loadingdone', m13RefitSoon); }catch(_){}
+
+/* ── reader (same public API the rest of the app already calls) ────── */
+const readerState = { pages: new Map(), currentPage: 0, token: 0, highlightVerse: null, highlightSurah: 0, loading: false };
+async function loadReaderPage(pageNumber){
+  if(!M13.ready){ const ok = await m13EnsureData(true); if(!ok){ m13ShowNoData(); return; } }
+  const n = Math.max(1, Math.min(M13.total, Math.round(pageNumber) || 1));
+  const token = ++readerState.token;
+  readerState.loading = false;
+  words = []; ptr = 0; lastCurrentEl = null; recReset(); mushafDirtyForViewer = true;
+  if(!readerState.pages.has(n)){
+    if(readerState.pages.size > 60){ const it = readerState.pages.keys().next(); if(!it.done) readerState.pages.delete(it.value); }
+    readerState.pages.set(n, m13BuildPage(n));
+  }
+  renderReaderPage(n, token);
+}
+function m13ShowNoData(){
+  pageEl.classList.add('mushaf-book');
+  pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading"><span class="err">The Quran page data has not been added yet.</span><br><button class="ghost" id="m13NoDataBtn" type="button" style="margin-top:14px;padding:0 18px;height:44px">Add Quran page data</button></div></div>';
+  qvTitle.textContent = 'Quran';
+  const b = document.getElementById('m13NoDataBtn'); if(b) b.addEventListener('click', async () => { if(await m13OpenImport()) loadReaderPage(m13R.page || 1); });
+}
 function renderReaderPage(pageNumber, token){
   const page = readerState.pages.get(pageNumber);
   if(!page) return;
@@ -10197,96 +10296,260 @@ function renderReaderPage(pageNumber, token){
   STORE.mode = 'page'; STORE.page = pageNumber;
   pageEl.classList.add('mushaf-book');
   pageEl.innerHTML = '';
-  const inner = document.createElement('div'); inner.className = 'mushaf-inner';
-  const frame = document.createElement('div'); frame.className = 'mushaf-book-page';
-  const firstAyah = page.ayahs[0] || {};
-  const pageJuz = firstAyah.juz || 1;
-  const pageManzil = firstAyah.manzil || 1;
-  const juzNameAr = JUZ_NAMES_AR[pageJuz - 1] || (JUZ_NAMES[pageJuz - 1] || ('Juz ' + pageJuz));
-  const surahLeft = (firstAyah.surahName || ('Surah ' + (firstAyah.surah || ''))) + ' ' + toAr(firstAyah.surah || '');
-  const juzRight  = juzNameAr + ' ' + toAr(pageJuz);
-  const headerRow = document.createElement('div');
-  headerRow.className = 'mushaf-book-header-row';
-  headerRow.innerHTML = '<span class="mbh-left">' + escapeHtml(surahLeft) + '</span><span class="mbh-center">' + toAr(pageNumber) + '</span><span class="mbh-right">' + escapeHtml(juzRight) + '</span>';
-  frame.appendChild(headerRow);
-  const content = document.createElement('div'); content.className = 'mushaf-book-content';
-  let lastSurah = -1;
-  const surahsOnPage = [];
+  const inner = document.createElement('div'); inner.className = 'mushaf-inner m13';
+  const wrap = document.createElement('div'); wrap.className = 'm13-page';
+  const juzNameAr = JUZ_NAMES_AR[page.juz - 1] || ('الجزء ' + toAr(page.juz));
+  const head = document.createElement('div'); head.className = 'm13-head';
+  head.innerHTML = '<span class="l">' + escapeHtml((M13_AR[page.lastSurah - 1] || '') + ' ' + toAr(page.lastSurah)) + '</span><span class="c">' + toAr(pageNumber) + '</span><span class="r">' + escapeHtml(juzNameAr + ' ' + toAr(page.juz)) + '</span>';
+  wrap.appendChild(head);
+  const box = document.createElement('div'); box.className = 'm13-box'; box.style.setProperty('--m13-n', page.nLines);
   const sajdahRefs = [];
-  page.ayahs.forEach((a) => {
-    if(!surahsOnPage.length || surahsOnPage[surahsOnPage.length - 1].surah !== a.surah) surahsOnPage.push(a);
-    const isSurahStart = (a.numberInSurah === 1 && a.surah !== lastSurah);
-    if(isSurahStart){
-      lastSurah = a.surah;
-      const h = document.createElement('div'); h.className = 'mushaf-book-header';
-      const metaBits = [];
-      if(a.surahEnglishName) metaBits.push(escapeHtml(a.surahEnglishName));
-      if(a.surahNumberOfAyahs) metaBits.push(a.surahNumberOfAyahs + ' ayahs');
-      metaBits.push('Surah ' + a.surah);
-      h.innerHTML = '<div class="mushaf-surah-name">' + escapeHtml(a.surahName) + '</div><div class="mushaf-surah-meta">' + metaBits.join(' · ') + '</div>';
-      content.appendChild(h);
-      if(shouldShowBismillah(a.surah)){
-        const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
-        const o1 = document.createElement('span'); o1.className = 'bism-orn'; o1.setAttribute('aria-hidden','true'); o1.textContent = '۞';
-        const t = document.createElement('span'); t.className = 'bism-text'; t.textContent = BISMILLAH_TEXT;
-        const o2 = document.createElement('span'); o2.className = 'bism-orn'; o2.setAttribute('aria-hidden','true'); o2.textContent = '۞';
-        b.appendChild(o1); b.appendChild(t); b.appendChild(o2);
-        content.appendChild(b);
-      }
+  page.ayahs.forEach(a => { const k = a.surah + ':' + a.numberInSurah; if(SAJDAH_VERSES.has(k) && sajdahRefs.indexOf(k) < 0) sajdahRefs.push(k); });
+  page.lines.forEach(L => {
+    const row = document.createElement('div');
+    if(L.t === 'surah'){
+      row.className = 'm13-line m13-surah'; row.dataset.surah = String(L.s);
+      const c = M13_CHAPTERS[L.s - 1] || { name: '', numberOfAyahs: 0, revelationType: '' };
+      row.innerHTML = '<span class="sm">' + (c.revelationType === 'Medinan' ? 'مدنية' : 'مكية') + '</span><span class="nm"><i>❁</i>سُورَةُ ' + escapeHtml(c.name) + '<i>❁</i></span><span class="sm">' + toAr(c.numberOfAyahs) + ' آيات</span>';
+    } else if(L.t === 'bism'){
+      row.className = 'm13-line m13-bism c'; row.textContent = m13Basm();
+    } else {
+      row.className = 'm13-line a' + (L.c ? ' c' : '');
+      L.words.forEach(w => {
+        const sp = document.createElement('span');
+        const key = w.s + ':' + w.a;
+        sp.className = 'm13-w mw' + (w.end ? ' m13-end' + (w.text.indexOf('\u06DD') >= 0 || /[\uE000-\uF8FF]/.test(w.text) ? ' g' : '') : '');
+        sp.textContent = w.text;
+        sp.dataset.surah = String(w.s); sp.dataset.ayah = String(w.a); sp.dataset.verse = key; sp.dataset.page = String(pageNumber);
+        row.appendChild(sp);
+        if(w.end && SAJDAH_VERSES.has(key)){
+          const sj = document.createElement('span'); sj.className = 'm13-w mushaf-sajdah-mark'; sj.textContent = '۩'; sj.title = 'Sajidah verse'; row.appendChild(sj);
+        }
+      });
     }
-    let text = String(a.text == null ? '' : a.text);
-    if(a.numberInSurah === 1 && shouldShowBismillah(a.surah)){ const r = splitBismillah(text); if(r) text = r.rest; }
-    // Bismillah is never verse 1: in Al-Fatiha the API's ayah 1 IS Bismillah
-    // alone, already shown as the preamble line above — skip it here.
-    if (Number(a.surah) === 1 && a.numberInSurah === 1 && normAr(text) === normAr(BISMILLAH_TEXT)) return;
-    const displayAyah = displayAyahNumber(a.surah, a.numberInSurah);
-    const verseKey = a.surah + ':' + displayAyah;
-    const isSajdah = (a.sajda === true) || SAJDAH_VERSES.has(verseKey);
-    const span = document.createElement('span'); span.className = 'ayah';
-    span.dataset.surah = String(a.surah); span.dataset.ayah = String(displayAyah);
-    span.dataset.verse = verseKey; span.dataset.page = String(pageNumber);
-    if(typeof a.ruku === 'number') span.dataset.ruku = String(a.ruku);
-    if(a.surahNumberOfAyahs) span.dataset.surahAyahs = String(a.surahNumberOfAyahs);
-    if(JUZ_START_VERSE[verseKey]) span.classList.add('juz-start');
-    span.appendChild(document.createTextNode(text + ' '));
-    const mark = document.createElement('span'); mark.className = 'mushaf-ayah-mark'; mark.textContent = toAr(displayAyah);
-    span.appendChild(mark);
-    if(isSajdah){ const sj = document.createElement('span'); sj.className = 'mushaf-sajdah-mark'; sj.textContent = '۩'; sj.title = 'Sajidah verse'; span.appendChild(sj); sajdahRefs.push(verseKey); }
-    if(a.translation){ const t = document.createElement('span'); t.className = 'translation'; t.textContent = a.translation; span.appendChild(t); }
-    content.appendChild(span);
+    box.appendChild(row);
   });
-  frame.appendChild(content);
-  const footer = document.createElement('div'); footer.className = 'mushaf-book-footer-row'; footer.textContent = 'منزل ' + toAr(pageManzil);
-  frame.appendChild(footer);
-  inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTop = 0;
-  scheduleRukuReplace();
-  if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
-  else if(surahsOnPage.length > 1) qvTitle.textContent = surahsOnPage.map(a => a.surahEnglishName).join(' · ');
-  else qvTitle.textContent = 'Page ' + pageNumber;
+  for(let i = page.lines.length; i < page.nLines; i++){ const e = document.createElement('div'); e.className = 'm13-line m13-empty'; box.appendChild(e); }
+  wrap.appendChild(box);
+  const foot = document.createElement('div'); foot.className = 'm13-foot'; foot.textContent = 'منزل ' + toAr(page.manzil);
+  wrap.appendChild(foot);
+  inner.appendChild(wrap); pageEl.appendChild(inner); pageEl.scrollTop = 0;
+  m13Layout();
+  const t1 = M13_EN[page.firstSurah - 1], t2 = M13_EN[page.lastSurah - 1];
+  if(page.firstSurah === page.lastSurah) qvTitle.textContent = t1 + ' · ' + (M13_AR[page.firstSurah - 1] || '');
+  else qvTitle.textContent = t1 + ' · ' + t2;
   if(sajdahRefs.length){ setTimeout(() => { showToast('۩ Sajdah verse · ' + sajdahRefs.join(' · '), 2600); if(toastEl) toastEl.classList.add('sajdah-toast'); }, 420); }
-  if(token === readerState.token && readerState.highlightVerse){
-    const key = readerState.highlightVerse;
-    readerState.highlightVerse = null;
-    let el = null;
-    try{ el = inner.querySelector('.ayah[data-verse="' + key.replace(/["\\]/g, '\\$&') + '"]'); }catch(_){}
-    if(el){ setTimeout(() => { if(!el.isConnected) return; el.classList.add('located'); scrollElementIntoView(el, true); setTimeout(() => el.classList.remove('located'), 1400); }, 60); }
+  if(token === readerState.token){
+    if(readerState.highlightVerse){
+      const key = readerState.highlightVerse; readerState.highlightVerse = null;
+      let els = []; try{ els = Array.prototype.slice.call(inner.querySelectorAll('.mw[data-verse="' + key.replace(/["\\]/g, '\\$&') + '"]')); }catch(_){}
+      if(els.length){ setTimeout(() => { els.forEach(el => { if(!el.isConnected) return; el.classList.add('located'); setTimeout(() => el.classList.remove('located'), 1400); }); try{ els[0].scrollIntoView({ block: 'center', behavior: 'smooth' }); }catch(_){} }, 60); }
+    } else if(readerState.highlightSurah){
+      const sn = readerState.highlightSurah; readerState.highlightSurah = 0;
+      const el = inner.querySelector('.m13-surah[data-surah="' + sn + '"]');
+      if(el){ el.classList.add('located'); setTimeout(() => el.classList.remove('located'), 1600); }
+    }
   }
-  prefetchAdjacentPages(pageNumber);
+  m13OnPage(page);
 }
-function goToReaderPage(n){ if(n < 1 || n > 604) return; loadReaderPage(n); }
+function goToReaderPage(n){ if(!M13.ready || n < 1 || n > M13.total) return; loadReaderPage(n); }
 async function openSurahInReader(surahNumber){
-  if(!navigator.onLine){ const ok = await askForInternet('Surah ' + surahNumber); if(!ok) return; }
+  if(!(await m13EnsureData(true))) return;
+  const pg = M13.surahPage[surahNumber] || 1;
+  readerState.highlightSurah = surahNumber;
   openViewer('read', { hideFullscreen: true });
-  qvTitle.textContent = 'Loading…';
-  const pg = await getSurahStartPage(surahNumber);
   loadReaderPage(pg);
 }
 async function openJuzInReader(juzNumber){
-  if(!navigator.onLine){ const ok = await askForInternet('Juz ' + juzNumber); if(!ok) return; }
+  if(!(await m13EnsureData(true))) return;
+  const pg = M13.juzPage[juzNumber] || 1;
   openViewer('read', { hideFullscreen: true });
-  qvTitle.textContent = 'Loading…';
-  const pg = await getJuzStartPage(juzNumber);
   loadReaderPage(pg);
+}
+async function m13OpenPage(n){
+  if(!(await m13EnsureData(true))) return;
+  openViewer('read', { hideFullscreen: true });
+  loadReaderPage(n);
+}
+function m13BmPage(b){ try{ if(M13.ready){ const p = M13.verseFirst.get(b.surah * 1000 + b.ayah); if(p) return p; } }catch(_){} return b.page || 1; }
+
+/* ── page / surah jump ──────────────────────────────────────────────── */
+function m13Digits(s){ return String(s).replace(/[\u0660-\u0669]/g, d => d.charCodeAt(0) - 0x660).replace(/[\u06F0-\u06F9]/g, d => d.charCodeAt(0) - 0x6F0).replace(/[^0-9]/g, ''); }
+async function m13Jump(kind, n){
+  if(!Number.isFinite(n) || n < 1) return { ok: false, msg: 'Enter a number.' };
+  if(kind === 'surah'){
+    if(n > 114) return { ok: false, msg: 'Surah must be between 1 and 114.' };
+    if(!(await m13EnsureData(true))) return { ok: false, msg: '' };
+    openSurahInReader(n); return { ok: true };
+  }
+  if(!(await m13EnsureData(true))) return { ok: false, msg: '' };
+  if(n > M13.total) return { ok: false, msg: 'Page must be between 1 and ' + M13.total + '.' };
+  m13OpenPage(n); return { ok: true };
+}
+function m13BuildJump(onDone){
+  const f = document.createElement('form'); f.className = 'm13-jump'; f.setAttribute('autocomplete', 'off'); f.noValidate = true;
+  f.innerHTML = '<div class="m13-seg" role="group" aria-label="Jump to"><button type="button" data-k="page">Page</button><button type="button" data-k="surah">Surah</button></div>' +
+    '<input class="m13-in" type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="go" aria-label="Page or surah number"><button class="m13-go" type="submit">Go</button><div class="m13-hint"></div>';
+  let kind = 'page'; try{ kind = localStorage.getItem('qc.jumpKind') === 'surah' ? 'surah' : 'page'; }catch(_){}
+  const inp = f.querySelector('.m13-in'), hint = f.querySelector('.m13-hint');
+  const paint = () => {
+    f.querySelectorAll('.m13-seg button').forEach(b => b.classList.toggle('on', b.dataset.k === kind));
+    inp.placeholder = kind === 'page' ? 'Page number' : 'Surah number';
+    hint.className = 'm13-hint'; hint.textContent = kind === 'page' ? ('Go to page 1–' + (M13.total || M13_TOTAL_DEFAULT)) : 'Go to surah 1–114';
+  };
+  f.querySelectorAll('.m13-seg button').forEach(b => b.addEventListener('click', () => { kind = b.dataset.k; try{ localStorage.setItem('qc.jumpKind', kind); }catch(_){} paint(); inp.focus(); }));
+  inp.addEventListener('input', () => { const c = m13Digits(inp.value); if(c !== inp.value) inp.value = c; });
+  f.addEventListener('submit', async e => {
+    e.preventDefault();
+    const r = await m13Jump(kind, parseInt(m13Digits(inp.value), 10));
+    if(r.ok){ inp.value = ''; inp.blur(); if(onDone) onDone(); }
+    else if(r.msg){ hint.className = 'm13-hint err'; hint.textContent = r.msg; f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); }
+  });
+  f.m13Paint = paint; f.m13Kind = () => kind; f.m13Focus = () => inp.focus();
+  paint();
+  return f;
+}
+function m13OpenJumpModal(){
+  const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.style.zIndex = 200;
+  bg.innerHTML = '<div class="modal"><div class="grabber"></div><h2>🔎 Go to</h2><div id="m13JumpHost"></div><div style="height:10px"></div><button class="ghost" id="m13JumpClose" type="button" style="width:100%;height:46px">Close</button></div>';
+  document.body.appendChild(bg);
+  const close = () => bg.remove();
+  const form = m13BuildJump(close); bg.querySelector('#m13JumpHost').appendChild(form);
+  const cur = readerState.currentPage;
+  if(cur){ const inp = form.querySelector('.m13-in'); inp.value = cur; inp.select && setTimeout(() => { try{ inp.focus(); inp.select(); }catch(_){} }, 60); } else setTimeout(() => form.m13Focus(), 60);
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  bg.querySelector('#m13JumpClose').addEventListener('click', close);
+}
+function m13InstallJumpBars(){
+  [['screenSurahIndex'], ['screenJuzIndex']].forEach(a => {
+    const scr = document.getElementById(a[0]); if(!scr || scr.querySelector('.m13-jump')) return;
+    const anchor = scr.querySelector('.lang-selector-wrap') || scr.querySelector('.sub-header');
+    const bar = m13BuildJump(null);
+    if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(bar, anchor.nextSibling);
+  });
+}
+
+/* ── resume: remember exactly where the reader left off ─────────────── */
+const M13_RESUME_KEY = 'qc.resume.v2';
+let m13R = (function(){ try{ return JSON.parse(localStorage.getItem(M13_RESUME_KEY)) || {}; }catch(e){ return {}; } })();
+const M13_BOOT_STATE = JSON.parse(JSON.stringify(m13R));
+let m13ScrollLock = false;
+function m13Save(patch){ Object.assign(m13R, patch); m13R.ts = Date.now(); try{ localStorage.setItem(M13_RESUME_KEY, JSON.stringify(m13R)); }catch(e){} }
+function m13Snapshot(){
+  try{
+    let screen = currentScreenName;
+    if(viewerOpen){ if(viewerMode !== 'read') return; screen = 'reader'; }
+    const o = { screen };
+    if(screen === 'reader' && readerState.currentPage){ o.page = readerState.currentPage; o.scroll = pageEl.scrollTop || 0; o.ret = viewerReturnScreen; }
+    m13Save(o);
+  }catch(e){}
+}
+function m13OnScreen(name){
+  m13ScrollLock = (name === 'index' || name === 'juz');
+  if(!viewerOpen) m13Save({ screen: name });
+}
+function m13OnPage(page){
+  const f = page.ayahs[0];
+  const patch = { screen: 'reader', page: page.pageNumber, scroll: 0, ret: viewerReturnScreen, lastSurah: page.firstSurah, lastJuz: page.juz };
+  if(f) patch.lastVerse = f.surah + ':' + f.numberInSurah;
+  m13Save(patch);
+}
+function m13Debounce(fn, ms){ let t; return function(){ clearTimeout(t); t = setTimeout(fn, ms); }; }
+const m13SaveReaderScroll = m13Debounce(() => { if(viewerOpen && viewerMode === 'read' && readerState.currentPage) m13Save({ scroll: pageEl.scrollTop || 0 }); }, 200);
+const m13SaveIndexScroll = m13Debounce(() => {
+  if(m13ScrollLock || viewerOpen) return;
+  if(currentScreenName === 'index') m13Save({ surahScroll: window.scrollY });
+  else if(currentScreenName === 'juz') m13Save({ juzScroll: window.scrollY });
+}, 200);
+pageEl.addEventListener('scroll', m13SaveReaderScroll, { passive: true });
+window.addEventListener('scroll', m13SaveIndexScroll, { passive: true });
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') { m13Snapshot(); if(!viewerOpen && (currentScreenName === 'index' || currentScreenName === 'juz') && !m13ScrollLock) m13Save(currentScreenName === 'index' ? { surahScroll: window.scrollY } : { juzScroll: window.scrollY }); } });
+window.addEventListener('pagehide', () => { m13Snapshot(); if(!viewerOpen && (currentScreenName === 'index' || currentScreenName === 'juz') && !m13ScrollLock) m13Save(currentScreenName === 'index' ? { surahScroll: window.scrollY } : { juzScroll: window.scrollY }); });
+window.addEventListener('beforeunload', () => { m13Snapshot(); });
+function m13RestoreIndexScroll(kind){
+  const list = kind === 'index' ? surahIndexList : juzIndexList;
+  const y = kind === 'index' ? m13R.surahScroll : m13R.juzScroll;
+  requestAnimationFrame(() => {
+    if(typeof y === 'number' && y > 0) window.scrollTo(0, y);
+    else { const last = list.querySelector('.m13-last'); if(last) last.scrollIntoView({ block: 'center' }); }
+    setTimeout(() => { m13ScrollLock = false; }, 200);
+  });
+}
+
+/* ── surah index + juz index ────────────────────────────────────────── */
+async function renderSurahIndex(){
+  m13InstallJumpBars();
+  await m13LoadStored();
+  surahIndexList.innerHTML = '';
+  const lastS = m13R.lastSurah || 0;
+  const rows = [];
+  M13_CHAPTERS.forEach(s => {
+    const row = document.createElement('button');
+    row.className = 'surah-row' + (s.number === lastS ? ' m13-last' : ''); row.type = 'button'; row.dataset.surah = String(s.number);
+    const pg = M13.ready ? M13.surahPage[s.number] : 0;
+    const subParts = [s.numberOfAyahs + ' ayahs', s.revelationType];
+    if(pg) subParts.push('Page ' + pg);
+    row.innerHTML =
+      '<span class="num">' + String(s.number).padStart(3, '0') + '</span>' +
+      '<span class="meta"><span class="en">' + escapeHtml(s.englishName) + (s.number === lastS ? ' <b class="m13-tag">Last read</b>' : '') + '</span>' +
+      '<span class="sub">' + subParts.join(' · ') + '</span></span>' +
+      '<span class="ar">' + escapeHtml(s.name) + '</span>';
+    row.addEventListener('click', () => openSurahInReader(s.number));
+    surahIndexList.appendChild(row); rows.push(row);
+  });
+  m13RestoreIndexScroll('index');
+  ensureChaptersLocalized(surahIndexLang).then(chs => {
+    if(!chs || currentScreenName !== 'index') return;
+    chs.forEach((c, i) => {
+      const row = rows[i]; if(!row || !c.translatedName) return;
+      const sub = row.querySelector('.sub'); if(!sub) return;
+      const pg = M13.ready ? M13.surahPage[c.number] : 0;
+      sub.innerHTML = escapeHtml(c.translatedName) + ' · ' + c.numberOfAyahs + ' ayahs · ' + escapeHtml(c.revelationType || M13_CHAPTERS[i].revelationType) + (pg ? ' · Page ' + pg : '');
+    });
+  }).catch(() => {});
+}
+async function renderJuzIndex(){
+  m13InstallJumpBars();
+  await m13LoadStored();
+  juzIndexList.innerHTML = '';
+  const label = { en: 'Juz', tr: 'Cüz' }[surahIndexLang] || 'Juz';
+  const lastJ = m13R.lastJuz || 0;
+  for(let i = 1; i <= 30; i++){
+    const row = document.createElement('button');
+    row.type = 'button'; row.className = 'surah-row' + (i === lastJ ? ' m13-last' : ''); row.dataset.juz = String(i);
+    const startPage = M13.ready ? M13.juzPage[i] : 0;
+    const t = M13_JUZ_STARTS[i - 1];
+    row.innerHTML =
+      '<span class="num">' + i + '</span>' +
+      '<span class="meta"><span class="en">' + escapeHtml(JUZ_NAMES[i - 1] || ('Juz ' + i)) + (i === lastJ ? ' <b class="m13-tag">Last read</b>' : '') + '</span>' +
+      '<span class="sub">' + (startPage ? 'Page ' + startPage + ' · ' : '') + escapeHtml(M13_EN[t.s - 1]) + ' ' + t.s + ':' + t.a + ' · ' + label + ' ' + i + ' / 30</span></span>' +
+      '<span class="ar">الجزء ' + toAr(i) + '</span>';
+    row.addEventListener('click', () => openJuzInReader(i));
+    juzIndexList.appendChild(row);
+  }
+  m13RestoreIndexScroll('juz');
+}
+if(typeof qvJump !== 'undefined' && qvJump) qvJump.addEventListener('click', () => { m13OpenJumpModal(); showViewerChrome(); });
+
+/* ── boot: reopen exactly where the user left off ───────────────────── */
+async function m13Boot(){
+  m13InstallJumpBars();
+  const r = M13_BOOT_STATE || {};
+  const hasData = await m13LoadStored();
+  m13LoadFont();
+  try{
+    if(r.screen === 'reader' && r.page && hasData){
+      const ret = (r.ret === 'index' || r.ret === 'juz') ? r.ret : 'home';
+      if(ret === 'index'){ showScreen('index'); renderSurahIndex(); }
+      else if(ret === 'juz'){ showScreen('juz'); renderJuzIndex(); }
+      openViewer('read', { hideFullscreen: true });
+      await loadReaderPage(r.page);
+      const sc = r.scroll || 0;
+      if(sc > 0) setTimeout(() => { pageEl.scrollTop = sc; m13Save({ scroll: sc }); }, 120);
+    } else if(r.screen === 'index'){ showScreen('index'); renderSurahIndex(); }
+    else if(r.screen === 'juz'){ showScreen('juz'); renderJuzIndex(); }
+    else if(r.screen === 'coach' && typeof openCoachScreen === 'function'){ openCoachScreen(); }
+  }catch(e){ console.warn('[resume] failed', e); }
 }
 
 let viewerOpen = false;
@@ -10460,6 +10723,7 @@ function closeViewer(){
   updateBookmarkButton();
   if(isBrowserFullscreen()){ try{ if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }catch(e){} }
   if(viewerReturnScreen && viewerReturnScreen !== 'coach') showScreen(viewerReturnScreen);
+  try{ m13Snapshot(); }catch(_){}
   refreshAudioRowStates();
 }
 qvBack.addEventListener('click', () => { closeViewer(); });
@@ -10501,7 +10765,7 @@ function openViewerSurahPicker(){
   list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:14px;text-align:center">Loading…</div>';
   (async () => {
     try{
-      const chapters = await ensureChapters();
+      const chapters = M13_CHAPTERS;
       list.innerHTML = '';
       chapters.forEach(s => {
         const btn = document.createElement('button');
@@ -10783,7 +11047,7 @@ function getMushafInner(){ return pageEl.querySelector('.mushaf-inner'); }
 function clearInnerTransform(el){ if(!el) return; el.style.transition = ''; el.style.transform = ''; el.style.willChange = ''; }
 function applyPageDrag(dx){
   const inner = getMushafInner(); if(!inner) return;
-  const canPrev = readerState.currentPage > 1; const canNext = readerState.currentPage < 604;
+  const canPrev = readerState.currentPage > 1; const canNext = readerState.currentPage < mushafTotalPages();
   let x = dx; if(x > 0 && !canNext) x *= 0.30; if(x < 0 && !canPrev) x *= 0.30;
   inner.style.willChange = 'transform'; inner.style.transition = 'none'; inner.style.transform = 'translate3d(' + x + 'px,0,0)';
 }
@@ -10798,13 +11062,13 @@ function snapPageBack(){
 }
 async function completePageTurn(dir){
   const target = readerState.currentPage + dir;
-  if(target < 1 || target > 604){ snapPageBack(); return; }
+  if(target < 1 || target > mushafTotalPages()){ snapPageBack(); return; }
   if(pageTurning) return;
   pageTurning = true;
   try{
     const W = pageEl.clientWidth || window.innerWidth || 400;
     const outX = dir === 1 ? W : -W;
-    if(!readerState.pages.has(target)){ snapPageBack(); await loadReaderPage(target); return; }
+    
     const inner = getMushafInner();
     if(inner){
       inner.style.willChange = 'transform';
@@ -10833,7 +11097,7 @@ function readerGestureStart(e){
   if(pageTurning) return;
   if(e.pointerType === 'mouse' && e.button !== 0) return;
   if(readerGesture) return;
-  const ayahEl = (e.target && e.target.closest) ? e.target.closest('.ayah') : null;
+  const ayahEl = (e.target && e.target.closest) ? e.target.closest('.ayah, .mw') : null;
   readerGesture = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t0: performance.now(), moved: false, dragging: false, swiped: false, consumed: false, ayahEl: (ayahEl && pageEl.contains(ayahEl)) ? ayahEl : null, holdTimer: null };
   if(readerGesture.ayahEl){
     readerGesture.holdTimer = setTimeout(() => {
@@ -10870,7 +11134,7 @@ function readerGestureEnd(e){
     const dist = Math.abs(dx); const speed = dist / dt;
     const threshold = Math.max(38, W * 0.11);
     const isFlick = dist > 22 && speed > 0.35;
-    const canPrev = readerState.currentPage > 1; const canNext = readerState.currentPage < 604;
+    const canPrev = readerState.currentPage > 1; const canNext = readerState.currentPage < mushafTotalPages();
     if(dx > 0 && canNext && (dist > threshold || (isFlick && dx > 0))) completePageTurn(1);
     else if(dx < 0 && canPrev && (dist > threshold || (isFlick && dx < 0))) completePageTurn(-1);
     else snapPageBack();
@@ -12783,6 +13047,7 @@ function showTextShareModal(text){
     if(lastSurah) hifzSel.value = String(lastSurah);
   }
   showScreen('home');
+  try{ m13Boot(); }catch(e){ console.warn(e); }
 })();
 </script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
