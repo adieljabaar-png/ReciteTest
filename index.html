@@ -19,27 +19,6 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
-</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
 </style><style>
 @font-face {
   font-family: "Optimistic";
@@ -904,8 +883,8 @@ body.viewer-audio-mode .qv-slot .mushaf-inner .ayah.playing{
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book{
 padding-top:calc(var(--safe-top) + 62px);
 padding-bottom:calc(var(--safe-bottom) + 96px);
-padding-left:calc(var(--safe-left) + 10px);
-padding-right:calc(var(--safe-right) + 10px);
+padding-left:var(--safe-left);
+padding-right:var(--safe-right);
 font-size:clamp(1.4rem,5.8vw,2rem);
 line-height:2.15;
 letter-spacing:0;
@@ -915,12 +894,18 @@ background:transparent;touch-action:pan-y;
 }
 body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book{--page-bg:#ffffff;--page-fg:#111111;--page-border:#111111;}
 body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book{--page-bg:#000000;--page-fg:#ffffff;--page-border:#ffffff;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner{padding:0 clamp(28px,6.5vw,50px);max-width:900px;margin:0 auto;position:relative;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner{padding:0;max-width:none;margin:0 auto;position:relative;}
 
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book @font-face{
+font-family:'IndoPakNastaleeq';
+src:url('https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2') format('woff2'),
+url('https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff') format('woff');
+font-display:block;font-weight:400 700;
+}
+.mushaf-book-page{
 background:var(--page-bg,#000);color:var(--page-fg,#fff);
-border:5px double var(--page-border,#fff);border-radius:4px;
-padding:14px 18px 8px;box-shadow:0 18px 46px rgba(0,0,0,.55);
+border:1px solid var(--page-border,#fff);border-radius:4px;
+padding:14px 0 8px;box-shadow:0 18px 46px rgba(0,0,0,.55);
 min-height:calc(100vh - var(--safe-top) - var(--safe-bottom) - 170px);
 position:relative;
 font-family:'Amiri','Amiri Quran','Al Majeed Quranic','PDMS Saleem Quran','Al Qalam Quran','KFGQPC Uthmanic Script HAFS','Scheherazade New','Noto Naskh Arabic',serif;
@@ -933,7 +918,7 @@ body.light-mode.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{
 
 .mushaf-book-header-row{
 display:flex;align-items:center;justify-content:space-between;gap:8px;
-padding:2px 2px 8px;margin-bottom:12px;
+padding:2px 0 8px;margin-bottom:12px;
 border-bottom:1px solid currentColor;
 font-family:'Amiri','Amiri Quran',serif;font-size:.82em;line-height:1.25;
 direction:ltr;-webkit-text-stroke:0.2px currentColor;
@@ -945,8 +930,8 @@ direction:ltr;-webkit-text-stroke:0.2px currentColor;
 .mushaf-book-header-row .mbh-center{flex:0 0 auto;font-weight:800;font-size:1em;text-align:center;}
 
 .mushaf-book-content{
-text-align:justify;text-align-last:center;text-justify:inter-word;
-line-height:2.15;font-size:1em;padding:0 2px 2px;
+text-align:justify;text-align-last:justify;text-justify:inter-word;width:100%;max-width:none;
+line-height:2.2;font-size:.58em;padding:0;word-spacing:-0.03em;font-family:'IndoPakNastaleeq';font-weight:700;
 }
 
 .mushaf-book-content .waqf-mark{position:relative;top:-0.08em;display:inline;font-size:1em;line-height:1;-webkit-text-stroke:0.15px currentColor;}
@@ -990,13 +975,13 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.model
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.pressing,
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .w.located{
 color:inherit !important;background:transparent !important;box-shadow:none !important;text-decoration:none !important;
-transform:none !important;animation:none !important;padding:0 4px;
+transform:none !important;animation:none !important;padding:0;
 }
 .mushaf-ayah-mark{
 display:inline-block;font-size:.68em;padding:0 .22em;margin:0 .2em;
 border:1px solid currentColor;border-radius:999px;min-width:1.75em;text-align:center;
 line-height:1.55;vertical-align:middle;
-font-family:'Amiri','Amiri Quran',serif;font-weight:700;color:currentColor;background:transparent;-webkit-text-stroke:0;
+font-family:'IndoPakNastaleeq';font-weight:700;color:currentColor;background:transparent;-webkit-text-stroke:0;
 }
 .mushaf-book-footer-row{
 display:block;text-align:center;padding:8px 0 2px;margin-top:12px;
@@ -2956,7 +2941,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
   <div class="index-tabs" role="tablist" aria-label="Jump or continue">
-    <button class="index-tab" type="button" id="surahIdxJumpTab" role="tab" aria-selected="false" aria-controls="surahIdxJumpPanel">Jump to</button>
+    <button class="index-tab" type="button" id="surahIdxJumpTab" role="tab" aria-selected="false" aria-controls="surahIdxJumpPanel" data-wired="1">Jump to</button>
     <button class="index-tab" type="button" id="surahIdxContinueTab" role="tab" aria-selected="false" aria-controls="surahIdxContinuePanel">Continue</button>
   </div>
   <div class="index-panel" id="surahIdxJumpPanel" role="tabpanel" hidden="">
@@ -2992,7 +2977,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
   <div class="index-tabs" role="tablist" aria-label="Jump or continue">
-    <button class="index-tab" type="button" id="juzIdxJumpTab" role="tab" aria-selected="false" aria-controls="juzIdxJumpPanel">Jump to</button>
+    <button class="index-tab" type="button" id="juzIdxJumpTab" role="tab" aria-selected="false" aria-controls="juzIdxJumpPanel" data-wired="1">Jump to</button>
     <button class="index-tab" type="button" id="juzIdxContinueTab" role="tab" aria-selected="false" aria-controls="juzIdxContinuePanel">Continue</button>
   </div>
   <div class="index-panel" id="juzIdxJumpPanel" role="tabpanel" hidden="">
@@ -3086,7 +3071,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">21 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">17:43</span>
+    <span class="pdr-item pdr-time" id="pdrTime">18:56</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3501,7 +3486,7 @@ const AYAH_AUDIO_BASE = 'https://everyayah.com/data/';
 const FALLBACK_RECITER = 'Alafasy_128kbps';
 const FETCH_TIMEOUT_MS = 15000;
 
-const READER_EDITION = 'text_indopak';
+const READER_EDITION = 'text_indopak_nastaleeq';
 const EDITION_FALLBACK = 'quran-uthmani';
 const EDITION_COACH = 'quran-uthmani';
 
@@ -9396,16 +9381,7 @@ function askForInternet(label){
 }
 
 
-/* ── Jump to / Continue (Surah & Juz index) ───────────
-   FIX: the previous version marked tabs wired with a DOM
-   attribute (dataset.wired). If the page was ever saved from
-   the browser (Save Page / View Source after load), that
-   attribute was baked into the HTML itself, so on the next
-   load the wiring code saw "already wired" and attached NO
-   click handlers — both tabs looked dead. This version keeps
-   ALL wiring state in JS only (never in the DOM) and uses ONE
-   document-level delegated click handler, so it works even
-   if the HTML was re-saved, re-rendered, or loaded twice. */
+/* ── Jump to / Continue (Surah & Juz index) ─────────── */
 function saveLastReaderPage(pageNumber, page){
   try{
     var n = Math.max(1, Math.min(604, Math.round(pageNumber)||1));
@@ -9428,84 +9404,55 @@ function refreshContinueCard(prefix){
   var panel = document.getElementById(prefix+'ContinuePanel'); if(!panel) return;
   var last = getLastReaderPage();
   var title = panel.querySelector('.cc-title'), sub = panel.querySelector('.cc-sub'), btn = panel.querySelector('.continue-btn');
-  if(!title || !btn) return;
-  if(last){ title.textContent = last.label || ('Page '+last.page); if(sub) sub.textContent = last.sub || ('Mushaf page '+last.page); btn.disabled = false; }
-  else { title.textContent = 'No recent page yet'; if(sub) sub.textContent = 'Open any page from the reader and it will appear here.'; btn.disabled = true; }
+  if(last){ title.textContent = last.label || ('Page '+last.page); sub.textContent = last.sub || ('Mushaf page '+last.page); btn.disabled = false; }
+  else { title.textContent = 'No recent page yet'; sub.textContent = 'Open any page from the reader and it will appear here.'; btn.disabled = true; }
 }
-function indexPrefixFromEl(el){
-  var p = el.closest('.index-panel, .index-tabs'); if(!p) return null;
-  var id = p.id || '';
-  if(id.indexOf('surahIdx')===0) return 'surahIdx';
-  if(id.indexOf('juzIdx')===0) return 'juzIdx';
-  // Fallback: walk up to the screen
-  var scr = el.closest('#screenSurahIndex, #screenJuzIndex');
-  if(scr && scr.id==='screenSurahIndex') return 'surahIdx';
-  if(scr) return 'juzIdx';
-  return null;
-}
-function showIndexPanel(prefix, which){
-  var jumpPanel = document.getElementById(prefix+'JumpPanel'), contPanel = document.getElementById(prefix+'ContinuePanel');
+function wireIndexJumpContinue(prefix){
   var jumpTab = document.getElementById(prefix+'JumpTab'), contTab = document.getElementById(prefix+'ContinueTab');
-  if(!jumpPanel || !contPanel) return;
-  var jump = (which==='jump');
-  jumpPanel.hidden = !jump; contPanel.hidden = jump;
-  if(jumpTab){ jumpTab.classList.toggle('active', jump); jumpTab.setAttribute('aria-selected', jump?'true':'false'); }
-  if(contTab){ contTab.classList.toggle('active', !jump); contTab.setAttribute('aria-selected', jump?'false':'true'); }
-  if(!jump) refreshContinueCard(prefix);
-  else { var inp = jumpPanel.querySelector('.jump-input'); if(inp) inp.focus(); }
-}
-function doIndexJump(prefix){
-  var jumpPanel = document.getElementById(prefix+'JumpPanel'); if(!jumpPanel) return;
-  var kind = jumpPanel.dataset.jumpKind || 'page';
-  var inp = jumpPanel.querySelector('.jump-input'), err = jumpPanel.querySelector('.jump-err');
-  var max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30);
-  var n = parseInt(inp ? inp.value : '', 10);
-  if(!n || n < 1 || n > max){ if(err) err.textContent = 'Please enter a ' + kind + ' number between 1 and ' + max + '.'; if(inp) inp.focus(); return; }
-  if(err) err.textContent = '';
-  if(kind==='page'){ openViewer('read',{hideFullscreen:true}); loadReaderPage(n); }
-  else if(kind==='surah'){ openSurahInReader(n); }
-  else { openJuzInReader(n); }
-}
-// ONE delegated handler for every Jump/Continue control on both indexes.
-// No per-element listeners, no dataset.wired flag — nothing for a
-// saved-page snapshot to break.
-var __indexTabsDelegated = false;
-function wireAllIndexJumpContinue(){
-  refreshContinueCard('surahIdx'); refreshContinueCard('juzIdx');
-  if(__indexTabsDelegated) return;
-  __indexTabsDelegated = true;
-  document.addEventListener('click', function(e){
-    var tab = e.target.closest && e.target.closest('.index-tab');
-    if(tab){ var pre = indexPrefixFromEl(tab); if(pre) showIndexPanel(pre, tab.id.indexOf('JumpTab')!==-1 ? 'jump' : 'continue'); return; }
-    var segBtn = e.target.closest && e.target.closest('.jump-seg button');
-    if(segBtn){
-      var panel = segBtn.closest('.index-panel'); if(!panel) return;
-      panel.dataset.jumpKind = segBtn.dataset.jumpKind || 'page';
-      panel.querySelectorAll('.jump-seg button').forEach(function(x){ x.classList.toggle('active', x===segBtn); });
-      var inp = panel.querySelector('.jump-input'), kind = panel.dataset.jumpKind;
-      if(inp){ inp.max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30); inp.placeholder = 'Enter ' + kind + ' number'; inp.setAttribute('aria-label', 'Enter ' + kind + ' number'); }
-      var err = panel.querySelector('.jump-err'); if(err) err.textContent = '';
-      return;
-    }
-    var go = e.target.closest && e.target.closest('.jump-go');
-    if(go){ var pre2 = indexPrefixFromEl(go); if(pre2) doIndexJump(pre2); return; }
-    var resume = e.target.closest && e.target.closest('.continue-btn');
-    if(resume){ var last = getLastReaderPage(); if(!last) return; openViewer('read',{hideFullscreen:true}); loadReaderPage(last.page); return; }
+  var jumpPanel = document.getElementById(prefix+'JumpPanel'), contPanel = document.getElementById(prefix+'ContinuePanel');
+  if(!jumpTab || !contTab || !jumpPanel || !contPanel || jumpTab.dataset.wired) return;
+  jumpTab.dataset.wired = '1';
+  var kind = 'page';
+  function show(which){
+    var jump = (which==='jump');
+    jumpPanel.hidden = !jump; contPanel.hidden = jump;
+    jumpTab.classList.toggle('active', jump); contTab.classList.toggle('active', !jump);
+    jumpTab.setAttribute('aria-selected', jump?'true':'false'); contTab.setAttribute('aria-selected', jump?'false':'true');
+    if(!jump) refreshContinueCard(prefix);
+  }
+  jumpTab.addEventListener('click', function(){ show('jump'); var inp = jumpPanel.querySelector('.jump-input'); if(inp) inp.focus(); });
+  contTab.addEventListener('click', function(){ show('continue'); });
+  jumpPanel.querySelectorAll('.jump-seg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      kind = b.dataset.jumpKind || 'page';
+      jumpPanel.querySelectorAll('.jump-seg button').forEach(function(x){ x.classList.toggle('active', x===b); });
+      var inp = jumpPanel.querySelector('.jump-input');
+      inp.max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30);
+      inp.placeholder = 'Enter ' + kind + ' number';
+      inp.setAttribute('aria-label', 'Enter ' + kind + ' number');
+      jumpPanel.querySelector('.jump-err').textContent = '';
+    });
   });
-  // Enter key inside the number field
-  document.addEventListener('keydown', function(e){
-    if(e.key!=='Enter') return;
-    var inp = e.target.closest && e.target.closest('.jump-input');
-    if(!inp) return;
-    e.preventDefault();
-    var pre = indexPrefixFromEl(inp); if(pre) doIndexJump(pre);
+  function doJump(){
+    var inp = jumpPanel.querySelector('.jump-input'), err = jumpPanel.querySelector('.jump-err');
+    var max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30);
+    var n = parseInt(inp.value, 10);
+    if(!n || n < 1 || n > max){ err.textContent = 'Please enter a ' + kind + ' number between 1 and ' + max + '.'; inp.focus(); return; }
+    err.textContent = '';
+    if(kind==='page'){ openViewer('read',{hideFullscreen:true}); loadReaderPage(n); }
+    else if(kind==='surah'){ openSurahInReader(n); }
+    else { openJuzInReader(n); }
+  }
+  jumpPanel.querySelector('.jump-go').addEventListener('click', doJump);
+  jumpPanel.querySelector('.jump-input').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); doJump(); } });
+  contPanel.querySelector('.continue-btn').addEventListener('click', function(){
+    var last = getLastReaderPage(); if(!last) return;
+    openViewer('read', {hideFullscreen:true}); loadReaderPage(last.page);
   });
 }
+function wireAllIndexJumpContinue(){ wireIndexJumpContinue('surahIdx'); wireIndexJumpContinue('juzIdx'); refreshContinueCard('surahIdx'); refreshContinueCard('juzIdx'); }
 window.addEventListener('pagehide', function(){ try{ if(readerState && readerState.currentPage) saveLastReaderPage(readerState.currentPage, readerState.pages ? readerState.pages.get(readerState.currentPage) : null); }catch(e){} });
 document.addEventListener('visibilitychange', function(){ if(document.hidden){ try{ if(readerState && readerState.currentPage) saveLastReaderPage(readerState.currentPage, readerState.pages ? readerState.pages.get(readerState.currentPage) : null); }catch(e){} } });
-// Wire as soon as the DOM is ready, not only when a tile is tapped.
-if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', wireAllIndexJumpContinue); } else { wireAllIndexJumpContinue(); }
-
 async function renderSurahIndex(){
   surahIndexList.innerHTML = '<div class="loading">Loading…</div>';
   try{
@@ -10308,7 +10255,7 @@ async function getJuzStartPage(juzNumber){
   return fallback;
 }
 async function fetchPageIndopak(pageNumber){
-  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&word_fields=text_indopak&translations=' + currentTextTranslationQuranComId();
+  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&word_fields=text_indopak_nastaleeq&translations=' + currentTextTranslationQuranComId();
   const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
@@ -10319,7 +10266,7 @@ async function fetchPageIndopak(pageNumber){
     const s = parseInt(sStr, 10) || 1; const a = parseInt(aStr, 10) || 1;
     let translation = '';
     if(Array.isArray(v.translations) && v.translations.length){ translation = cleanTranslation(v.translations.map(t => t.text || '').join(' ')); }
-    return { text: v.text_indopak || '', numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
+    return { text: v.text_indopak_nastaleeq || '', numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
   })};
 }
 async function _fetchPageByEditionFallback(pageNumber){
@@ -10435,6 +10382,14 @@ function scheduleRukuReplace(){
 }
 window.addEventListener('resize', scheduleRukuReplace);
 window.addEventListener('orientationchange', scheduleRukuReplace);
+// ENFORCED: no square blocks in the contained Quran script.
+// Any tofu / placeholder / private-use char that would render as □ is
+// replaced with a real mushaf symbol (۞) so Tajweed / pause marks always show.
+function fixTajweedSymbols(s){
+  return String(s == null ? '' : s)
+    .replace(/[\uFFFD\u25A1\u25A0\u25A2\u25A3\uFFFC\u061C\uE000-\uF8FF]+/g, ' \u06DE ')
+    .replace(/\u06DE(?:\s*\u06DE)+/g, ' \u06DE ');
+}
 function renderReaderPage(pageNumber, token){
   const page = readerState.pages.get(pageNumber);
   if(!page) return;
@@ -10481,7 +10436,7 @@ function renderReaderPage(pageNumber, token){
         content.appendChild(b);
       }
     }
-    let text = String(a.text == null ? '' : a.text);
+    let text = fixTajweedSymbols(String(a.text == null ? '' : a.text));
     if(a.numberInSurah === 1 && shouldShowBismillah(a.surah)){ const r = splitBismillah(text); if(r) text = r.rest; }
     // Bismillah is never verse 1: in Al-Fatiha the API's ayah 1 IS Bismillah
     // alone, already shown as the preamble line above — skip it here.
@@ -13031,7 +12986,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   // The full Tajweed engine needs live speech input.
@@ -13086,4 +13041,4 @@ window.addEventListener('contextmenu', function(event) {
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
