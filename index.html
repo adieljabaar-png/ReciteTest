@@ -2935,7 +2935,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
   
-  <div class="index-nav" data-index-nav="surah">
+  <div class="index-nav" data-index-nav="surah" data-wired="1">
     <div class="index-tabs" role="tablist">
       <button type="button" class="index-tab" data-tab="continue">Continue…</button>
       <button type="button" class="index-tab" data-tab="jump">Jump to…</button>
@@ -2966,7 +2966,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
   
-  <div class="index-nav" data-index-nav="juz">
+  <div class="index-nav" data-index-nav="juz" data-wired="1">
     <div class="index-tabs" role="tablist">
       <button type="button" class="index-tab" data-tab="continue">Continue…</button>
       <button type="button" class="index-tab" data-tab="jump">Jump to…</button>
@@ -9364,7 +9364,66 @@ function askForInternet(label){
   });
 }
 
-async function renderSurahIndex(){ surahIndexList.innerHTML='<div class="loading">Loading\u2026</div>'; try{ const chapters=await ensureChaptersLocalized(surahIndexLang); renderIndexPaged(surahIndexList, chapters.map(buildSurahRow), 'surah'); }catch(e){ surahIndexList.innerHTML='<div class="loading"><span class="err">\u26a0\ufe0f Could not load the surah list.</span>Check your connection and try again.</div>'; } };
+async function renderSurahIndex(){ surahIndexList.innerHTML='<div class="loading">Loading\u2026</div>'; try{ const chapters=await ensureChaptersLocalized(surahIndexLang); renderIndexPaged(surahIndexList, chapters.map(buildSurahRow), 'surah'); }catch(e){ surahIndexList.innerHTML='<div class="loading"><span class="err">\u26a0\ufe0f Could not load the surah list.</span>Check your connection and try again.</div>'; } }
+/* --- Index pagination (14 rows/page) + Continue / Jump to --- */
+const INDEX_PAGE_SIZE = 14;
+const indexPagerState = { surah:1, juz:1 };
+function getLastReaderPage(){
+  const cands=[readerState && readerState.currentPage, (typeof STORE!=='undefined' && STORE.page), parseInt(localStorage.getItem('qc.lastReaderPage')||'',10), parseInt(localStorage.getItem('qc.page')||'',10)];
+  for(const c of cands){ const n=Number(c); if(Number.isFinite(n) && n>=1 && n<=604) return n; }
+  return 0;
+}
+function renderIndexPaged(listEl, rows, key){
+  const totalPages = Math.max(1, Math.ceil(rows.length / INDEX_PAGE_SIZE));
+  indexPagerState[key] = Math.max(1, Math.min(totalPages, indexPagerState[key] || 1));
+  const start = (indexPagerState[key]-1)*INDEX_PAGE_SIZE;
+  listEl.innerHTML='';
+  rows.slice(start, start+INDEX_PAGE_SIZE).forEach(r=>listEl.appendChild(r));
+  const pager=document.createElement('div'); pager.className='index-pager';
+  const prev=document.createElement('button'); prev.type='button'; prev.textContent='\u2039 Prev'; prev.disabled=indexPagerState[key]<=1;
+  const next=document.createElement('button'); next.type='button'; next.textContent='Next \u203a'; next.disabled=indexPagerState[key]>=totalPages;
+  const label=document.createElement('span'); label.textContent='Page '+indexPagerState[key]+' of '+totalPages+' \u00b7 '+rows.length+' rows';
+  prev.addEventListener('click',()=>{ indexPagerState[key]--; renderIndexPaged(listEl,rows,key); });
+  next.addEventListener('click',()=>{ indexPagerState[key]++; renderIndexPaged(listEl,rows,key); });
+  pager.append(prev,label,next); listEl.appendChild(pager);
+}
+function buildSurahRow(s){
+  const row=document.createElement('button'); row.className='surah-row'; row.type='button';
+  const subParts=[]; if(s.translatedName) subParts.push(escapeHtml(s.translatedName));
+  subParts.push(s.numberOfAyahs+' ayahs'); subParts.push(escapeHtml(s.revelationType));
+  row.innerHTML='<span class="num">'+String(s.number).padStart(3,'0')+'</span><span class="meta"><span class="en">'+escapeHtml(s.englishName)+'</span><span class="sub">'+subParts.join(' \u00b7 ')+'</span></span><span class="ar">'+escapeHtml(s.name)+'</span>';
+  row.addEventListener('click',()=>openSurahInReader(s.number)); return row;
+}
+function buildJuzRow(i){
+  const row=document.createElement('button'); row.type='button'; row.className='surah-row';
+  const startPage=JUZ_START_PAGES_FALLBACK[i-1];
+  const label={en:'Juz',tr:'C\u00fcz'}[surahIndexLang]||'Juz';
+  row.innerHTML='<span class="num">'+i+'</span><span class="meta"><span class="en">'+escapeHtml(JUZ_NAMES[i-1]||('Juz '+i))+'</span><span class="sub">Page '+startPage+' \u00b7 '+label+' '+i+' / 30</span></span><span class="ar">\u0627\u0644\u062c\u0632\u0621 '+toAr(i)+'</span>';
+  row.addEventListener('click',()=>openJuzInReader(i)); return row;
+}
+async function jumpIndexTo(kind, raw){
+  const n=parseInt(raw,10);
+  const max = kind==='page'?604 : kind==='juz'?30 : 114;
+  if(!Number.isFinite(n) || n<1 || n>max) return {ok:false, msg:'Enter a number between 1 and '+max+' for '+kind+'.'};
+  try{
+    if(kind==='page') loadReaderPage(n);
+    else if(kind==='juz'){ const pg=await getJuzStartPage(n); loadReaderPage(pg); }
+    else { const pg=await getSurahStartPage(n); loadReaderPage(pg); }
+    return {ok:true};
+  }catch(e){ return {ok:false, msg:'Could not open that '+kind+'. Check your connection.'}; }
+}
+function wireIndexNav(){
+  document.querySelectorAll('[data-index-nav]').forEach(nav=>{
+    if(nav.dataset.wired) return; nav.dataset.wired='1';
+    const tabs=nav.querySelectorAll('.index-tab'), panels=nav.querySelectorAll('.index-panel');
+    const lastLabel=nav.querySelector('[data-last-label]'), lastPageEl=nav.querySelector('[data-last-page]');
+    const contBtn=nav.querySelector('[data-continue-go]');
+    const kindSel=nav.querySelector('[data-jump-kind]'), numInp=nav.querySelector('[data-jump-num]');
+    const jumpBtn=nav.querySelector('[data-jump-go]'), errEl=nav.querySelector('[data-jump-err]');
+    const refreshLast=()=>{ const p=getLastReaderPage(); if(lastPageEl) lastPageEl.textContent=p||'\u2014'; if(contBtn) contBtn.disabled=!p; if(lastLabel) lastLabel.textContent=p?('Last recited page: '+p+' \u2014 tap to resume exactly there.'):'No saved page yet. Open any page in the Quran window first.'; };
+    tabs.forEach(tab=>tab.addEventListener('click',()=>{ tabs.forEach(x=>x.classList.toggle('active',x===tab)); panels.forEach(pp=>pp.classList.toggle('open',pp.dataset.panel===tab.dataset.tab)); if(tab.dataset.tab==='continue') refreshLast(); }));
+    if(contBtn) contBtn.addEventListener('click',()=>{ const p=getLastReaderPage(); if(p) loadReaderPage(p); });
+    const doJump=async()=>{ errEl.classList.remove('show'); const r=await jumpIndexTo(kindSel.value, numInp.value); if(!r.ok){ errEl.textContent=r.msg; errEl.classList.add('show'); } };
     if(jumpBtn) jumpBtn.addEventListener('click',doJump);
     if(numInp) numInp.addEventListener('keydown',e=>{ if(e.key==='Enter') doJump(); });
     refreshLast();
@@ -12851,7 +12910,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   // The full Tajweed engine needs live speech input.
