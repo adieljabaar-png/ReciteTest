@@ -1,13 +1,49 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.25 — Pre-cache the Read Arabic page (read.html) and the
-   dashboard (index_3.html), and serve each navigation from its
-   own cached copy so Read Arabic works offline instead of
-   falling back to index.html.
+   v2.4.19 — Keep the Surah / Juz index “Jump to” + “Continue”
+   changes safe (new index.html).
 
-   Changes in this deployment (all client-side — no SW logic
-   changes, purely a cache-invalidation bump):
+   Changes in this deployment:
+     index.html (Surah index + Juz index):
+       • Two tabs directly below the Translation row:
+         “Jump to” and “Continue”.
+       • Jump to: pick Page / Surah / Juz, enter a number,
+         Go opens that page / surah / juz.
+         Page 1–604 · Surah 1–114 · Juz 1–30.
+       • Continue: shows the last reader page that was opened
+         and Resume reopens that exact page.
+       • The last page is saved in localStorage under
+         'qc.lastReaderPage' on every reader-page render and
+         again on pagehide / visibilitychange (app hidden or
+         closed), so Continue survives closing the app or
+         leaving the Surah / Juz index.
+
+   Why this SW update is required — and what it protects:
+     • The old shell cache (qc-shell-2.4.18) still holds the
+       PREVIOUS index.html without Jump to / Continue. Without
+       a version bump, browsers / installed PWAs could keep
+       serving that stale copy and the new tabs would appear
+       to be missing, even though the new index.html was
+       deployed.
+     • Bumping VERSION to 2.4.19 creates fresh
+       qc-shell-2.4.19 / qc-text-2.4.19 / qc-fonts-2.4.19 /
+       qc-runtime-2.4.19 caches. ACTIVATE deletes the old
+       versioned caches, and INSTALL pre-caches the NEW
+       index.html with { cache: 'reload' }, so the new tabs
+       are fetched, not resurrected from the old cache.
+     • Continue does NOT live in any Cache Storage entry.
+       It lives only in localStorage ('qc.lastReaderPage').
+       This SW never reads, writes, clears, or otherwise
+       touches localStorage, and no SW handler in this file
+       deletes localStorage. Clearing / updating caches
+       therefore cannot erase the saved Continue page.
+     • The persistent qc-audio cache is still preserved —
+       users keep downloaded surahs / translation audio.
+       CLEAR_CACHES now also preserves qc-audio for the
+       same reason (see MESSAGES below).
+
+   Changes in this deployment (previous release, retained):
 
      index.html (Home / Dashboard):
        • Added a new "Read Arabic" tile on the dashboard that
@@ -32,9 +68,11 @@
 
    Cache invalidation:
      qc-shell-* / qc-text-* / qc-fonts-* / qc-runtime-* are
-     bumped so the new index.html and read.html are fetched.
-     The persistent qc-audio cache is preserved — users keep
-     their downloaded surahs and translation audio.
+     bumped to 2.4.19 so the new index.html (with Jump to /
+     Continue) is fetched. The persistent qc-audio cache is
+     preserved — users keep their downloaded surahs and
+     translation audio. localStorage ('qc.lastReaderPage')
+     is untouched by this SW.
 
    Previously-retained features (unchanged):
 
@@ -59,7 +97,7 @@
 
 'use strict';
 
-const VERSION = '2.4.18';
+const VERSION = '2.4.19';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -185,9 +223,14 @@ self.addEventListener('message', event => {
     return;
   }
   if(data.type === 'CLEAR_CACHES'){
+    // SAFETY: never wipe the persistent audio cache here, and
+    // never touch localStorage (where 'qc.lastReaderPage' for
+    // Continue lives — the SW has no access to it and must
+    // not attempt to clear it). Only versioned caches are
+    // dropped; qc-audio is preserved.
     event.waitUntil((async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
+      await Promise.all(keys.filter(k => !PERSISTENT_CACHES.includes(k)).map(k => caches.delete(k)));
       if(event.source && event.source.postMessage) event.source.postMessage({ type: 'CACHES_CLEARED' });
     })());
     return;

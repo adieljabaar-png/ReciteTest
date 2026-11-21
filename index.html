@@ -19,6 +19,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style><style>
 @font-face {
   font-family: "Optimistic";
@@ -2935,7 +2956,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
   <div class="index-tabs" role="tablist" aria-label="Jump or continue">
-    <button class="index-tab" type="button" id="surahIdxJumpTab" role="tab" aria-selected="false" aria-controls="surahIdxJumpPanel" data-wired="1">Jump to</button>
+    <button class="index-tab" type="button" id="surahIdxJumpTab" role="tab" aria-selected="false" aria-controls="surahIdxJumpPanel">Jump to</button>
     <button class="index-tab" type="button" id="surahIdxContinueTab" role="tab" aria-selected="false" aria-controls="surahIdxContinuePanel">Continue</button>
   </div>
   <div class="index-panel" id="surahIdxJumpPanel" role="tabpanel" hidden="">
@@ -2971,7 +2992,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
   <div class="index-tabs" role="tablist" aria-label="Jump or continue">
-    <button class="index-tab" type="button" id="juzIdxJumpTab" role="tab" aria-selected="false" aria-controls="juzIdxJumpPanel" data-wired="1">Jump to</button>
+    <button class="index-tab" type="button" id="juzIdxJumpTab" role="tab" aria-selected="false" aria-controls="juzIdxJumpPanel">Jump to</button>
     <button class="index-tab" type="button" id="juzIdxContinueTab" role="tab" aria-selected="false" aria-controls="juzIdxContinuePanel">Continue</button>
   </div>
   <div class="index-panel" id="juzIdxJumpPanel" role="tabpanel" hidden="">
@@ -3065,7 +3086,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">21 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">17:36</span>
+    <span class="pdr-item pdr-time" id="pdrTime">17:43</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -9375,7 +9396,16 @@ function askForInternet(label){
 }
 
 
-/* ── Jump to / Continue (Surah & Juz index) ─────────── */
+/* ── Jump to / Continue (Surah & Juz index) ───────────
+   FIX: the previous version marked tabs wired with a DOM
+   attribute (dataset.wired). If the page was ever saved from
+   the browser (Save Page / View Source after load), that
+   attribute was baked into the HTML itself, so on the next
+   load the wiring code saw "already wired" and attached NO
+   click handlers — both tabs looked dead. This version keeps
+   ALL wiring state in JS only (never in the DOM) and uses ONE
+   document-level delegated click handler, so it works even
+   if the HTML was re-saved, re-rendered, or loaded twice. */
 function saveLastReaderPage(pageNumber, page){
   try{
     var n = Math.max(1, Math.min(604, Math.round(pageNumber)||1));
@@ -9398,55 +9428,84 @@ function refreshContinueCard(prefix){
   var panel = document.getElementById(prefix+'ContinuePanel'); if(!panel) return;
   var last = getLastReaderPage();
   var title = panel.querySelector('.cc-title'), sub = panel.querySelector('.cc-sub'), btn = panel.querySelector('.continue-btn');
-  if(last){ title.textContent = last.label || ('Page '+last.page); sub.textContent = last.sub || ('Mushaf page '+last.page); btn.disabled = false; }
-  else { title.textContent = 'No recent page yet'; sub.textContent = 'Open any page from the reader and it will appear here.'; btn.disabled = true; }
+  if(!title || !btn) return;
+  if(last){ title.textContent = last.label || ('Page '+last.page); if(sub) sub.textContent = last.sub || ('Mushaf page '+last.page); btn.disabled = false; }
+  else { title.textContent = 'No recent page yet'; if(sub) sub.textContent = 'Open any page from the reader and it will appear here.'; btn.disabled = true; }
 }
-function wireIndexJumpContinue(prefix){
-  var jumpTab = document.getElementById(prefix+'JumpTab'), contTab = document.getElementById(prefix+'ContinueTab');
+function indexPrefixFromEl(el){
+  var p = el.closest('.index-panel, .index-tabs'); if(!p) return null;
+  var id = p.id || '';
+  if(id.indexOf('surahIdx')===0) return 'surahIdx';
+  if(id.indexOf('juzIdx')===0) return 'juzIdx';
+  // Fallback: walk up to the screen
+  var scr = el.closest('#screenSurahIndex, #screenJuzIndex');
+  if(scr && scr.id==='screenSurahIndex') return 'surahIdx';
+  if(scr) return 'juzIdx';
+  return null;
+}
+function showIndexPanel(prefix, which){
   var jumpPanel = document.getElementById(prefix+'JumpPanel'), contPanel = document.getElementById(prefix+'ContinuePanel');
-  if(!jumpTab || !contTab || !jumpPanel || !contPanel || jumpTab.dataset.wired) return;
-  jumpTab.dataset.wired = '1';
-  var kind = 'page';
-  function show(which){
-    var jump = (which==='jump');
-    jumpPanel.hidden = !jump; contPanel.hidden = jump;
-    jumpTab.classList.toggle('active', jump); contTab.classList.toggle('active', !jump);
-    jumpTab.setAttribute('aria-selected', jump?'true':'false'); contTab.setAttribute('aria-selected', jump?'false':'true');
-    if(!jump) refreshContinueCard(prefix);
-  }
-  jumpTab.addEventListener('click', function(){ show('jump'); var inp = jumpPanel.querySelector('.jump-input'); if(inp) inp.focus(); });
-  contTab.addEventListener('click', function(){ show('continue'); });
-  jumpPanel.querySelectorAll('.jump-seg button').forEach(function(b){
-    b.addEventListener('click', function(){
-      kind = b.dataset.jumpKind || 'page';
-      jumpPanel.querySelectorAll('.jump-seg button').forEach(function(x){ x.classList.toggle('active', x===b); });
-      var inp = jumpPanel.querySelector('.jump-input');
-      inp.max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30);
-      inp.placeholder = 'Enter ' + kind + ' number';
-      inp.setAttribute('aria-label', 'Enter ' + kind + ' number');
-      jumpPanel.querySelector('.jump-err').textContent = '';
-    });
+  var jumpTab = document.getElementById(prefix+'JumpTab'), contTab = document.getElementById(prefix+'ContinueTab');
+  if(!jumpPanel || !contPanel) return;
+  var jump = (which==='jump');
+  jumpPanel.hidden = !jump; contPanel.hidden = jump;
+  if(jumpTab){ jumpTab.classList.toggle('active', jump); jumpTab.setAttribute('aria-selected', jump?'true':'false'); }
+  if(contTab){ contTab.classList.toggle('active', !jump); contTab.setAttribute('aria-selected', jump?'false':'true'); }
+  if(!jump) refreshContinueCard(prefix);
+  else { var inp = jumpPanel.querySelector('.jump-input'); if(inp) inp.focus(); }
+}
+function doIndexJump(prefix){
+  var jumpPanel = document.getElementById(prefix+'JumpPanel'); if(!jumpPanel) return;
+  var kind = jumpPanel.dataset.jumpKind || 'page';
+  var inp = jumpPanel.querySelector('.jump-input'), err = jumpPanel.querySelector('.jump-err');
+  var max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30);
+  var n = parseInt(inp ? inp.value : '', 10);
+  if(!n || n < 1 || n > max){ if(err) err.textContent = 'Please enter a ' + kind + ' number between 1 and ' + max + '.'; if(inp) inp.focus(); return; }
+  if(err) err.textContent = '';
+  if(kind==='page'){ openViewer('read',{hideFullscreen:true}); loadReaderPage(n); }
+  else if(kind==='surah'){ openSurahInReader(n); }
+  else { openJuzInReader(n); }
+}
+// ONE delegated handler for every Jump/Continue control on both indexes.
+// No per-element listeners, no dataset.wired flag — nothing for a
+// saved-page snapshot to break.
+var __indexTabsDelegated = false;
+function wireAllIndexJumpContinue(){
+  refreshContinueCard('surahIdx'); refreshContinueCard('juzIdx');
+  if(__indexTabsDelegated) return;
+  __indexTabsDelegated = true;
+  document.addEventListener('click', function(e){
+    var tab = e.target.closest && e.target.closest('.index-tab');
+    if(tab){ var pre = indexPrefixFromEl(tab); if(pre) showIndexPanel(pre, tab.id.indexOf('JumpTab')!==-1 ? 'jump' : 'continue'); return; }
+    var segBtn = e.target.closest && e.target.closest('.jump-seg button');
+    if(segBtn){
+      var panel = segBtn.closest('.index-panel'); if(!panel) return;
+      panel.dataset.jumpKind = segBtn.dataset.jumpKind || 'page';
+      panel.querySelectorAll('.jump-seg button').forEach(function(x){ x.classList.toggle('active', x===segBtn); });
+      var inp = panel.querySelector('.jump-input'), kind = panel.dataset.jumpKind;
+      if(inp){ inp.max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30); inp.placeholder = 'Enter ' + kind + ' number'; inp.setAttribute('aria-label', 'Enter ' + kind + ' number'); }
+      var err = panel.querySelector('.jump-err'); if(err) err.textContent = '';
+      return;
+    }
+    var go = e.target.closest && e.target.closest('.jump-go');
+    if(go){ var pre2 = indexPrefixFromEl(go); if(pre2) doIndexJump(pre2); return; }
+    var resume = e.target.closest && e.target.closest('.continue-btn');
+    if(resume){ var last = getLastReaderPage(); if(!last) return; openViewer('read',{hideFullscreen:true}); loadReaderPage(last.page); return; }
   });
-  function doJump(){
-    var inp = jumpPanel.querySelector('.jump-input'), err = jumpPanel.querySelector('.jump-err');
-    var max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30);
-    var n = parseInt(inp.value, 10);
-    if(!n || n < 1 || n > max){ err.textContent = 'Please enter a ' + kind + ' number between 1 and ' + max + '.'; inp.focus(); return; }
-    err.textContent = '';
-    if(kind==='page'){ openViewer('read',{hideFullscreen:true}); loadReaderPage(n); }
-    else if(kind==='surah'){ openSurahInReader(n); }
-    else { openJuzInReader(n); }
-  }
-  jumpPanel.querySelector('.jump-go').addEventListener('click', doJump);
-  jumpPanel.querySelector('.jump-input').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); doJump(); } });
-  contPanel.querySelector('.continue-btn').addEventListener('click', function(){
-    var last = getLastReaderPage(); if(!last) return;
-    openViewer('read', {hideFullscreen:true}); loadReaderPage(last.page);
+  // Enter key inside the number field
+  document.addEventListener('keydown', function(e){
+    if(e.key!=='Enter') return;
+    var inp = e.target.closest && e.target.closest('.jump-input');
+    if(!inp) return;
+    e.preventDefault();
+    var pre = indexPrefixFromEl(inp); if(pre) doIndexJump(pre);
   });
 }
-function wireAllIndexJumpContinue(){ wireIndexJumpContinue('surahIdx'); wireIndexJumpContinue('juzIdx'); refreshContinueCard('surahIdx'); refreshContinueCard('juzIdx'); }
 window.addEventListener('pagehide', function(){ try{ if(readerState && readerState.currentPage) saveLastReaderPage(readerState.currentPage, readerState.pages ? readerState.pages.get(readerState.currentPage) : null); }catch(e){} });
 document.addEventListener('visibilitychange', function(){ if(document.hidden){ try{ if(readerState && readerState.currentPage) saveLastReaderPage(readerState.currentPage, readerState.pages ? readerState.pages.get(readerState.currentPage) : null); }catch(e){} } });
+// Wire as soon as the DOM is ready, not only when a tile is tapped.
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', wireAllIndexJumpContinue); } else { wireAllIndexJumpContinue(); }
+
 async function renderSurahIndex(){
   surahIndexList.innerHTML = '<div class="loading">Loading…</div>';
   try{
@@ -12972,7 +13031,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   // The full Tajweed engine needs live speech input.
@@ -13027,4 +13086,4 @@ window.addEventListener('contextmenu', function(event) {
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
