@@ -2899,7 +2899,7 @@ body.light-mode .index-action-tab{background:linear-gradient(180deg,#ffffff,#eef
       </div>
       <div class="streak-badges" id="streakBadges"></div>
     </div>
-    <button class="feature-tab" id="tileReadArabic" type="button" onclick="window.location.href='read.html'">
+    <button class="feature-tab" id="tileReadArabic" type="button" data-read-arabic="1">
       <span class="ft-icon">📗</span>
       <div class="ft-text">
         <strong>Read Arabic</strong>
@@ -8751,7 +8751,7 @@ function appendMistake(m){
   mistakesList.appendChild(li);
   mistakesList.scrollTop = mistakesList.scrollHeight;
 }
-btnClearMistakes.addEventListener('click', () => {
+if(btnClearMistakes) btnClearMistakes.addEventListener('click', () => {
   mistakes = []; mistakeCounter = 0;
   mistakesList.innerHTML = ''; mistakeCountBadge.textContent = '0'; mistakesPanel.hidden = true;
   errors = 0; updateHUD();
@@ -9185,7 +9185,7 @@ function updateFsMicBtn(){
   if(wantMic){ fsMicBtn.classList.add('active-mic'); fsMicBtn.textContent = '🎙️'; }
   else { fsMicBtn.classList.remove('active-mic'); fsMicBtn.textContent = '🎤'; }
 }
-fsMicBtn.addEventListener('click', async () => { if(wantMic) stopReciting(); else await startReciting(); updateFsMicBtn(); showFsControls(); });
+if(fsMicBtn) fsMicBtn.addEventListener('click', async () => { if(wantMic) stopReciting(); else await startReciting(); updateFsMicBtn(); showFsControls(); });
 fsPauseBtn.addEventListener('click', () => {
   fsPaused = true;
   if(playing && currentAudio && !audioPaused){ try{ currentAudio.pause(); if(currentAudio._safetyTimer){ clearTimeout(currentAudio._safetyTimer); currentAudio._safetyTimer=null; } }catch(e){} audioPaused = true; updateAudioOverlay(); }
@@ -11711,9 +11711,9 @@ function showInstallPromptModal(){
   });
 }
 
-tileSurahIndex.addEventListener('click', () => { showScreen('index'); renderSurahIndex(); });
-tileJuzIndex.addEventListener('click', () => { showScreen('juz'); renderJuzIndex(); });
-tilePlayAudio.addEventListener('click', () => {
+if(tileSurahIndex) tileSurahIndex.addEventListener('click', () => { showScreen('index'); renderSurahIndex(); });
+if(tileJuzIndex) tileJuzIndex.addEventListener('click', () => { showScreen('juz'); renderJuzIndex(); });
+if(tilePlayAudio) tilePlayAudio.addEventListener('click', () => {
   showScreen('audio');
   renderReciterSelect(); closeReciterMenu();
   renderTranslationSelect(); closeTranslationMenu();
@@ -11726,15 +11726,15 @@ tilePlayAudio.addEventListener('click', () => {
     setPlayTranslationState(false);
   }
 });
-tileBookmarks.addEventListener('click', () => { showScreen('bookmarks'); renderBookmarksScreen(); });
+if(tileBookmarks) tileBookmarks.addEventListener('click', () => { showScreen('bookmarks'); renderBookmarksScreen(); });
 if(tileDashboard) tileDashboard.addEventListener('click', () => { showScreen('dashboard'); });
-openCoachBtn.addEventListener('click', () => openCoachScreen());
-backFromIndex.addEventListener('click', () => showScreen('home'));
-backFromJuz.addEventListener('click', () => showScreen('home'));
-backFromBookmarks.addEventListener('click', () => showScreen('home'));
-backFromAudio.addEventListener('click', () => showScreen('home'));
+if(openCoachBtn) openCoachBtn.addEventListener('click', () => openCoachScreen());
+if(backFromIndex) backFromIndex.addEventListener('click', () => showScreen('home'));
+if(backFromJuz) backFromJuz.addEventListener('click', () => showScreen('home'));
+if(backFromBookmarks) backFromBookmarks.addEventListener('click', () => showScreen('home'));
+if(backFromAudio) backFromAudio.addEventListener('click', () => showScreen('home'));
 if(backFromDashboard) backFromDashboard.addEventListener('click', () => showScreen('home'));
-btnBackHome.addEventListener('click', () => { if(readerFullscreen) exitReaderFullscreen(); stopEverything(true); releaseMicStream(); showScreen('home'); });
+if(btnBackHome) btnBackHome.addEventListener('click', () => { if(readerFullscreen) exitReaderFullscreen(); stopEverything(true); releaseMicStream(); showScreen('home'); });
 
 (function wireHomeMenu(){
   if(!homeMenuBtn || !homeMenu || !homeMenuWrap) return;
@@ -11905,14 +11905,14 @@ async function enableNotifications(){
     showToast('✅ Notifications enabled.');
   }catch(err){ console.warn('[Push] subscribe failed:', err); showToast('⚠️ Could not enable notifications. Please try again.'); }
 }
-hijriCard.addEventListener('click', () => openCalendarModal());
-micButton.addEventListener('click', async () => {
+if(hijriCard) hijriCard.addEventListener('click', () => openCalendarModal());
+if(micButton) micButton.addEventListener('click', async () => {
   if(wantMic){ stopReciting(); return; }
   enterReaderFullscreen();
   await startReciting();
   if(!wantMic) exitReaderFullscreen();
 });
-stopButton.addEventListener('click',()=>{
+if(stopButton) stopButton.addEventListener('click',()=>{
   if(wantMic){
     stopReciting();
     setStatus('Paused','idle','Tap Start reciting to resume');
@@ -11922,7 +11922,7 @@ stopButton.addEventListener('click',()=>{
   }
   fsPaused = false; syncFsButtons();
 });
-resetButton.addEventListener('click',()=>{
+if(resetButton) resetButton.addEventListener('click',()=>{
   _normCache.clear(); _phonCache.clear(); _phonLooseCache.clear();
   mistakes = []; mistakeCounter = 0; completedVerses = new Set(); errors = 0;
   mistakesList.innerHTML = ''; mistakesPanel.hidden = true; mistakeCountBadge.textContent = '0';
@@ -11930,9 +11930,9 @@ resetButton.addEventListener('click',()=>{
   fsPaused=false; syncFsButtons();
   feedbackEl.innerHTML='<div class="line">Restarted.</div>';
 });
-prevSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum<114) flipSurah(1); });
-nextSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum>1) flipSurah(-1); });
-surahButton.addEventListener('click',openSurahPicker);
+if(prevSurahBtn) prevSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum<114) flipSurah(1); });
+if(nextSurahBtn) nextSurahBtn.addEventListener('click',()=>{ if(!flipping && surahNum>1) flipSurah(-1); });
+if(surahButton) surahButton.addEventListener('click',openSurahPicker);
 
 async function openSurahPicker(){
   const bg=document.createElement('div'); bg.className='modal-bg';
@@ -12220,9 +12220,7 @@ document.addEventListener('visibilitychange',()=>{
 let lastTouch=0;
 document.addEventListener('touchend',e=>{
   const now=Date.now();
-  if(now-lastTouch<300 && !e.target.closest('button, input, select, .fs-controls, .audio-overlay, .w, .tile, .coach-bar, .surah-row, .reciter-item, .reciter-trigger, .reciter-menu, .qv-chrome, .qv-btn, .qv-vol-slider, .islamic-dates-list li, .cal-cell, .cal-nav, .bookmark-row, .juz-row, .progress-trigger, .progress-item, .qr-card, .home-menu-item, .install-step, .dlbtn, .streak-bar, .feature-tab, .hifz-mode, .hifz-word, .tj-chip, .tajweed-toolbar, .tj-ayah, .ps-tab, .copyright-footer')){
-    e.preventDefault();
-  }
+  /* Never preventDefault a tap: it used to swallow the click that follows a quick second tap, so tabs felt dead. */
   lastTouch=now;
 },{passive:false});
 window.addEventListener('beforeunload',()=>{
@@ -12965,6 +12963,7 @@ function showTextShareModal(text){
 .mushaf-book-page.mushaf-decorated::before{content:"✦  ✦  ✦";display:block;text-align:center;letter-spacing:1.2em;color:#b08d2e;font-size:12px;padding:2px 0 0;}
 /* All other pages: exactly 14 ruled rows, text centred between lines, full width */
 .mushaf-book-page:not(.mushaf-decorated) .mushaf-book-content{padding-left:2px;padding-right:2px;}
+.tile,.feature-tab,.index-action-tab,.ps-tab,.jump-seg button,.back-pill,.streak-bar{touch-action:manipulation;-webkit-tap-highlight-color:transparent;position:relative;z-index:1;}
 /* ══ 14-row IndoPak page layout (long mushaf pages split into 14-row pages) ══ */
 var ROWS_PER_PAGE = 14;
 var ROW_RATIO = 2.5;
@@ -13242,14 +13241,41 @@ function submitJump(){
   else openSurahInReader(n);
 }
 document.querySelectorAll('[data-jump-kind]').forEach(b => b.addEventListener('click', () => { setJumpKind(b.dataset.jumpKind); try{ jumpInput.focus(); }catch(_){} }));
-document.getElementById('jumpGo').addEventListener('click', submitJump);
-document.getElementById('jumpCancel').addEventListener('click', closeJumpSheet);
-jumpOverlay.addEventListener('click', e => { if(e.target === jumpOverlay) closeJumpSheet(); });
-jumpInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); submitJump(); } else if(e.key === 'Escape') closeJumpSheet(); });
-jumpInput.addEventListener('input', () => { jumpErr.textContent = ''; });
+if(document.getElementById('jumpGo')) document.getElementById('jumpGo').addEventListener('click', submitJump);
+if(document.getElementById('jumpCancel')) document.getElementById('jumpCancel').addEventListener('click', closeJumpSheet);
+if(jumpOverlay) jumpOverlay.addEventListener('click', e => { if(e.target === jumpOverlay) closeJumpSheet(); });
+if(jumpInput) jumpInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); submitJump(); } else if(e.key === 'Escape') closeJumpSheet(); });
+if(jumpInput) jumpInput.addEventListener('input', () => { jumpErr.textContent = ''; });
 document.querySelectorAll('[data-index-action]').forEach(b => b.addEventListener('click', () => {
   if(b.dataset.indexAction === 'continue') continueReading(); else openJumpSheet();
 }));
+
+/* ══ Tabs fallback — delegated, capture phase: every tab works even if direct wiring above threw ══ */
+document.addEventListener('click', function(e){
+  var t = e.target && e.target.closest ? e.target.closest('.tile,.feature-tab,.index-action-tab,[data-jump-kind],.ps-tab,.back-pill,[data-read-arabic]') : null;
+  if(!t) return;
+  e.stopPropagation(); /* delegated handler owns this tap - stops the direct handler firing twice */
+  try{
+    if(t.classList.contains('ps-tab')){ psCurrentTab = t.dataset.tab; updatePsTabs(); renderPsPane(); return; }
+    if(t.hasAttribute('data-jump-kind')){ setJumpKind(t.dataset.jumpKind); return; }
+    if(t.classList.contains('index-action-tab')){
+      if(t.dataset.indexAction === 'continue') continueReading(); else openJumpSheet(); return;
+    }
+    if(t.classList.contains('back-pill')){ showScreen('home'); return; }
+    if(t.hasAttribute('data-read-arabic')){ openCoachScreen(); return; }
+    var id = t.id || '';
+    if(id === 'tileSurahIndex'){ showScreen('index'); renderSurahIndex(); }
+    else if(id === 'tileJuzIndex'){ showScreen('juz'); renderJuzIndex(); }
+    else if(id === 'tilePlayAudio'){ showScreen('audio'); renderAudioSurahList(); }
+    else if(id === 'tileBookmarks'){ showScreen('bookmarks'); renderBookmarksScreen(); }
+    else if(id === 'tilePrayerTimes'){ openPrayerScreen(); }
+    else if(id === 'tileDashboard'){ showScreen('dashboard'); }
+    else if(id === 'tileHifz'){ openHifzScreen(); }
+    else if(id === 'tileTajweed'){ openTajweedScreen(); }
+    else if(id === 'openCoachBtn'){ openCoachScreen(); }
+    else if(id === 'streakBar'){ openAchievementsModal(); }
+  }catch(err){ console.warn('[tabs fallback]', err); }
+}, true);
 refreshContinueTabs();
 </script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
