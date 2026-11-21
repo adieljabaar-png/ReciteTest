@@ -1,4 +1,12 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }/* Decorated opening pages (Mushaf pages 1-2 only): ornate frame around the script, fewer rows allowed */
+.mushaf-book-page.mushaf-decorated{border:6px double #b08d2e;outline:3px solid #7a5c14;outline-offset:4px;background:linear-gradient(180deg,#fffdf4,#fdf6dd);box-shadow:0 0 0 3px #f3e5a8,0 18px 46px rgba(0,0,0,.35),inset 0 0 0 6px #fdf6dd,inset 0 0 0 8px #b08d2e;}
+.mushaf-book-page.mushaf-decorated .mushaf-book-content{background-image:none !important;text-align:center;text-align-last:center;}
+.mushaf-book-page.mushaf-decorated .mushaf-book-content .rw{transform:none;}
+.mushaf-book-page.mushaf-decorated::before{content:"✦  ✦  ✦";display:block;text-align:center;letter-spacing:1.2em;color:#b08d2e;font-size:12px;padding:2px 0 0;}
+/* All other pages: exactly 14 ruled rows, text centred between lines, full width */
+.mushaf-book-page:not(.mushaf-decorated) .mushaf-book-content{padding-left:2px;padding-right:2px;}
+.tile,.feature-tab,.index-action-tab,.ps-tab,.jump-seg button,.back-pill,.streak-bar{touch-action:manipulation;-webkit-tap-highlight-color:transparent;position:relative;z-index:1;}
+</style><head><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -2683,12 +2691,12 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header-row{paddi
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-footer-row{margin-top:0;padding:6px 0;font-size:13px;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
   font-family:var(--indopak-font);font-weight:700;font-size:var(--quran-font);
-  line-height:var(--row-ratio);letter-spacing:0;word-spacing:0;padding:0 2px; /* 2px = very small space to borders */
+  line-height:var(--row-ratio);letter-spacing:0;word-spacing:0;padding:0;
   text-align:justify;text-align-last:justify;
   -webkit-text-stroke:0.25px currentColor;position:relative;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .rw{
-  display:inline-block;white-space:nowrap;vertical-align:middle;line-height:var(--row-ratio);transform:translateY(-0.12em); /* centre glyphs between ruled lines */
+  display:inline-block;white-space:nowrap;vertical-align:middle;line-height:1;transform:none; /* centre glyphs between ruled lines */
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start{
   display:inline;margin:0;background:rgba(201,162,39,.16) !important;
@@ -12956,14 +12964,7 @@ function showTextShareModal(text){
 })();
 
 
-/* Decorated opening pages (Mushaf pages 1-2 only): ornate frame around the script, fewer rows allowed */
-.mushaf-book-page.mushaf-decorated{border:6px double #b08d2e;outline:3px solid #7a5c14;outline-offset:4px;background:linear-gradient(180deg,#fffdf4,#fdf6dd);box-shadow:0 0 0 3px #f3e5a8,0 18px 46px rgba(0,0,0,.35),inset 0 0 0 6px #fdf6dd,inset 0 0 0 8px #b08d2e;}
-.mushaf-book-page.mushaf-decorated .mushaf-book-content{background-image:none !important;text-align:center;text-align-last:center;}
-.mushaf-book-page.mushaf-decorated .mushaf-book-content .rw{transform:none;}
-.mushaf-book-page.mushaf-decorated::before{content:"✦  ✦  ✦";display:block;text-align:center;letter-spacing:1.2em;color:#b08d2e;font-size:12px;padding:2px 0 0;}
-/* All other pages: exactly 14 ruled rows, text centred between lines, full width */
-.mushaf-book-page:not(.mushaf-decorated) .mushaf-book-content{padding-left:2px;padding-right:2px;}
-.tile,.feature-tab,.index-action-tab,.ps-tab,.jump-seg button,.back-pill,.streak-bar{touch-action:manipulation;-webkit-tap-highlight-color:transparent;position:relative;z-index:1;}
+
 /* ══ 14-row IndoPak page layout (long mushaf pages split into 14-row pages) ══ */
 var ROWS_PER_PAGE = 14;
 var ROW_RATIO = 2.5;
@@ -12984,12 +12985,16 @@ function cleanQuranText(s){
   // Remove Quranic annotation / pause signs that have no glyph in the IndoPak font
   // and render as empty boxes / stray marks (e.g. U+06D6-U+06ED, U+08D3-U+08E1, U+0610-U+061A, U+06DD etc.)
   // Diacritics (harakat) and letters are preserved.
-  return String(s).replace(/[\u0610-\u061A\u06D6-\u06DC\u06DD-\u06DF\u06E0-\u06EA\u06EB-\u06ED\u08D3-\u08E1\u061C\u200B-\u200F\uFEFF]/g,'').replace(/\s+/g,' ').trim();
+  return String(s)
+    .replace(/[\u0610-\u061A\u061C\u06D6-\u06ED\u06DD\u06E9\u08D3-\u08FF\uFD3E-\uFD3F\u200B-\u200F\uFEFF]/g,'')
+    .replace(/[\uFBB2-\uFBC1\uFDF0-\uFDFD]/g,'')
+    .replace(/\s+/g,' ').trim();
 }
 function tokenizeRows(flow){
   if(flow.dataset.rw === '1') return;
   const NON_LETTER = /^[^\u0621-\u063F\u0641-\u064A\u066E-\u06D3\u06FA-\u06FF]+$/;
   flow.querySelectorAll('.ayah').forEach(ay => {
+    Array.from(ay.childNodes).forEach(n => { if(n.nodeType === 3) n.nodeValue = cleanQuranText(n.nodeValue); });
     const first = ay.firstChild;
     if(!first || first.nodeType !== 3) return;
     const toks = cleanQuranText(first.nodeValue).split(/\s+/).filter(Boolean);
@@ -13076,6 +13081,11 @@ function applyRowLayout(){
   const want = readerState.wantSub; readerState.wantSub = null;
   readerState.sub = null;
   if(document.body.classList.contains('viewer-translation-mode')){ saveLastRead(readerState.currentPage, 0); return; }
+  const decoratedFrame = content.closest('.mushaf-book-page');
+  if(decoratedFrame && decoratedFrame.classList.contains('mushaf-decorated')){
+    saveLastRead(readerState.currentPage, 0);
+    return;
+  }
   tokenizeRows(flow);
   const W = content.clientWidth;
   if(W < 80) return;
