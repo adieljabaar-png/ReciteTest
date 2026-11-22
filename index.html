@@ -2726,6 +2726,58 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-open
 body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{border-color:#d5ad55;color:#fff;}
 body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{border-color:#b58a2b;color:#16120a;}
 </style>
+
+<style id="mushaf-row-fill-and-six-point-gold">
+/* Larger Quran text and portrait/landscape line rhythm */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book{
+  font-size:calc(max(13.5px,min(3.9vw,5.2vh,96px)) + 10px) !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
+  height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 125px);
+  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 125px);
+}
+/* Aim for 16 evenly spaced text lines in portrait and 13 in landscape.
+   Content remains scrollable rather than silently clipping verses if the font/verse wraps differently. */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
+  flex:1;min-height:0;overflow:auto;line-height:calc((100dvh - var(--safe-top) - var(--safe-bottom) - 230px)/16) !important;
+  text-align:justify;text-align-last:center;
+}
+@media (orientation:landscape){
+ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
+  height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 90px);
+  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 90px);
+ }
+ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
+  line-height:calc((100dvh - var(--safe-top) - var(--safe-bottom) - 190px)/13) !important;
+ }
+}
+/* Pages 1 and 2: six-point (hexagram) gold ornament centred in the page frame,
+   with an ornamental border wash and clear inset space around Quran text. */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{
+  position:relative;border:6px double #c69a38 !important;border-radius:3px !important;
+  outline:2px solid #d8b45e;outline-offset:2px;
+  background:linear-gradient(145deg,rgba(250,237,195,.12),transparent 28%,transparent 72%,rgba(250,237,195,.12)),var(--page-bg,#fff);
+  box-shadow:inset 0 0 0 4px rgba(198,154,56,.18),inset 0 0 0 10px rgba(198,154,56,.07),0 10px 28px rgba(0,0,0,.28);
+  padding:clamp(12px,3vw,24px) !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages:before{
+  content:'۞ ٭ ۞';position:absolute;left:50%;top:5px;transform:translateX(-50%);
+  color:#c69a38;font-size:1em;letter-spacing:.2em;line-height:1;pointer-events:none;
+  text-shadow:0 0 1px #b58a2b;z-index:1;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages:after{
+  content:'✡';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  color:rgba(198,154,56,.09);font-size:min(42vw,42vh);pointer-events:none;z-index:0;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-content{
+  position:relative;z-index:1;line-height:1.85 !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-header-row,
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-footer-row{
+  border-color:#c69a38 !important;position:relative;z-index:1;
+}
+</style>
+
 </head>
 <body class="page-dark tajweed-full">
 <script>
