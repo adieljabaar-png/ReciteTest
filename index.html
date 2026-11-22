@@ -2686,6 +2686,46 @@ html.ui-fit .app.screen [style*="max-height:52vh"]{max-height:calc(52vh / var(--
 html.ui-fit body.reader-fullscreen .app.screen{zoom:1}
 html.ui-fit .qv-top,html.ui-fit .qv-bottom{zoom:var(--uzc,1)}
 </style>
+
+<style id="mushaf-page-fit-gold-upgrade">
+/* Portrait Mushaf pages: fill the available screen with a clear, even text layout. */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
+  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 145px);
+  height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 145px);
+  display:flex;flex-direction:column;box-sizing:border-box;
+  padding:clamp(3px,1vw,9px) clamp(5px,1.8vw,14px) 3px;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page .mushaf-book-content{
+  flex:1;min-height:0;overflow:hidden;line-height:1.82;text-align:justify;text-align-last:center;
+}
+@media (orientation:portrait){
+ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page .mushaf-book-content{line-height:1.82;}
+}
+@media (orientation:landscape){
+ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
+  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 105px);height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 105px);
+ }
+ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page .mushaf-book-content{line-height:1.55;}
+}
+/* The opening two pages receive an ornate gold frame and a roomy page-specific fit. */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{
+  border:5px double #c69a38;border-radius:9px;
+  outline:1px solid rgba(198,154,56,.55);outline-offset:3px;
+  box-shadow:inset 0 0 0 2px rgba(198,154,56,.22),0 12px 30px rgba(0,0,0,.35);
+  background:var(--page-bg,#fff);
+  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 145px);
+  box-sizing:border-box;padding:clamp(8px,2vw,18px);
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages:before{
+  content:'۞';position:absolute;top:2px;left:50%;transform:translateX(-50%);
+  color:#c69a38;font-size:1.15em;line-height:1;pointer-events:none;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-header-row,
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-footer-row{border-color:#c69a38;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-content{line-height:1.9;}
+body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{border-color:#d5ad55;color:#fff;}
+body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{border-color:#b58a2b;color:#16120a;}
+</style>
 </head>
 <body class="page-dark tajweed-full">
 <script>
@@ -10764,6 +10804,7 @@ function renderReaderPage(pageNumber, token){
   pageEl.innerHTML = '';
   const inner = document.createElement('div'); inner.className = 'mushaf-inner';
   const frame = document.createElement('div'); frame.className = 'mushaf-book-page';
+  frame.classList.add(pageNumber <= 2 ? 'mushaf-opening-pages' : 'mushaf-standard-page');
   const firstAyah = page.ayahs[0] || {};
   const pageJuz = firstAyah.juz || 1;
   const pageManzil = firstAyah.manzil || 1;
