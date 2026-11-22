@@ -1,47 +1,57 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v2.4.29— Keep the Surah / Juz index “Jump to” + “Continue”
-   changes safe (new index.html).
+   v2.4.21 — Ship AUTO-ROTATE on all screens “Jump to” / “Continue” tabs on the
+   Surah / Juz index (new index.html).
 
-   Changes in this deployment:
+   Changes in this deployment (v2.4.21 — AUTO-ROTATE):
+     index.html (all screens):
+       • All screens now follow the device's auto-rotate setting.
+         The page releases any orientation lock
+         (screen.orientation.unlock()), re-fires resize on
+         orientationchange, and adds landscape CSS (wider canvas,
+         safe-area padding, modals/viewers capped to rotated height,
+         compact layout for short landscape phones).
+       • This SW forces orientation:"any" in the manifest it serves
+         (see manifestFresh), so an installed PWA cannot stay stuck
+         in portrait because of a stale / portrait-only manifest.json.
+         It also serves an "orientation":"any" fallback manifest.
+       • qc-audio and localStorage ('qc.lastReaderPage') untouched.
+
+   Changes in this deployment (v2.4.20, retained):
      index.html (Surah index + Juz index):
-       • Two tabs directly below the Translation row:
-         “Jump to” and “Continue”.
-       • Jump to: pick Page / Surah / Juz, enter a number,
-         Go opens that page / surah / juz.
-         Page 1–604 · Surah 1–114 · Juz 1–30.
-       • Continue: shows the last reader page that was opened
-         and Resume reopens that exact page.
-       • The last page is saved in localStorage under
-         'qc.lastReaderPage' on every reader-page render and
-         again on pagehide / visibilitychange (app hidden or
-         closed), so Continue survives closing the app or
-         leaving the Surah / Juz index.
+       • FIX: the Jump to / Continue tabs could look dead. The old
+         code marked tabs as wired with a DOM attribute
+         (dataset.wired); if the page HTML was ever re-saved, that
+         attribute was baked in and no click handlers were attached.
+         Wiring state now lives in JS only, and ONE delegated
+         document-level click handler drives both tabs.
+       • Jump to: Page 1–604 · Surah 1–114 · Juz 1–30.
+       • Continue: Resume reopens the last reader page, saved in
+         localStorage under 'qc.lastReaderPage' on every render and
+         on pagehide / visibilitychange.
 
    Why this SW update is required — and what it protects:
-     • The old shell cache (qc-shell-2.4.18) still holds the
-       PREVIOUS index.html without Jump to / Continue. Without
-       a version bump, browsers / installed PWAs could keep
-       serving that stale copy and the new tabs would appear
-       to be missing, even though the new index.html was
-       deployed.
-     • Bumping VERSION to 2.4.19 creates fresh
-       qc-shell-2.4.19 / qc-text-2.4.19 / qc-fonts-2.4.19 /
-       qc-runtime-2.4.19 caches. ACTIVATE deletes the old
+     • The old shell cache (qc-shell-2.4.20) still holds the
+       PREVIOUS index.html with the broken tab wiring. Without a
+       version bump, browsers / installed PWAs could keep serving
+       that stale copy and the tabs would still look dead.
+     • Bumping VERSION to 2.4.21 creates fresh
+       qc-shell-2.4.21 / qc-text-2.4.21 / qc-fonts-2.4.21 /
+       qc-runtime-2.4.21 caches. ACTIVATE deletes the old
        versioned caches, and INSTALL pre-caches the NEW
-       index.html with { cache: 'reload' }, so the new tabs
-       are fetched, not resurrected from the old cache.
-     • Continue does NOT live in any Cache Storage entry.
-       It lives only in localStorage ('qc.lastReaderPage').
-       This SW never reads, writes, clears, or otherwise
-       touches localStorage, and no SW handler in this file
-       deletes localStorage. Clearing / updating caches
-       therefore cannot erase the saved Continue page.
-     • The persistent qc-audio cache is still preserved —
-       users keep downloaded surahs / translation audio.
-       CLEAR_CACHES now also preserves qc-audio for the
-       same reason (see MESSAGES below).
+       index.html with { cache: 'reload' }.
+     • Continue lives only in localStorage ('qc.lastReaderPage').
+       This SW never reads, writes or clears localStorage, so
+       cache updates cannot erase the saved Continue page.
+     • The persistent qc-audio cache is preserved — users keep
+       downloaded surahs / translation audio. CLEAR_CACHES also
+       preserves qc-audio.
+     • Hosts used by the page that this SW deliberately does NOT
+       intercept (they pass straight to the network): Adhan audio
+       (cdn.islamic.network is cached via the audio handler;
+       islamcan.com is not), api.bigdatacloud.net and
+       geocoding-api.open-meteo.com (prayer-time location lookups).
 
    Changes in this deployment (previous release, retained):
 
@@ -68,7 +78,7 @@
 
    Cache invalidation:
      qc-shell-* / qc-text-* / qc-fonts-* / qc-runtime-* are
-     bumped to 2.4.19 so the new index.html (with Jump to /
+     bumped to 2.4.21 so the auto-rotate index.html (Jump to /
      Continue) is fetched. The persistent qc-audio cache is
      preserved — users keep their downloaded surahs and
      translation audio. localStorage ('qc.lastReaderPage')
@@ -97,7 +107,7 @@
 
 'use strict';
 
-const VERSION = '2.4.19';
+const VERSION = '2.4.21';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -125,6 +135,7 @@ const SHELL_URLS = [
   './',
   './index.html',
   './index_3.html',
+  './index_39.html',
   './read.html',
   './manifest.json',
   './icon-192.png',
@@ -526,9 +537,18 @@ async function manifestFresh(req){
       clearTimeout(timer);
     }
     if(res && res.ok){
-      const clone = res.clone();
-      cache.put('./manifest.json', clone).catch(() => {});
-      return res;
+      try{
+        const data = await res.clone().json();
+        // AUTO-ROTATE: never let a portrait-only manifest lock the installed app.
+        data.orientation = 'any';
+        const fixed = new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } });
+        cache.put('./manifest.json', fixed.clone()).catch(() => {});
+        return fixed;
+      }catch(_){
+        const clone = res.clone();
+        cache.put('./manifest.json', clone).catch(() => {});
+        return res;
+      }
     }
     throw new Error('bad response');
   }catch(_){ /* fall through to cache */ }
@@ -546,6 +566,7 @@ async function manifestFresh(req){
       start_url: './',
       scope: './',
       display: 'standalone',
+      orientation: 'any',
       background_color: '#0d1119',
       theme_color: '#0d1119',
       icons: []
