@@ -2507,12 +2507,6 @@ body.light-mode .toggles .progress-trigger {
 
 /* ── Jump to / Continue tabs (Surah & Juz index) ─────────── */
 .index-tabs{display:flex;gap:8px;padding:0 2px 10px}
-.quran-top-strip{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px 7px;margin:0 0 8px;border:1px solid var(--border,#2a3446);border-radius:10px;background:#0d1421}
-.quran-top-strip .qts-side{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Amiri','Amiri Quran','Noto Naskh Arabic',serif;font-size:.68rem;line-height:1.4;font-weight:700;color:var(--text)}
-.quran-top-strip .qts-juz{text-align:left}
-.quran-top-strip .qts-surah{text-align:right}
-.quran-top-strip .qts-page{flex:0 0 auto;text-align:center;font-family:'Amiri','Amiri Quran','Noto Naskh Arabic',serif;font-size:.68rem;line-height:1.4;font-weight:700;color:var(--text);white-space:nowrap}
-
 .index-tab{flex:1;height:44px;border:1px solid var(--border,#2a3446);border-radius:12px;background:#0d1421;color:var(--text);font-size:.92rem;font-weight:800;cursor:pointer}
 body.light-mode .index-tab{background:#eef2f8}
 .index-tab.active{background:#F5C542;color:#111;border-color:#F5C542}
@@ -2779,6 +2773,22 @@ body.light-mode .share-arabic{color:#1a2233;}
   .share-prayer .sp-time{font-size:.78rem;}
 }
 </style>
+
+<style id="index-arabic-mushaf">
+/* Arabic-only Mushaf header rows on Surah + Juz index screens (smaller, like printed Mushaf header) */
+#screenSurahIndex,#screenJuzIndex{direction:rtl}
+#screenSurahIndex .sub-header,#screenJuzIndex .sub-header{direction:rtl}
+#screenSurahIndex .mushaf-index-top,#screenJuzIndex .mushaf-index-top{display:flex;justify-content:space-between;align-items:center;direction:rtl;padding:2px 4px 6px;border-bottom:1px solid var(--line);font-family:'Amiri','Noto Naskh Arabic',serif}
+#screenSurahIndex .mushaf-index-top span,#screenJuzIndex .mushaf-index-top span{font-size:.62rem;line-height:1.4;color:var(--text);white-space:nowrap}
+#screenSurahIndex .surah-row,#screenJuzIndex .surah-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;direction:rtl;padding:8px 10px}
+#screenSurahIndex .surah-row .mushaf-cell,#screenJuzIndex .surah-row .mushaf-cell{font-family:'Amiri','Noto Naskh Arabic',serif;font-size:.62rem;line-height:1.5;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#screenSurahIndex .surah-row .mushaf-cell.surah,#screenJuzIndex .surah-row .mushaf-cell.surah{text-align:right}
+#screenSurahIndex .surah-row .mushaf-cell.page,#screenJuzIndex .surah-row .mushaf-cell.page{text-align:center;color:var(--muted)}
+#screenSurahIndex .surah-row .mushaf-cell.juz,#screenJuzIndex .surah-row .mushaf-cell.juz{text-align:left}
+#screenSurahIndex .index-tabs,#screenJuzIndex .index-tabs{direction:rtl}
+#screenSurahIndex .jump-row,#screenJuzIndex .jump-row{direction:rtl}
+#screenSurahIndex .continue-card,#screenJuzIndex .continue-card{direction:rtl;text-align:right}
+</style>
 </head>
 <body class="page-dark tajweed-full">
 
@@ -3012,84 +3022,64 @@ body.light-mode .share-arabic{color:#1a2233;}
 
 <div class="app screen" id="screenSurahIndex" hidden="">
   <div class="sub-header">
-    <button id="backFromIndex" class="back-pill" type="button" aria-label="Back to home">Back</button>
-    <h1>Surah index</h1>
-    <span class="sub-note">Tap to open</span>
+    <button id="backFromIndex" class="back-pill" type="button" aria-label="رجوع">‹</button><h1>فهرس السور</h1><span class="sub-note">اضغط للفتح</span>
   </div>
-  <div class="quran-top-strip" id="surahIdxTopStrip" dir="ltr" aria-label="Current position">
-    <span class="qts-side qts-juz" id="surahIdxTopJuz" dir="rtl" lang="ar">الجزء ١</span>
-    <span class="qts-page" id="surahIdxTopPage" dir="rtl" lang="ar">١</span>
-    <span class="qts-side qts-surah" id="surahIdxTopSurah" dir="rtl" lang="ar">سورة الفاتحة ١</span>
-  </div>
-  <div class="lang-selector-wrap">
-    <label class="lang-label" for="surahIndexLang">🌐 Translation</label>
-    <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
-  </div>
-  <div class="index-tabs" role="tablist" aria-label="Jump or continue">
-    <button class="index-tab" type="button" id="surahIdxJumpTab" role="tab" aria-selected="false" aria-controls="surahIdxJumpPanel">Jump to</button>
-    <button class="index-tab" type="button" id="surahIdxContinueTab" role="tab" aria-selected="false" aria-controls="surahIdxContinuePanel">Continue</button>
+  
+  <div class="mushaf-index-top" aria-hidden="true"><span>السورة</span><span>الصفحة</span><span>الجزء</span></div><div class="index-tabs" role="tablist" aria-label="اقفز أو تابع">
+    <button class="index-tab" type="button" id="surahIdxJumpTab" role="tab" aria-selected="false" aria-controls="surahIdxJumpPanel">اقفز إلى</button>
+    <button class="index-tab" type="button" id="surahIdxContinueTab" role="tab" aria-selected="false" aria-controls="surahIdxContinuePanel">متابعة</button>
   </div>
   <div class="index-panel" id="surahIdxJumpPanel" role="tabpanel" hidden="">
     <div class="jump-row">
-      <div class="jump-seg" role="group" aria-label="Jump by">
-        <button type="button" data-jump-kind="page" class="active">Page</button>
-        <button type="button" data-jump-kind="surah">Surah</button>
-        <button type="button" data-jump-kind="juz">Juz</button>
+      <div class="jump-seg" role="group" aria-label="اقفز حسب">
+        <button type="button" data-jump-kind="page" class="active">صفحة</button>
+        <button type="button" data-jump-kind="surah">سورة</button>
+        <button type="button" data-jump-kind="juz">جزء</button>
       </div>
-      <input type="number" class="jump-input" inputmode="numeric" min="1" max="604" placeholder="Enter number" aria-label="Number to jump to">
-      <button type="button" class="jump-go">Go</button>
+      <input type="number" class="jump-input" inputmode="numeric" min="1" max="604" placeholder="أدخل الرقم" aria-label="أدخل الرقم">
+      <button type="button" class="jump-go">اذهب</button>
     </div>
-    <div class="jump-hint">Page 1–604 · Surah 1–114 · Juz 1–30</div>
+    <div class="jump-hint">صفحة ١–٦٠٤ · سورة ١–١١٤ · جزء ١–٣٠</div>
     <div class="jump-err" aria-live="polite"></div>
   </div>
   <div class="index-panel" id="surahIdxContinuePanel" role="tabpanel" hidden="">
     <div class="continue-card">
-      <div class="cc-text"><div class="cc-title">No recent page yet</div><div class="cc-sub">Open any page from the reader and it will appear here.</div></div>
-      <button type="button" class="continue-btn" disabled="">Resume</button>
+      <div class="cc-text"><div class="cc-title">لا صفحة أخيرة بعد</div><div class="cc-sub">افتح أي صفحة من المصحف وستظهر هنا.</div></div>
+      <button type="button" class="continue-btn" disabled="">استئناف</button>
     </div>
   </div>
-  <div class="surah-list" id="surahIndexList"><div class="loading">Loading…</div></div>
+  <div class="surah-list" id="surahIndexList"><div class="loading">جارٍ التحميل…</div></div>
 </div>
 
 <div class="app screen" id="screenJuzIndex" hidden="">
   <div class="sub-header">
-    <button id="backFromJuz" class="back-pill" type="button" aria-label="Back to home">Back</button>
-    <h1>Juz index</h1>
-    <span class="sub-note">Tap to open</span>
+    <button id="backFromJuz" class="back-pill" type="button" aria-label="رجوع">‹</button><h1>فهرس الأجزاء</h1><span class="sub-note">اضغط للفتح</span>
   </div>
-  <div class="quran-top-strip" id="juzIdxTopStrip" dir="ltr" aria-label="Current position">
-    <span class="qts-side qts-juz" id="juzIdxTopJuz" dir="rtl" lang="ar">الجزء ١</span>
-    <span class="qts-page" id="juzIdxTopPage" dir="rtl" lang="ar">١</span>
-    <span class="qts-side qts-surah" id="juzIdxTopSurah" dir="rtl" lang="ar">سورة الفاتحة ١</span>
-  </div>
-  <div class="lang-selector-wrap">
-    <label class="lang-label" for="juzIndexLang">🌐 Translation</label>
-    <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
-  </div>
-  <div class="index-tabs" role="tablist" aria-label="Jump or continue">
-    <button class="index-tab" type="button" id="juzIdxJumpTab" role="tab" aria-selected="false" aria-controls="juzIdxJumpPanel">Jump to</button>
-    <button class="index-tab" type="button" id="juzIdxContinueTab" role="tab" aria-selected="false" aria-controls="juzIdxContinuePanel">Continue</button>
+  
+  <div class="mushaf-index-top" aria-hidden="true"><span>السورة</span><span>الصفحة</span><span>الجزء</span></div><div class="index-tabs" role="tablist" aria-label="اقفز أو تابع">
+    <button class="index-tab" type="button" id="juzIdxJumpTab" role="tab" aria-selected="false" aria-controls="juzIdxJumpPanel">اقفز إلى</button>
+    <button class="index-tab" type="button" id="juzIdxContinueTab" role="tab" aria-selected="false" aria-controls="juzIdxContinuePanel">متابعة</button>
   </div>
   <div class="index-panel" id="juzIdxJumpPanel" role="tabpanel" hidden="">
     <div class="jump-row">
-      <div class="jump-seg" role="group" aria-label="Jump by">
-        <button type="button" data-jump-kind="page" class="active">Page</button>
-        <button type="button" data-jump-kind="surah">Surah</button>
-        <button type="button" data-jump-kind="juz">Juz</button>
+      <div class="jump-seg" role="group" aria-label="اقفز حسب">
+        <button type="button" data-jump-kind="page" class="active">صفحة</button>
+        <button type="button" data-jump-kind="surah">سورة</button>
+        <button type="button" data-jump-kind="juz">جزء</button>
       </div>
-      <input type="number" class="jump-input" inputmode="numeric" min="1" max="604" placeholder="Enter number" aria-label="Number to jump to">
-      <button type="button" class="jump-go">Go</button>
+      <input type="number" class="jump-input" inputmode="numeric" min="1" max="604" placeholder="أدخل الرقم" aria-label="أدخل الرقم">
+      <button type="button" class="jump-go">اذهب</button>
     </div>
-    <div class="jump-hint">Page 1–604 · Surah 1–114 · Juz 1–30</div>
+    <div class="jump-hint">صفحة ١–٦٠٤ · سورة ١–١١٤ · جزء ١–٣٠</div>
     <div class="jump-err" aria-live="polite"></div>
   </div>
   <div class="index-panel" id="juzIdxContinuePanel" role="tabpanel" hidden="">
     <div class="continue-card">
-      <div class="cc-text"><div class="cc-title">No recent page yet</div><div class="cc-sub">Open any page from the reader and it will appear here.</div></div>
-      <button type="button" class="continue-btn" disabled="">Resume</button>
+      <div class="cc-text"><div class="cc-title">لا صفحة أخيرة بعد</div><div class="cc-sub">افتح أي صفحة من المصحف وستظهر هنا.</div></div>
+      <button type="button" class="continue-btn" disabled="">استئناف</button>
     </div>
   </div>
-  <div class="surah-list" id="juzIndexList"><button type="button" class="surah-row"><span class="num">1</span><span class="meta"><span class="en">Alif Lam Meem</span><span class="sub">Page 1 · Juz 1 / 30</span></span><span class="ar">الجزء ١</span></button><button type="button" class="surah-row"><span class="num">2</span><span class="meta"><span class="en">Sayaqul</span><span class="sub">Page 22 · Juz 2 / 30</span></span><span class="ar">الجزء ٢</span></button><button type="button" class="surah-row"><span class="num">3</span><span class="meta"><span class="en">Tilkal Rusul</span><span class="sub">Page 42 · Juz 3 / 30</span></span><span class="ar">الجزء ٣</span></button><button type="button" class="surah-row"><span class="num">4</span><span class="meta"><span class="en">Lan Tanaloo</span><span class="sub">Page 62 · Juz 4 / 30</span></span><span class="ar">الجزء ٤</span></button><button type="button" class="surah-row"><span class="num">5</span><span class="meta"><span class="en">Wal Muhsanat</span><span class="sub">Page 82 · Juz 5 / 30</span></span><span class="ar">الجزء ٥</span></button><button type="button" class="surah-row"><span class="num">6</span><span class="meta"><span class="en">La Yuhibbullah</span><span class="sub">Page 102 · Juz 6 / 30</span></span><span class="ar">الجزء ٦</span></button><button type="button" class="surah-row"><span class="num">7</span><span class="meta"><span class="en">Wa Iza Samiu</span><span class="sub">Page 121 · Juz 7 / 30</span></span><span class="ar">الجزء ٧</span></button><button type="button" class="surah-row"><span class="num">8</span><span class="meta"><span class="en">Wa Lau Annana</span><span class="sub">Page 142 · Juz 8 / 30</span></span><span class="ar">الجزء ٨</span></button><button type="button" class="surah-row"><span class="num">9</span><span class="meta"><span class="en">Qalal Malaou</span><span class="sub">Page 162 · Juz 9 / 30</span></span><span class="ar">الجزء ٩</span></button><button type="button" class="surah-row"><span class="num">10</span><span class="meta"><span class="en">Wa A'lamu</span><span class="sub">Page 182 · Juz 10 / 30</span></span><span class="ar">الجزء ١٠</span></button><button type="button" class="surah-row"><span class="num">11</span><span class="meta"><span class="en">Yatazeroon</span><span class="sub">Page 201 · Juz 11 / 30</span></span><span class="ar">الجزء ١١</span></button><button type="button" class="surah-row"><span class="num">12</span><span class="meta"><span class="en">Wa Mamin Da'abat</span><span class="sub">Page 222 · Juz 12 / 30</span></span><span class="ar">الجزء ١٢</span></button><button type="button" class="surah-row"><span class="num">13</span><span class="meta"><span class="en">Wa Ma Ubarri'u</span><span class="sub">Page 242 · Juz 13 / 30</span></span><span class="ar">الجزء ١٣</span></button><button type="button" class="surah-row"><span class="num">14</span><span class="meta"><span class="en">Rubama</span><span class="sub">Page 262 · Juz 14 / 30</span></span><span class="ar">الجزء ١٤</span></button><button type="button" class="surah-row"><span class="num">15</span><span class="meta"><span class="en">Subhanallazi</span><span class="sub">Page 282 · Juz 15 / 30</span></span><span class="ar">الجزء ١٥</span></button><button type="button" class="surah-row"><span class="num">16</span><span class="meta"><span class="en">Qal Alam</span><span class="sub">Page 302 · Juz 16 / 30</span></span><span class="ar">الجزء ١٦</span></button><button type="button" class="surah-row"><span class="num">17</span><span class="meta"><span class="en">Aqtarabo</span><span class="sub">Page 322 · Juz 17 / 30</span></span><span class="ar">الجزء ١٧</span></button><button type="button" class="surah-row"><span class="num">18</span><span class="meta"><span class="en">Qad Aflaha</span><span class="sub">Page 342 · Juz 18 / 30</span></span><span class="ar">الجزء ١٨</span></button><button type="button" class="surah-row"><span class="num">19</span><span class="meta"><span class="en">Wa Qalallazina</span><span class="sub">Page 362 · Juz 19 / 30</span></span><span class="ar">الجزء ١٩</span></button><button type="button" class="surah-row"><span class="num">20</span><span class="meta"><span class="en">A'man Khalaq</span><span class="sub">Page 382 · Juz 20 / 30</span></span><span class="ar">الجزء ٢٠</span></button><button type="button" class="surah-row"><span class="num">21</span><span class="meta"><span class="en">Utlu Ma Oohiya</span><span class="sub">Page 402 · Juz 21 / 30</span></span><span class="ar">الجزء ٢١</span></button><button type="button" class="surah-row"><span class="num">22</span><span class="meta"><span class="en">Wa Manyaqnut</span><span class="sub">Page 422 · Juz 22 / 30</span></span><span class="ar">الجزء ٢٢</span></button><button type="button" class="surah-row"><span class="num">23</span><span class="meta"><span class="en">Wa Mali</span><span class="sub">Page 442 · Juz 23 / 30</span></span><span class="ar">الجزء ٢٣</span></button><button type="button" class="surah-row"><span class="num">24</span><span class="meta"><span class="en">Faman Azlam</span><span class="sub">Page 462 · Juz 24 / 30</span></span><span class="ar">الجزء ٢٤</span></button><button type="button" class="surah-row"><span class="num">25</span><span class="meta"><span class="en">Elahe Yuraddo</span><span class="sub">Page 482 · Juz 25 / 30</span></span><span class="ar">الجزء ٢٥</span></button><button type="button" class="surah-row"><span class="num">26</span><span class="meta"><span class="en">Ha Meem</span><span class="sub">Page 502 · Juz 26 / 30</span></span><span class="ar">الجزء ٢٦</span></button><button type="button" class="surah-row"><span class="num">27</span><span class="meta"><span class="en">Qala Fama Khatbukum</span><span class="sub">Page 522 · Juz 27 / 30</span></span><span class="ar">الجزء ٢٧</span></button><button type="button" class="surah-row"><span class="num">28</span><span class="meta"><span class="en">Qad Sami Allah</span><span class="sub">Page 542 · Juz 28 / 30</span></span><span class="ar">الجزء ٢٨</span></button><button type="button" class="surah-row"><span class="num">29</span><span class="meta"><span class="en">Tabarakallazi</span><span class="sub">Page 562 · Juz 29 / 30</span></span><span class="ar">الجزء ٢٩</span></button><button type="button" class="surah-row"><span class="num">30</span><span class="meta"><span class="en">Amma Yatasa'aloon</span><span class="sub">Page 582 · Juz 30 / 30</span></span><span class="ar">الجزء ٣٠</span></button></div>
+  <div class="surah-list" id="juzIndexList"><button type="button" class="surah-row"><span class="mushaf-cell surah">الفاتحة ١</span><span class="mushaf-cell page">١</span><span class="mushaf-cell juz">الجزء ١</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">البقرة ٢</span><span class="mushaf-cell page">٢٢</span><span class="mushaf-cell juz">الجزء ٢</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">البقرة ٢</span><span class="mushaf-cell page">٤٢</span><span class="mushaf-cell juz">الجزء ٣</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">آل عمران ٣</span><span class="mushaf-cell page">٦٢</span><span class="mushaf-cell juz">الجزء ٤</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">النساء ٤</span><span class="mushaf-cell page">٨٢</span><span class="mushaf-cell juz">الجزء ٥</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">النساء ٤</span><span class="mushaf-cell page">١٠٢</span><span class="mushaf-cell juz">الجزء ٦</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">المائدة ٥</span><span class="mushaf-cell page">١٢١</span><span class="mushaf-cell juz">الجزء ٧</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الأنعام ٦</span><span class="mushaf-cell page">١٤٢</span><span class="mushaf-cell juz">الجزء ٨</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الأعراف ٧</span><span class="mushaf-cell page">١٦٢</span><span class="mushaf-cell juz">الجزء ٩</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الأنفال ٨</span><span class="mushaf-cell page">١٨٢</span><span class="mushaf-cell juz">الجزء ١٠</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">التوبة ٩</span><span class="mushaf-cell page">٢٠١</span><span class="mushaf-cell juz">الجزء ١١</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">هود ١١</span><span class="mushaf-cell page">٢٢٢</span><span class="mushaf-cell juz">الجزء ١٢</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">يوسف ١٢</span><span class="mushaf-cell page">٢٤٢</span><span class="mushaf-cell juz">الجزء ١٣</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الحجر ١٥</span><span class="mushaf-cell page">٢٦٢</span><span class="mushaf-cell juz">الجزء ١٤</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الإسراء ١٧</span><span class="mushaf-cell page">٢٨٢</span><span class="mushaf-cell juz">الجزء ١٥</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الكهف ١٨</span><span class="mushaf-cell page">٣٠٢</span><span class="mushaf-cell juz">الجزء ١٦</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الأنبياء ٢١</span><span class="mushaf-cell page">٣٢٢</span><span class="mushaf-cell juz">الجزء ١٧</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">المؤمنون ٢٣</span><span class="mushaf-cell page">٣٤٢</span><span class="mushaf-cell juz">الجزء ١٨</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الفرقان ٢٥</span><span class="mushaf-cell page">٣٦٢</span><span class="mushaf-cell juz">الجزء ١٩</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">النمل ٢٧</span><span class="mushaf-cell page">٣٨٢</span><span class="mushaf-cell juz">الجزء ٢٠</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">العنكبوت ٢٩</span><span class="mushaf-cell page">٤٠٢</span><span class="mushaf-cell juz">الجزء ٢١</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الأحزاب ٣٣</span><span class="mushaf-cell page">٤٢٢</span><span class="mushaf-cell juz">الجزء ٢٢</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">يس ٣٦</span><span class="mushaf-cell page">٤٤٢</span><span class="mushaf-cell juz">الجزء ٢٣</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الزمر ٣٩</span><span class="mushaf-cell page">٤٦٢</span><span class="mushaf-cell juz">الجزء ٢٤</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">فصلت ٤١</span><span class="mushaf-cell page">٤٨٢</span><span class="mushaf-cell juz">الجزء ٢٥</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الأحقاف ٤٦</span><span class="mushaf-cell page">٥٠٢</span><span class="mushaf-cell juz">الجزء ٢٦</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الذاريات ٥١</span><span class="mushaf-cell page">٥٢٢</span><span class="mushaf-cell juz">الجزء ٢٧</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">المجادلة ٥٨</span><span class="mushaf-cell page">٥٤٢</span><span class="mushaf-cell juz">الجزء ٢٨</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">الملك ٦٧</span><span class="mushaf-cell page">٥٦٢</span><span class="mushaf-cell juz">الجزء ٢٩</span></button><button type="button" class="surah-row"><span class="mushaf-cell surah">النبأ ٧٨</span><span class="mushaf-cell page">٥٨٢</span><span class="mushaf-cell juz">الجزء ٣٠</span></button></div>
 </div>
 
 <div class="app screen" id="screenBookmarks" hidden="">
@@ -3140,7 +3130,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span style="font-weight: 700; font-size: .9rem; color: var(--text);">Play translation audio</span>
   </label>
 
-  <div class="surah-list" id="audioSurahList"><div class="loading">Loading…</div></div>
+  <div class="surah-list" id="audioSurahList"><div class="loading">جارٍ التحميل…</div></div>
 </div>
 <div class="app screen" id="screenPrayer" hidden="">
   <div class="sub-header">
@@ -3161,7 +3151,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">22 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">11:30</span>
+    <span class="pdr-item pdr-time" id="pdrTime">11:41</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3258,7 +3248,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <ol class="mistakes-list" id="mistakesList"></ol>
   </section>
   <section class="mushaf" id="pageEl" aria-label="Quran text">
-    <div class="mushaf-inner"><div class="loading">Loading…</div></div>
+    <div class="mushaf-inner"><div class="loading">جارٍ التحميل…</div></div>
   </section>
   <div class="legend hide-immersive">
     <span><i style="background:#2fd07a"></i>correct</span>
@@ -9962,14 +9952,14 @@ function askForInternet(label){
 function saveLastReaderPage(pageNumber, page){
   try{
     var n = Math.max(1, Math.min(604, Math.round(pageNumber)||1));
-    var label = 'Page ' + n, sub = '';
+    var label = 'صفحة ' + toAr(n), sub = '';
     if(page && Array.isArray(page.ayahs) && page.ayahs.length){
       var f = page.ayahs[0];
-      if(f && f.surah) label = 'Page ' + n + ' · Surah ' + f.surah + (f.numberInSurah ? (', Ayah ' + f.numberInSurah) : '');
+      if(f && f.surah) label = 'صفحة ' + toAr(n) + ' · سورة ' + toAr(f.surah) + (f.numberInSurah ? ('، آية ' + toAr(f.numberInSurah)) : '');
     }
     var juz = 1;
     try{ for(var i=0;i<JUZ_START_PAGES_FALLBACK.length;i++){ if(n >= JUZ_START_PAGES_FALLBACK[i]) juz = i+1; } }catch(e){}
-    sub = 'Juz ' + juz + ' · Mushaf page ' + n;
+    sub = 'الجزء ' + toAr(juz) + ' · صفحة ' + toAr(n);
     localStorage.setItem('qc.lastReaderPage', JSON.stringify({page:n, label:label, sub:sub, at: Date.now()}));
   }catch(e){}
 }
@@ -9982,8 +9972,8 @@ function refreshContinueCard(prefix){
   var last = getLastReaderPage();
   var title = panel.querySelector('.cc-title'), sub = panel.querySelector('.cc-sub'), btn = panel.querySelector('.continue-btn');
   if(!title || !btn) return;
-  if(last){ title.textContent = last.label || ('Page '+last.page); if(sub) sub.textContent = last.sub || ('Mushaf page '+last.page); btn.disabled = false; }
-  else { title.textContent = 'No recent page yet'; if(sub) sub.textContent = 'Open any page from the reader and it will appear here.'; btn.disabled = true; }
+  if(last){ title.textContent = last.label || ('صفحة '+toAr(last.page)); if(sub) sub.textContent = last.sub || ('صفحة '+toAr(last.page)); btn.disabled = false; }
+  else { title.textContent = 'لا صفحة أخيرة بعد'; if(sub) sub.textContent = 'افتح أي صفحة من المصحف وستظهر هنا.'; btn.disabled = true; }
 }
 function indexPrefixFromEl(el){
   var p = el.closest('.index-panel, .index-tabs'); if(!p) return null;
@@ -10013,7 +10003,7 @@ function doIndexJump(prefix){
   var inp = jumpPanel.querySelector('.jump-input'), err = jumpPanel.querySelector('.jump-err');
   var max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30);
   var n = parseInt(inp ? inp.value : '', 10);
-  if(!n || n < 1 || n > max){ if(err) err.textContent = 'Please enter a ' + kind + ' number between 1 and ' + max + '.'; if(inp) inp.focus(); return; }
+  if(!n || n < 1 || n > max){ if(err) err.textContent = 'أدخل رقم ' + (kind==='page' ? 'صفحة' : kind==='surah' ? 'سورة' : 'جزء') + ' بين ١ و ' + toAr(max) + '.'; if(inp) inp.focus(); return; }
   if(err) err.textContent = '';
   if(kind==='page'){ openViewer('read',{hideFullscreen:true}); loadReaderPage(n); }
   else if(kind==='surah'){ openSurahInReader(n); }
@@ -10036,7 +10026,7 @@ function wireAllIndexJumpContinue(){
       panel.dataset.jumpKind = segBtn.dataset.jumpKind || 'page';
       panel.querySelectorAll('.jump-seg button').forEach(function(x){ x.classList.toggle('active', x===segBtn); });
       var inp = panel.querySelector('.jump-input'), kind = panel.dataset.jumpKind;
-      if(inp){ inp.max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30); inp.placeholder = 'Enter ' + kind + ' number'; inp.setAttribute('aria-label', 'Enter ' + kind + ' number'); }
+      if(inp){ inp.max = (kind==='page' ? 604 : kind==='surah' ? 114 : 30); var kindAr = kind==='page' ? 'صفحة' : kind==='surah' ? 'سورة' : 'جزء'; inp.placeholder = 'أدخل رقم ' + kindAr; inp.setAttribute('aria-label', 'أدخل رقم ' + kindAr); }
       var err = panel.querySelector('.jump-err'); if(err) err.textContent = '';
       return;
     }
@@ -10060,96 +10050,47 @@ document.addEventListener('visibilitychange', function(){ if(document.hidden){ t
 if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', wireAllIndexJumpContinue); } else { wireAllIndexJumpContinue(); }
 
 async function renderSurahIndex(){
-  surahIndexList.innerHTML = '<div class="loading">Loading…</div>';
+  surahIndexList.innerHTML = '<div class="loading">جارٍ التحميل…</div>';
   try{
     const chapters = await ensureChaptersLocalized(surahIndexLang);
     surahIndexList.innerHTML = '';
     chapters.forEach(s => {
       const row = document.createElement('button');
       row.className = 'surah-row'; row.type = 'button';
-      const subParts = [];
-      if (s.translatedName) subParts.push(escapeHtml(s.translatedName));
-      subParts.push(s.numberOfAyahs + ' ayahs');
-      subParts.push(escapeHtml(s.revelationType));
+      const page = SURAH_START_PAGES[s.number - 1] || 1;
+      const juz = juzForPage(page);
       row.innerHTML =
-        '<span class="num">' + String(s.number).padStart(3,'0') + '</span>' +
-        '<span class="meta">' +
-          '<span class="en">' + escapeHtml(s.englishName) + '</span>' +
-          '<span class="sub">' + subParts.join(' · ') + '</span>' +
-        '</span>' +
-        '<span class="ar">' + escapeHtml(s.name) + '</span>';
+        '<span class="mushaf-cell surah">' + escapeHtml(SURAH_AR_NAMES[s.number - 1] || s.name) + ' ' + toAr(s.number) + '</span>' +
+        '<span class="mushaf-cell page">' + toAr(page) + '</span>' +
+        '<span class="mushaf-cell juz">الجزء ' + toAr(juz) + '</span>';
       row.addEventListener('click', () => openSurahInReader(s.number));
       surahIndexList.appendChild(row);
     });
   }catch(e){
-    surahIndexList.innerHTML = '<div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div>';
-  }
-}
+    surahIndexList.innerHTML = '<div class="loading">تعذّر تحميل القائمة.</div>';
+  } }
 const JUZ_NAMES = ['Alif Lam Meem','Sayaqul','Tilkal Rusul','Lan Tanaloo','Wal Muhsanat','La Yuhibbullah','Wa Iza Samiu','Wa Lau Annana','Qalal Malaou','Wa A\'lamu','Yatazeroon','Wa Mamin Da\'abat','Wa Ma Ubarri\'u','Rubama','Subhanallazi','Qal Alam','Aqtarabo','Qad Aflaha','Wa Qalallazina','A\'man Khalaq','Utlu Ma Oohiya','Wa Manyaqnut','Wa Mali','Faman Azlam','Elahe Yuraddo','Ha Meem','Qala Fama Khatbukum','Qad Sami Allah','Tabarakallazi','Amma Yatasa\'aloon'];
 const JUZ_NAMES_AR = ['الم','سيقول','تلك الرسل','لن تنالوا','والمحصنات','لا يحب الله','وإذا سمعوا','ولو أننا','قال الملأ','واعلموا','يعتذرون','وما من دابة','وما أبرئ','ربما','سبحان الذي','قال ألم','اقترب','قد أفلح','وقال الذين','أمن خلق','اتل ما أوحي','ومن يقنت','وما لي','فمن أظلم','إليه يرد','حم','قال فما خطبكم','قد سمع الله','تبارك الذي','عم يتساءلون'];
+const SURAH_AR_NAMES = ['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
+const SURAH_START_PAGES = [1,2,50,77,106,128,151,177,187,208,221,235,249,255,262,267,282,293,305,312,322,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,477,483,489,496,499,502,507,511,515,518,520,523,526,528,531,534,537,540,542,545,547,551,553,556,558,560,562,564,566,568,570,572,574,575,577,578,580,582,583,585,586,587,589,590,591,592,593,594,595,596,597,598,599,600,601,601,602,602,603,603,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604];
+function juzForPage(page){ var j=1; for(var i=0;i<JUZ_START_PAGES_FALLBACK.length;i++){ if(page>=JUZ_START_PAGES_FALLBACK[i]) j=i+1; } return j; }
+function juzStartSurah(juz){ var k=Object.keys(JUZ_START_VERSE).find(function(key){ return JUZ_START_VERSE[key]===juz; }); return k?parseInt(k.split(':')[0],10):1; }
 const JUZ_START_PAGES_FALLBACK = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
 function renderJuzIndex(){
   juzIndexList.innerHTML = '';
-  const label = { en: 'Juz', tr: 'Cüz' }[surahIndexLang] || 'Juz';
   for(let i = 1; i <= 30; i++){
     const row = document.createElement('button');
     row.type = 'button'; row.className = 'surah-row';
     const startPage = JUZ_START_PAGES_FALLBACK[i - 1];
+    const surahNo = juzStartSurah(i);
     row.innerHTML =
-      '<span class="num">' + i + '</span>' +
-      '<span class="meta">' +
-        '<span class="en">' + escapeHtml(JUZ_NAMES[i - 1] || ('Juz ' + i)) + '</span>' +
-        '<span class="sub">Page ' + startPage + ' · ' + label + ' ' + i + ' / 30</span>' +
-      '</span>' +
-      '<span class="ar">الجزء ' + toAr(i) + '</span>';
+      '<span class="mushaf-cell surah">' + escapeHtml(SURAH_AR_NAMES[surahNo - 1] || '') + ' ' + toAr(surahNo) + '</span>' +
+      '<span class="mushaf-cell page">' + toAr(startPage) + '</span>' +
+      '<span class="mushaf-cell juz">الجزء ' + toAr(i) + '</span>';
     row.addEventListener('click', () => openJuzInReader(i));
     juzIndexList.appendChild(row);
   }
 }
-
-const SURAH_START_PAGES=[1,2,50,77,106,128,151,177,187,208,221,235,249,261,267,282,293,305,312,322,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,477,483,489,496,499,502,507,511,515,518,520,523,526,528,531,534,537,542,545,549,551,553,556,558,560,562,564,566,568,570,572,574,575,577,578,580,582,583,584,586,587,589,590,591,592,594,595,595,596,597,598,599,599,600,600,601,601,602,602,602,603,603,603,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604];
-function juzForPage(page){let j=1;for(let i=0;i<JUZ_START_PAGES_FALLBACK.length;i++){if(page>=JUZ_START_PAGES_FALLBACK[i])j=i+1;}return j;}
-function surahForPage(page){let s=1;for(let i=0;i<SURAH_START_PAGES.length;i++){if(page>=SURAH_START_PAGES[i])s=i+1;}return s;}
-function setQuranTopStrip(prefix,page,surahNum,surahArName){
-  const juzEl=document.getElementById(prefix+'TopJuz'),pageEl=document.getElementById(prefix+'TopPage'),surahEl=document.getElementById(prefix+'TopSurah');
-  if(!juzEl||!pageEl||!surahEl)return;
-  const juz=juzForPage(page);
-  juzEl.textContent='الجزء '+toAr(juz)+' · '+(typeof JUZ_NAMES_AR!=='undefined'&&JUZ_NAMES_AR[juz-1]?JUZ_NAMES_AR[juz-1]:'');
-  pageEl.textContent=toAr(page);
-  const name=(surahArName||'').replace(/^سورة\s*/,'').trim();
-  surahEl.textContent='سورة '+(name||'')+' '+toAr(surahNum);
-}
-function syncIndexTopStrip(prefix,listId){
-  const list=document.getElementById(listId); if(!list)return;
-  const rows=list.querySelectorAll('.surah-row'); if(!rows.length)return;
-  // First row whose top is at / below the list top (the row at the top of the list)
-  const listTop=list.getBoundingClientRect().top;
-  let current=rows[0];
-  rows.forEach(r=>{const rt=r.getBoundingClientRect(); if(rt.top<=listTop+24) current=r;});
-  const num=parseInt((current.querySelector('.num')||{}).textContent||'1',10)||1;
-  if(prefix==='surahIdx'){
-    const page=SURAH_START_PAGES[num-1]||1;
-    const ar=(current.querySelector('.ar')||{}).textContent||'';
-    setQuranTopStrip(prefix,page,num,ar);
-  } else {
-    const page=JUZ_START_PAGES_FALLBACK[num-1]||1;
-    const s=surahForPage(page);
-    let arName='';
-    try{ const ch=(typeof chaptersCache!=='undefined'&&chaptersCache)?chaptersCache.find(c=>c.number===s):null; if(ch&&ch.name) arName=ch.name; }catch(e){}
-    setQuranTopStrip(prefix,page,s,arName);
-  }
-}
-let __indexTopStripTicking=false;
-function onIndexScrollSync(){
-  if(__indexTopStripTicking)return; __indexTopStripTicking=true;
-  requestAnimationFrame(()=>{__indexTopStripTicking=false;
-    try{ if(!document.getElementById('screenSurahIndex').hidden) syncIndexTopStrip('surahIdx','surahIndexList'); }catch(e){}
-    try{ if(!document.getElementById('screenJuzIndex').hidden) syncIndexTopStrip('juzIdx','juzIndexList'); }catch(e){}
-  });
-}
-document.addEventListener('scroll',onIndexScrollSync,{passive:true,capture:true});
-try{var __stripObs=new MutationObserver(function(){onIndexScrollSync();});var __sL=document.getElementById('surahIndexList');var __jL=document.getElementById('juzIndexList');if(__sL)__stripObs.observe(__sL,{childList:true});if(__jL)__stripObs.observe(__jL,{childList:true});}catch(e){}
-window.addEventListener('scroll',onIndexScrollSync,{passive:true});
 function populateLangSelectors() {
   const ids = ['surahIndexLang', 'juzIndexLang'];
   ids.forEach(id => {
@@ -10493,7 +10434,7 @@ function changeTextTranslation(id){
 
 async function renderAudioSurahList(){
   if(audioListRendered){ refreshAudioRowStates(); return; }
-  audioSurahList.innerHTML = '<div class="loading">Loading…</div>';
+  audioSurahList.innerHTML = '<div class="loading">جارٍ التحميل…</div>';
   try{
     const chapters = await ensureChapters();
     audioSurahList.innerHTML = '';
