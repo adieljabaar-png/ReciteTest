@@ -1051,7 +1051,9 @@ body.page-light.viewer-read-mode.viewer-translation-mode .qv-slot .mushaf.mushaf
 /* Highlight only the first displayed row of a Juz beginning.
    White text on black; the rest of the ayah keeps its normal colours. */
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start{
-display:block;position:relative;background:transparent !important;color:inherit !important;
+/* Keep the Juz-start ayah inline so the next ayah can continue immediately
+   in the same text row instead of leaving an empty block/row behind. */
+display:inline !important;position:relative;background:transparent !important;color:inherit !important;
 padding:0;margin:0;box-shadow:none !important;opacity:1 !important;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::first-line{
