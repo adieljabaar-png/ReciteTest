@@ -2687,97 +2687,43 @@ html.ui-fit body.reader-fullscreen .app.screen{zoom:1}
 html.ui-fit .qv-top,html.ui-fit .qv-bottom{zoom:var(--uzc,1)}
 </style>
 
-<style id="mushaf-page-fit-gold-upgrade">
-/* Portrait Mushaf pages: fill the available screen with a clear, even text layout. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
-  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 145px);
-  height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 145px);
-  display:flex;flex-direction:column;box-sizing:border-box;
-  padding:clamp(3px,1vw,9px) clamp(5px,1.8vw,14px) 3px;
+<style id="reader-fixed-rows">
+/* ===== Reader: fixed number of rows per page (16 portrait / 13 landscape), gold frame on pages 1-2 ===== */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book.rd-on .mushaf-inner{max-width:none}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.rd-fixed{display:flex;flex-direction:column;min-height:0}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content{flex:0 0 auto;padding:0;text-align:justify;text-align-last:center;word-spacing:-.06em}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-footer-row{margin-top:auto}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header{
+  height:var(--rd-lh);margin:0;padding:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:5px;
 }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page .mushaf-book-content{
-  flex:1;min-height:0;overflow:hidden;line-height:1.82;text-align:justify;text-align-last:center;
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-name{font-size:calc(var(--rd-lh) * .56);line-height:1;margin:0}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-meta{display:none}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-bismillah-line{
+  height:var(--rd-lh);margin:0;padding:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;line-height:1;
 }
-@media (orientation:portrait){
- body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page .mushaf-book-content{line-height:1.82;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content .ayah.juz-start{display:inline !important;margin:0 !important}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content .ayah.juz-start::before{display:none}
+.mushaf-ruku-mark{font-size:calc(var(--rd-f,1em) * .85) !important}
+/* gold Arabic ornamental frame (pages 1 and 2) */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.rd-deco{
+  --deco-w:clamp(22px,7.4vw,40px);
+  border:var(--deco-w) solid transparent !important;border-radius:0 !important;
+  border-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2784%27 height=%2784%27 viewBox=%270 0 84 84%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 gradientUnits=%27userSpaceOnUse%27 x1=%270%27 y1=%270%27 x2=%2784%27 y2=%2784%27%3E%3Cstop offset=%270%27 stop-color=%27%23f7e6a0%27/%3E%3Cstop offset=%27.35%27 stop-color=%27%23d9ac2b%27/%3E%3Cstop offset=%27.65%27 stop-color=%27%23f2d675%27/%3E%3Cstop offset=%271%27 stop-color=%27%23a87c14%27/%3E%3C/linearGradient%3E%3Cg id=%27st8%27 fill=%27none%27 stroke=%27url(%23g)%27 stroke-width=%271.3%27%3E%3Crect x=%27-7%27 y=%27-7%27 width=%2714%27 height=%2714%27/%3E%3Crect x=%27-7%27 y=%27-7%27 width=%2714%27 height=%2714%27 transform=%27rotate(45)%27/%3E%3C/g%3E%3C/defs%3E%3Cg fill=%27none%27 stroke=%27url(%23g)%27%3E%3Crect x=%272%27 y=%272%27 width=%2780%27 height=%2780%27 stroke-width=%272.4%27/%3E%3Crect x=%274.8%27 y=%274.8%27 width=%2774.4%27 height=%2774.4%27 stroke-width=%27.8%27/%3E%3Crect x=%2726%27 y=%2726%27 width=%2732%27 height=%2732%27 stroke-width=%271.4%27/%3E%3C/g%3E%3Cg fill=%27url(%23g)%27%3E%3Cg transform=%27translate(42 14)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cg transform=%27translate(42 70)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cg transform=%27translate(14 42)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cg transform=%27translate(70 42)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cpath d=%27M33 14l2-2.2 2 2.2-2 2.2zM47 14l2-2.2 2 2.2-2 2.2z%27/%3E%3Cpath d=%27M33 70l2-2.2 2 2.2-2 2.2zM47 70l2-2.2 2 2.2-2 2.2z%27/%3E%3Cpath d=%27M14 33l2.2-2 2.2 2-2.2 2zM14 47l2.2-2 2.2 2-2.2 2z%27/%3E%3Cpath d=%27M70 33l2.2-2 2.2 2-2.2 2zM70 47l2.2-2 2.2 2-2.2 2z%27/%3E%3C/g%3E%3Cg fill=%27none%27 stroke=%27url(%23g)%27 stroke-width=%271.3%27%3E%3Cg transform=%27translate(14 14) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Cg transform=%27translate(70 14) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Cg transform=%27translate(14 70) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Cg transform=%27translate(70 70) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%274.2%27/%3E%3Ccircle cx=%2770%27 cy=%2714%27 r=%274.2%27/%3E%3Ccircle cx=%2714%27 cy=%2770%27 r=%274.2%27/%3E%3Ccircle cx=%2770%27 cy=%2770%27 r=%274.2%27/%3E%3C/g%3E%3Cg fill=%27url(%23g)%27%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%271.6%27/%3E%3Ccircle cx=%2770%27 cy=%2714%27 r=%271.6%27/%3E%3Ccircle cx=%2714%27 cy=%2770%27 r=%271.6%27/%3E%3Ccircle cx=%2770%27 cy=%2770%27 r=%271.6%27/%3E%3C/g%3E%3C/svg%3E") 28 / var(--deco-w) round !important;
+  padding:.2em .35em !important;
 }
-@media (orientation:landscape){
- body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
-  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 105px);height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 105px);
- }
- body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page .mushaf-book-content{line-height:1.55;}
-}
-/* The opening two pages receive an ornate gold frame and a roomy page-specific fit. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{
-  border:5px double #c69a38;border-radius:9px;
-  outline:1px solid rgba(198,154,56,.55);outline-offset:3px;
-  box-shadow:inset 0 0 0 2px rgba(198,154,56,.22),0 12px 30px rgba(0,0,0,.35);
-  background:var(--page-bg,#fff);
-  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 145px);
-  box-sizing:border-box;padding:clamp(8px,2vw,18px);
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages:before{
-  content:'۞';position:absolute;top:2px;left:50%;transform:translateX(-50%);
-  color:#c69a38;font-size:1.15em;line-height:1;pointer-events:none;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-header-row,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-footer-row{border-color:#c69a38;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-content{line-height:1.9;}
-body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{border-color:#d5ad55;color:#fff;}
-body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{border-color:#b58a2b;color:#16120a;}
-</style>
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-content{margin-top:auto;margin-bottom:auto}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-header{border:1.5px solid #d9ac2b;box-shadow:inset 0 0 0 3px rgba(217,172,43,.18)}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-surah-name,
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-line{color:#e2b93b}
+body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-surah-name,
+body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-line{color:#9a7410}
 
-<style id="mushaf-row-fill-and-six-point-gold">
-/* Larger Quran text and portrait/landscape line rhythm */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book{
-  font-size:calc(max(13.5px,min(3.9vw,5.2vh,96px)) + 10px) !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
-  height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 125px);
-  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 125px);
-}
-/* Aim for 16 evenly spaced text lines in portrait and 13 in landscape.
-   Content remains scrollable rather than silently clipping verses if the font/verse wraps differently. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
-  flex:1;min-height:0;overflow:auto;line-height:calc((100dvh - var(--safe-top) - var(--safe-bottom) - 230px)/16) !important;
-  text-align:justify;text-align-last:center;
-}
-@media (orientation:landscape){
- body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-standard-page{
-  height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 90px);
-  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 90px);
- }
- body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
-  line-height:calc((100dvh - var(--safe-top) - var(--safe-bottom) - 190px)/13) !important;
- }
-}
-/* Pages 1 and 2: six-point (hexagram) gold ornament centred in the page frame,
-   with an ornamental border wash and clear inset space around Quran text. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages{
-  position:relative;border:6px double #c69a38 !important;border-radius:3px !important;
-  outline:2px solid #d8b45e;outline-offset:2px;
-  background:linear-gradient(145deg,rgba(250,237,195,.12),transparent 28%,transparent 72%,rgba(250,237,195,.12)),var(--page-bg,#fff);
-  box-shadow:inset 0 0 0 4px rgba(198,154,56,.18),inset 0 0 0 10px rgba(198,154,56,.07),0 10px 28px rgba(0,0,0,.28);
-  padding:clamp(12px,3vw,24px) !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages:before{
-  content:'۞ ٭ ۞';position:absolute;left:50%;top:5px;transform:translateX(-50%);
-  color:#c69a38;font-size:1em;letter-spacing:.2em;line-height:1;pointer-events:none;
-  text-shadow:0 0 1px #b58a2b;z-index:1;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages:after{
-  content:'✡';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  color:rgba(198,154,56,.09);font-size:min(42vw,42vh);pointer-events:none;z-index:0;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-content{
-  position:relative;z-index:1;line-height:1.85 !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-header-row,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.mushaf-opening-pages .mushaf-book-footer-row{
-  border-color:#c69a38 !important;position:relative;z-index:1;
-}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line{display:flex;flex-direction:row;justify-content:space-between;align-items:center;direction:rtl;height:var(--rd-lh);white-space:nowrap;line-height:1;text-align:start;text-align-last:auto}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line .ayah{flex:0 0 auto;white-space:nowrap;line-height:1}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line .mushaf-ayah-mark{margin:0 .26em 0 .04em;line-height:1.5}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line.has-juz{background:rgba(128,128,128,.22);border-radius:6px}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-name{white-space:nowrap}
 </style>
-
 </head>
 <body class="page-dark tajweed-full">
 <script>
@@ -10844,19 +10790,18 @@ function scheduleRukuReplace(){
 }
 window.addEventListener('resize', scheduleRukuReplace);
 window.addEventListener('orientationchange', scheduleRukuReplace);
-function renderReaderPage(pageNumber, token){
+function renderReaderPage(pageNumber, token, relayout){
   const page = readerState.pages.get(pageNumber);
   if(!page) return;
   readerState.currentPage = pageNumber;
   try{ rzReset(); }catch(e){}
-  try{ saveLastReaderPage(pageNumber, page); }catch(e){}
+  if(!relayout){ try{ saveLastReaderPage(pageNumber, page); }catch(e){} }
   updateBookmarkButton();
   STORE.mode = 'page'; STORE.page = pageNumber;
   pageEl.classList.add('mushaf-book');
   pageEl.innerHTML = '';
   const inner = document.createElement('div'); inner.className = 'mushaf-inner';
   const frame = document.createElement('div'); frame.className = 'mushaf-book-page';
-  frame.classList.add(pageNumber <= 2 ? 'mushaf-opening-pages' : 'mushaf-standard-page');
   const firstAyah = page.ayahs[0] || {};
   const pageJuz = firstAyah.juz || 1;
   const pageManzil = firstAyah.manzil || 1;
@@ -10918,18 +10863,19 @@ function renderReaderPage(pageNumber, token){
   frame.appendChild(footer);
   inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTop = 0;
   scheduleRukuReplace();
+  try{ rdScheduleFit(); }catch(e){}
   if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
   else if(surahsOnPage.length > 1) qvTitle.textContent = surahsOnPage.map(a => a.surahEnglishName).join(' · ');
   else qvTitle.textContent = 'Page ' + pageNumber;
-  if(sajdahRefs.length){ setTimeout(() => { showToast('۩ Sajdah verse · ' + sajdahRefs.join(' · '), 2600); if(toastEl) toastEl.classList.add('sajdah-toast'); }, 420); }
+  if(sajdahRefs.length && !relayout){ setTimeout(() => { showToast('۩ Sajdah verse · ' + sajdahRefs.join(' · '), 2600); if(toastEl) toastEl.classList.add('sajdah-toast'); }, 420); }
   if(token === readerState.token && readerState.highlightVerse){
     const key = readerState.highlightVerse;
     readerState.highlightVerse = null;
-    let el = null;
-    try{ el = inner.querySelector('.ayah[data-verse="' + key.replace(/["\\]/g, '\\$&') + '"]'); }catch(_){}
-    if(el){ setTimeout(() => { if(!el.isConnected) return; el.classList.add('located'); scrollElementIntoView(el, true); setTimeout(() => el.classList.remove('located'), 1400); }, 60); }
+    let el = null; let allEls = [];
+    try{ const q = '.ayah[data-verse="' + key.replace(/["\\]/g, '\\$&') + '"]'; el = inner.querySelector(q); }catch(_){}
+    if(el){ setTimeout(() => { let q2 = null; try{ q2 = '.ayah[data-verse="' + key.replace(/["\\]/g, '\\$&') + '"]'; allEls = Array.from(pageEl.querySelectorAll(q2)); }catch(_){} if(!allEls.length) return; allEls.forEach(x => x.classList.add('located')); scrollElementIntoView(allEls[0], true); setTimeout(() => allEls.forEach(x => x.classList.remove('located')), 1400); }, 400); }
   }
-  prefetchAdjacentPages(pageNumber);
+  if(!relayout) prefetchAdjacentPages(pageNumber);
 }
 function goToReaderPage(n){ if(n < 1 || n > 604) return; loadReaderPage(n); }
 async function openSurahInReader(surahNumber){
@@ -11064,6 +11010,7 @@ function toggleViewerFullscreen(){
 function applyViewerTranslateUI(){
   const on = !!viewerShowTranslation;
   document.body.classList.toggle('viewer-translation-mode', on);
+  try{ rdScheduleFit(); }catch(e){}
   if(qvTranslate){ qvTranslate.classList.toggle('on', on); qvTranslate.textContent = on ? 'EN ✓' : 'EN'; qvTranslate.setAttribute('aria-label', on ? 'Hide English translation' : 'Show English translation'); }
 }
 function applyPageColor(){
@@ -11694,6 +11641,215 @@ function applyUiFit(){
 applyUiFit();
 window.addEventListener('resize', applyUiFit);
 window.addEventListener('orientationchange', () => setTimeout(applyUiFit, 250));
+
+/* ===== Reader: fixed rows per page (16 portrait / 13 landscape), fit text to the screen ===== */
+const RD = { timer:0, lastW:0, lastH:0, deco:{ 1:{p:9,l:8}, 2:{p:12,l:10} } };
+function rdIsLandscape(){ return window.innerWidth > window.innerHeight * 1.05; }
+function rdClear(){
+  pageEl.classList.remove('rd-on');
+  const inner = rzInner(); if(!inner) return;
+  inner.style.removeProperty('--rd-f');
+  const frame = inner.querySelector('.mushaf-book-page'); if(!frame) return;
+  frame.classList.remove('rd-fixed','rd-deco'); frame.style.height = ''; frame.style.minHeight = '';
+  frame.style.width = ''; frame.style.marginLeft = ''; frame.style.marginRight = '';
+  const c = frame.querySelector('.mushaf-book-content');
+  if(c){ c.style.fontSize = ''; c.style.lineHeight = ''; c.style.flex = ''; c.style.minHeight = ''; c.style.overflow = ''; c.style.removeProperty('--rd-lh'); }
+}
+/* --- word units, so a word is never split and every row can be filled evenly --- */
+const RD_BASE = /[ء-ؿف-يٮ-ۓۺ-ۿ]/;
+function rdCollect(data, pageNumber){
+  const segs = []; let cur = null; let lastSurah = -1;
+  data.ayahs.forEach((a) => {
+    if(a.numberInSurah === 1 && a.surah !== lastSurah){
+      lastSurah = a.surah; cur = null;
+      segs.push({ kind:'banner', a });
+      if(shouldShowBismillah(a.surah)) segs.push({ kind:'bism' });
+    }
+    let text = String(a.text == null ? '' : a.text);
+    if(a.numberInSurah === 1 && shouldShowBismillah(a.surah)){ const r = splitBismillah(text); if(r) text = r.rest; }
+    if(Number(a.surah) === 1 && a.numberInSurah === 1 && (normAr(text) === normAr(BISMILLAH_TEXT) || text.trim().split(/\s+/).length <= 4)) return;
+    const displayAyah = displayAyahNumber(a.surah, a.numberInSurah);
+    const verseKey = a.surah + ':' + displayAyah;
+    const meta = { surah:a.surah, ayah:displayAyah, verse:verseKey, page:pageNumber, ruku:(typeof a.ruku === 'number') ? a.ruku : null, total:a.surahNumberOfAyahs || 0 };
+    const units = [];
+    text.trim().split(/\s+/).filter(Boolean).forEach((t) => {
+      if(units.length && !RD_BASE.test(t)) units[units.length - 1].text += ' ' + t;
+      else units.push({ text:t, meta });
+    });
+    if(!units.length) return;
+    if(JUZ_START_VERSE[verseKey]) units[0].juz = true;
+    const last = units[units.length - 1];
+    last.mark = true; last.sajdah = (a.sajda === true) || SAJDAH_VERSES.has(verseKey);
+    if(!cur){ cur = { kind:'text', units:[] }; segs.push(cur); }
+    units.forEach(u => cur.units.push(u));
+  });
+  return segs;
+}
+function rdUnitEl(u){
+  const el = document.createElement('span'); el.className = 'ayah mushaf-unit';
+  const m = u.meta;
+  el.dataset.surah = String(m.surah); el.dataset.ayah = String(m.ayah); el.dataset.verse = m.verse; el.dataset.page = String(m.page);
+  if(m.ruku !== null) el.dataset.ruku = String(m.ruku);
+  if(m.total) el.dataset.surahAyahs = String(m.total);
+  if(u.juz) el.classList.add('juz-start');
+  el.appendChild(document.createTextNode(u.text));
+  if(u.mark){
+    const mk = document.createElement('span'); mk.className = 'mushaf-ayah-mark'; mk.textContent = toAr(m.ayah); el.appendChild(mk);
+    if(u.sajdah){ const sj = document.createElement('span'); sj.className = 'mushaf-sajdah-mark'; sj.textContent = '۩'; el.appendChild(sj); }
+  }
+  return el;
+}
+function rdGreedyCuts(ws, f, W, g){
+  const cuts = []; let start = 0, used = 0;
+  for(let i = 0; i < ws.length; i++){
+    const need = ws[i] * f + (i > start ? g * f : 0);
+    if(i > start && used + need > W + 0.01){ cuts.push([start, i]); start = i; used = ws[i] * f; }
+    else used += need;
+  }
+  cuts.push([start, ws.length]);
+  return cuts;
+}
+function rdBalance(ws, n, f, W, g){
+  const N = ws.length; n = Math.max(1, Math.min(n, N));
+  const pre = [0]; for(let i = 0; i < N; i++) pre.push(pre[i] + ws[i]);
+  const cost = (a, b) => { const used = (pre[b] - pre[a]) * f + (b - a - 1) * g * f; const sl = (W - used) / W; return sl < -1e-6 ? Infinity : sl * sl; };
+  const dp = [], bk = [];
+  for(let k = 0; k <= n; k++){ dp.push(new Array(N + 1).fill(Infinity)); bk.push(new Array(N + 1).fill(0)); }
+  dp[0][0] = 0;
+  for(let k = 1; k <= n; k++) for(let j = k; j <= N; j++) for(let a = k - 1; a < j; a++){
+    if(dp[k - 1][a] === Infinity) continue;
+    const c = cost(a, j); if(c === Infinity) continue;
+    const v = dp[k - 1][a] + c; if(v < dp[k][j]){ dp[k][j] = v; bk[k][j] = a; }
+  }
+  if(dp[n][N] === Infinity) return null;
+  const cuts = []; let j = N;
+  for(let k = n; k >= 1; k--){ const a = bk[k][j]; cuts.unshift([a, j]); j = a; }
+  return cuts;
+}
+function rdFit(){
+  if(!viewerOpen || viewerMode !== 'read' || !pageEl.classList.contains('mushaf-book')) return;
+  if(rzIsZoomed()) return;
+  const inner = rzInner(); if(!inner) return;
+  const frame = inner.querySelector('.mushaf-book-page');
+  const content = frame && frame.querySelector('.mushaf-book-content');
+  if(!content) return;
+  const pageNo = readerState.currentPage;
+  const data = readerState.pages.get(pageNo);
+  if(!data) return;
+  if(document.body.classList.contains('viewer-translation-mode')){
+    const wasLined = !!content.querySelector('.mushaf-line');
+    rdClear();
+    if(wasLined) renderReaderPage(pageNo, readerState.token, true);
+    return;
+  }
+  const land = rdIsLandscape();
+  const deco = (pageNo === 1 || pageNo === 2);
+  const N = deco ? RD.deco[pageNo][land ? 'l' : 'p'] : (land ? 13 : 16);
+  pageEl.classList.add('rd-on');
+  frame.classList.add('rd-fixed'); frame.classList.toggle('rd-deco', deco);
+  frame.style.minHeight = '0'; frame.style.width = ''; frame.style.marginLeft = ''; frame.style.marginRight = '';
+  let Hc = 0;
+  if(!land){
+    const cs = getComputedStyle(pageEl);
+    const avail = pageEl.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    frame.style.height = Math.max(120, avail) + 'px';
+    content.style.minHeight = '0'; content.style.overflow = 'hidden'; content.style.flex = '1 1 0';
+    Hc = content.clientHeight;
+    content.style.flex = ''; content.style.minHeight = ''; content.style.overflow = '';
+  } else { frame.style.height = ''; }
+  const segs = rdCollect(data, pageNo);
+  const textSegs = segs.filter(x => x.kind === 'text');
+  if(!textSegs.length) return;
+  const specials = segs.length - textSegs.length;
+  const Lt = Math.max(textSegs.length, N - specials);
+  const W0 = content.clientWidth;
+  if(!(W0 > 20)) return;
+  /* measure every word at 100px */
+  const meas = document.createElement('div');
+  meas.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;display:flex;flex-wrap:nowrap;width:max-content;font-size:100px;line-height:1;direction:rtl;white-space:nowrap;pointer-events:none';
+  content.appendChild(meas);
+  textSegs.forEach(sg => sg.units.forEach(u => { u.el = rdUnitEl(u); meas.appendChild(u.el); }));
+  textSegs.forEach(sg => sg.units.forEach(u => { u.w = u.el.getBoundingClientRect().width / 100; }));
+  meas.remove();
+  const g = 0.14;
+  const groups = textSegs.map(sg => sg.units.map(u => u.w));
+  const countAt = (f, W) => groups.reduce((n, ws) => n + rdGreedyCuts(ws, f, W, g).length, 0);
+  const lh0 = land ? 0 : Hc / N;
+  const fcap = land ? (deco ? 44 : 72) : Math.min(72, lh0 / 1.7);
+  let fFit = 7;
+  if(countAt(7, W0) <= Lt){
+    let lo = 7, hi = 200;
+    for(let k = 0; k < 18; k++){ const mid = (lo + hi) / 2; if(countAt(mid, W0) <= Lt) lo = mid; else hi = mid; }
+    fFit = lo;
+  }
+  let f = Math.min(fFit, fcap), W = W0;
+  if(fFit > fcap){
+    let wl = W0 * 0.35, wh = W0;
+    if(countAt(f, wl) <= Lt) W = wl;
+    else { for(let k = 0; k < 18; k++){ const mid = (wl + wh) / 2; if(countAt(f, mid) <= Lt) wh = mid; else wl = mid; } W = wh; }
+  }
+  const want = groups.map(ws => rdGreedyCuts(ws, f, W, g).length);
+  let extra = Lt - want.reduce((a, b) => a + b, 0);
+  while(extra > 0){
+    let bi = -1, br = -1;
+    groups.forEach((ws, i) => {
+      if(want[i] >= ws.length) return;
+      const tot = ws.reduce((a, b) => a + b, 0) * f + (ws.length - 1) * g * f;
+      const ratio = tot / (want[i] * W);
+      if(ratio > br){ br = ratio; bi = i; }
+    });
+    if(bi < 0) break;
+    want[bi]++; extra--;
+  }
+  const finalCuts = groups.map((ws, i) => rdBalance(ws, want[i], f, W, g) || rdGreedyCuts(ws, f, W, g));
+  const R = specials + finalCuts.reduce((n, c) => n + c.length, 0);
+  const lh = land ? f * 2 : (R > N ? Hc / R : lh0);
+  /* build the rows */
+  const frag = document.createDocumentFragment();
+  let gi = 0;
+  segs.forEach((sg) => {
+    if(sg.kind === 'banner'){
+      const a = sg.a, h = document.createElement('div'); h.className = 'mushaf-book-header';
+      h.innerHTML = '<div class="mushaf-surah-name">' + escapeHtml(a.surahName || '') + '</div>';
+      frag.appendChild(h);
+    } else if(sg.kind === 'bism'){
+      const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
+      const o1 = document.createElement('span'); o1.className = 'bism-orn'; o1.setAttribute('aria-hidden','true'); o1.textContent = '۞';
+      const t = document.createElement('span'); t.className = 'bism-text'; t.textContent = IP_BISMILLAH;
+      const o2 = document.createElement('span'); o2.className = 'bism-orn'; o2.setAttribute('aria-hidden','true'); o2.textContent = '۞';
+      b.appendChild(o1); b.appendChild(t); b.appendChild(o2); frag.appendChild(b);
+    } else {
+      finalCuts[gi++].forEach(([a, b]) => {
+        const line = document.createElement('div'); line.className = 'mushaf-line';
+        for(let k = a; k < b; k++){ line.appendChild(sg.units[k].el); if(sg.units[k].juz) line.classList.add('has-juz'); }
+        frag.appendChild(line);
+      });
+    }
+  });
+  content.textContent = '';
+  content.appendChild(frag);
+  content.style.fontSize = f + 'px'; content.style.lineHeight = lh + 'px'; content.style.setProperty('--rd-lh', lh + 'px');
+  if(W < W0 - 1){
+    frame.style.width = (W + (frame.offsetWidth - W0)) + 'px'; frame.style.marginLeft = 'auto'; frame.style.marginRight = 'auto';
+  }
+  inner.style.setProperty('--rd-f', f + 'px');
+  scheduleRukuReplace();
+}
+function rdScheduleFit(){
+  clearTimeout(RD.timer);
+  try{ rdFit(); }catch(e){}
+  RD.timer = setTimeout(() => {
+    const go = () => { try{ rdFit(); }catch(e){} };
+    if(document.fonts && document.fonts.load) document.fonts.load('20px IndoPakNastaleeq', 'ا').then(go, go); else go();
+  }, 60);
+}
+window.addEventListener('resize', () => {
+  if(window.innerWidth === RD.lastW && Math.abs(window.innerHeight - RD.lastH) < 3) return;
+  RD.lastW = window.innerWidth; RD.lastH = window.innerHeight;
+  clearTimeout(RD.timer); RD.timer = setTimeout(() => { try{ rdFit(); }catch(e){} }, 200);
+});
+window.addEventListener('orientationchange', () => setTimeout(rdScheduleFit, 300));
+if(document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => rdScheduleFit());
 const PRAYERS = [
   { key:'fajr',    label:'Fajr',    icon:'🌅' },
   { key:'sunrise', label:'Sunrise', icon:'☀️' },
