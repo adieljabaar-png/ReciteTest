@@ -1114,7 +1114,12 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-b
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-bismillah-line .bism-orn{flex:0 0 auto;}
 
 /* ===== Golden rectangle around every Bismillah (inside the Surah rectangle) ===== */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header{padding:6px 8px 7px;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header{
+padding:6px 8px 7px;border:2px solid transparent;border-radius:8px;
+background:linear-gradient(var(--page-bg,#000),var(--page-bg,#000)) padding-box,
+           linear-gradient(135deg,#f8e596 0%,#d4a82a 35%,#8a6410 58%,#e9c45a 100%) border-box;
+box-shadow:0 0 8px rgba(212,168,42,.30);
+}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-bismillah-line{
 border:2px solid transparent;border-radius:7px;padding:1px 10px;
 background:linear-gradient(var(--page-bg,#000),var(--page-bg,#000)) padding-box,
@@ -1151,10 +1156,10 @@ box-shadow:0 18px 46px rgba(0,0,0,.55),0 0 14px rgba(212,168,42,.35);
 .hijri-main,.hijri-sub{max-width:100%;}
 
 /* ===== Reader zoom (double-tap / pinch, 1x to 1.5x) ===== */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{font-size:calc(1em * var(--reader-zoom,1));}
-body.reader-pinching .qv-slot .juz-first-row{background:transparent !important;color:inherit !important;}
-body.reader-pinching .qv-slot .juz-first-row *{color:inherit !important;}
-body.reader-pinching .qv-slot .mushaf-ruku-mark{visibility:hidden;}
+/* The whole page (frame, header, text, ع marks) is scaled uniformly with the CSS `scale` property:
+   nothing reflows, so the words are never distorted. One finger pans while zoomed. */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book.reader-zoomed{overflow:auto !important;direction:ltr;touch-action:pan-x pan-y !important;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book.reader-zoomed .mushaf-inner{transform-origin:0 0;padding-bottom:110px;}
 
 .toast{
 position:fixed;top:calc(var(--safe-top) + 18px);left:50%;
@@ -10746,7 +10751,8 @@ function placeRukuMarks(inner, content){
   const frame = content.closest('.mushaf-book-page') || content.parentElement;
   const innerRect = inner.getBoundingClientRect();
   const frameRect = frame ? frame.getBoundingClientRect() : innerRect;
-  const rightOffset = (innerRect.right - frameRect.left) + 4;
+  const zf = (inner.offsetWidth ? innerRect.width / inner.offsetWidth : 1) || 1;   /* current page zoom */
+  const rightOffset = ((innerRect.right - frameRect.left) / zf) + 4;
   const isOddPage = inner.classList.contains('page-odd');
   const nextPageData = readerState.pages.get(readerState.currentPage + 1);
   for(let i = 0; i < list.length; i++){
@@ -10774,7 +10780,7 @@ function placeRukuMarks(inner, content){
     const anchor = medallion || el;
     const r = anchor.getBoundingClientRect();
     if(!r || !r.width) continue;
-    const top = (r.top + r.height / 2) - innerRect.top;
+    const top = ((r.top + r.height / 2) - innerRect.top) / zf;
     if(!isFinite(rightOffset) || !isFinite(top)) continue;
     const m = document.createElement('span');
     m.className = 'mushaf-ruku-mark';
@@ -10783,7 +10789,7 @@ function placeRukuMarks(inner, content){
     if(isOddPage){
       /* odd page: gap on the right of the frame */
       m.style.right = 'auto';
-      m.style.left = Math.round((frameRect.right - innerRect.left) + 4) + 'px';
+      m.style.left = Math.round(((frameRect.right - innerRect.left) / zf) + 4) + 'px';
     } else {
       /* even page: gap on the left of the frame */
       m.style.left = 'auto';
@@ -10900,6 +10906,7 @@ function renderReaderPage(pageNumber, token){
   const inner = document.createElement('div'); inner.className = 'mushaf-inner';
   /* odd pages keep their side gap on the RIGHT, even pages on the LEFT (for the ع marks) */
   inner.classList.add((pageNumber % 2 === 1) ? 'page-odd' : 'page-even');
+  applyZoomToInner(inner);
   const frame = document.createElement('div'); frame.className = 'mushaf-book-page';
   if(pageNumber === 1 || pageNumber === 2){
     /* the first two pages of the Quran get the golden decorative border */
@@ -10969,7 +10976,7 @@ function renderReaderPage(pageNumber, token){
   frame.appendChild(content);
   const footer = document.createElement('div'); footer.className = 'mushaf-book-footer-row'; footer.textContent = 'منزل ' + toAr(pageManzil);
   frame.appendChild(footer);
-  inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTop = 0;
+  inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTo({top:0,left:0,behavior:'instant'});
   scheduleRukuReplace();
   scheduleReaderLayoutFix();
   if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
@@ -11568,7 +11575,7 @@ function readerGestureMove(e){
   const g = readerGesture; if(g.pinched) return; g.x = e.clientX; g.y = e.clientY;
   const dx = g.x - g.x0; const dy = g.y - g.y0;
   if(!g.moved && (Math.abs(dx) > 8 || Math.abs(dy) > 8)){ g.moved = true; if(g.holdTimer){ clearTimeout(g.holdTimer); g.holdTimer = null; } }
-  if(!g.dragging){ if(Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.1){ g.dragging = true; try{ pageEl.setPointerCapture(e.pointerId); }catch(_){} hideViewerChromeNow(); } }
+  if(!g.dragging && !(readerZoom > 1.001)){ if(Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.1){ g.dragging = true; try{ pageEl.setPointerCapture(e.pointerId); }catch(_){} hideViewerChromeNow(); } }
   if(g.dragging) applyPageDrag(dx);
 }
 function readerGestureEnd(e){
@@ -11601,29 +11608,39 @@ function readerGestureCancel(e){
 pageEl.addEventListener('pointerdown', readerGestureStart);
 /* ===== Reader zoom: double-tap toggles 1x <-> 1.5x, two-finger pinch zooms between 1x and 1.5x ===== */
 const READER_ZOOM_MAX = 1.5;
-let readerZoom = 1;
+var readerZoom = 1;
 const readerPtrs = new Map();
 let readerPinch = null, readerLastTap = null, readerPinchRaf = 0, readerPinchNext = null;
-function setReaderZoom(z, cx, cy, final){
+function applyZoomToInner(inner){
+  if(!inner) return;
+  if(readerZoom > 1.001){ inner.style.transformOrigin = '0 0'; inner.style.scale = String(readerZoom); }
+  else { inner.style.scale = ''; inner.style.transformOrigin = ''; }
+}
+function setReaderZoom(z, fx, fy){
   z = Math.max(1, Math.min(READER_ZOOM_MAX, z));
   const old = readerZoom;
-  if(Math.abs(z - old) > 0.0005){
-    const r = pageEl.getBoundingClientRect();
-    const yIn = (cy == null) ? r.height / 2 : (cy - r.top);
-    const docY = pageEl.scrollTop + yIn;
-    readerZoom = z;
-    pageEl.style.setProperty('--reader-zoom', z.toFixed(3));
-    const prevSB = pageEl.style.scrollBehavior; pageEl.style.scrollBehavior = 'auto';
-    pageEl.scrollTop = Math.max(0, docY * (z / old) - yIn);
-    pageEl.style.scrollBehavior = prevSB;
-    fitBismillahInHeaders();
-  }
-  if(final){ fitBismillahInHeaders(); resetJuzFirstRows(); scheduleJuzFirstVisualLines(); scheduleRukuReplace(); }
+  if(Math.abs(z - old) < 0.0005) return;
+  const inner = getMushafInner();
+  if(!inner){ readerZoom = z; return; }
+  const pr = pageEl.getBoundingClientRect();
+  if(fx == null) fx = pr.left + pr.width / 2;
+  if(fy == null) fy = pr.top + pr.height / 2;
+  const ir = inner.getBoundingClientRect();              /* top-left of the page = scale origin */
+  const ux = (fx - ir.left) / old, uy = (fy - ir.top) / old;   /* point under the fingers, in unscaled page units */
+  readerZoom = z;
+  pageEl.classList.toggle('reader-zoomed', z > 1.001);
+  applyZoomToInner(inner);
+  const prevSB = pageEl.style.scrollBehavior; pageEl.style.scrollBehavior = 'auto';
+  if(z > 1.001){
+    pageEl.scrollLeft += ir.left - (fx - ux * z);
+    pageEl.scrollTop  += ir.top  - (fy - uy * z);
+  } else { pageEl.scrollLeft = 0; }
+  pageEl.style.scrollBehavior = prevSB;
 }
 function resetReaderZoom(){
   readerZoom = 1; readerPinch = null; readerLastTap = null; readerPtrs.clear();
-  pageEl.style.removeProperty('--reader-zoom');
-  document.body.classList.remove('reader-pinching');
+  pageEl.classList.remove('reader-zoomed');
+  const inner = getMushafInner(); if(inner) applyZoomToInner(inner);
 }
 function readerZoomActive(){ return viewerOpen && viewerMode === 'read'; }
 pageEl.addEventListener('pointerdown', e => {
@@ -11636,7 +11653,6 @@ pageEl.addEventListener('pointerdown', e => {
     readerLastTap = null;
     const g = readerGesture;                    /* a pinch must never turn the page or bookmark a verse */
     if(g){ g.pinched = true; g.consumed = true; if(g.holdTimer){ clearTimeout(g.holdTimer); g.holdTimer = null; } if(g.dragging){ g.dragging = false; snapPageBack(); } }
-    document.body.classList.add('reader-pinching');
   }
 });
 pageEl.addEventListener('pointerup', e => {     /* double-tap detection (runs before readerGestureEnd clears the gesture) */
@@ -11647,7 +11663,7 @@ pageEl.addEventListener('pointerup', e => {     /* double-tap detection (runs be
   if(now - g.t0 > 350) { readerLastTap = null; return; }
   if(readerLastTap && now - readerLastTap.t < 350 && Math.hypot(e.clientX - readerLastTap.x, e.clientY - readerLastTap.y) < 40){
     readerLastTap = null;
-    setReaderZoom(readerZoom > 1.25 ? 1 : READER_ZOOM_MAX, e.clientX, e.clientY, true);
+    setReaderZoom(readerZoom > 1.25 ? 1 : READER_ZOOM_MAX, e.clientX, e.clientY);
   } else readerLastTap = { t: now, x: e.clientX, y: e.clientY };
 });
 document.addEventListener('pointermove', e => {
@@ -11658,7 +11674,7 @@ document.addEventListener('pointermove', e => {
   const d = Math.hypot(a.x - b.x, a.y - b.y);
   readerPinchNext = { z: readerPinch.z0 * d / readerPinch.d0, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
   if(!readerPinchRaf) readerPinchRaf = requestAnimationFrame(() => {
-    readerPinchRaf = 0; const n = readerPinchNext; if(n && readerPinch) setReaderZoom(n.z, n.cx, n.cy, false);
+    readerPinchRaf = 0; const n = readerPinchNext; if(n && readerPinch) setReaderZoom(n.z, n.cx, n.cy);
   });
 }, {passive:true});
 function readerPointerUp(e){
@@ -11667,8 +11683,6 @@ function readerPointerUp(e){
   if(readerPinch && readerPtrs.size < 2){
     readerPinch = null; readerPinchNext = null;
     if(readerPinchRaf){ cancelAnimationFrame(readerPinchRaf); readerPinchRaf = 0; }
-    document.body.classList.remove('reader-pinching');
-    setReaderZoom(readerZoom, null, null, true);
   }
 }
 document.addEventListener('pointerup', readerPointerUp);
