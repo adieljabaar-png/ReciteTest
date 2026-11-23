@@ -1056,14 +1056,22 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
 display:inline !important;position:relative;background:transparent !important;color:inherit !important;
 padding:0;margin:0;box-shadow:none !important;opacity:1 !important;
 }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::first-line{
+/* Invert the first displayed Juz row according to the active page theme.
+   Keep the Juz-start ayah inline so the following ayah can continue on the
+   same row; only its first line receives the contrasting colours. */
+body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::first-line,
+body.page-light .qv-slot .ayah.juz-start::first-line{
 color:#fff !important;background:#000 !important;
+}
+body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::first-line,
+body.page-dark .qv-slot .ayah.juz-start::first-line{
+color:#000 !important;background:#fff !important;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{content:none !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start .mushaf-ayah-mark{border-color:currentColor !important;}
 /* The non-Mushaf reading/index view uses block ayah rows too. */
 .qv-slot .ayah.juz-start{background:transparent !important;color:inherit !important;padding:0;margin:0;}
-.qv-slot .ayah.juz-start::first-line{color:#fff !important;background:#000 !important;}
+
 .mushaf-page-num{display:block;text-align:center;margin:0 0 14px;padding:0;font-family:'Amiri','Amiri Quran',serif;color:currentColor;font-size:1.05rem;letter-spacing:.14em;opacity:.8;border:none;}
 .mushaf-ruku-mark{
 position:absolute;transform:translate(0,-50%);
