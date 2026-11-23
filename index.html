@@ -1056,17 +1056,10 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.ju
 display:inline !important;position:relative;background:transparent !important;color:inherit !important;
 padding:0;margin:0;box-shadow:none !important;opacity:1 !important;
 }
-/* Invert the first displayed Juz row according to the active page theme.
-   Keep the Juz-start ayah inline so the following ayah can continue on the
-   same row; only its first line receives the contrasting colours. */
-body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::first-line,
-body.page-light .qv-slot .ayah.juz-start::first-line{
-color:#fff !important;background:#000 !important;
-}
-body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::first-line,
-body.page-dark .qv-slot .ayah.juz-start::first-line{
-color:#000 !important;background:#fff !important;
-}
+/* Actual first-visual-line wrapper: contrast follows the active theme. */
+body.page-light .qv-slot .ayah.juz-first-row{color:#fff !important;background:#000 !important;}
+body.page-dark .qv-slot .ayah.juz-first-row{color:#000 !important;background:#fff !important;}
+.ayah.juz-first-row{-webkit-box-decoration-break:clone;box-decoration-break:clone;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{content:none !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start .mushaf-ayah-mark{border-color:currentColor !important;}
 /* The non-Mushaf reading/index view uses block ayah rows too. */
@@ -10721,6 +10714,60 @@ function scheduleRukuReplace(){
 }
 window.addEventListener('resize', scheduleRukuReplace);
 window.addEventListener('orientationchange', scheduleRukuReplace);
+/* Wrap only the first rendered line of each Juz-start ayah. The old ::first-line
+   rule did not work because these ayah elements are inline. */
+function applyJuzFirstVisualLines(root){
+  if(!root) return;
+  root.querySelectorAll('.ayah.juz-start:not([data-juz-row-done="1"])').forEach(el=>{
+    const textNode=Array.from(el.childNodes).find(n=>n.nodeType===Node.TEXT_NODE && n.textContent.trim());
+    if(textNode){
+      const value=textNode.textContent; const range=document.createRange();
+      let firstTop=null, end=0, lastSpace=0;
+      for(let i=0;i<value.length;i++){
+        range.setStart(textNode,i);range.setEnd(textNode,i+1);
+        const rect=range.getBoundingClientRect();
+        if(!rect.width && !rect.height) continue;
+        if(firstTop===null) firstTop=rect.top;
+        if(Math.abs(rect.top-firstTop)>2) break;
+        end=i+1;if(/\s/.test(value[i])) lastSpace=i+1;
+      }
+      end=lastSpace||end;
+      if(end>0){
+        textNode.splitText(end);
+        const wrap=document.createElement('span');wrap.className='juz-first-row';
+        textNode.parentNode.insertBefore(wrap,textNode);wrap.appendChild(textNode);
+      }
+    }else{
+      const children=Array.from(el.children); let top=null; const selected=[];
+      for(const child of children){
+        const r=child.getBoundingClientRect(); if(!r.width&&!r.height) continue;
+        if(top===null) top=r.top;
+        if(Math.abs(r.top-top)>2) break;
+        selected.push(child);
+      }
+      if(selected.length){
+        const wrap=document.createElement('span');wrap.className='juz-first-row';
+        el.insertBefore(wrap,selected[0]);selected.forEach(n=>wrap.appendChild(n));
+      }
+    }
+    el.dataset.juzRowDone='1';
+  });
+}
+let juzLineFrame=0;
+function scheduleJuzFirstVisualLines(){
+  if(juzLineFrame) cancelAnimationFrame(juzLineFrame);
+  juzLineFrame=requestAnimationFrame(()=>{juzLineFrame=0;const slot=document.querySelector('.qv-slot');if(slot)applyJuzFirstVisualLines(slot);});
+}
+if(!window.__juzLineObserver){
+  window.__juzLineObserver=new MutationObserver(scheduleJuzFirstVisualLines);
+  window.__juzLineObserver.observe(document.documentElement,{childList:true,subtree:true});
+  window.addEventListener('resize',()=>{
+    document.querySelectorAll('.ayah.juz-first-row').forEach(w=>{const p=w.parentNode;if(p){while(w.firstChild)p.insertBefore(w.firstChild,w);w.remove();}});
+    document.querySelectorAll('.ayah.juz-start').forEach(e=>delete e.dataset.juzRowDone);
+    scheduleJuzFirstVisualLines();
+  });
+  document.addEventListener('DOMContentLoaded',scheduleJuzFirstVisualLines);
+}
 function renderReaderPage(pageNumber, token){
   const page = readerState.pages.get(pageNumber);
   if(!page) return;
