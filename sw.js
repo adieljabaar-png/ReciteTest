@@ -1,136 +1,46 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker
-   ============================================================
-   v2.4.21 — Ship AUTO-ROTATE on all screens “Jump to” / “Continue” tabs on the
-   Surah / Juz index (new index.html).
+   Quran Recitation Coach — Service Worker  v2.4.23
 
-   Changes in this deployment (v2.4.21 — AUTO-ROTATE):
-     index.html (all screens):
-       • All screens now follow the device's auto-rotate setting.
-         The page releases any orientation lock
-         (screen.orientation.unlock()), re-fires resize on
-         orientationchange, and adds landscape CSS (wider canvas,
-         safe-area padding, modals/viewers capped to rotated height,
-         compact layout for short landscape phones).
-       • This SW forces orientation:"any" in the manifest it serves
-         (see manifestFresh), so an installed PWA cannot stay stuck
-         in portrait because of a stale / portrait-only manifest.json.
-         It also serves an "orientation":"any" fallback manifest.
-       • qc-audio and localStorage ('qc.lastReaderPage') untouched.
+   What changed in 2.4.22:
+     • Cache version bumped so installed apps fetch the updated
+       index.html (notification fix, Tajweed error-name fix).
+     • Push: added a 'pushsubscriptionchange' handler that silently
+       re-subscribes (same VAPID key as index.html) and re-posts
+       the subscription to /api/subscribe, so notifications keep working
+       when the browser rotates the subscription.
+     • The IndoPak font database (cdn.jsdelivr.net / raw.githubusercontent.com)
+       is now cached, so it also loads offline.
 
-   Changes in this deployment (v2.4.20, retained):
-     index.html (Surah index + Juz index):
-       • FIX: the Jump to / Continue tabs could look dead. The old
-         code marked tabs as wired with a DOM attribute
-         (dataset.wired); if the page HTML was ever re-saved, that
-         attribute was baked in and no click handlers were attached.
-         Wiring state now lives in JS only, and ONE delegated
-         document-level click handler drives both tabs.
-       • Jump to: Page 1–604 · Surah 1–114 · Juz 1–30.
-       • Continue: Resume reopens the last reader page, saved in
-         localStorage under 'qc.lastReaderPage' on every render and
-         on pagehide / visibilitychange.
+   What this SW never touches (user data is safe across updates):
+     • localStorage (progress, bookmarks, streaks, settings,
+       'qc.lastReaderPage', 'qc.downloads', theme, mode, etc.)
+     • IndexedDB
+     • The persistent 'qc-audio' cache (downloaded surahs and
+       translation audio). Activation and CLEAR_CACHES only delete
+       old versioned shell/text/font/runtime caches.
 
-   Why this SW update is required — and what it protects:
-     • The old shell cache (qc-shell-2.4.20) still holds the
-       PREVIOUS index.html with the broken tab wiring. Without a
-       version bump, browsers / installed PWAs could keep serving
-       that stale copy and the tabs would still look dead.
-     • Bumping VERSION to 2.4.21 creates fresh
-       qc-shell-2.4.21 / qc-text-2.4.21 / qc-fonts-2.4.21 /
-       qc-runtime-2.4.21 caches. ACTIVATE deletes the old
-       versioned caches, and INSTALL pre-caches the NEW
-       index.html with { cache: 'reload' }.
-     • Continue lives only in localStorage ('qc.lastReaderPage').
-       This SW never reads, writes or clears localStorage, so
-       cache updates cannot erase the saved Continue page.
-     • The persistent qc-audio cache is preserved — users keep
-       downloaded surahs / translation audio. CLEAR_CACHES also
-       preserves qc-audio.
-     • Hosts used by the page that this SW deliberately does NOT
-       intercept (they pass straight to the network): Adhan audio
-       (cdn.islamic.network is cached via the audio handler;
-       islamcan.com is not), api.bigdatacloud.net and
-       geocoding-api.open-meteo.com (prayer-time location lookups).
-
-   Changes in this deployment (previous release, retained):
-
-     index.html (Home / Dashboard):
-       • Added a new "Read Arabic" tile on the dashboard that
-         links to ./read.html.
-       • Shrank the Daily Streak tile to the same size as the
-         Hifz tile (removed grid-column:span 2 behaviour).
-
-     read.html (new — Read Arabic page):
-       • New page styled to match the Recite app: same CSS
-         variables, dark/light theme, radial background,
-         Amiri/Amiri Quran Arabic fonts, gold accent.
-       • Header: [Back] [Read Arabic] [ℹ️ info] [🌙☀️ theme]
-         — NO book icon, NO "mic off" text.
-       • Removed from the menu: install, share, scan-QR —
-         those features are simply not present on this page.
-       • Replaced the old menu with an info icon next to the
-         moon/sun; tapping it opens the same slide-up info
-         modal style as the coach screen.
-       • Moon + sun theme toggle pill behaves exactly like
-         the Recite app (saved to localStorage under
-         'read-arabic-theme').
-
-   Cache invalidation:
-     qc-shell-* / qc-text-* / qc-fonts-* / qc-runtime-* are
-     bumped to 2.4.21 so the auto-rotate index.html (Jump to /
-     Continue) is fetched. The persistent qc-audio cache is
-     preserved — users keep their downloaded surahs and
-     translation audio. localStorage ('qc.lastReaderPage')
-     is untouched by this SW.
-
-   Previously-retained features (unchanged):
-
-     • Microphone diagnostic system with four failure modes:
-       track health (mute / ended), RMS silence, ASR death when
-       audio is proven present, and a 12 s fallback. The
-       diagnostic stops after the first successful ASR result
-       so subsequent Start Reciting calls do not trigger extra
-       getUserMedia re-calls. Includes a "Test microphone" menu
-       item with live RMS level, live transcript, and copy-
-       diagnostic button.
-
-     • Translation audio sources (EveryAyah, Islamic Network,
-       QuranEnc for English and Turkish) are handled via the
-       persistent qc-audio cache.
-
-     • serveRangeFromCached early-returns for opaque responses
-       (QuranEnc without CORS) — they cannot be sliced or
-       measured, so the SW returns the full cached response
-       instead of throwing when the player requests a Range.
+   Not intercepted (straight to network): /api/*, /my-analytics/*,
+   /_vercel/*, adhan from islamcan.com, bigdatacloud and open-meteo
+   location lookups.
    ============================================================ */
 
 'use strict';
 
-const VERSION = '2.4.21';
+const VERSION = '2.4.23';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
+const LAST_SHELL_KEY = './__qc_last_shell__.html';
 const TEXT_CACHE    = `qc-text-${VERSION}`;
 const FONTS_CACHE   = `qc-fonts-${VERSION}`;
 const RUNTIME_CACHE = `qc-runtime-${VERSION}`;
 
 const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE];
 
-/* Persistent caches — NEVER deleted on activation, regardless of
-   version. Downloaded Quran audio (everyayah.com) and downloaded
-   translation audio (everyayah.com, Islamic Network, QuranEnc)
-   all live here. */
 const AUDIO_CACHE = 'qc-audio';
 const PERSISTENT_CACHES = [AUDIO_CACHE];
 
 const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-'];
 
-/* Pre-cache the shell, manifest, AND the real app icons so they
-   are available for the install prompt and offline usage.
-
-   Note: read.html is the new Read Arabic page. index.html is the
-   main dashboard; index_3.html is the previous dashboard copy
-   kept around for old links. */
 const SHELL_URLS = [
   './',
   './index.html',
@@ -149,21 +59,19 @@ const HOST_QURANENC             = 'd.quranenc.com';
 const HOST_ISLAMIC_NETWORK      = 'cdn.islamic.network';
 const HOST_GOOGLE_FONTS_CSS     = 'fonts.googleapis.com';
 const HOST_GOOGLE_FONTS_STATIC  = 'fonts.gstatic.com';
+const HOST_JSDELIVR             = 'cdn.jsdelivr.net';
+const HOST_GITHUB_RAW           = 'raw.githubusercontent.com';
 
-/* 600 entries covers surah + page translations across all five
-   supported languages without thrashing. */
+const VAPID_PUBLIC_KEY = 'BHpU2OJZjHoYab_-F8I369UTsJjx9ArleSiggsdQ2dcch4mTQFQLTEvanyto6J5f8xFh-tshGyGsJNiDj9xy1aE';
+
 const TEXT_CACHE_MAX = 600;
 const RUNTIME_MAX    = 120;
 const MANIFEST_TIMEOUT_MS = 2000;
 
-/* The exact Google Fonts stylesheet URL used by <link> in index.html
-   and read.html. Keep these identical so the pre-cached font CSS
-   hits both pages without a second network round-trip. */
 const FONT_CSS_URL = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap';
 const FONT_FETCH_TIMEOUT_MS   = 8000;
 const FONTS_PREFETCH_TOTAL_MS = 20000;
 
-/* Inline SVG icon used by push notifications. */
 const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'>" +
     "<rect width='180' height='180' rx='40' fill='#000000'/>" +
@@ -183,9 +91,19 @@ self.addEventListener('install', event => {
         try{
           const req = new Request(url, { cache: 'reload' });
           const res = await fetch(req);
-          if(res && (res.ok || res.type === 'opaque')) await cache.put(url, res.clone());
+          if(res && res.ok && res.type === 'basic'){
+            await cache.put(url, res.clone());
+          } else if(res && res.type === 'opaque'){
+            await cache.put(url, res.clone());
+          }
         }catch(_){}
       }));
+
+      let seed = await cache.match('./', { ignoreSearch: true });
+      if(!seed) seed = await cache.match('./index.html', { ignoreSearch: true });
+      if(seed && !await cache.match(LAST_SHELL_KEY)){
+        await cache.put(LAST_SHELL_KEY, seed.clone());
+      }
     }catch(_){}
 
     try{
@@ -204,17 +122,29 @@ self.addEventListener('install', event => {
    ============================================================ */
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
+    let newShellReady = false;
     try{
-      const keys = await caches.keys();
-      const toDelete = keys.filter(name => {
-        if(VERSIONED_CACHES.includes(name)) return false;
-        if(PERSISTENT_CACHES.includes(name)) return false;
-        const owned = OWNED_PREFIXES.some(p => name.startsWith(p));
-        if(!owned) return false;
-        return true;
-      });
-      await Promise.all(toDelete.map(name => caches.delete(name)));
+      const current = await caches.open(SHELL_CACHE);
+      newShellReady = !!(
+        await current.match(LAST_SHELL_KEY) ||
+        await current.match('./index.html', { ignoreSearch: true }) ||
+        await current.match('./', { ignoreSearch: true })
+      );
     }catch(_){}
+
+    if(newShellReady){
+      try{
+        const keys = await caches.keys();
+        const toDelete = keys.filter(name => {
+          if(VERSIONED_CACHES.includes(name)) return false;
+          if(PERSISTENT_CACHES.includes(name)) return false;
+          const owned = OWNED_PREFIXES.some(p => name.startsWith(p));
+          if(!owned) return false;
+          return true;
+        });
+        await Promise.all(toDelete.map(name => caches.delete(name)));
+      }catch(_){}
+    }
 
     if(self.registration && self.registration.navigationPreload){
       try{ await self.registration.navigationPreload.disable(); }catch(_){}
@@ -234,11 +164,6 @@ self.addEventListener('message', event => {
     return;
   }
   if(data.type === 'CLEAR_CACHES'){
-    // SAFETY: never wipe the persistent audio cache here, and
-    // never touch localStorage (where 'qc.lastReaderPage' for
-    // Continue lives — the SW has no access to it and must
-    // not attempt to clear it). Only versioned caches are
-    // dropped; qc-audio is preserved.
     event.waitUntil((async () => {
       const keys = await caches.keys();
       await Promise.all(keys.filter(k => !PERSISTENT_CACHES.includes(k)).map(k => caches.delete(k)));
@@ -270,7 +195,6 @@ self.addEventListener('message', event => {
     return;
   }
 });
-
 /* ============================================================
    PUSH — show notification with the Recite logo
    ============================================================ */
@@ -285,6 +209,30 @@ self.addEventListener('push', event => {
     renotify: true,
     data: { url: data.url }
   }));
+});
+
+function urlBase64ToUint8Array(b64){
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  const out = new Uint8Array(raw.length);
+  for(let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+self.addEventListener('pushsubscriptionchange', event => {
+  event.waitUntil((async () => {
+    try{
+      const sub = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+      await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sub)
+      });
+    }catch(_){}
+  })());
 });
 
 self.addEventListener('notificationclick', event => {
@@ -336,6 +284,11 @@ self.addEventListener('fetch', event => {
 
   if(url.hostname === HOST_EVERYAYAH || url.hostname === HOST_QURANENC || url.hostname === HOST_ISLAMIC_NETWORK){
     event.respondWith(audioFromDownloadCache(req));
+    return;
+  }
+
+  if((url.hostname === HOST_JSDELIVR || url.hostname === HOST_GITHUB_RAW) && url.pathname.indexOf('quran8vs/IndoPak') !== -1){
+    event.respondWith(cacheFirst(req, FONTS_CACHE));
     return;
   }
 
@@ -396,8 +349,6 @@ async function audioFromDownloadCache(req){
 }
 
 async function serveRangeFromCached(response, rangeHeader){
-  // If the cached response is opaque (e.g., from QuranEnc without CORS),
-  // we cannot read its size or slice it. Return the whole thing.
   if (response.type === 'opaque') {
     return response;
   }
@@ -458,7 +409,6 @@ async function serveRangeFromCached(response, rangeHeader){
     }
   });
 }
-
 /* ============================================================
    Fetch strategies
    ============================================================ */
@@ -539,7 +489,6 @@ async function manifestFresh(req){
     if(res && res.ok){
       try{
         const data = await res.clone().json();
-        // AUTO-ROTATE: never let a portrait-only manifest lock the installed app.
         data.orientation = 'any';
         const fixed = new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } });
         cache.put('./manifest.json', fixed.clone()).catch(() => {});
@@ -551,7 +500,7 @@ async function manifestFresh(req){
       }
     }
     throw new Error('bad response');
-  }catch(_){ /* fall through to cache */ }
+  }catch(_){}
 
   try{
     let hit = await cache.match('./manifest.json', { ignoreSearch: true });
@@ -574,38 +523,61 @@ async function manifestFresh(req){
     { status: 200, headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } }
   );
 }
-
 async function shellNavigation(req){
   const cache = await caches.open(SHELL_CACHE);
+
+  // Online: always try to obtain the newest requested shell first.
   try{
-    const freshReq = new Request(req, { cache: 'reload' });
+    const freshReq = new Request(req, { cache: 'no-store' });
     const res = await fetch(freshReq);
     if(res && res.ok && res.type === 'basic'){
-      const clone = res.clone();
-      // Cache the page that was actually requested (index.html,
-      // index_3.html or read.html) so each page works offline.
-      cache.put(req, clone).catch(() => {});
+      const copyForUrl = res.clone();
+      const copyForLast = res.clone();
+      try{
+        await cache.put(req, copyForUrl);
+        await cache.put(LAST_SHELL_KEY, copyForLast);
+      }catch(_){}
+      return res;
     }
-    return res;
-  }catch(_){
-    let hit = null;
-    try{
-      // Try the exact URL first (so /read.html serves read.html
-      // offline, not the dashboard), then fall back to index.html.
-      hit = await cache.match(req, { ignoreSearch: true })
-         || await cache.match('./index.html', { ignoreSearch: true })
-         || await cache.match('./', { ignoreSearch: true });
-    }catch(_){}
-    if(hit) return hit;
-    return new Response(
-      '<!doctype html><meta charset="utf-8"><title>Offline</title>' +
-      '<body style="font-family:sans-serif;padding:2rem;text-align:center;background:#0d1119;color:#e8edf7">' +
-      '<h2>You are offline</h2>' +
-      '<p>Open the app once while online to enable offline mode.</p>' +
-      '<p style="font-size:.75rem;opacity:.6;margin-top:2rem">&copy; 2025 Quran Recitation Coach. All rights reserved.</p>',
-      { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-    );
-  }
+    throw new Error('Shell request returned a non-success response');
+  }catch(_){}
+
+  // Offline: first use the most recently opened shell, then the exact
+  // requested URL, then the standard dashboard entry points.
+  try{
+    const names = await caches.keys();
+    const shellNames = names
+      .filter(name => name.startsWith('qc-shell-'))
+      .sort((a, b) => {
+        if(a === SHELL_CACHE) return -1;
+        if(b === SHELL_CACHE) return 1;
+        return b.localeCompare(a);
+      });
+
+    for(const name of shellNames){
+      const oldCache = await caches.open(name);
+      let hit = await oldCache.match(LAST_SHELL_KEY, { ignoreSearch: true });
+      if(hit) return hit;
+
+      hit = await oldCache.match(req, { ignoreSearch: true });
+      if(hit) return hit;
+
+      hit = await oldCache.match('./index.html', { ignoreSearch: true });
+      if(hit) return hit;
+
+      hit = await oldCache.match('./', { ignoreSearch: true });
+      if(hit) return hit;
+    }
+  }catch(_){}
+
+  return new Response(
+    '<!doctype html><meta charset="utf-8"><title>Offline</title>' +
+    '<body style="font-family:sans-serif;padding:2rem;text-align:center;background:#0d1119;color:#e8edf7">' +
+    '<h2>You are offline</h2>' +
+    '<p>Open the app once while online to enable offline mode.</p>' +
+    '<p style="font-size:.75rem;opacity:.6;margin-top:2rem">&copy; 2025 Quran Recitation Coach. All rights reserved.</p>',
+    { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+  );
 }
 
 async function trimCache(cacheName, maxEntries){

@@ -2784,6 +2784,57 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-header 
 }
 
 </style>
+
+<style id="reader-13line-book-refinement">
+/* 13-line Indo-Pak-inspired book page refinement.
+   The original decorative artwork on pages 1 and 2 is deliberately untouched. */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.rd-fixed:not(.rd-deco){
+  border:5px double var(--page-border,#fff);
+  border-radius:5px;
+  box-shadow:0 16px 38px rgba(0,0,0,.30), inset 0 0 0 1px rgba(255,255,255,.08);
+  padding:12px 10px 8px;
+  background:var(--page-bg,#000);
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed:not(.rd-deco) .mushaf-book-header-row{
+  border-bottom:1px solid currentColor;
+  padding:2px 5px 7px;
+  margin:0 0 7px;
+  line-height:1.35;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed:not(.rd-deco) .mushaf-book-content{
+  gap:0;
+  justify-content:space-between;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed:not(.rd-deco) .mushaf-line{
+  border:0 !important;
+  border-bottom:0 !important;
+  justify-content:space-between;
+  align-items:center;
+  direction:rtl;
+  text-align:justify;
+  text-align-last:justify;
+  overflow:visible;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed:not(.rd-deco) .mushaf-line-last{
+  justify-content:center;
+  gap:.30em;
+  text-align:center;
+  text-align-last:center;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed:not(.rd-deco) .mushaf-line .ayah{
+  font-weight:700 !important;
+  white-space:nowrap;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed:not(.rd-deco) .mushaf-book-footer-row{
+  border-top:1px solid currentColor;
+  padding:6px 4px 0;
+  margin-top:5px;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book.rz-on{
+  touch-action:pan-x pan-y;
+}
+</style>
+
 </head>
 <body class="page-dark tajweed-full surah-mode">
 <script>
@@ -11535,8 +11586,8 @@ function readerGestureEnd(e){
     const dx = g.x - g.x0; const dt = Math.max(1, performance.now() - g.t0);
     const W = pageEl.clientWidth || window.innerWidth || 400;
     const dist = Math.abs(dx); const speed = dist / dt;
-    const threshold = Math.max(38, W * 0.11);
-    const isFlick = dist > 22 && speed > 0.35;
+    const threshold = Math.max(22, W * 0.06);
+    const isFlick = dist > 16 && speed > 0.30;
     const canPrev = readerState.currentPage > 1; const canNext = readerState.currentPage < 604;
     if(dx > 0 && canNext && (dist > threshold || (isFlick && dx > 0))) completePageTurn(1);
     else if(dx < 0 && canPrev && (dist > threshold || (isFlick && dx < 0))) completePageTurn(-1);
@@ -11558,7 +11609,7 @@ document.addEventListener('pointerup', readerGestureEnd);
 document.addEventListener('pointercancel', readerGestureCancel);
 
 /* ===== Reader zoom: double-tap / pinch / ctrl+wheel / double-click, 1x <-> 2x ===== */
-const RZ = { scale:1, MAX:2, natL:0, natT:0, natW:0, natH:0, anim:0, tapT:0, tapX:0, tapY:0, tapMoved:false, sx:0, sy:0, pinch:null, toggledAt:0, wheelTimer:0 };
+const RZ = { scale:1, MAX:2.5, natL:0, natT:0, natW:0, natH:0, anim:0, tapT:0, tapX:0, tapY:0, tapMoved:false, sx:0, sy:0, pinch:null, toggledAt:0, wheelTimer:0 };
 function rzIsZoomed(){ return RZ.scale > 1.001; }
 function rzInner(){ return pageEl.querySelector('.mushaf-inner'); }
 function rzActive(){ return viewerOpen && viewerMode === 'read' && pageEl.classList.contains('mushaf-book'); }
@@ -11971,7 +12022,8 @@ function rdFit(){
   if(deco){ rowW = Math.ceil(maxNat * f + 2 * PAD + 0.5); rowW = Math.min(rowW, Wt); if(rowW < Wt * 0.97 && !land){ /* keep full-width justified rows */ rowW = Wt; } }
   /* ---- build the rows ---- */
   const frag = document.createDocumentFragment();
-  let gi = 0;
+  let gi = 0, renderedTextRows = 0;
+  const totalTextRows = cutsAll.reduce((n, cuts) => n + cuts.length, 0);
   const bismFont = Math.max(8, Math.min(f * 1.25, (rowW - 2 * PAD) * 0.94 / (bismW || 1)));
   segs.forEach((sg) => {
     if(sg.kind === 'banner'){
@@ -11993,6 +12045,8 @@ function rdFit(){
     } else {
       cutsAll[gi++].forEach(([a, b]) => {
         const line = document.createElement('div'); line.className = 'mushaf-line';
+        renderedTextRows++;
+        if(renderedTextRows === totalTextRows) line.classList.add('mushaf-line-last');
         for(let k = a; k < b; k++){ line.appendChild(sg.units[k].el); if(sg.units[k].juz) line.classList.add('has-juz'); }
         frag.appendChild(line);
       });
