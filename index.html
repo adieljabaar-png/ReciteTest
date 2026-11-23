@@ -1,4 +1,25 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 100% !important; text-size-adjust: 100% !important; }</style><style>
+<html lang="en" style="--uz: 1; --uzc: 1;"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><style>* { -webkit-text-size-adjust: 100% !important; text-size-adjust: 100% !important; }</style><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -2738,7 +2759,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-header{
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-line{width:var(--rd-w);border-bottom:0;color:#1b1b1b}
 </style>
 </head>
-<body class="page-dark tajweed-full">
+<body class="page-dark tajweed-full surah-mode">
 <script>
 (function () {
   'use strict';
@@ -2802,8 +2823,8 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
     </div>
     <button class="hijri-card" id="hijriCard" type="button" aria-label="Open Hijri and Gregorian calendar">
       <span class="hijri-sub">Today · Hijri</span>
-      <span class="hijri-main" id="hijriEn"><span class="hijri-day-month">11 Jumada al-Akhirah</span><span class="hijri-year">1448 AH</span></span>
-      <span class="hijri-alt" id="hijriAr">11 جمادى الثانية 1448 هـ</span>
+      <span class="hijri-main" id="hijriEn"><span class="hijri-day-month">12 Jumada al-Akhirah</span><span class="hijri-year">1448 AH</span></span>
+      <span class="hijri-alt" id="hijriAr">12 جمادى الثانية 1448 هـ</span>
     </button>
     <button id="homeThemeBtn" class="iconbtn" aria-label="Toggle dark / light theme">🌙</button>
   </div>
@@ -2857,7 +2878,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
       <span class="ico">🕌</span>
       <span>Important Islamic Dates</span>
     </div>
-    <ul class="islamic-dates-list" id="islamicDatesList"><li><span class="ico">✨</span><span class="info"><span class="name">Isra and Mi'raj</span><span class="hijri">27 Raj 1448</span></span><span class="greg">Jan 6, 2027<small>in 45d</small></span></li><li><span class="ico">🌟</span><span class="info"><span class="name">Mid-Sha'ban</span><span class="hijri">15 Sha 1448</span></span><span class="greg">Jan 24, 2027<small>in 63d</small></span></li><li><span class="ico">📿</span><span class="info"><span class="name">Ramadan begins</span><span class="hijri">1 Ram 1448</span></span><span class="greg">Feb 8, 2027<small>in 78d</small></span></li><li><span class="ico">🌌</span><span class="info"><span class="name">Laylat al-Qadr</span><span class="hijri">27 Ram 1448</span></span><span class="greg">Mar 6, 2027<small>in 104d</small></span></li><li><span class="ico">🎉</span><span class="info"><span class="name">Eid al-Fitr</span><span class="hijri">1 Shaw 1448</span></span><span class="greg">Mar 10, 2027<small>in 108d</small></span></li><li><span class="ico">🏔️</span><span class="info"><span class="name">Day of Arafah</span><span class="hijri">9 Dhul H 1448</span></span><span class="greg">May 16, 2027<small>in 175d</small></span></li><li><span class="ico">🐏</span><span class="info"><span class="name">Eid al-Adha</span><span class="hijri">10 Dhul H 1448</span></span><span class="greg">May 17, 2027<small>in 176d</small></span></li><li><span class="ico">🌙</span><span class="info"><span class="name">Islamic New Year</span><span class="hijri">1 Muh 1449</span></span><span class="greg">Jun 6, 2027<small>in 196d</small></span></li><li><span class="ico">🕯️</span><span class="info"><span class="name">Day of Ashura</span><span class="hijri">10 Muh 1449</span></span><span class="greg">Jun 15, 2027<small>in 205d</small></span></li><li><span class="ico">🕌</span><span class="info"><span class="name">Mawlid al-Nabi</span><span class="hijri">12 Rab I 1449</span></span><span class="greg">Aug 15, 2027<small>in 266d</small></span></li></ul>
+    <ul class="islamic-dates-list" id="islamicDatesList"><li><span class="ico">✨</span><span class="info"><span class="name">Isra and Mi'raj</span><span class="hijri">27 Raj 1448</span></span><span class="greg">Jan 6, 2027<small>in 44d</small></span></li><li><span class="ico">🌟</span><span class="info"><span class="name">Mid-Sha'ban</span><span class="hijri">15 Sha 1448</span></span><span class="greg">Jan 24, 2027<small>in 62d</small></span></li><li><span class="ico">📿</span><span class="info"><span class="name">Ramadan begins</span><span class="hijri">1 Ram 1448</span></span><span class="greg">Feb 8, 2027<small>in 77d</small></span></li><li><span class="ico">🌌</span><span class="info"><span class="name">Laylat al-Qadr</span><span class="hijri">27 Ram 1448</span></span><span class="greg">Mar 6, 2027<small>in 103d</small></span></li><li><span class="ico">🎉</span><span class="info"><span class="name">Eid al-Fitr</span><span class="hijri">1 Shaw 1448</span></span><span class="greg">Mar 10, 2027<small>in 107d</small></span></li><li><span class="ico">🏔️</span><span class="info"><span class="name">Day of Arafah</span><span class="hijri">9 Dhul H 1448</span></span><span class="greg">May 16, 2027<small>in 174d</small></span></li><li><span class="ico">🐏</span><span class="info"><span class="name">Eid al-Adha</span><span class="hijri">10 Dhul H 1448</span></span><span class="greg">May 17, 2027<small>in 175d</small></span></li><li><span class="ico">🌙</span><span class="info"><span class="name">Islamic New Year</span><span class="hijri">1 Muh 1449</span></span><span class="greg">Jun 6, 2027<small>in 195d</small></span></li><li><span class="ico">🕯️</span><span class="info"><span class="name">Day of Ashura</span><span class="hijri">10 Muh 1449</span></span><span class="greg">Jun 15, 2027<small>in 204d</small></span></li><li><span class="ico">🕌</span><span class="info"><span class="name">Mawlid al-Nabi</span><span class="hijri">12 Rab I 1449</span></span><span class="greg">Aug 15, 2027<small>in 265d</small></span></li></ul>
   </section>
 </div>
 <div class="app screen" id="screenDashboard" hidden="">
@@ -2909,32 +2930,32 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
       </div>
       <div class="share-header">
         <div class="share-city" id="shareCityName">Makkah, SA</div>
-        <div class="share-dates" id="shareDates">11 Jumada al-Akhirah 1448 AH  ·  22 November 2026</div>
+        <div class="share-dates" id="shareDates">12 Jumada al-Akhirah 1448 AH  ·  23 November 2026</div>
       </div>
-      <div class="share-prayers" id="sharePrayers"><div class="share-prayer"><span class="sp-name">Fajr</span><span class="sp-time">04:16</span></div><div class="share-prayer is-sunrise"><span class="sp-name">Sunrise</span><span class="sp-time">05:36</span></div><div class="share-prayer"><span class="sp-name">Zohr</span><span class="sp-time">11:07</span></div><div class="share-prayer"><span class="sp-name">Asr</span><span class="sp-time">14:15</span></div><div class="share-prayer"><span class="sp-name">Maghrib</span><span class="sp-time">16:37</span></div><div class="share-prayer"><span class="sp-name">Isha</span><span class="sp-time">18:07</span></div></div>
+      <div class="share-prayers" id="sharePrayers"><div class="share-prayer"><span class="sp-name">Fajr</span><span class="sp-time">04:17</span></div><div class="share-prayer is-sunrise"><span class="sp-name">Sunrise</span><span class="sp-time">05:37</span></div><div class="share-prayer"><span class="sp-name">Zohr</span><span class="sp-time">11:07</span></div><div class="share-prayer"><span class="sp-name">Asr</span><span class="sp-time">14:15</span></div><div class="share-prayer"><span class="sp-name">Maghrib</span><span class="sp-time">16:37</span></div><div class="share-prayer"><span class="sp-name">Isha</span><span class="sp-time">18:07</span></div></div>
       <div class="share-divider" role="separator"></div>
       <div class="share-block">
         <div class="share-block-title">🤲 Duah of the Day</div>
-        <p class="share-arabic" id="shareDuahArabic" dir="rtl">رَبَّنَا إِنَّنَا آمَنَّا فَاغْفِرْ لَنَا ذُنُوبَنَا وَقِنَا عَذَابَ النَّارِ</p>
-        <p class="share-translation" id="shareDuahTranslation">Our Lord, indeed we have believed, so forgive us our sins and protect us from the punishment of the Fire.</p>
-        <p class="share-reference" id="shareDuahRef">Surah Ali 'Imran 3:16</p>
+        <p class="share-arabic" id="shareDuahArabic" dir="rtl">رَبَّنَا آمَنَّا بِمَا أَنزَلْتَ وَاتَّبَعْنَا الرَّسُولَ فَاكْتُبْنَا مَعَ الشَّاهِدِينَ</p>
+        <p class="share-translation" id="shareDuahTranslation">Our Lord, we have believed in what You revealed and have followed the messenger, so register us among the witnesses.</p>
+        <p class="share-reference" id="shareDuahRef">Surah Ali 'Imran 3:53</p>
       </div>
       <div class="share-divider" role="separator"></div>
       <div class="share-block">
         <div class="share-block-title">📚 Tafsir of the Duah</div>
-        <p class="share-tafsir" id="shareTafsirText">The declaration of the people of understanding who affirm their faith and ask for forgiveness of sins.</p>
+        <p class="share-tafsir" id="shareTafsirText">The disciples of Isa affirming belief in what Allah revealed and following the messenger.</p>
       </div>
       <div class="share-divider" role="separator"></div>
       <div class="share-block">
         <div class="share-block-title">📜 Hadith of the Day</div>
-        <p class="share-arabic" id="shareHadithArabic" dir="rtl">لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ</p>
-        <p class="share-translation" id="shareHadithTranslation">None of you truly believes until he loves for his brother what he loves for himself.</p>
-        <p class="share-reference" id="shareHadithRef">Sahih al-Bukhari 13 · Sahih Muslim 45</p>
+        <p class="share-arabic" id="shareHadithArabic" dir="rtl">مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ</p>
+        <p class="share-translation" id="shareHadithTranslation">Whoever believes in Allah and the Last Day, let him speak good or remain silent.</p>
+        <p class="share-reference" id="shareHadithRef">Sahih al-Bukhari 6018 · Sahih Muslim 47</p>
       </div>
       <div class="share-divider" role="separator"></div>
       <div class="share-block">
         <div class="share-block-title">💡 Explanation of the Hadith</div>
-        <p class="share-tafsir" id="shareHadithExplanationText">This hadith defines the social dimension of faith. It is not enough to worship Allah in isolation; true belief requires wanting good for others as you want for yourself. Envy, greed and selfishness are diseases of the heart that contradict faith. When a believer truly loves for their brother what they love for themselves, they will not cheat, oppress or wish harm — they will instead help, support and celebrate others' success. The Prophet ﷺ made this a measure of sincerity: whoever does not wish good for others has not yet tasted the sweetness of faith.</p>
+        <p class="share-tafsir" id="shareHadithExplanationText">The Prophet ﷺ links faith in Allah and the Last Day to the simple act of controlling one's tongue. Speech is a tremendous trust — a few careless words can destroy relationships, spread rumours or cause lasting harm. This hadith teaches that a believer should either speak good (truth, kindness, benefit) or remain silent. Silence is not weakness; it is a form of worship that protects the believer from sin. The Prophet ﷺ also said: 'Whoever guards his tongue, Allah will conceal his faults.'</p>
       </div>
       <div class="share-footer">
         <span>from <b>Recite</b>,</span>
@@ -2980,7 +3001,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
       <button type="button" class="continue-btn" disabled="">Resume</button>
     </div>
   </div>
-  <div class="surah-list" id="surahIndexList"><div class="loading">Loading…</div></div>
+  <div class="surah-list" id="surahIndexList"><div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div></div>
 </div>
 <div class="app screen" id="screenJuzIndex" hidden="">
   <div class="sub-header">
@@ -3037,7 +3058,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
       <span class="rt-meta"><span class="rt-label">RECITER</span><span class="rt-value" id="reciterValue">Mishary Rashid Alafasy</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="reciterMenu" role="listbox" aria-label="Available Qaris" hidden=""></div>
+    <div class="reciter-menu" id="reciterMenu" role="listbox" aria-label="Available Qaris" hidden=""><button type="button" class="reciter-item active" data-reciter="Alafasy_128kbps" role="option" aria-selected="true"><span class="ri-num">1</span><span class="ri-name">Mishary Rashid Alafasy</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Abdul_Basit_Murattal_64kbps" role="option" aria-selected="false"><span class="ri-num">2</span><span class="ri-name">Abdul Basit (Murattal)</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Abdul_Basit_Mujawwad_128kbps" role="option" aria-selected="false"><span class="ri-num">3</span><span class="ri-name">Abdul Basit (Mujawwad)</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Husary_128kbps" role="option" aria-selected="false"><span class="ri-num">4</span><span class="ri-name">Mahmoud Khalil Al-Husary</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Husary_Mujawwad_64kbps" role="option" aria-selected="false"><span class="ri-num">5</span><span class="ri-name">Al-Husary (Mujawwad)</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Minshawy_Murattal_128kbps" role="option" aria-selected="false"><span class="ri-num">6</span><span class="ri-name">Mohamed Siddiq Al-Minshawi</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Minshawy_Mujawwad_64kbps" role="option" aria-selected="false"><span class="ri-num">7</span><span class="ri-name">Al-Minshawi (Mujawwad)</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Muhammad_AbdulKareem_128kbps" role="option" aria-selected="false"><span class="ri-num">8</span><span class="ri-name">Muhammad AbdulKareem</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Muhsin_Al_Qasim_192kbps" role="option" aria-selected="false"><span class="ri-num">9</span><span class="ri-name">Abdul Muhsin Al-Qasim</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Hudhaify_128kbps" role="option" aria-selected="false"><span class="ri-num">10</span><span class="ri-name">Ali Al-Hudhaify</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Abu_Bakr_Ash-Shaatree_128kbps" role="option" aria-selected="false"><span class="ri-num">11</span><span class="ri-name">Abu Bakr Ash-Shaatree</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Ghamadi_40kbps" role="option" aria-selected="false"><span class="ri-num">12</span><span class="ri-name">Saad Al-Ghamdi</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Maher_AlMuaiqly_128kbps" role="option" aria-selected="false"><span class="ri-num">13</span><span class="ri-name">Maher Al-Muaiqly</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Abdurrahmaan_As-Sudais_192kbps" role="option" aria-selected="false"><span class="ri-num">14</span><span class="ri-name">Abdurrahman As-Sudais</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Hani_Rifai_192kbps" role="option" aria-selected="false"><span class="ri-num">15</span><span class="ri-name">Hani Ar-Rifai</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Muhammad_Ayyoub_128kbps" role="option" aria-selected="false"><span class="ri-num">16</span><span class="ri-name">Muhammad Ayyoub</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Nasser_Alqatami_128kbps" role="option" aria-selected="false"><span class="ri-num">17</span><span class="ri-name">Nasser Al-Qatami</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Yasser_Ad-Dussary_128kbps" role="option" aria-selected="false"><span class="ri-num">18</span><span class="ri-name">Yasser Ad-Dussary</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Salah_Al_Budair_128kbps" role="option" aria-selected="false"><span class="ri-num">19</span><span class="ri-name">Salah Al-Budair</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-reciter="Ali_Jaber_64kbps" role="option" aria-selected="false"><span class="ri-num">20</span><span class="ri-name">Ali Jaber</span><span class="ri-check">✓</span></button></div>
   </div>
   <div class="reciter-dropdown" id="translationDropdown">
     <button class="reciter-trigger" id="translationTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Audio Translation">
@@ -3045,7 +3066,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
       <span class="rt-meta"><span class="rt-label">AUDIO TRANSLATION</span><span class="rt-value" id="translationValue">English — Saheeh International</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="translationMenu" role="listbox" aria-label="Available Translations" hidden=""></div>
+    <div class="reciter-menu" id="translationMenu" role="listbox" aria-label="Available Translations" hidden=""><button type="button" class="reciter-item active" data-translation="English/Sahih_Intnl_Ibrahim_Walk_192kbps" role="option" aria-selected="true"><span class="ri-num">1</span><span class="ri-name">English — Saheeh International</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-translation="Turkish/Turkish_Kamili_128kbps" role="option" aria-selected="false"><span class="ri-num">2</span><span class="ri-name">Türkçe — Kamili</span><span class="ri-check">✓</span></button></div>
   </div>
   <div class="reciter-dropdown" id="textTranslationDropdown">
     <button class="reciter-trigger" id="textTranslationTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Text Translation">
@@ -3053,13 +3074,13 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
       <span class="rt-meta"><span class="rt-label">TEXT TRANSLATION</span><span class="rt-value" id="textTranslationValue">English — Abdullah Yusuf Ali</span></span>
       <span class="rt-chev">▾</span>
     </button>
-    <div class="reciter-menu" id="textTranslationMenu" role="listbox" aria-label="Available Text Translations" hidden=""></div>
+    <div class="reciter-menu" id="textTranslationMenu" role="listbox" aria-label="Available Text Translations" hidden=""><button type="button" class="reciter-item active" data-text-trans="en.yusufali" role="option" aria-selected="true"><span class="ri-num">1</span><span class="ri-name">English — Abdullah Yusuf Ali</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-text-trans="en.sahih" role="option" aria-selected="false"><span class="ri-num">2</span><span class="ri-name">English — Saheeh International</span><span class="ri-check">✓</span></button><button type="button" class="reciter-item" data-text-trans="tr.diyanet" role="option" aria-selected="false"><span class="ri-num">3</span><span class="ri-name">Türkçe — Diyanet</span><span class="ri-check">✓</span></button></div>
   </div>
   <label class="toggle" id="translateAudioChip" style="width: 100%; justify-content: flex-start; margin-bottom: 10px; padding: 12px 16px; border-radius: 14px; opacity: 1; pointer-events: auto;">
     <input type="checkbox" id="chkTranslateAudio" style="width: 20px; height: 20px;">
     <span style="font-weight: 700; font-size: .9rem; color: var(--text);">Play translation audio</span>
   </label>
-  <div class="surah-list" id="audioSurahList"><div class="loading">Loading…</div></div>
+  <div class="surah-list" id="audioSurahList"><div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div></div>
 </div>
 <div class="app screen" id="screenPrayer" hidden="">
   <div class="sub-header">
@@ -3076,11 +3097,11 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
     <button class="prayer-settings-btn" id="prayerQiblaBtn" type="button" aria-label="Qibla direction">🧭</button>
   </div>
   <div class="prayer-date-row">
-    <span class="pdr-item pdr-hijri" id="pdrHijri">11 Jumada al-Akhirah 1448 AH</span>
+    <span class="pdr-item pdr-hijri" id="pdrHijri">12 Jumada al-Akhirah 1448 AH</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-greg" id="pdrGreg">22 November 2026</span>
+    <span class="pdr-item pdr-greg" id="pdrGreg">23 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">12:00</span>
+    <span class="pdr-item pdr-time" id="pdrTime">10:49</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3095,20 +3116,20 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
     <button id="btnTheme" class="iconbtn" aria-label="Toggle theme">🌙</button>
   </header>
   <div id="support" class="warnbox" hidden=""></div>
-  <div class="statusbar idle" id="statusbar" role="status" aria-live="polite">
+  <div class="statusbar error" id="statusbar" role="status" aria-live="polite">
     <span class="dot"></span>
-    <span class="label" id="statusLabel">Loading…</span>
-    <span class="hint" id="statusHint"></span>
+    <span class="label" id="statusLabel">Load failed</span>
+    <span class="hint" id="statusHint">Tap Retry</span>
   </div>
   <section class="panel hide-immersive">
-    <div class="row" id="surahNavRow" hidden="">
+    <div class="row" id="surahNavRow">
       <button id="btnPrevSurah" class="ghost icon" aria-label="Next surah">◀</button>
       <div class="surah-info">
-        <span class="surah-en" id="surahEn">—</span>
-        <span class="surah-ar" id="surahAr">—</span>
+        <span class="surah-en" id="surahEn">Surah 1</span>
+        <span class="surah-ar" id="surahAr"></span>
         <span class="surah-count" id="surahCount"></span>
       </div>
-      <button id="btnNextSurah" class="ghost icon" aria-label="Previous surah">▶</button>
+      <button id="btnNextSurah" class="ghost icon" aria-label="Previous surah" disabled="">▶</button>
       <button id="btnSurah" class="ghost" style="padding:0 12px">📖 Surah</button>
     </div>
   </section>
@@ -3170,9 +3191,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
     </div>
     <ol class="mistakes-list" id="mistakesList"></ol>
   </section>
-  <section class="mushaf" id="pageEl" aria-label="Quran text">
-    <div class="mushaf-inner"><div class="loading">Loading…</div></div>
-  </section>
+  <section class="mushaf" id="pageEl" aria-label="Quran text"><div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load Surah 1</span>The Quran server did not respond. Check your connection and tap Retry.<div class="detail">Arabic edition: Load failed</div><button id="btnRetry" class="primary">↻ Retry</button></div></div><button id="mushafFsBtn" type="button" class="mushaf-fs-btn" aria-label="Toggle fullscreen reader">⛶</button></section>
   <div class="legend hide-immersive">
     <span><i style="background:#2fd07a"></i>correct</span>
     <span><i style="background:#ff5a6a"></i>misread</span>
@@ -3301,7 +3320,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-li
     <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen">⛶</button>
   </div>
 </div>
-<div class="fs-badge" id="fsBadge"><span class="dot"></span><span id="fsBadgeText">Ready</span></div>
+<div class="fs-badge" id="fsBadge"><span class="dot"></span><span id="fsBadgeText">Load failed</span></div>
 <div class="fs-controls" id="fsControls" role="toolbar" aria-label="Fullscreen controls">
   <button id="fsMic" aria-label="Toggle microphone">🎤</button>
   <span class="fs-sep"></span>
@@ -13880,7 +13899,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13971,4 +13990,41 @@ html.ui-fit .qv-top,html.ui-fit .qv-bottom{zoom:var(--uzc,1)}
 </style>
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-</body></html>
+
+<style id="tab-fit-fix">
+/* TAB-FIT FIX — only Surah/Juz lists, Play-audio rows, and Coach tabs. No other sizing changed. */
+/* Surah + Juz index rows + Play-audio rows (share .surah-row) */
+.surah-row{gap:8px;padding:9px 10px;align-items:center}
+.surah-row .num{width:40px;height:40px;font-size:.78rem;flex-shrink:0}
+.surah-row .meta{min-width:0;flex:1 1 auto}
+.surah-row .en{font-size:.80rem;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
+.surah-row .sub{font-size:.58rem;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35;letter-spacing:.02em}
+.surah-row .ar{font-size:1.02rem;max-width:38%;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
+.surah-row .playbtn{width:36px;height:36px;font-size:.95rem}
+.surah-row .dlbtn{width:30px;height:30px;font-size:.70rem}
+/* Juz rows */
+.juz-row{gap:8px;padding:9px 10px;align-items:center}
+.juz-row .juz-num{width:40px;height:40px;font-size:.78rem;flex-shrink:0}
+.juz-row .juz-name{font-size:.80rem;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
+.juz-row .juz-range{font-size:.58rem;white-space:normal;overflow:visible;line-height:1.35}
+/* Play-audio selector values (Reciter / translations) — smaller so long names fit */
+.rt-value{font-size:.80rem}
+.rt-label{font-size:.54rem}
+/* Coach header + mode tabs only */
+header .coach-title{font-size:.80rem}
+.surah-info .surah-en{font-size:.80rem}
+.surah-info .surah-ar{font-size:.80rem}
+.surah-info .surah-count{font-size:.60rem}
+#screenCoach .toggles{flex-wrap:nowrap;gap:6px}
+#screenCoach .toggle.mode-pill{font-size:.68rem;padding:8px 10px;min-height:38px;flex:1 1 0;white-space:nowrap;letter-spacing:.01em}
+#screenCoach .toggle.hide-text{font-size:.68rem;padding:8px 10px;min-height:38px;white-space:nowrap}
+#screenCoach .progress-section .toggle,#screenCoach .progress-trigger{font-size:.68rem;min-height:38px;white-space:nowrap}
+#screenCoach .toggle.tj-status-loading,#screenCoach .toggle.tj-status-error{font-size:.62rem}
+@media (max-width:380px){
+ .surah-row .en,.juz-row .juz-name{font-size:.76rem}
+ .surah-row .sub,.juz-row .juz-range{font-size:.55rem}
+ .surah-row .ar{font-size:.95rem;max-width:34%}
+ #screenCoach .toggle.mode-pill{font-size:.64rem;padding:8px 8px}
+}
+</style>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
