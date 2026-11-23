@@ -1057,9 +1057,13 @@ display:inline !important;position:relative;background:transparent !important;co
 padding:0;margin:0;box-shadow:none !important;opacity:1 !important;
 }
 /* Actual first-visual-line wrapper: contrast follows the active theme. */
-body.page-light .qv-slot .ayah.juz-first-row{color:#fff !important;background:#000 !important;}
-body.page-dark .qv-slot .ayah.juz-first-row{color:#000 !important;background:#fff !important;}
-.ayah.juz-first-row{-webkit-box-decoration-break:clone;box-decoration-break:clone;}
+/* FIX: the wrapper created by applyJuzFirstVisualLines() is a plain <span class="juz-first-row">
+   (it is NOT an .ayah), so the old ".ayah.juz-first-row" selectors never matched. */
+body.page-light .qv-slot .juz-first-row{color:#fff !important;background:#000 !important;}
+body.page-dark  .qv-slot .juz-first-row{color:#000 !important;background:#fff !important;}
+body.page-light .qv-slot .juz-first-row *{color:#fff !important;background:transparent !important;border-color:#fff !important;}
+body.page-dark  .qv-slot .juz-first-row *{color:#000 !important;background:transparent !important;border-color:#000 !important;}
+.juz-first-row{-webkit-box-decoration-break:clone;box-decoration-break:clone;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{content:none !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start .mushaf-ayah-mark{border-color:currentColor !important;}
 /* The non-Mushaf reading/index view uses block ayah rows too. */
@@ -1074,6 +1078,41 @@ pointer-events:none;-webkit-user-select:none;user-select:none;direction:rtl;
 z-index:3;background:transparent;padding:0 .12em;border-radius:999px;
 }
 .mushaf-sajdah-mark{display:inline-block;font-size:.95em;margin:0 .15em;color:currentColor;vertical-align:middle;-webkit-text-stroke:0;opacity:.9;cursor:help;}
+
+/* ===== Reader page frame: wider border, one-sided ع gutter (odd = right, even = left) ===== */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book{
+--page-border-w:7px;            /* thickness of the double border around the Quran text */
+--ruku-gap:clamp(28px,7vw,42px);/* the only side gap: holds the ع marks */
+--edge-gap:0px;                 /* the other side: no gap */
+padding-left:calc(var(--safe-left) + 5px);
+padding-right:calc(var(--safe-right) + 5px);
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner{padding-left:var(--edge-gap);padding-right:var(--edge-gap);}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner.page-odd{padding-right:var(--ruku-gap);}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-inner.page-even{padding-left:var(--ruku-gap);}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{
+border-width:var(--page-border-w);padding-left:14px;padding-right:14px;
+}
+
+/* ===== Surah rectangle now holds the Bismillah, neatly fitted ===== */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header{
+display:flex;flex-direction:column;align-items:stretch;justify-content:center;
+padding:4px 8px 6px;overflow:hidden;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-surah-name{text-align:center;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-surah-meta{text-align:center;margin-bottom:2px;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-bismillah-line{
+display:flex;align-items:center;justify-content:center;gap:8px;
+width:100%;margin:0;padding:0;overflow:hidden;white-space:nowrap;text-align:center;
+line-height:2.1;font-size:1.05em;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-surah-name + .mushaf-bismillah-line,
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-surah-meta + .mushaf-bismillah-line{
+margin-top:4px;padding-top:4px;border-top:1px solid currentColor;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-bismillah-line .bism-text{padding:0;flex:0 0 auto;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header .mushaf-bismillah-line .bism-orn{flex:0 0 auto;}
+
 .toast{
 position:fixed;top:calc(var(--safe-top) + 18px);left:50%;
 transform:translateX(-50%) translateY(-18px);
@@ -10665,6 +10704,7 @@ function placeRukuMarks(inner, content){
   const innerRect = inner.getBoundingClientRect();
   const frameRect = frame ? frame.getBoundingClientRect() : innerRect;
   const rightOffset = (innerRect.right - frameRect.left) + 4;
+  const isOddPage = inner.classList.contains('page-odd');
   const nextPageData = readerState.pages.get(readerState.currentPage + 1);
   for(let i = 0; i < list.length; i++){
     const el = list[i];
@@ -10697,8 +10737,15 @@ function placeRukuMarks(inner, content){
     m.className = 'mushaf-ruku-mark';
     m.textContent = 'ع';
     m.setAttribute('aria-hidden', 'true');
-    m.style.left = 'auto';
-    m.style.right = Math.round(rightOffset) + 'px';
+    if(isOddPage){
+      /* odd page: gap on the right of the frame */
+      m.style.right = 'auto';
+      m.style.left = Math.round((frameRect.right - innerRect.left) + 4) + 'px';
+    } else {
+      /* even page: gap on the left of the frame */
+      m.style.left = 'auto';
+      m.style.right = Math.round(rightOffset) + 'px';
+    }
     m.style.top = Math.round(top) + 'px';
     inner.appendChild(m);
   }
@@ -10723,19 +10770,27 @@ function applyJuzFirstVisualLines(root){
     if(textNode){
       const value=textNode.textContent; const range=document.createRange();
       let firstTop=null, end=0, lastSpace=0;
+      let firstCy=null, allOnRow=true;
       for(let i=0;i<value.length;i++){
         range.setStart(textNode,i);range.setEnd(textNode,i+1);
         const rect=range.getBoundingClientRect();
-        if(!rect.width && !rect.height) continue;
-        if(firstTop===null) firstTop=rect.top;
-        if(Math.abs(rect.top-firstTop)>2) break;
-        end=i+1;if(/\s/.test(value[i])) lastSpace=i+1;
+        if(!rect.width || !rect.height) continue;      /* skip combining marks / collapsed chars */
+        const cy=(rect.top+rect.bottom)/2;
+        if(firstCy===null) firstCy=cy;
+        if(Math.abs(cy-firstCy)>rect.height*0.6){ allOnRow=false; end=i; break; }  /* first char of the next visual line: row ends right before it */
+        end=i+1;
       }
-      end=lastSpace||end;
       if(end>0){
-        textNode.splitText(end);
+        if(end<value.length) textNode.splitText(end);
         const wrap=document.createElement('span');wrap.className='juz-first-row';
         textNode.parentNode.insertBefore(wrap,textNode);wrap.appendChild(textNode);
+        /* verse fits on one row: take the ayah number medallion (and sajdah sign) with it */
+        if(allOnRow){
+          let sib=wrap.nextSibling;
+          while(sib && sib.nodeType===1 && !sib.classList.contains('translation')){
+            const nxt=sib.nextSibling; wrap.appendChild(sib); sib=nxt;
+          }
+        }
       }
     }else{
       const children=Array.from(el.children); let top=null; const selected=[];
@@ -10753,6 +10808,32 @@ function applyJuzFirstVisualLines(root){
     el.dataset.juzRowDone='1';
   });
 }
+/* Remove the wrappers again (used on resize / after fonts load) so the first row is re-measured. */
+function resetJuzFirstRows(){
+  document.querySelectorAll('.juz-first-row').forEach(w=>{const p=w.parentNode;if(p){while(w.firstChild)p.insertBefore(w.firstChild,w);w.remove();p.normalize();}});
+  document.querySelectorAll('.ayah.juz-start').forEach(e=>delete e.dataset.juzRowDone);
+}
+/* Shrink the Bismillah (if needed) so it always fits inside the Surah rectangle on one line. */
+function fitBismillahInHeaders(){
+  document.querySelectorAll('.mushaf-book-header .mushaf-bismillah-line').forEach(b=>{
+    b.style.fontSize='';
+    const avail=b.clientWidth; if(!avail) return;
+    let size=parseFloat(getComputedStyle(b).fontSize), guard=0;
+    while(b.scrollWidth>avail+0.5 && size>10 && guard++<60){ size-=0.5; b.style.fontSize=size+'px'; }
+  });
+}
+let readerLayoutTimer=null;
+function scheduleReaderLayoutFix(){
+  clearTimeout(readerLayoutTimer);
+  readerLayoutTimer=setTimeout(()=>{
+    fitBismillahInHeaders();
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{
+      fitBismillahInHeaders(); resetJuzFirstRows(); scheduleJuzFirstVisualLines(); scheduleRukuReplace();
+    }).catch(()=>{});
+  },60);
+}
+window.addEventListener('resize',()=>{ clearTimeout(readerLayoutTimer); readerLayoutTimer=setTimeout(fitBismillahInHeaders,120); });
+window.addEventListener('orientationchange',()=>{ setTimeout(fitBismillahInHeaders,200); });
 let juzLineFrame=0;
 function scheduleJuzFirstVisualLines(){
   if(juzLineFrame) cancelAnimationFrame(juzLineFrame);
@@ -10761,11 +10842,7 @@ function scheduleJuzFirstVisualLines(){
 if(!window.__juzLineObserver){
   window.__juzLineObserver=new MutationObserver(scheduleJuzFirstVisualLines);
   window.__juzLineObserver.observe(document.documentElement,{childList:true,subtree:true});
-  window.addEventListener('resize',()=>{
-    document.querySelectorAll('.ayah.juz-first-row').forEach(w=>{const p=w.parentNode;if(p){while(w.firstChild)p.insertBefore(w.firstChild,w);w.remove();}});
-    document.querySelectorAll('.ayah.juz-start').forEach(e=>delete e.dataset.juzRowDone);
-    scheduleJuzFirstVisualLines();
-  });
+  window.addEventListener('resize',()=>{ resetJuzFirstRows(); scheduleJuzFirstVisualLines(); });
   document.addEventListener('DOMContentLoaded',scheduleJuzFirstVisualLines);
 }
 function renderReaderPage(pageNumber, token){
@@ -10778,6 +10855,8 @@ function renderReaderPage(pageNumber, token){
   pageEl.classList.add('mushaf-book');
   pageEl.innerHTML = '';
   const inner = document.createElement('div'); inner.className = 'mushaf-inner';
+  /* odd pages keep their side gap on the RIGHT, even pages on the LEFT (for the ع marks) */
+  inner.classList.add((pageNumber % 2 === 1) ? 'page-odd' : 'page-even');
   const frame = document.createElement('div'); frame.className = 'mushaf-book-page';
   const firstAyah = page.ayahs[0] || {};
   const pageJuz = firstAyah.juz || 1;
@@ -10802,8 +10881,10 @@ function renderReaderPage(pageNumber, token){
       const metaBits = [];
       if(a.surahEnglishName) metaBits.push(escapeHtml(a.surahEnglishName));
       if(a.surahNumberOfAyahs) metaBits.push(a.surahNumberOfAyahs + ' ayahs');
-      metaBits.push('Surah ' + a.surah);
-      h.innerHTML = '<div class="mushaf-surah-name">' + escapeHtml(a.surahName) + '</div><div class="mushaf-surah-meta">' + metaBits.join(' · ') + '</div>';
+      /* the word "Surah" (and its number) is no longer shown in the rectangle */
+      let hdrName = a.surahName || '';
+      if(!hdrName && !shouldShowBismillah(a.surah)) hdrName = SURAH_NAMES_AR[a.surah - 1] || '';  /* Surah 9 has no Bismillah: keep its name so the box is not empty */
+      h.innerHTML = (hdrName ? '<div class="mushaf-surah-name">' + escapeHtml(hdrName) + '</div>' : '') + (metaBits.length ? '<div class="mushaf-surah-meta">' + metaBits.join(' · ') + '</div>' : '');
       content.appendChild(h);
       if(shouldShowBismillah(a.surah)){
         const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
@@ -10811,7 +10892,7 @@ function renderReaderPage(pageNumber, token){
         const t = document.createElement('span'); t.className = 'bism-text'; t.textContent = IP_BISMILLAH;
         const o2 = document.createElement('span'); o2.className = 'bism-orn'; o2.setAttribute('aria-hidden','true'); o2.textContent = '۞';
         b.appendChild(o1); b.appendChild(t); b.appendChild(o2);
-        content.appendChild(b);
+        h.appendChild(b);   /* Bismillah now lives INSIDE the Surah rectangle */
       }
     }
     let text = String(a.text == null ? '' : a.text);
@@ -10840,6 +10921,7 @@ function renderReaderPage(pageNumber, token){
   frame.appendChild(footer);
   inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTop = 0;
   scheduleRukuReplace();
+  scheduleReaderLayoutFix();
   if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
   else if(surahsOnPage.length > 1) qvTitle.textContent = surahsOnPage.map(a => a.surahEnglishName).join(' · ');
   else qvTitle.textContent = 'Page ' + pageNumber;
