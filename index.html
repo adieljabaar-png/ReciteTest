@@ -3088,7 +3088,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">23 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">07:19</span>
+    <span class="pdr-item pdr-time" id="pdrTime">07:34</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -11781,7 +11781,9 @@ function rdFit(){
   const segs = rdCollect(data, pageNo);
   const textSegs = segs.filter(x => x.kind === 'text');
   if(!textSegs.length) return;
-  const specials = segs.length - textSegs.length;
+  let specials = segs.length - textSegs.length;
+  let bismMerged = false;
+  for(let i=0;i+1<segs.length;i++){ if(segs[i].kind==='banner' && segs[i+1].kind==='bism'){ bismMerged = true; specials = specials; /* banner(1)+bism(1)=2 slots, header will be 2 lines tall */ break; } }
   const Lt = Math.max(textSegs.length, N - specials);
   const W0 = content.clientWidth;
   if(!(W0 > 20)) return;
@@ -11796,7 +11798,7 @@ function rdFit(){
   const groups = textSegs.map(sg => sg.units.map(u => u.w));
   const countAt = (f, W) => groups.reduce((n, ws) => n + rdGreedyCuts(ws, f, W, g).length, 0);
   const lh0 = land ? 0 : Hc / N;
-  const fcap = land ? (deco ? 44 : 72) : Math.min(72, lh0 / 1.7);
+  const fcap = land ? (deco ? 36 : 48) : Math.min(52, lh0 / 2.5); /* v4: line must be 2.5x font so harakaat/Tajweed marks fit INSIDE the line, not across the separator */
   let fFit = 7;
   if(countAt(7, W0) <= Lt){
     let lo = 7, hi = 200;
@@ -11824,7 +11826,7 @@ function rdFit(){
   }
   const finalCuts = groups.map((ws, i) => rdBalance(ws, want[i], f, W, g) || rdGreedyCuts(ws, f, W, g));
   const R = specials + finalCuts.reduce((n, c) => n + c.length, 0);
-  const lh = land ? f * 2 : (R > N ? Hc / R : lh0);
+  const lh = land ? f * 2.5 : (R > N ? Hc / R : lh0); /* v4: landscape line height 2.5x font */
   /* build the rows */
   const frag = document.createDocumentFragment();
   let gi = 0;
@@ -11832,13 +11834,27 @@ function rdFit(){
     if(sg.kind === 'banner'){
       const a = sg.a, h = document.createElement('div'); h.className = 'mushaf-book-header';
       h.innerHTML = '<div class="mushaf-surah-name">' + escapeHtml(a.surahName || '') + '</div>';
+      h.dataset.bismHost = '1';
       frag.appendChild(h);
     } else if(sg.kind === 'bism'){
+      const host = frag.querySelector('.mushaf-book-header[data-bism-host="1"]');
+      if(host){ /* v4: Bismillah lives INSIDE the rectangle above it, not as a separate row */
+        const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
+        const o1 = document.createElement('span'); o1.className = 'bism-orn'; o1.setAttribute('aria-hidden','true'); o1.textContent = '۞';
+        const tt = document.createElement('span'); tt.className = 'bism-text'; tt.textContent = IP_BISMILLAH;
+        const o2 = document.createElement('span'); o2.className = 'bism-orn'; o2.setAttribute('aria-hidden','true'); o2.textContent = '۞';
+        b.appendChild(o1); b.appendChild(tt); b.appendChild(o2); host.appendChild(b); host.dataset.bismHost = '0';
+        /* keep the loop's bism creation below from running twice: mark it handled by skipping its append */
+        sg._merged = true;
+      }
+      if(sg._merged){ /* already placed inside the header - do not create a second copy below it */ }
+      else {
       const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
       const o1 = document.createElement('span'); o1.className = 'bism-orn'; o1.setAttribute('aria-hidden','true'); o1.textContent = '۞';
       const t = document.createElement('span'); t.className = 'bism-text'; t.textContent = IP_BISMILLAH;
       const o2 = document.createElement('span'); o2.className = 'bism-orn'; o2.setAttribute('aria-hidden','true'); o2.textContent = '۞';
       b.appendChild(o1); b.appendChild(t); b.appendChild(o2); frag.appendChild(b);
+      }
     } else {
       finalCuts[gi++].forEach(([a, b]) => {
         const line = document.createElement('div'); line.className = 'mushaf-line';
@@ -11850,9 +11866,9 @@ function rdFit(){
   content.textContent = '';
   content.appendChild(frag);
   content.style.fontSize = f + 'px'; content.style.lineHeight = lh + 'px'; content.style.setProperty('--rd-lh', (lh - 2) + 'px'); /* v3: 2px gap between lines, taken out of the line height so nothing overflows */
-  if(W < W0 - 1){
+  if(land && W < W0 - 1){ /* v4: portrait keeps the full fixed-width frame; only landscape may narrow, with equal margins */
     frame.style.width = (W + (frame.offsetWidth - W0)) + 'px'; frame.style.marginLeft = 'auto'; frame.style.marginRight = 'auto';
-  }
+  } else if(!land){ frame.style.width = ''; frame.style.marginLeft = ''; frame.style.marginRight = ''; }
   inner.style.setProperty('--rd-f', f + 'px');
   scheduleRukuReplace();
 }
@@ -13777,7 +13793,7 @@ function showTextShareModal(text){
   }
   showScreen('home');
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13828,32 +13844,41 @@ window.addEventListener('contextmenu', function(event) {
 
 
 
-<!-- FIX v3: work WITH the reader's measuring, never against it -->
-<style id="quran-fix-v3">
-/* App text +4px per 1rem, auto-scales with device. Quran text is sized in px by RD, so it is NOT touched by this. */
+
+<!-- FIX v4 -->
+<style id="quran-fix-v4">
 html{ font-size:20px !important; -webkit-text-size-adjust:100% !important; text-size-adjust:100% !important; }
-/* Quran frame 6px (was 4px) */
-.mushaf-book-page{ border-width:6px !important; box-sizing:border-box !important; }
-/* Rows: RD already measured every word + a 0.14em gap. Use EXACTLY that gap, centred,
-   instead of space-between (which stretched short rows edge-to-edge) and instead of the
-   v2 0.38em gap (which made every row wider than RD measured -> sideways overflow).
-   2px gap ONLY between lines: margin-bottom, paid for by the lh-2 patch in rdFit(). */
+/* 3. Portrait frame: FIXED full width, 6px thicker than v3 (6px -> 12px), equal side margins.
+   The outer .mushaf-inner keeps its left gutter so the ع (ruku) mark stays visible outside the frame. */
+.mushaf-book-page{ border-width:12px !important; box-sizing:border-box !important; width:100% !important; margin-left:auto !important; margin-right:auto !important; }
+/* 1. Separator sits in the 2px gap, and the line box has breathing room inside it:
+   content is vertically centred with padding, so stacked marks stay inside the line. */
 .rd-fixed .mushaf-line, .mushaf-book-content .mushaf-line{
-  justify-content:center !important; gap:.14em !important;
-  margin:0 0 2px !important; box-sizing:border-box !important;
-  border-bottom:1px solid currentColor !important; overflow:visible !important;
+  justify-content:center !important; gap:.14em !important; align-items:center !important;
+  margin:0 0 2px !important; padding:.14em 0 !important; box-sizing:border-box !important;
+  border-bottom:1px solid currentColor !important; overflow:hidden !important;
 }
-.rd-fixed .mushaf-line .ayah, .mushaf-book-content .mushaf-line .ayah{
-  flex:0 0 auto !important; white-space:nowrap !important; overflow:visible !important;
+.rd-fixed .mushaf-line .ayah, .mushaf-book-content .mushaf-line .ayah{ flex:0 0 auto !important; white-space:nowrap !important; line-height:1 !important; }
+/* 2. Header block = 2 RD lines tall when it holds the Bismillah (surah name + Bismillah),
+   with its own divider between them. Surah name keeps its own line so it cannot be pushed out. */
+.mushaf-book-header{ height:auto !important; min-height:0 !important; display:block !important;
+  padding:.5em .6em .55em !important; margin:0 0 2px !important; box-sizing:border-box !important; overflow:hidden !important; }
+.mushaf-book-header .mushaf-surah-name{ display:block !important; line-height:1.4 !important; }
+.mushaf-book-header .mushaf-bismillah-line{
+  display:flex !important; flex-wrap:wrap !important; align-items:center !important; justify-content:center !important;
+  white-space:normal !important; line-height:1.9 !important; font-size:.92em !important;
+  padding:.45em 0 0 !important; margin:.4em 0 0 !important;
+  border-top:1px solid currentColor !important; gap:.4em !important; -webkit-text-stroke:0 !important; }
+/* 4. Landscape: equal side borders (auto margins), and the page scrolls so line 13 is reachable. */
+@media (orientation:landscape){
+  .mushaf-book{ overflow-y:auto !important; overflow-x:hidden !important; }
+  .mushaf-book-page{ margin-left:auto !important; margin-right:auto !important; }
+  .mushaf-book-content{ padding-bottom:24px !important; }
 }
-/* Crisp glyphs only - no layout changes */
 .mushaf-book-page, .mushaf-book-content, .mushaf-line, .ayah{
   -webkit-text-stroke:0 !important; -webkit-font-smoothing:antialiased !important; text-rendering:optimizeLegibility !important;
   font-feature-settings:"kern" 1,"liga" 1,"calt" 1,"rlig" 1,"mark" 1,"mkmk" 1 !important;
 }
-/* Bismillah: keep it as RD's own row directly under the Surah header.
-   v2 moved it INSIDE the header, but the header is exactly one RD line tall, so the
-   Bismillah overflowed it and the next line printed on top of it. */
 </style>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 </body></html>
