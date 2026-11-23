@@ -2709,41 +2709,33 @@ html.ui-fit .qv-top,html.ui-fit .qv-bottom{zoom:var(--uzc,1)}
 </style>
 
 <style id="reader-fixed-rows">
-/* ===== Reader: fixed number of rows per page (16 portrait / 13 landscape), gold frame on pages 1-2 ===== */
+/* ===== Reader: 13 fixed rows (portrait + landscape), equal words per row, 2.5px gap to the borders ===== */
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book.rd-on .mushaf-inner{max-width:none}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.rd-fixed{display:flex;flex-direction:column;min-height:0}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content{flex:0 0 auto;padding:0;text-align:justify;text-align-last:center;word-spacing:-.06em}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-footer-row{margin-top:auto}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header{
-  height:var(--rd-lh);margin:0;padding:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:5px;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-name{font-size:calc(var(--rd-lh) * .56);line-height:1;margin:0}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-meta{display:none}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-bismillah-line{
-  height:var(--rd-lh);margin:0;padding:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;line-height:1;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content .ayah.juz-start{display:inline !important;margin:0 !important}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content .ayah.juz-start::before{display:none}
-.mushaf-ruku-mark{font-size:calc(var(--rd-f,1em) * .85) !important}
-/* gold Arabic ornamental frame (pages 1 and 2) */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.rd-deco{
-  --deco-w:clamp(22px,7.4vw,40px);
-  border:var(--deco-w) solid transparent !important;border-radius:0 !important;
-  border-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2784%27 height=%2784%27 viewBox=%270 0 84 84%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 gradientUnits=%27userSpaceOnUse%27 x1=%270%27 y1=%270%27 x2=%2784%27 y2=%2784%27%3E%3Cstop offset=%270%27 stop-color=%27%23f7e6a0%27/%3E%3Cstop offset=%27.35%27 stop-color=%27%23d9ac2b%27/%3E%3Cstop offset=%27.65%27 stop-color=%27%23f2d675%27/%3E%3Cstop offset=%271%27 stop-color=%27%23a87c14%27/%3E%3C/linearGradient%3E%3Cg id=%27st8%27 fill=%27none%27 stroke=%27url(%23g)%27 stroke-width=%271.3%27%3E%3Crect x=%27-7%27 y=%27-7%27 width=%2714%27 height=%2714%27/%3E%3Crect x=%27-7%27 y=%27-7%27 width=%2714%27 height=%2714%27 transform=%27rotate(45)%27/%3E%3C/g%3E%3C/defs%3E%3Cg fill=%27none%27 stroke=%27url(%23g)%27%3E%3Crect x=%272%27 y=%272%27 width=%2780%27 height=%2780%27 stroke-width=%272.4%27/%3E%3Crect x=%274.8%27 y=%274.8%27 width=%2774.4%27 height=%2774.4%27 stroke-width=%27.8%27/%3E%3Crect x=%2726%27 y=%2726%27 width=%2732%27 height=%2732%27 stroke-width=%271.4%27/%3E%3C/g%3E%3Cg fill=%27url(%23g)%27%3E%3Cg transform=%27translate(42 14)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cg transform=%27translate(42 70)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cg transform=%27translate(14 42)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cg transform=%27translate(70 42)%27%3E%3Cuse href=%27%23st8%27/%3E%3Ccircle r=%271.7%27/%3E%3C/g%3E%3Cpath d=%27M33 14l2-2.2 2 2.2-2 2.2zM47 14l2-2.2 2 2.2-2 2.2z%27/%3E%3Cpath d=%27M33 70l2-2.2 2 2.2-2 2.2zM47 70l2-2.2 2 2.2-2 2.2z%27/%3E%3Cpath d=%27M14 33l2.2-2 2.2 2-2.2 2zM14 47l2.2-2 2.2 2-2.2 2z%27/%3E%3Cpath d=%27M70 33l2.2-2 2.2 2-2.2 2zM70 47l2.2-2 2.2 2-2.2 2z%27/%3E%3C/g%3E%3Cg fill=%27none%27 stroke=%27url(%23g)%27 stroke-width=%271.3%27%3E%3Cg transform=%27translate(14 14) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Cg transform=%27translate(70 14) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Cg transform=%27translate(14 70) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Cg transform=%27translate(70 70) scale(1.5)%27%3E%3Cuse href=%27%23st8%27/%3E%3C/g%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%274.2%27/%3E%3Ccircle cx=%2770%27 cy=%2714%27 r=%274.2%27/%3E%3Ccircle cx=%2714%27 cy=%2770%27 r=%274.2%27/%3E%3Ccircle cx=%2770%27 cy=%2770%27 r=%274.2%27/%3E%3C/g%3E%3Cg fill=%27url(%23g)%27%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%271.6%27/%3E%3Ccircle cx=%2770%27 cy=%2714%27 r=%271.6%27/%3E%3Ccircle cx=%2714%27 cy=%2770%27 r=%271.6%27/%3E%3Ccircle cx=%2770%27 cy=%2770%27 r=%271.6%27/%3E%3C/g%3E%3C/svg%3E") 28 / var(--deco-w) round !important;
-  padding:.2em .35em !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-content{margin-top:auto;margin-bottom:auto}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-header{border:1.5px solid #d9ac2b;box-shadow:inset 0 0 0 3px rgba(217,172,43,.18)}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-surah-name,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-line{color:#e2b93b}
-body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-surah-name,
-body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-line{color:#9a7410}
-
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line{display:flex;flex-direction:row;justify-content:space-between;align-items:center;direction:rtl;height:var(--rd-lh);white-space:nowrap;line-height:1;text-align:start;text-align-last:auto}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line .ayah{flex:0 0 auto;white-space:nowrap;line-height:1}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.rd-fixed{display:flex;flex-direction:column;min-height:0;box-sizing:border-box;border:6px double var(--page-border,#fff);border-radius:3px;padding:.12em 0 .1em;width:100%;margin-left:auto;margin-right:auto}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header-row{padding:0 4px .25em;margin-bottom:.2em;flex:0 0 auto}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-footer-row{margin-top:0;padding:.2em 0 0;flex:0 0 auto;border-top:0}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content{flex:1 1 auto;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0;text-align:start;text-align-last:auto;word-spacing:0;position:relative;min-height:0}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line{display:flex;flex:0 0 auto;flex-direction:row;justify-content:space-between;align-items:center;direction:rtl;box-sizing:border-box;width:100%;height:var(--rd-lh);padding:0 var(--rd-pad,2.5px);gap:var(--rd-gap,.17em);white-space:nowrap;line-height:1;text-align:start;text-align-last:auto;border-bottom:1px solid currentColor;overflow:visible;margin:0;word-spacing:0}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line:last-child{border-bottom:0}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line .ayah{flex:0 0 auto;white-space:nowrap;line-height:1;padding:0}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line .mushaf-ayah-mark{margin:0 .26em 0 .04em;line-height:1.5}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line.has-juz{background:rgba(128,128,128,.22);border-radius:6px}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-name{white-space:nowrap}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content .ayah.juz-start{display:inline !important;margin:0 !important}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-content .ayah.juz-start::before{display:none}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header{flex:0 0 auto;width:100%;height:calc(var(--rd-lh) - 6px);margin:3px 0;padding:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:1.5px solid currentColor;border-radius:6px;overflow:hidden}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header::after{display:none}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-name{font-size:calc(var(--rd-lh) * .5);line-height:1;margin:0;white-space:nowrap;display:block}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header .mushaf-surah-meta{display:none}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-bismillah-line{flex:0 0 auto;width:100%;height:var(--rd-lh);margin:0;padding:0;border:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:.5em;line-height:1;white-space:nowrap;border-bottom:1px solid currentColor}
+.mushaf-ruku-mark{font-size:calc(var(--rd-f,1em) * .85) !important}
+/* pages 1 and 2: full-page ornamental decoration, text stretched across the panel */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page.rd-deco{border:0 !important;border-radius:0;background:transparent !important;box-shadow:none !important;padding:0 !important}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-header-row{border-bottom:0;padding-bottom:.35em}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-footer-row{border-top:0}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-content{background-size:100% 100%;background-repeat:no-repeat;align-items:center;justify-content:center;box-shadow:0 14px 36px rgba(0,0,0,.45)}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-line{width:var(--rd-w);border-bottom:0;color:#1b1b1b}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-book-header{width:var(--rd-w);border-color:#9c7314;color:#6b4a06;background:rgba(201,162,39,.14)}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-deco .mushaf-bismillah-line{width:var(--rd-w);border-bottom:0;color:#1b1b1b}
 </style>
 </head>
 <body class="page-dark tajweed-full">
@@ -11663,8 +11655,11 @@ applyUiFit();
 window.addEventListener('resize', applyUiFit);
 window.addEventListener('orientationchange', () => setTimeout(applyUiFit, 250));
 
-/* ===== Reader: fixed rows per page (16 portrait / 13 landscape), fit text to the screen ===== */
-const RD = { timer:0, lastW:0, lastH:0, deco:{ 1:{p:9,l:8}, 2:{p:12,l:10} } };
+/* ===== Reader: fixed rows per page (13 rows, portrait AND landscape), equal words per row ===== */
+/* Line breaks depend ONLY on the page text (never on screen size), so portrait and landscape show the same rows.
+   Every row of a text block holds the same number of words (differs by at most one when the word count is not
+   divisible by the row count), and each row is stretched edge to edge between the borders with a 2.5px gap. */
+const RD = { timer:0, lastW:0, lastH:0, ROWS:13, PAD:2.5, GAP:0.17, deco:{ 1:{rows:7}, 2:{rows:7} } };
 function rdIsLandscape(){ return window.innerWidth > window.innerHeight * 1.05; }
 function rdClear(){
   pageEl.classList.remove('rd-on');
@@ -11674,10 +11669,14 @@ function rdClear(){
   frame.classList.remove('rd-fixed','rd-deco'); frame.style.height = ''; frame.style.minHeight = '';
   frame.style.width = ''; frame.style.marginLeft = ''; frame.style.marginRight = '';
   const c = frame.querySelector('.mushaf-book-content');
-  if(c){ c.style.fontSize = ''; c.style.lineHeight = ''; c.style.flex = ''; c.style.minHeight = ''; c.style.overflow = ''; c.style.removeProperty('--rd-lh'); }
+  if(c){ c.style.fontSize = ''; c.style.lineHeight = ''; c.style.flex = ''; c.style.minHeight = ''; c.style.height = ''; c.style.overflow = ''; c.style.backgroundImage = ''; c.style.removeProperty('--rd-lh'); c.style.removeProperty('--rd-w'); c.style.removeProperty('--rd-gap'); }
 }
 /* --- word units, so a word is never split and every row can be filled evenly --- */
 const RD_BASE = /[ء-ؿف-يٮ-ۓۺ-ۿ]/;
+function rdSurahName(a){
+  const n = (a.surahName && String(a.surahName).trim()) || (SURAH_NAMES_AR[(a.surah || 1) - 1] || '');
+  return /^\s*(سورة|سُورَة)/.test(n) ? n : ('سورة ' + n);
+}
 function rdCollect(data, pageNumber){
   const segs = []; let cur = null; let lastSurah = -1;
   data.ayahs.forEach((a) => {
@@ -11693,9 +11692,14 @@ function rdCollect(data, pageNumber){
     const verseKey = a.surah + ':' + displayAyah;
     const meta = { surah:a.surah, ayah:displayAyah, verse:verseKey, page:pageNumber, ruku:(typeof a.ruku === 'number') ? a.ruku : null, total:a.surahNumberOfAyahs || 0 };
     const units = [];
+    let joinNext = false;
     text.trim().split(/\s+/).filter(Boolean).forEach((t) => {
-      if(units.length && !RD_BASE.test(t)) units[units.length - 1].text += ' ' + t;
+      if(units.length && !RD_BASE.test(t)) units[units.length - 1].text += ' ' + t;       /* stop signs stay with their word */
+      else if(units.length && joinNext){ units[units.length - 1].text += ' ' + t; joinNext = false; }
       else units.push({ text:t, meta });
+      /* a lone "و" is written apart in Indo-Pak text: keep it with the word after it (one word per slot) */
+      const baseOnly = t.replace(/[^ء-ي]/g, '');
+      if(baseOnly === 'و' && units[units.length - 1].text === t) joinNext = true;
     });
     if(!units.length) return;
     if(JUZ_START_VERSE[verseKey]) units[0].juz = true;
@@ -11720,32 +11724,119 @@ function rdUnitEl(u){
   }
   return el;
 }
-function rdGreedyCuts(ws, f, W, g){
-  const cuts = []; let start = 0, used = 0;
-  for(let i = 0; i < ws.length; i++){
-    const need = ws[i] * f + (i > start ? g * f : 0);
-    if(i > start && used + need > W + 0.01){ cuts.push([start, i]); start = i; used = ws[i] * f; }
-    else used += need;
+/* Split n word widths (in em) into R rows with an equal word count (q or q+1). Chooses which rows carry the
+   extra word so that the widest row is as narrow as possible (=> largest possible font). Returns [[a,b],...]. */
+function rdSplitEqual(ws, R, g){
+  const T = ws.length; R = Math.max(1, Math.min(R, T));
+  const q = Math.floor(T / R), r = T % R;
+  const pre = [0]; for(let i = 0; i < T; i++) pre.push(pre[i] + ws[i]);
+  const width = (a, b) => pre[b] - pre[a] + (b - a - 1) * g;
+  const dp = []; for(let k = 0; k <= R; k++){ dp.push(new Array(r + 1).fill(null)); }
+  dp[0][0] = { m:0, s:0, x:0 };
+  for(let k = 0; k < R; k++) for(let e = 0; e <= r; e++){
+    const st = dp[k][e]; if(!st) continue;
+    for(let x = 0; x <= 1; x++){
+      const e2 = e + x; if(e2 > r) continue;
+      const a = k * q + e, b = a + q + x; if(b > T) continue;
+      const w = width(a, b);
+      const m = Math.max(st.m, w), s = st.s + w * w;
+      const cur = dp[k + 1][e2];
+      if(!cur || m < cur.m - 1e-9 || (Math.abs(m - cur.m) < 1e-9 && s < cur.s)) dp[k + 1][e2] = { m, s, x, prev:e };
+    }
   }
-  cuts.push([start, ws.length]);
+  let e = r; const cuts = [];
+  for(let k = R; k >= 1; k--){
+    const st = dp[k][e]; const x = st.x; const b = k * q + e; const a = b - q - x;
+    cuts.unshift([a, b]); e = st.prev;
+  }
   return cuts;
 }
-function rdBalance(ws, n, f, W, g){
-  const N = ws.length; n = Math.max(1, Math.min(n, N));
-  const pre = [0]; for(let i = 0; i < N; i++) pre.push(pre[i] + ws[i]);
-  const cost = (a, b) => { const used = (pre[b] - pre[a]) * f + (b - a - 1) * g * f; const sl = (W - used) / W; return sl < -1e-6 ? Infinity : sl * sl; };
-  const dp = [], bk = [];
-  for(let k = 0; k <= n; k++){ dp.push(new Array(N + 1).fill(Infinity)); bk.push(new Array(N + 1).fill(0)); }
-  dp[0][0] = 0;
-  for(let k = 1; k <= n; k++) for(let j = k; j <= N; j++) for(let a = k - 1; a < j; a++){
-    if(dp[k - 1][a] === Infinity) continue;
-    const c = cost(a, j); if(c === Infinity) continue;
-    const v = dp[k - 1][a] + c; if(v < dp[k][j]){ dp[k][j] = v; bk[k][j] = a; }
+/* how many text rows each text block gets: proportional to its words, at least one, at most one per word */
+function rdAllocate(counts, total){
+  const T = counts.reduce((a, b) => a + b, 0);
+  const mu = T / Math.max(1, total);
+  const rows = counts.map(c => Math.max(1, Math.min(c, Math.round(c / mu))));
+  let sum = rows.reduce((a, b) => a + b, 0), guard = 400;
+  while(sum !== total && guard-- > 0){
+    let bi = -1, bv = sum < total ? -1 : Infinity;
+    counts.forEach((c, i) => {
+      const per = c / rows[i];
+      if(sum < total){ if(rows[i] < c && per > bv){ bv = per; bi = i; } }
+      else { if(rows[i] > 1 && per < bv){ bv = per; bi = i; } }
+    });
+    if(bi < 0) break;
+    rows[bi] += (sum < total) ? 1 : -1; sum += (sum < total) ? 1 : -1;
   }
-  if(dp[n][N] === Infinity) return null;
-  const cuts = []; let j = N;
-  for(let k = n; k >= 1; k--){ const a = bk[k][j]; cuts.unshift([a, j]); j = a; }
-  return cuts;
+  return rows;
+}
+/* ---- ornamental page decoration for pages 1 and 2 (original artwork, drawn to the real page size) ---- */
+function rdDecoSVG(W, H, tb, tt){
+  const cx = W / 2, band = Math.max(14, W * 0.07);
+  const x0 = band, x1 = W - band, y0 = band, y1 = H - band;
+  const cy = H / 2;
+  const bh = Math.max(tb, 40) / 2 + W * 0.035;           /* half height of the text body */
+  const yT = cy - bh, yB = cy + bh;
+  const hw = Math.min(tt / 2 + W * 0.03, (W / 2) - band - 5); /* half width of the panel body */
+  const pt = Math.min(hw + W * 0.035, (W / 2) - band - 2);    /* star points */
+  const nk = Math.max(8, W * 0.035);                      /* half width of the necks */
+  const yNT = y0 + (yT - y0) * 0.30, yNB = y1 - (y1 - yB) * 0.30;
+  const mid = (a, b, t) => a + (b - a) * t;
+  const L = (x) => (cx - x).toFixed(1), R = (x) => (cx + x).toFixed(1), Y = (y) => y.toFixed(1);
+  /* clockwise outline of the cream panel */
+  let d = 'M' + L(nk) + ' ' + Y(yNT)
+    + ' C' + L(nk) + ' ' + Y(mid(yNT, yT, .55)) + ' ' + L(hw * .55) + ' ' + Y(mid(yNT, yT, .75)) + ' ' + L(hw) + ' ' + Y(yT)
+    + ' L' + L(hw) + ' ' + Y(mid(yT, cy, .62))
+    + ' Q' + L(hw + (pt - hw) * .35) + ' ' + Y(mid(yT, cy, .86)) + ' ' + L(pt) + ' ' + Y(cy)
+    + ' Q' + L(hw + (pt - hw) * .35) + ' ' + Y(mid(cy, yB, .14)) + ' ' + L(hw) + ' ' + Y(mid(cy, yB, .38))
+    + ' L' + L(hw) + ' ' + Y(yB)
+    + ' C' + L(hw * .55) + ' ' + Y(mid(yB, yNB, .25)) + ' ' + L(nk) + ' ' + Y(mid(yB, yNB, .45)) + ' ' + L(nk) + ' ' + Y(yNB)
+    + ' L' + R(nk) + ' ' + Y(yNB)
+    + ' C' + R(nk) + ' ' + Y(mid(yB, yNB, .45)) + ' ' + R(hw * .55) + ' ' + Y(mid(yB, yNB, .25)) + ' ' + R(hw) + ' ' + Y(yB)
+    + ' L' + R(hw) + ' ' + Y(mid(cy, yB, .38))
+    + ' Q' + R(hw + (pt - hw) * .35) + ' ' + Y(mid(cy, yB, .14)) + ' ' + R(pt) + ' ' + Y(cy)
+    + ' Q' + R(hw + (pt - hw) * .35) + ' ' + Y(mid(yT, cy, .86)) + ' ' + R(hw) + ' ' + Y(mid(yT, cy, .62))
+    + ' L' + R(hw) + ' ' + Y(yT)
+    + ' C' + R(hw * .55) + ' ' + Y(mid(yNT, yT, .75)) + ' ' + R(nk) + ' ' + Y(mid(yNT, yT, .55)) + ' ' + R(nk) + ' ' + Y(yNT) + ' Z';
+  const medal = (my) => {
+    const rx = Math.min(W * 0.16, (x1 - x0) / 2 - 6), ry = rx * 0.5;
+    return '<g transform="translate(' + cx.toFixed(1) + ' ' + Y(my) + ')">'
+      + '<ellipse rx="' + (rx * 1.16).toFixed(1) + '" ry="' + (ry * 1.2).toFixed(1) + '" fill="#f6e7a6" stroke="#9c7314" stroke-width="1.6"/>'
+      + '<ellipse rx="' + rx.toFixed(1) + '" ry="' + ry.toFixed(1) + '" fill="#1b3a7a" stroke="#d9ac2b" stroke-width="2"/>'
+      + '<ellipse rx="' + (rx * .72).toFixed(1) + '" ry="' + (ry * .68).toFixed(1) + '" fill="none" stroke="#f6e7a6" stroke-width="1" stroke-dasharray="1 4" stroke-linecap="round"/>'
+      + '<g fill="#d9ac2b"><circle r="' + (ry * .26).toFixed(1) + '"/>'
+      + [0, 60, 120, 180, 240, 300].map(a => '<ellipse cx="' + (Math.cos(a * Math.PI / 180) * ry * .5).toFixed(1) + '" cy="' + (Math.sin(a * Math.PI / 180) * ry * .5).toFixed(1) + '" rx="' + (ry * .18).toFixed(1) + '" ry="' + (ry * .1).toFixed(1) + '" transform="rotate(' + a + ' ' + (Math.cos(a * Math.PI / 180) * ry * .5).toFixed(1) + ' ' + (Math.sin(a * Math.PI / 180) * ry * .5).toFixed(1) + ')"/>').join('')
+      + '</g></g>';
+  };
+  const tile = 22;
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">'
+    + '<defs>'
+    + '<pattern id="fl" width="' + tile + '" height="' + tile + '" patternUnits="userSpaceOnUse">'
+    + '<rect width="' + tile + '" height="' + tile + '" fill="#5d7a31"/>'
+    + '<path d="M11 1 L21 11 L11 21 L1 11Z" fill="none" stroke="#e8cf72" stroke-width=".9"/>'
+    + '<circle cx="11" cy="11" r="3.4" fill="#d8527a"/><circle cx="11" cy="11" r="1.4" fill="#f6e7a6"/>'
+    + '<circle cx="0" cy="0" r="3" fill="#1d3f86"/><circle cx="' + tile + '" cy="0" r="3" fill="#1d3f86"/><circle cx="0" cy="' + tile + '" r="3" fill="#1d3f86"/><circle cx="' + tile + '" cy="' + tile + '" r="3" fill="#1d3f86"/>'
+    + '<circle cx="11" cy="3" r="1.2" fill="#f6e7a6"/><circle cx="11" cy="19" r="1.2" fill="#f6e7a6"/><circle cx="3" cy="11" r="1.2" fill="#f6e7a6"/><circle cx="19" cy="11" r="1.2" fill="#f6e7a6"/>'
+    + '</pattern>'
+    + '<pattern id="bd" width="' + (band * 0.9).toFixed(1) + '" height="' + (band * 0.9).toFixed(1) + '" patternUnits="userSpaceOnUse">'
+    + '<rect width="' + band + '" height="' + band + '" fill="#1d3f86"/>'
+    + '<path d="M' + (band * .45).toFixed(1) + ' 1 L' + (band * .88).toFixed(1) + ' ' + (band * .45).toFixed(1) + ' L' + (band * .45).toFixed(1) + ' ' + (band * .88).toFixed(1) + ' L2 ' + (band * .45).toFixed(1) + 'Z" fill="#c9a227"/>'
+    + '<circle cx="' + (band * .45).toFixed(1) + '" cy="' + (band * .45).toFixed(1) + '" r="' + (band * .13).toFixed(1) + '" fill="#d8527a"/>'
+    + '</pattern>'
+    + '<linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7e6a0"/><stop offset=".5" stop-color="#c9a227"/><stop offset="1" stop-color="#8a6510"/></linearGradient>'
+    + '</defs>'
+    /* ornament field */
+    + '<rect width="' + W + '" height="' + H + '" fill="url(#fl)"/>'
+    /* outer border band */
+    + '<path fill-rule="evenodd" fill="url(#bd)" d="M0 0H' + W + 'V' + H + 'H0Z M' + (band * .72).toFixed(1) + ' ' + (band * .72).toFixed(1) + 'H' + (W - band * .72).toFixed(1) + 'V' + (H - band * .72).toFixed(1) + 'H' + (band * .72).toFixed(1) + 'Z"/>'
+    + '<rect x="1.5" y="1.5" width="' + (W - 3) + '" height="' + (H - 3) + '" fill="none" stroke="url(#gd)" stroke-width="3"/>'
+    + '<rect x="' + (band * .72).toFixed(1) + '" y="' + (band * .72).toFixed(1) + '" width="' + (W - band * 1.44).toFixed(1) + '" height="' + (H - band * 1.44).toFixed(1) + '" fill="none" stroke="url(#gd)" stroke-width="2.2"/>'
+    + '<rect x="' + (band * .72 + 3.5).toFixed(1) + '" y="' + (band * .72 + 3.5).toFixed(1) + '" width="' + (W - band * 1.44 - 7).toFixed(1) + '" height="' + (H - band * 1.44 - 7).toFixed(1) + '" fill="none" stroke="#f6e7a6" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>'
+    /* cream panel with gold edge */
+    + '<path d="' + d + '" fill="#fbf3d6" stroke="url(#gd)" stroke-width="3.2" stroke-linejoin="round"/>'
+    + '<path d="' + d + '" fill="none" stroke="#7a8f4a" stroke-width="1" transform="translate(' + cx + ' ' + cy + ') scale(.965 .975) translate(' + (-cx) + ' ' + (-cy) + ')"/>'
+    + '<path d="' + d + '" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="0.1 6" stroke-linecap="round" transform="translate(' + cx + ' ' + cy + ') scale(1.015 1.008) translate(' + (-cx) + ' ' + (-cy) + ')"/>'
+    + medal(mid(y0, yNT, .45)) + medal(mid(yNB, y1, .55))
+    + '</svg>';
 }
 function rdFit(){
   if(!viewerOpen || viewerMode !== 'read' || !pageEl.classList.contains('mushaf-book')) return;
@@ -11765,94 +11856,90 @@ function rdFit(){
   }
   const land = rdIsLandscape();
   const deco = (pageNo === 1 || pageNo === 2);
-  const N = deco ? RD.deco[pageNo][land ? 'l' : 'p'] : 13; /* v5: 13 rows portrait AND landscape */
+  const N = deco ? RD.deco[pageNo].rows : RD.ROWS;
+  const PAD = RD.PAD, g = RD.GAP;
   pageEl.classList.add('rd-on');
   frame.classList.add('rd-fixed'); frame.classList.toggle('rd-deco', deco);
   frame.style.minHeight = '0'; frame.style.width = ''; frame.style.marginLeft = ''; frame.style.marginRight = '';
-  let Hc = 0;
-  if(!land){
-    const cs = getComputedStyle(pageEl);
-    const avail = pageEl.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
-    frame.style.height = Math.max(120, avail) + 'px';
-    content.style.minHeight = '0'; content.style.overflow = 'hidden'; content.style.flex = '1 1 0';
-    Hc = content.clientHeight;
-    content.style.flex = ''; content.style.minHeight = ''; content.style.overflow = '';
-  } else { frame.style.height = ''; }
+  content.style.height = ''; content.style.backgroundImage = '';
+  const cs = getComputedStyle(pageEl);
+  const availH = Math.max(120, pageEl.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0));
+  const W0 = frame.clientWidth - (parseFloat(getComputedStyle(frame).paddingLeft) || 0) - (parseFloat(getComputedStyle(frame).paddingRight) || 0);
+  if(!(W0 > 60)) return;
+  /* frame size */
+  let frameW = 0;
+  if(deco && land){
+    frameW = Math.max(400, Math.min(W0, availH / 1.05, 580));
+    frame.style.width = frameW + 'px'; frame.style.marginLeft = 'auto'; frame.style.marginRight = 'auto';
+  }
+  if(!land){ frame.style.height = availH + 'px'; } else { frame.style.height = ''; }
+  const Wc = content.clientWidth;
+  let Hc;
+  if(!land){ content.style.flex = '1 1 0'; content.style.minHeight = '0'; content.style.overflow = 'hidden'; Hc = content.clientHeight; content.style.flex = ''; content.style.minHeight = ''; content.style.overflow = ''; }
+  else if(deco){ Hc = Math.round(Wc * 1.3); content.style.height = Hc + 'px'; }
+  else Hc = 0;
   const segs = rdCollect(data, pageNo);
   const textSegs = segs.filter(x => x.kind === 'text');
   if(!textSegs.length) return;
   const specials = segs.length - textSegs.length;
   const Lt = Math.max(textSegs.length, N - specials);
-  const W0 = content.clientWidth;
-  if(!(W0 > 20)) return;
-  /* measure every word at 100px */
-  const meas = document.createElement('div');
-  meas.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;display:flex;flex-wrap:nowrap;width:max-content;font-size:100px;line-height:1;direction:rtl;white-space:nowrap;pointer-events:none';
+  /* ---- measure every word at 100px, inside the real row context so marks/margins are counted ---- */
+  const prevFs = content.style.fontSize; content.style.fontSize = '100px';
+  const meas = document.createElement('div'); meas.className = 'mushaf-line rd-meas';
+  meas.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;width:max-content;height:auto;gap:0;padding:0;border:0;overflow:visible;pointer-events:none';
   content.appendChild(meas);
   textSegs.forEach(sg => sg.units.forEach(u => { u.el = rdUnitEl(u); meas.appendChild(u.el); }));
   textSegs.forEach(sg => sg.units.forEach(u => { u.w = u.el.getBoundingClientRect().width / 100; }));
-  meas.remove();
-  const g = 0.14;
+  let bismW = 0;
+  if(segs.some(s => s.kind === 'bism')){ meas.textContent = ''; const bt = document.createElement('span'); bt.textContent = '۞ ' + IP_BISMILLAH + ' ۞'; meas.appendChild(bt); bismW = bt.getBoundingClientRect().width / 100; }
+  meas.remove(); content.style.fontSize = prevFs;
+  /* ---- allocate rows, split with equal word counts ---- */
   const groups = textSegs.map(sg => sg.units.map(u => u.w));
-  const countAt = (f, W) => groups.reduce((n, ws) => n + rdGreedyCuts(ws, f, W, g).length, 0);
-  const lh0 = land ? 0 : Hc / N;
-  const fcap = land ? (deco ? 36 : 48) : Math.min(52, lh0 / 2.5); /* v5: line 2.5x font so marks fit inside line */
-  let fFit = 7;
-  if(countAt(7, W0) <= Lt){
-    let lo = 7, hi = 200;
-    for(let k = 0; k < 18; k++){ const mid = (lo + hi) / 2; if(countAt(mid, W0) <= Lt) lo = mid; else hi = mid; }
-    fFit = lo;
+  const alloc = rdAllocate(groups.map(ws => ws.length), Lt);
+  const cutsAll = groups.map((ws, i) => rdSplitEqual(ws, alloc[i], g));
+  let maxNat = 0;
+  cutsAll.forEach((cuts, i) => cuts.forEach(([a, b]) => { let t = 0; for(let k = a; k < b; k++) t += groups[i][k]; t += (b - a - 1) * g; if(t > maxNat) maxNat = t; }));
+  const R = specials + cutsAll.reduce((n, c) => n + c.length, 0);
+  /* ---- font size: the widest row fills the space between the borders (2.5px each side) ---- */
+  const Wt = deco ? Math.floor(Wc * 0.70) : Wc;
+  let f = (Wt - 2 * PAD) / maxNat;
+  let lh;
+  if(!land){
+    lh = Hc / Math.max(N, R);
+    if(deco) lh = Math.min(lh, Math.max(f * 2.3, 20));
+    f = Math.min(f, lh / 2.25);
+  } else {
+    const cap = deco ? 36 : 48;
+    f = Math.min(f, cap);
+    lh = f * 2.35;
   }
-  let f = Math.min(fFit, fcap), W = W0;
-  if(fFit > fcap){
-    let wl = W0 * 0.35, wh = W0;
-    if(countAt(f, wl) <= Lt) W = wl;
-    else { for(let k = 0; k < 18; k++){ const mid = (wl + wh) / 2; if(countAt(f, mid) <= Lt) wh = mid; else wl = mid; } W = wh; }
+  let rowW = Wt;
+  if(land && !deco){
+    /* shrink the frame so the widest row still touches both borders (no loose gaps) */
+    rowW = Math.ceil(maxNat * f + 2 * PAD + 0.5);
+    const extra = frame.offsetWidth - Wc;
+    if(rowW < Wc - 1){ frame.style.width = (rowW + extra) + 'px'; frame.style.marginLeft = 'auto'; frame.style.marginRight = 'auto'; }
   }
-  const want = groups.map(ws => rdGreedyCuts(ws, f, W, g).length);
-  let extra = Lt - want.reduce((a, b) => a + b, 0);
-  while(extra > 0){
-    let bi = -1, br = -1;
-    groups.forEach((ws, i) => {
-      if(want[i] >= ws.length) return;
-      const tot = ws.reduce((a, b) => a + b, 0) * f + (ws.length - 1) * g * f;
-      const ratio = tot / (want[i] * W);
-      if(ratio > br){ br = ratio; bi = i; }
-    });
-    if(bi < 0) break;
-    want[bi]++; extra--;
-  }
-  const finalCuts = groups.map((ws, i) => rdBalance(ws, want[i], f, W, g) || rdGreedyCuts(ws, f, W, g));
-  const R = specials + finalCuts.reduce((n, c) => n + c.length, 0);
-  const lh = land ? f * 2.5 : (R > N ? Hc / R : lh0);
-  /* build the rows */
+  if(deco){ rowW = Math.ceil(maxNat * f + 2 * PAD + 0.5); rowW = Math.min(rowW, Wt); if(rowW < Wt * 0.97 && !land){ /* keep full-width justified rows */ rowW = Wt; } }
+  /* ---- build the rows ---- */
   const frag = document.createDocumentFragment();
   let gi = 0;
+  const bismFont = Math.max(8, Math.min(f * 1.25, (rowW - 2 * PAD) * 0.94 / (bismW || 1)));
   segs.forEach((sg) => {
     if(sg.kind === 'banner'){
-      const a = sg.a, h = document.createElement('div'); h.className = 'mushaf-book-header';
-      h.innerHTML = '<div class="mushaf-surah-name">' + escapeHtml(a.surahName || '') + '</div>';
-      h.dataset.bismHost = '1'; frag.appendChild(h);
+      const h = document.createElement('div'); h.className = 'mushaf-book-header';
+      const nm = document.createElement('div'); nm.className = 'mushaf-surah-name'; nm.textContent = rdSurahName(sg.a);
+      h.appendChild(nm); frag.appendChild(h);
     } else if(sg.kind === 'bism'){
-      const host = frag.querySelector('.mushaf-book-header[data-bism-host="1"]');
-      if(host){
-        const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
-        const o1 = document.createElement('span'); o1.className = 'bism-orn'; o1.setAttribute('aria-hidden','true'); o1.textContent = '۞';
-        const tt = document.createElement('span'); tt.className = 'bism-text'; tt.textContent = IP_BISMILLAH;
-        const o2 = document.createElement('span'); o2.className = 'bism-orn'; o2.setAttribute('aria-hidden','true'); o2.textContent = '۞';
-        b.appendChild(o1); b.appendChild(tt); b.appendChild(o2); host.appendChild(b); host.dataset.bismHost = '0'; sg._merged = true;
-      }
-      if(sg._merged){ }
-      else {
-      const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
       const b = document.createElement('div'); b.className = 'mushaf-bismillah-line';
       const o1 = document.createElement('span'); o1.className = 'bism-orn'; o1.setAttribute('aria-hidden','true'); o1.textContent = '۞';
-      const t = document.createElement('span'); t.className = 'bism-text'; t.textContent = IP_BISMILLAH;
+      const tt = document.createElement('span'); tt.className = 'bism-text'; tt.textContent = IP_BISMILLAH;
       const o2 = document.createElement('span'); o2.className = 'bism-orn'; o2.setAttribute('aria-hidden','true'); o2.textContent = '۞';
-      b.appendChild(o1); b.appendChild(t); b.appendChild(o2); frag.appendChild(b);
-      }
+      b.appendChild(o1); b.appendChild(tt); b.appendChild(o2);
+      b.style.fontSize = bismFont + 'px';
+      frag.appendChild(b);
     } else {
-      finalCuts[gi++].forEach(([a, b]) => {
+      cutsAll[gi++].forEach(([a, b]) => {
         const line = document.createElement('div'); line.className = 'mushaf-line';
         for(let k = a; k < b; k++){ line.appendChild(sg.units[k].el); if(sg.units[k].juz) line.classList.add('has-juz'); }
         frag.appendChild(line);
@@ -11861,10 +11948,15 @@ function rdFit(){
   });
   content.textContent = '';
   content.appendChild(frag);
-  content.style.fontSize = f + 'px'; content.style.lineHeight = lh + 'px'; content.style.setProperty('--rd-lh', (lh - 2) + 'px'); /* v5: 2px gap between lines taken out of line height */
-  if(land && W < W0 - 1){ frame.style.width = (W + (frame.offsetWidth - W0)) + 'px'; frame.style.marginLeft = 'auto'; frame.style.marginRight = 'auto'; }
-  else if(!land){ frame.style.width = ''; frame.style.marginLeft = ''; frame.style.marginRight = ''; } /* v5: portrait keeps fixed full-width frame */
+  content.style.fontSize = f + 'px'; content.style.lineHeight = lh + 'px';
+  content.style.setProperty('--rd-lh', lh + 'px'); content.style.setProperty('--rd-w', rowW + 'px'); content.style.setProperty('--rd-gap', (g * f) + 'px');
+  content.style.setProperty('--rd-pad', PAD + 'px');
   inner.style.setProperty('--rd-f', f + 'px');
+  if(deco){
+    const bodyH = Math.max(N, R) * lh;
+    const svg = rdDecoSVG(Math.round(Wc), Math.round(land ? Hc : Hc), bodyH, rowW);
+    content.style.backgroundImage = 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")';
+  }
   scheduleRukuReplace();
 }
 function rdScheduleFit(){
@@ -13841,32 +13933,42 @@ window.addEventListener('contextmenu', function(event) {
 <!-- FIX v5 -->
 <style id="quran-fix-v5">
 html{ font-size:20px !important; -webkit-text-size-adjust:100% !important; text-size-adjust:100% !important; }
-.rd-fixed .mushaf-line, .mushaf-book-content .mushaf-line{
-  justify-content:space-between !important; gap:.14em !important; align-items:center !important;
-  margin:0 0 2px !important; padding:.14em 2px !important; box-sizing:border-box !important;
-  border-bottom:1px solid currentColor !important; overflow:hidden !important; width:100% !important;
-}
-.rd-fixed .mushaf-line .ayah, .mushaf-book-content .mushaf-line .ayah{ flex:0 0 auto !important; white-space:nowrap !important; line-height:1 !important; }
-.rd-deco.mushaf-book-page, .mushaf-book-page.rd-deco{ width:100% !important; height:100% !important; min-height:100% !important; margin-left:auto !important; margin-right:auto !important; box-sizing:border-box !important; }
-.rd-deco .mushaf-book-content{ width:100% !important; height:100% !important; }
-.rd-deco .mushaf-line{ justify-content:space-between !important; padding:.14em 2px !important; width:100% !important; }
-.mushaf-book-page{ border-width:12px !important; box-sizing:border-box !important; width:100% !important; margin-left:auto !important; margin-right:auto !important; }
-.mushaf-book-header{ height:auto !important; min-height:0 !important; display:block !important; padding:.5em .6em .55em !important; margin:0 0 2px !important; box-sizing:border-box !important; overflow:hidden !important; }
-.mushaf-book-header .mushaf-surah-name{ display:block !important; line-height:1.4 !important; }
-.mushaf-book-header .mushaf-bismillah-line{ display:flex !important; flex-wrap:wrap !important; align-items:center !important; justify-content:center !important; white-space:normal !important; line-height:1.9 !important; font-size:.92em !important; padding:.45em 0 0 !important; margin:.4em 0 0 !important; border-top:1px solid currentColor !important; gap:.4em !important; -webkit-text-stroke:0 !important; }
-@media (orientation:landscape){ .mushaf-book{ overflow-y:auto !important; overflow-x:hidden !important; } .mushaf-book-page{ margin-left:auto !important; margin-right:auto !important; } .mushaf-book-content{ padding-bottom:24px !important; } }
 .mushaf-book-page, .mushaf-book-content, .mushaf-line, .ayah{ -webkit-text-stroke:0 !important; -webkit-font-smoothing:antialiased !important; text-rendering:optimizeLegibility !important; font-feature-settings:"kern" 1,"liga" 1,"calt" 1,"rlig" 1,"mark" 1,"mkmk" 1 !important; }
-@media (max-width:600px){
-  .feature-tab .ft-text strong{ font-size:.70rem !important; line-height:1.15 !important; }
-  .feature-tab .ft-text small{ font-size:.52rem !important; line-height:1.2 !important; }
-  .feature-tab{ padding:8px 10px !important; gap:6px !important; min-height:52px !important; }
-  .ft-icon{ width:32px !important; height:32px !important; font-size:1.05rem !important; }
-  .index-tab{ font-size:.78rem !important; height:38px !important; padding:0 6px !important; }
-  .ps-tab{ font-size:.64rem !important; height:32px !important; padding:0 8px !important; }
-  .fs-text-tab{ font-size:.58rem !important; height:30px !important; padding:0 8px !important; }
-  .dash-top-tabs .streak-label{ font-size:.50rem !important; }
-  .dash-top-tabs .streak-count{ font-size:.82rem !important; }
-}
 </style>
+<style id="tabs-fit">
+/* ===== Tab / tile text: slightly smaller and neat on phones, laptops and wide PCs =====
+   Sizes are final on-screen pixels; the whole-app zoom used on wide screens (--uz) is divided out
+   so the text no longer balloons on laptops / PCs. */
+:root{--tt:14px;--ts:10.5px;--tb:13px;--ti:20px}
+@media (min-width:600px){:root{--tt:15px;--ts:11.5px;--tb:13.5px}}
+@media (min-width:900px){:root{--tt:17px;--ts:12.5px;--tb:14.5px}}
+.tile-title{font-size:calc(var(--tt) / var(--uz,1)) !important;line-height:1.2 !important}
+.tile-sub{font-size:calc(var(--ts) / var(--uz,1)) !important;line-height:1.3 !important}
+.tile-list-item,#tileDashboard .tile-list-item{font-size:calc(var(--ts) / var(--uz,1)) !important}
+.tile{min-height:calc(118px / var(--uz,1)) !important;padding:14px 14px !important;gap:7px !important}
+.tile-icon{width:calc(44px / var(--uz,1)) !important;height:calc(44px / var(--uz,1)) !important;font-size:calc(var(--ti) / var(--uz,1)) !important;border-radius:12px !important}
+#tileDashboard .tile-icon{width:calc(34px / var(--uz,1)) !important;height:calc(34px / var(--uz,1)) !important}
+.ft-text strong{font-size:calc(var(--tb) / var(--uz,1)) !important;line-height:1.2 !important;white-space:normal !important}
+.ft-text small{font-size:calc(var(--ts) / var(--uz,1)) !important;line-height:1.25 !important;white-space:normal !important}
+.feature-tab{min-height:calc(54px / var(--uz,1)) !important;padding:9px 11px !important;gap:8px !important}
+.ft-icon,.dash-top-tabs .streak-fire{width:calc(34px / var(--uz,1)) !important;height:calc(34px / var(--uz,1)) !important;font-size:calc(17px / var(--uz,1)) !important}
+.dash-top-tabs .streak-count{font-size:calc(14px / var(--uz,1)) !important}
+.dash-top-tabs .streak-label,.dash-top-tabs .streak-best{font-size:calc(10px / var(--uz,1)) !important}
+.coach-text strong{font-size:calc(var(--tt) / var(--uz,1)) !important}
+.coach-text small{font-size:calc(var(--ts) / var(--uz,1)) !important}
+.hijri-main{font-size:calc(var(--tt) / var(--uz,1)) !important}
+.hijri-sub{font-size:calc(9.5px / var(--uz,1)) !important}
+.hijri-alt{font-size:calc(var(--ts) / var(--uz,1)) !important}
+.hijri-main .hijri-day-month{white-space:normal !important}
+.hijri-card{min-height:calc(84px / var(--uz,1)) !important;padding:8px 10px !important;overflow:visible !important}
+.hijri-alt{line-height:1.35 !important;white-space:nowrap}
+.home-menu-item,.home-menu-item .hmi-text strong{font-size:calc(var(--tb) / var(--uz,1)) !important}
+.home-menu-item .hmi-text small{font-size:calc(var(--ts) / var(--uz,1)) !important}
+.index-tab{font-size:calc(var(--tb) / var(--uz,1)) !important;height:calc(38px / var(--uz,1)) !important;padding:0 8px !important;white-space:nowrap}
+.ps-tab{font-size:calc(12px / var(--uz,1)) !important;height:calc(32px / var(--uz,1)) !important;padding:0 10px !important}
+.fs-controls .fs-text-tab,.fs-text-tab{font-size:calc(11px / var(--uz,1)) !important;height:calc(30px / var(--uz,1)) !important;padding:0 10px !important}
+html.ui-fit .qv-top,html.ui-fit .qv-bottom{zoom:var(--uzc,1)}
+</style>
+
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 </body></html>
