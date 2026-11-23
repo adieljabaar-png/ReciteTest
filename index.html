@@ -1054,14 +1054,10 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 body.page-dark.viewer-read-mode.viewer-translation-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah .translation{background:rgba(255,255,255,.08);}
 body.page-light.viewer-read-mode.viewer-translation-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah .translation{background:rgba(0,0,0,.05);}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start{
-display:block;position:relative;background:transparent !important;color:inherit !important;
-padding:0;margin:10px 0;box-shadow:none !important;opacity:1 !important;
+display:inline !important;position:relative;background:transparent !important;color:inherit !important;
+padding:0 !important;margin:0 !important;box-shadow:none !important;opacity:1 !important;
 }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{
-content:'';position:absolute;left:-6px;right:-6px;top:0;height:2.25em;height:1lh;
-background:#ffffff;border-radius:8px;mix-blend-mode:difference;-webkit-mix-blend-mode:difference;
-pointer-events:none;z-index:0;
-}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{display:none !important;content:none !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start .mushaf-ayah-mark{border-color:currentColor !important;}
 .mushaf-page-num{display:block;text-align:center;margin:0 0 14px;padding:0;font-family:'Amiri','Amiri Quran',serif;color:currentColor;font-size:1.05rem;letter-spacing:.14em;opacity:.8;border:none;}
 .mushaf-ruku-mark{
@@ -2646,6 +2642,44 @@ body.light-mode .share-arabic{color:#1a2233;}
   @media (orientation: landscape) and (min-width: 900px){
     .app{max-width:1200px}
   }
+</style>
+<style id="reader-thirteen-row-layout">
+/* 13-line Quran reader layout: the fit script below tunes type size on each device. */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book{
+  font-size:var(--reader-fit-font, 1.35rem) !important;
+  line-height:1.78 !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{
+  height:100% !important; min-height:0 !important; box-sizing:border-box !important;
+  overflow:hidden !important; padding:8px 8px 6px !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
+  line-height:1.78 !important; padding:0 1px 1px !important;
+  word-spacing:.045em !important; overflow:visible !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah{
+  display:inline !important; margin:0 !important; padding:0 !important;
+  white-space:normal !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .mushaf-ayah-mark{
+  display:inline-block !important; vertical-align:middle !important;
+  line-height:1.35 !important; margin:0 .12em !important; padding:0 .14em !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header{
+  padding:1px 0 5px !important; margin:3px 0 5px !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-bismillah-line{
+  padding:0 !important; margin:0 !important; line-height:1.45 !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-header-row{
+  margin-bottom:6px !important; padding-bottom:4px !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-footer-row{
+  margin-top:5px !important; padding:4px 0 0 !important;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-ruku-mark{
+  display:none !important;
+}
 </style>
 </head>
 <body class="page-dark tajweed-full">
@@ -10712,6 +10746,75 @@ function scheduleRukuReplace(){
 }
 window.addEventListener('resize', scheduleRukuReplace);
 window.addEventListener('orientationchange', scheduleRukuReplace);
+
+/* Keep the reader at 13 Quran text rows in both orientations.
+   Landscape starts from a width-scaled font so the words-per-line density
+   tracks the portrait layout; the final fit pass prevents clipping. */
+let readerPortraitWidth = 0;
+let readerPortraitFont = 0;
+let readerFitQueued = false;
+function queueReaderThirteenRowFit(){
+  if(readerFitQueued) return;
+  readerFitQueued = true;
+  requestAnimationFrame(() => {
+    readerFitQueued = false;
+    fitReaderThirteenRows();
+  });
+}
+function fitReaderThirteenRows(){
+  if(!document.body.classList.contains('viewer-read-mode')) return;
+  const page = pageEl && pageEl.querySelector('.mushaf-book-page');
+  const content = page && page.querySelector('.mushaf-book-content');
+  if(!page || !content) return;
+  const width = content.clientWidth;
+  if(!width) return;
+  const isLandscape = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
+  if(!isLandscape) readerPortraitWidth = width;
+  const base = parseFloat(getComputedStyle(pageEl).fontSize) || 16;
+  const ratio = (isLandscape && readerPortraitWidth > 0) ? width / readerPortraitWidth : 1;
+  const portraitBase = readerPortraitFont || base;
+  let start = Math.max(8, Math.min(64, (isLandscape ? portraitBase * ratio : base)));
+  const textLineCount = () => {
+    const tops = [];
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const parent = node.parentElement;
+        if(parent && (parent.closest('.mushaf-ayah-mark,.mushaf-bismillah-line,.translation'))) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    let node;
+    while((node = walker.nextNode())){
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      for(const rect of range.getClientRects()){
+        if(rect.width > 0 && rect.height > 0) tops.push(Math.round(rect.top));
+      }
+    }
+    return new Set(tops).size;
+  };
+  // Binary search the font size to target 13 visible Arabic text baselines.
+  let low = isLandscape ? Math.max(8, start * 0.72) : 8;
+  let high = isLandscape ? Math.min(64, start * 1.35) : 54;
+  let best = start, bestDiff = Infinity;
+  for(let i = 0; i < 15; i++){
+    const mid = (low + high) / 2;
+    pageEl.style.setProperty('--reader-fit-font', mid + 'px');
+    const rows = textLineCount();
+    const diff = Math.abs(rows - 13);
+    if(diff < bestDiff){ best = mid; bestDiff = diff; }
+    if(rows > 13) high = mid;
+    else low = mid;
+  }
+  pageEl.style.setProperty('--reader-fit-font', best + 'px');
+  if(!isLandscape) readerPortraitFont = best;
+  // Avoid a tajweed/waqf glyph crossing the frame edge after font fitting.
+  content.querySelectorAll('.ayah').forEach(el => { el.style.breakInside = 'avoid'; });
+}
+window.addEventListener('resize', queueReaderThirteenRowFit, {passive:true});
+window.addEventListener('orientationchange', () => setTimeout(queueReaderThirteenRowFit, 80), {passive:true});
+
 function renderReaderPage(pageNumber, token){
   const page = readerState.pages.get(pageNumber);
   if(!page) return;
@@ -10787,6 +10890,7 @@ function renderReaderPage(pageNumber, token){
   frame.appendChild(footer);
   inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTop = 0;
   scheduleRukuReplace();
+  queueReaderThirteenRowFit();
   if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
   else if(surahsOnPage.length > 1) qvTitle.textContent = surahsOnPage.map(a => a.surahEnglishName).join(' · ');
   else qvTitle.textContent = 'Page ' + pageNumber;
