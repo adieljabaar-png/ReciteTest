@@ -2835,39 +2835,6 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book.rz-on{
 }
 </style>
 
-
-<style id="quran-reference-style-update">
-/* Reference-page typography: +2px with more compact line spacing. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book{font-size:calc(clamp(1.5rem,6.2vw,2.1rem) + 2px);line-height:2.15;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{line-height:2.15;}
-/* Juz indicator: only the opening row/verse is reversed to white on black. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start{
-  background:#242222 !important;color:#fff !important;border-radius:0 !important;
-  padding:.04em .16em !important;margin:8px 0 !important;box-decoration-break:clone;-webkit-box-decoration-break:clone;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{display:none !important;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start .mushaf-ayah-mark{color:#fff !important;border-color:#fff !important;}
-/* The fixed-page reader marks the row containing the Juz opening verse. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line.has-juz{
-  background:#242222 !important;color:#fff !important;border-radius:0 !important;
-  border-bottom-color:#242222 !important;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line.has-juz .ayah,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line.has-juz .mushaf-ayah-mark{color:#fff !important;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-line.has-juz .mushaf-ayah-mark{border-color:#fff !important;}
-/* Bismillah plaque: retain the Arabic Quranic ornaments on both sides and give them the same visual weight as the reference. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-bismillah-line,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-bismillah-in-header{gap:.38em;}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-bismillah-line .bism-orn,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-bismillah-in-header .bism-orn{
-  font-family:'Amiri','Amiri Quran','IndoPakNastaleeq',serif;font-size:1.12em;font-weight:700;opacity:1;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-bismillah-line .bism-text,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-bismillah-in-header .bism-text{
-  font-family:'IndoPakNastaleeq','Amiri','Amiri Quran',serif;font-weight:600;
-}
-</style>
-
 </head>
 <body class="page-dark tajweed-full surah-mode">
 <script>
@@ -12045,8 +12012,6 @@ function rdFit(){
     f = Math.min(f, cap);
     lh = f * 2.35;
   }
-  /* Slightly larger Quran text, with a tighter line-height to preserve the page fit. */
-  f = f + 2;
   let rowW = Wt;
   if(land && !deco){
     /* shrink the frame so the widest row still touches both borders (no loose gaps) */
@@ -12090,7 +12055,7 @@ function rdFit(){
   content.textContent = '';
   content.appendChild(frag);
   content.style.fontSize = f + 'px'; content.style.lineHeight = lh + 'px';
-  content.style.setProperty('--rd-lh', lh + 'px'); content.style.setProperty('--rd-w', rowW + 'px'); content.style.setProperty('--rd-gap', Math.max(0, g * f - 1.5) + 'px');
+  content.style.setProperty('--rd-lh', lh + 'px'); content.style.setProperty('--rd-w', rowW + 'px'); content.style.setProperty('--rd-gap', (g * f) + 'px');
   content.style.setProperty('--rd-pad', PAD + 'px');
   inner.style.setProperty('--rd-f', f + 'px');
   if(deco){
