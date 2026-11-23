@@ -2988,7 +2988,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header
       <button type="button" class="continue-btn" disabled="">Resume</button>
     </div>
   </div>
-  <div class="surah-list" id="surahIndexList"><div class="loading"><span class="err">⚠️ Could not load the surah list.</span>Check your connection and try again.</div></div>
+  <div class="surah-list" id="surahIndexList"><div class="loading">Loading…</div></div>
 </div>
 <div class="app screen" id="screenJuzIndex" hidden="">
   <div class="sub-header">
@@ -3088,7 +3088,7 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .rd-fixed .mushaf-book-header
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">23 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">06:50</span>
+    <span class="pdr-item pdr-time" id="pdrTime">07:19</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -11849,7 +11849,7 @@ function rdFit(){
   });
   content.textContent = '';
   content.appendChild(frag);
-  content.style.fontSize = f + 'px'; content.style.lineHeight = lh + 'px'; content.style.setProperty('--rd-lh', lh + 'px');
+  content.style.fontSize = f + 'px'; content.style.lineHeight = lh + 'px'; content.style.setProperty('--rd-lh', (lh - 2) + 'px'); /* v3: 2px gap between lines, taken out of the line height so nothing overflows */
   if(W < W0 - 1){
     frame.style.width = (W + (frame.offsetWidth - W0)) + 'px'; frame.style.marginLeft = 'auto'; frame.style.marginRight = 'auto';
   }
@@ -13827,47 +13827,33 @@ window.addEventListener('contextmenu', function(event) {
 </script>
 
 
-<!-- FIX 2026-11-23 v2: RD layout preserved, centred rows, 16/13 lines, +4px app text -->
-<style id="quran-fix-v2">
+
+<!-- FIX v3: work WITH the reader's measuring, never against it -->
+<style id="quran-fix-v3">
+/* App text +4px per 1rem, auto-scales with device. Quran text is sized in px by RD, so it is NOT touched by this. */
 html{ font-size:20px !important; -webkit-text-size-adjust:100% !important; text-size-adjust:100% !important; }
-.mushaf-book-page{ border-width:6px !important; box-sizing:border-box !important; overflow:visible !important; }
-.mushaf-book-content{ display:flex !important; flex-direction:column !important; gap:2px !important; overflow:visible !important; padding:0 !important; }
+/* Quran frame 6px (was 4px) */
+.mushaf-book-page{ border-width:6px !important; box-sizing:border-box !important; }
+/* Rows: RD already measured every word + a 0.14em gap. Use EXACTLY that gap, centred,
+   instead of space-between (which stretched short rows edge-to-edge) and instead of the
+   v2 0.38em gap (which made every row wider than RD measured -> sideways overflow).
+   2px gap ONLY between lines: margin-bottom, paid for by the lh-2 patch in rdFit(). */
 .rd-fixed .mushaf-line, .mushaf-book-content .mushaf-line{
-  display:flex !important; flex-direction:row !important; justify-content:center !important; align-items:center !important;
-  direction:rtl !important; white-space:nowrap !important; flex-wrap:nowrap !important;
-  height:var(--rd-lh) !important; line-height:1 !important; gap:.38em !important;
-  border-bottom:1px solid currentColor !important; overflow:visible !important; padding:0 !important; margin:0 !important; box-sizing:border-box !important;
+  justify-content:center !important; gap:.14em !important;
+  margin:0 0 2px !important; box-sizing:border-box !important;
+  border-bottom:1px solid currentColor !important; overflow:visible !important;
 }
 .rd-fixed .mushaf-line .ayah, .mushaf-book-content .mushaf-line .ayah{
-  flex:0 0 auto !important; white-space:nowrap !important; line-height:1 !important; padding:0 !important; margin:0 !important; overflow:visible !important;
+  flex:0 0 auto !important; white-space:nowrap !important; overflow:visible !important;
 }
+/* Crisp glyphs only - no layout changes */
 .mushaf-book-page, .mushaf-book-content, .mushaf-line, .ayah{
   -webkit-text-stroke:0 !important; -webkit-font-smoothing:antialiased !important; text-rendering:optimizeLegibility !important;
   font-feature-settings:"kern" 1,"liga" 1,"calt" 1,"rlig" 1,"mark" 1,"mkmk" 1 !important;
 }
-.mushaf-ayah-mark{ line-height:1.6 !important; -webkit-text-stroke:0 !important; }
-.mushaf-book-header{ height:auto !important; min-height:0 !important; display:block !important; padding:.55em .6em .6em !important; margin:0 0 .45em !important; overflow:visible !important; }
-.mushaf-book-header .mushaf-bismillah-line{
-  height:auto !important; display:flex !important; flex-wrap:wrap !important; align-items:center !important; justify-content:center !important; white-space:normal !important;
-  line-height:2.1 !important; font-size:.92em !important; padding:.35em 0 0 !important; margin:.35em 0 0 !important;
-  border-top:1px solid currentColor !important; gap:.4em !important; -webkit-text-stroke:0 !important;
-}
+/* Bismillah: keep it as RD's own row directly under the Surah header.
+   v2 moved it INSIDE the header, but the header is exactly one RD line tall, so the
+   Bismillah overflowed it and the next line printed on top of it. */
 </style>
-<script id="quran-fix-v2-js">
-(function(){
-  function fixBismillah(){
-    document.querySelectorAll('.mushaf-book-page').forEach(function(page){
-      var header=page.querySelector('.mushaf-book-header'); if(!header) return;
-      var sib=header.nextElementSibling;
-      if(sib && sib.classList.contains('mushaf-bismillah-line')) header.appendChild(sib);
-      var c=page.querySelector('.mushaf-book-content');
-      if(c){ var f=c.firstElementChild; if(f && f.classList.contains('mushaf-bismillah-line')) header.appendChild(f); }
-    });
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', fixBismillah); else fixBismillah();
-  new MutationObserver(fixBismillah).observe(document.body,{childList:true,subtree:true});
-  document.addEventListener('click',function(){ setTimeout(fixBismillah,60); },true);
-})();
-</script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 </body></html>
