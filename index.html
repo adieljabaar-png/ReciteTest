@@ -1158,8 +1158,12 @@ box-shadow:0 18px 46px rgba(0,0,0,.55),0 0 14px rgba(212,168,42,.35);
 /* ===== Reader zoom (double-tap / pinch, 1x to 1.5x) ===== */
 /* The whole page (frame, header, text, ع marks) is scaled uniformly with the CSS `scale` property:
    nothing reflows, so the words are never distorted. One finger pans while zoomed. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book.reader-zoomed{overflow:auto !important;direction:ltr;touch-action:pan-x pan-y !important;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book.reader-zoomed{overflow:auto !important;direction:ltr;touch-action:pan-x pan-y !important;scroll-behavior:auto !important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+/* every child must allow horizontal panning too: touch-action is the intersection of the element and its ancestors */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book.reader-zoomed *{touch-action:pan-x pan-y !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book.reader-zoomed .mushaf-inner{transform-origin:0 0;padding-bottom:110px;}
+/* invisible box that gives the zoomed page a real (layout) scroll width/height on every device */
+.reader-zoom-sizer{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;opacity:0;}
 
 .toast{
 position:fixed;top:calc(var(--safe-top) + 18px);left:50%;
@@ -1898,6 +1902,9 @@ body.light-mode .feature-tab{background:linear-gradient(180deg,#ffffff,#eef2f8)}
 .dash-top-tabs .streak-badges{display:none}
 #tileReadArabic .ft-icon{background:rgba(47,208,122,.14);border-color:rgba(47,208,122,.4)}
 #tileReadArabic:hover{border-color:rgba(47,208,122,.6)}
+.dash-top-tabs .streak-bar{grid-column:1 / -1}
+#tileSalaah .ft-icon{background:rgba(79,140,255,.14);border-color:rgba(79,140,255,.4)}
+#tileSalaah:hover{border-color:rgba(79,140,255,.6)}
 @media (max-width:400px){
   .home-feature-tabs{gap:8px}
   .home-feature-tabs .feature-tab,.dash-top-tabs .streak-bar{padding:10px;gap:8px}
@@ -2838,6 +2845,7 @@ body.light-mode .share-arabic{color:#1a2233;}
       <span class="tile-list" aria-label="Tabs inside Dashboard">
         <span class="tile-list-item">Day Streak</span>
         <span class="tile-list-item">Read Arabic</span>
+        <span class="tile-list-item">Salaah</span>
         <span class="tile-list-item">Hifz Test</span>
         <span class="tile-list-item">Tajweed Colors</span>
       </span>
@@ -2880,6 +2888,13 @@ body.light-mode .share-arabic{color:#1a2233;}
       <div class="ft-text">
         <strong>Read Arabic</strong>
         <small>Letters &amp; reading</small>
+      </div>
+    </button>
+    <button class="feature-tab" id="tileSalaah" type="button" onclick="window.location.href='salaah.html?theme='+(document.body.classList.contains('light-mode')?'light':'dark')">
+      <span class="ft-icon">🕌</span>
+      <div class="ft-text">
+        <strong>Salaah</strong>
+        <small>Learn to pray</small>
       </div>
     </button>
   </div>
@@ -10977,6 +10992,7 @@ function renderReaderPage(pageNumber, token){
   const footer = document.createElement('div'); footer.className = 'mushaf-book-footer-row'; footer.textContent = 'منزل ' + toAr(pageManzil);
   frame.appendChild(footer);
   inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTo({top:0,left:0,behavior:'instant'});
+  if(readerZoom > 1.001) syncZoomSizer();
   scheduleRukuReplace();
   scheduleReaderLayoutFix();
   if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
@@ -11616,6 +11632,32 @@ function applyZoomToInner(inner){
   if(readerZoom > 1.001){ inner.style.transformOrigin = '0 0'; inner.style.scale = String(readerZoom); }
   else { inner.style.scale = ''; inner.style.transformOrigin = ''; }
 }
+/* Scroll range of the zoomed page is set by a real sized box instead of relying on the overflow of a CSS-scaled child
+   (some mobile browsers ignore that overflow sideways, which made left/right panning stick). */
+let readerZoomSizer = null, readerZoomRO = null;
+function syncZoomSizer(){
+  const inner = getMushafInner();
+  const on = readerZoom > 1.001 && !!inner;
+  if(!on){
+    if(readerZoomSizer){ readerZoomSizer.style.width = '0'; readerZoomSizer.style.height = '0'; }
+    if(readerZoomRO) readerZoomRO.disconnect();
+    return;
+  }
+  if(!readerZoomSizer || readerZoomSizer.parentNode !== pageEl){
+    readerZoomSizer = document.createElement('div');
+    readerZoomSizer.className = 'reader-zoom-sizer';
+    readerZoomSizer.setAttribute('aria-hidden', 'true');
+    pageEl.appendChild(readerZoomSizer);
+  }
+  readerZoomSizer.style.width  = Math.ceil(inner.offsetLeft + inner.offsetWidth  * readerZoom) + 'px';
+  readerZoomSizer.style.height = Math.ceil(inner.offsetTop  + inner.offsetHeight * readerZoom) + 'px';
+  if('ResizeObserver' in window){
+    if(!readerZoomRO) readerZoomRO = new ResizeObserver(() => { if(readerZoom > 1.001) syncZoomSizer(); });
+    readerZoomRO.disconnect(); readerZoomRO.observe(inner);
+  }
+}
+window.addEventListener('resize', () => { if(readerZoom > 1.001) syncZoomSizer(); });
+window.addEventListener('orientationchange', () => { setTimeout(() => { if(readerZoom > 1.001) syncZoomSizer(); }, 250); });
 function setReaderZoom(z, fx, fy){
   z = Math.max(1, Math.min(READER_ZOOM_MAX, z));
   const old = readerZoom;
@@ -11630,6 +11672,7 @@ function setReaderZoom(z, fx, fy){
   readerZoom = z;
   pageEl.classList.toggle('reader-zoomed', z > 1.001);
   applyZoomToInner(inner);
+  syncZoomSizer();
   const prevSB = pageEl.style.scrollBehavior; pageEl.style.scrollBehavior = 'auto';
   if(z > 1.001){
     pageEl.scrollLeft += ir.left - (fx - ux * z);
@@ -11641,6 +11684,7 @@ function resetReaderZoom(){
   readerZoom = 1; readerPinch = null; readerLastTap = null; readerPtrs.clear();
   pageEl.classList.remove('reader-zoomed');
   const inner = getMushafInner(); if(inner) applyZoomToInner(inner);
+  syncZoomSizer();
 }
 function readerZoomActive(){ return viewerOpen && viewerMode === 'read'; }
 pageEl.addEventListener('pointerdown', e => {
@@ -11678,6 +11722,7 @@ document.addEventListener('pointermove', e => {
   });
 }, {passive:true});
 function readerPointerUp(e){
+  if(readerPan && readerPan.id === e.pointerId) readerPan = null;
   if(!readerPtrs.has(e.pointerId)) return;
   readerPtrs.delete(e.pointerId);
   if(readerPinch && readerPtrs.size < 2){
@@ -11687,6 +11732,26 @@ function readerPointerUp(e){
 }
 document.addEventListener('pointerup', readerPointerUp);
 document.addEventListener('pointercancel', readerPointerUp);
+/* Fallback one-finger pan while zoomed. When the browser pans natively it fires pointercancel and stops sending
+   pointermove, so this never runs. It only takes over on devices where the native sideways pan is blocked
+   (pointermove keeps arriving), and then scrolls the page by hand in both directions. */
+let readerPan = null;
+pageEl.addEventListener('pointerdown', e => {
+  if(!readerZoomActive() || !(readerZoom > 1.001) || e.pointerType === 'mouse' || readerPtrs.size !== 1){ readerPan = null; return; }
+  readerPan = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lx: e.clientX, ly: e.clientY, on: false };
+});
+document.addEventListener('pointermove', e => {
+  const p = readerPan; if(!p || e.pointerId !== p.id) return;
+  if(!(readerZoom > 1.001) || readerPtrs.size !== 1 || readerPinch){ readerPan = null; return; }
+  if(!p.on){
+    if(Math.hypot(e.clientX - p.x0, e.clientY - p.y0) < 24) return;   /* give native panning the first chance */
+    p.on = true; p.lx = e.clientX; p.ly = e.clientY; return;
+  }
+  const dx = e.clientX - p.lx, dy = e.clientY - p.ly; p.lx = e.clientX; p.ly = e.clientY;
+  const sb = pageEl.style.scrollBehavior; pageEl.style.scrollBehavior = 'auto';
+  pageEl.scrollLeft -= dx; pageEl.scrollTop -= dy;
+  pageEl.style.scrollBehavior = sb;
+}, {passive:true});
 /* iOS Safari: stop the browser's own page-zoom gesture inside the reader */
 document.addEventListener('gesturestart', e => { if(readerZoomActive()) e.preventDefault(); }, {passive:false});
 document.addEventListener('pointermove', readerGestureMove, {passive:true});
@@ -12660,6 +12725,7 @@ function openInfoModal(){
     '<div class="feature"><h3><span class="fnum">1</span> 📊 Dashboard — learning and daily progress</h3><ul>' +
       '<li><b>Daily streak:</b> see your current and best practice streak, with achievement badges and milestones.</li>' +
       '<li><b>Read Arabic:</b> open the dedicated voice-powered Arabic trainer to practise Arabic letters and reading, and learn Tajweed through guided voice practice. This opens the separate <b>read.html</b> trainer.</li>' +
+      '<li><b>Salaah:</b> open the Learn Salaah guide (<b>salaah.html</b>) to learn how to pray, with wudu, positions, prayers and common mistakes. It opens in the same light or dark theme as Recite, and its Back button returns you to this Dashboard.</li>' +
       '<li><b>Hifz Test:</b> practise memorisation and test how well you remember Quran passages.</li>' +
       '<li><b>Tajweed Colors:</b> view Quran text with colour-coded Tajweed annotations to help identify recitation rules.</li>' +
       '<li><b>Daily share card:</b> view the selected city and date, daily prayer times, Duah of the Day with translation and reference, Tafsir of the Duah, Hadith of the Day with reference, and its explanation. Share the card as an image or as text.</li>' +
@@ -13596,7 +13662,9 @@ function showTextShareModal(text){
     const lastSurah = parseInt(localStorage.getItem('qc.hifz.lastSurah') || '1', 10);
     if(lastSurah) hifzSel.value = String(lastSurah);
   }
-  showScreen('home');
+  var _openDash = /^#dashboard$/i.test(location.hash || '');
+  showScreen(_openDash ? 'dashboard' : 'home');
+  if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
 </script>
 <script>
