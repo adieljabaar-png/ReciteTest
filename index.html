@@ -7412,6 +7412,24 @@ async function runSpeechResultProcessing(snap) {
           scheduleHUD();
         }
       }
+      /* Pointer-match fast commit: the next uncommitted interim token is accepted at
+         once when it matches the word the reader is waiting for. Only words that do
+         not match the expected word still need the stable-prefix rule above. */
+      if (followOnly && (bestConf === 0 || bestConf >= floor)) {
+        let a2 = interimProgress.get(i) || 0;
+        let guardN = 0;
+        while (a2 < toks.length && guardN++ < 4 && interimMatchesPointer(toks[a2])) {
+          const ptrBefore = ptr;
+          a2++;
+          interimProgress.set(i, a2);
+          recPush([toks[a2 - 1]]);
+          const usedFast = await grade(recTokens, recCursor);
+          recCursor = Math.min(recCursor + usedFast, recTokens.length);
+          if (recCursor >= recTokens.length) { recTokens.length = 0; recCursor = 0; }
+          scheduleHUD();
+          if (ptr === ptrBefore) break;
+        }
+      }
       const tail = toks.slice(-4).join(' ');
       if (statusHint && tail) statusHint.textContent = '… ' + tail;
     }
@@ -7419,6 +7437,26 @@ async function runSpeechResultProcessing(snap) {
   if (speechRecognition && Math.abs(ptr - (speechRecognition.__lastPhrasePtr || 0)) >= 24) {
     buildPhraseObjects(speechRecognition);
   }
+}
+
+/* Follow fast path: does this heard token directly match the word the reader
+   is waiting for? Same direct-match test as gradeFollowFast step 1, including the
+   exit-confidence check on the last word of an ayah. Used to commit an interim
+   token immediately instead of waiting for a second interim or a final result. */
+function interimMatchesPointer(rawTok){
+  if(!followOnly || ptr >= words.length) return false;
+  const w = words[ptr];
+  if(!w || w.isMuqattaat) return false;
+  const heard = normArCached(rawTok);
+  if(!heard) return false;
+  const hPhon = phonArCached(rawTok);
+  const hPhonLoose = phonLooseArCached(rawTok);
+  if(!(isMatchWord(heard, hPhon, hPhonLoose, w) || followAlPrefixMatch(heard, w) || isFollowConfusionMatch(heard, w))) return false;
+  const nextW = words[ptr + 1];
+  if(!nextW || nextW.verse !== w.verse){
+    if(followExitConfidence(heard, hPhon, hPhonLoose, w) < FOLLOW_TAU_EXIT) return false;
+  }
+  return true;
 }
 
 function scoreAlternativeToks(toks, startPtr){
