@@ -3122,7 +3122,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">25 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">21:29</span>
+    <span class="pdr-item pdr-time" id="pdrTime">21:39</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3213,8 +3213,10 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
     <ol class="mistakes-list" id="mistakesList"></ol>
   </section>
-  
-  <section class="mushaf" id="pageEl" aria-label="Quran text"><div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load page 382.</span>Check your connection and try again.</div></div></section><div class="legend hide-immersive">
+  <section class="mushaf" id="pageEl" aria-label="Quran text">
+    <div class="mushaf-inner"><div class="loading">Loading…</div></div>
+  </section>
+  <div class="legend hide-immersive">
     <span><i style="background:#2fd07a"></i>correct</span>
     <span><i style="background:#ff5a6a"></i>misread</span>
     <span>· Scrolls automatically as you recite</span>
@@ -3322,13 +3324,13 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="qv-chrome" id="qvChrome">
     <div class="qv-top">
       <button class="qv-btn qv-back" id="qvBack" aria-label="Back">Back</button>
-      <span class="qv-title" id="qvTitle">Error</span>
+      <span class="qv-title" id="qvTitle">Quran</span>
       <button class="qv-btn qv-bookmark" id="qvBookmark" type="button" aria-label="Bookmark this page" title="Bookmark this page">🔖</button>
       <button class="qv-btn" id="qvDark" aria-label="Toggle theme">🌙</button>
     </div>
     <div class="qv-bottom">
       <button class="qv-btn qv-page-nav" id="qvPrevPage" aria-label="Previous page">‹</button>
-      <button class="qv-btn qv-play" id="qvPlay" aria-label="Play">▶</button>
+      <button class="qv-btn qv-play" id="qvPlay" aria-label="Play / pause">▶</button>
       <div class="qv-vol-wrap" id="qvVolWrap">
         <span class="qv-vol-icon" id="qvVolIcon" role="button" tabindex="0" aria-label="Mute or unmute">🔊</span>
         <input type="range" class="qv-vol-slider" id="qvVolSlider" min="0" max="1" step="0.01" value="1" aria-label="Volume">
@@ -3338,8 +3340,8 @@ body.light-mode .share-arabic{color:#1a2233;}
       <button class="qv-btn" id="qvSurahBtn" aria-label="Surah picker">📖</button>
     </div>
   </div>
-  <div class="qv-fs-float hidden" id="qvFsFloat" style="">
-    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen" style="">⛶</button>
+  <div class="qv-fs-float hidden" id="qvFsFloat">
+    <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen">⛶</button>
   </div>
 </div>
 <div class="fs-badge" id="fsBadge"><span class="dot"></span><span id="fsBadgeText">Ready</span></div>
@@ -11080,7 +11082,12 @@ async function applyIndoPakText(data){
    the existing .juz-first-row CSS. */
 const JUZ_PAGE_OVERFLOW = {};
 function juzStartKeyForPage(pageNumber){
-  if(!window.JUZ_START_PAGES_FALLBACK || !window.JUZ_START_VERSE) return null;
+  /* NOTE: JUZ_START_VERSE / JUZ_START_PAGES_FALLBACK are top-level consts,
+     NOT window properties — window.JUZ_START_VERSE is always undefined,
+     which is why the shift never fired in index_46. */
+  try{
+    if(typeof JUZ_START_PAGES_FALLBACK === 'undefined' || typeof JUZ_START_VERSE === 'undefined') return null;
+  }catch(_){ return null; }
   for(const key in JUZ_START_VERSE){
     const juz = JUZ_START_VERSE[key];
     if(juz > 1 && JUZ_START_PAGES_FALLBACK[juz - 1] === pageNumber) return key;
