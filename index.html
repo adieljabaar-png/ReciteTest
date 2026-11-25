@@ -1434,6 +1434,12 @@ body.listen-mode.hide-text-mode .w{color: var(--text) !important;background: tra
 .w.skipped{background:rgba(255,176,32,.16);color:#ffcf6b;text-decoration:line-through;text-decoration-color:var(--warn);}
 .w.model{background:rgba(255,176,32,.3);color:#fff}
 .w.warned{color:#ffd54a;text-decoration:underline solid #ffc107;text-decoration-thickness:2px;text-underline-offset:6px;background:rgba(255,193,7,.22);border-radius:4px;}
+.w.unchecked{color:#9aa3b2;text-decoration:underline dotted #8b94a5;text-decoration-thickness:2px;text-underline-offset:6px;background:rgba(139,148,165,.18);border-radius:4px;}
+body.light-mode .w.unchecked{color:#566070;background:rgba(110,120,135,.20);}
+.legend .legend-key{flex:1 1 100%;display:flex;flex-direction:column;gap:6px;margin-bottom:2px;}
+.legend .lk-row{display:flex;gap:8px;align-items:flex-start;line-height:1.35;}
+.legend .lk-row i{flex:0 0 auto;margin-top:3px;}
+.legend .lk-row b{color:var(--text);}
 .w-deco{display:inline-block;padding:0 3px;opacity:.9;pointer-events:none;cursor:default;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
 @keyframes locatePulse{0%{background:rgba(79,140,255,.55);box-shadow:0 0 0 0 rgba(79,140,255,.6);color:#fff}100%{background:transparent;box-shadow:0 0 0 18px rgba(79,140,255,0);color:var(--text)}}
@@ -2220,6 +2226,7 @@ body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{
 .w.error     [class^="tj-"], .w.error     [class*=" tj-"],
 .w.skipped   [class^="tj-"], .w.skipped   [class*=" tj-"],
 .w.model     [class^="tj-"], .w.model     [class*=" tj-"],
+.w.unchecked [class^="tj-"], .w.unchecked [class*=" tj-"],
 .w.warned    [class^="tj-"], .w.warned    [class*=" tj-"] {
   color: inherit !important;
   font-weight: inherit;
@@ -2252,6 +2259,13 @@ body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{
 }
 .w.model [class^="tj-"], .w.model [class*=" tj-"] {
   background: rgba(255,176,32,.28);
+  border-radius: 4px;
+}
+.w.unchecked [class^="tj-"], .w.unchecked [class*=" tj-"] {
+  background: rgba(139,148,165,.22);
+  text-decoration: underline dotted #8b94a5;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
   border-radius: 4px;
 }
 .w.warned [class^="tj-"], .w.warned [class*=" tj-"] {
@@ -3196,8 +3210,12 @@ body.light-mode .share-arabic{color:#1a2233;}
     <div class="mushaf-inner"><div class="loading">Loading…</div></div>
   </section>
   <div class="legend hide-immersive">
-    <span><i style="background:#2fd07a"></i>correct</span>
-    <span><i style="background:#ff5a6a"></i>misread</span>
+    <div class="legend-key">
+      <div class="lk-row"><i style="background:#ff5a6a"></i><span><b>Red</b> — misread or Tajweed mistake. The word or a Tajweed rule on it was clearly wrong.</span></div>
+      <div class="lk-row"><i style="background:#ffc107"></i><span><b>Yellow</b> — Tajweed warning. The rule may be off or the result is uncertain; listen again or check with a teacher.</span></div>
+      <div class="lk-row"><i style="background:#8b94a5"></i><span><b>Grey</b> — unchecked. The word was read, but a Tajweed rule on it could not be verified on this device.</span></div>
+    </div>
+    <span><i style="background:#2fd07a"></i>green = correct</span>
     <span>· Scrolls automatically as you recite</span>
     <span>· Hold a word 3 s to start from there</span>
   </div>
@@ -3673,6 +3691,23 @@ const IS_SAMSUNG_BROWSER = /SamsungBrowser/i.test(UA);
 const IS_MAC_SAFARI = /Safari/i.test(UA) && !/Chrome|Chromium|CriOS|Android|Edg|OPR/i.test(UA);
 const IS_IN_APP_BROWSER = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|WhatsApp|SnapChat|TikTok|BytedanceWebview|Musical_ly|Telegram|Twitter|LinkedInApp|Pinterest|Slack|Discord|GSA\/|KAKAOTALK|Naver|DaumApps|Everyfarm/i.test(UA);
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+/* Safari/WebKit ignores abort()/stop() while a recognizer is still *starting*,
+   so the mic stays open after Stop. killRecognizer() retries and also aborts the
+   instant a pending start completes. Every recognizer is tracked so none can leak. */
+const _liveRecs = new Set();
+function killRecognizer(rec){
+  if(!rec) return;
+  try{ rec.__dead = true; }catch(_){}
+  try{ rec.onresult = null; rec.onerror = null; rec.onend = null; rec.onaudiostart = null; rec.onspeechstart = null; }catch(_){}
+  const hit = () => { try{ rec.abort(); }catch(_){} try{ rec.stop(); }catch(_){} };
+  try{ rec.onstart = hit; }catch(_){}
+  hit();
+  [150, 600, 1500, 3500].forEach(ms => setTimeout(hit, ms));
+  setTimeout(() => { try{ rec.onstart = null; }catch(_){} _liveRecs.delete(rec); }, 4000);
+}
+function killAllRecognizers(except){
+  Array.from(_liveRecs).forEach(r => { if(r !== except) killRecognizer(r); });
+}
 const SPEECH_SUPPORTED = !!SpeechRecognitionCtor;
 const SPEECH_LANG = 'ar-SA';
 /* ── On-device Arabic voice pack (Chrome 139+) ─────────────────────────
@@ -3744,7 +3779,7 @@ function fallbackFromOnDevice(){
   if(_localFallbackDone || !speechRecognition || !speechRecognition.__local) return false;
   _localFallbackDone = true;
   onDeviceState = 'unsupported'; renderOnDeviceChip();
-  try{ const o = speechRecognition; o.onstart = null; o.onresult = null; o.onerror = null; o.onend = null; o.abort(); }catch(_){}
+  try{ killRecognizer(speechRecognition); }catch(_){}
   speechRecognition = null;
   try{
     speechRecognition = createSpeechRecognition(false, true);
@@ -5571,6 +5606,7 @@ function startHifzSpeech(){
   stopHifzSpeech();
   try{
     const rec = new SpeechRecognitionCtor();
+    _liveRecs.add(rec);
     rec.lang = 'ar-SA'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 3;
     rec.onresult = (event) => {
       if(!hifzState.active) return;
@@ -5611,11 +5647,7 @@ function stopHifzSpeech(){
   hifzState.speechActive = false;
   const rec = hifzState.recognizer;
   hifzState.recognizer = null;
-  if(rec){
-    try{ rec.onstart = null; rec.onresult = null; rec.onerror = null; rec.onend = null; }catch(_){}
-    try{ rec.abort(); }catch(_){}
-    try{ rec.stop(); }catch(_){}
-  }
+  if(rec) killRecognizer(rec);
 }
 function checkAyahComplete(aIdx){
   const words = hifzState.words.filter(w => w.aIdx === aIdx);
@@ -6039,8 +6071,18 @@ function noteAcousticMode(available){
   if (_acousticMissStreak >= 3 && _acousticMode !== 'transcript'){
     _acousticMode = 'transcript';
     try{ updateTajweedStatusChip(); }catch(_){}
-    addFeedback('ℹ️ <b>No microphone audio is reaching the Tajweed engine</b> (the phone may have given the mic to speech recognition). Madd, Ghunnah, Qalqalah and the other timing/sound rules are <b>transcript estimates only — not verified</b>.', false, true);
+    addFeedback('ℹ️ <b>No microphone audio is reaching the Tajweed engine</b> (the phone may have given the mic to speech recognition). Limited rule checks available: Madd, Ghunnah, Qalqalah and the other timing/sound rules are <b>transcript estimates only — not verified</b>, and unverifiable words show <b>grey (unchecked)</b>.', false, true);
   }
+}
+function hasGetUserMedia(){
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+let _limitedChecksNoticeShown = false;
+function noteLimitedChecksNoGum(){
+  if (_limitedChecksNoticeShown) return;
+  _limitedChecksNoticeShown = true;
+  showToast('⚠️ Limited rule checks available on this device — it does not give the app microphone access (getUserMedia).', 7000);
+  addFeedback('ℹ️ <b>Limited rule checks available on this device.</b> It does not support microphone access (getUserMedia), so only transcript-based checks can run. Words whose Tajweed rules cannot be verified are shown <b>grey — unchecked</b>.', false, true);
 }
 function updateTajweedStatusChip(){
   const chip = document.getElementById('tajweedStatusChip');
@@ -6052,15 +6094,15 @@ function updateTajweedStatusChip(){
   const acousticReady = !!(liveTrack && rmsAnalyser.isRunning() && rmsAnalyser.sampleCount() > 3);
   if(coachTajweedMicFailed){
     chip.className = 'toggle tj-status-error';
-    chip.innerHTML = '<span class="tj-status-dot"></span>Mic unavailable';
-    chip.title = 'The 12 Tajweed categories are loaded, but microphone waveform access is unavailable. Acoustic checks cannot be performed on this device until microphone permission and getUserMedia work.';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Limited rule checks · mic unavailable';
+    chip.title = 'The 13 Tajweed rules are loaded, but microphone waveform access is unavailable. Acoustic checks cannot be performed on this device until microphone permission and getUserMedia work.';
     chip.setAttribute('aria-label', 'Tajweed acoustic checks unavailable — microphone access failed');
     return;
   }
   if(coachTajweedDegraded){
     chip.className = 'toggle tj-status-error';
     chip.innerHTML = '<span class="tj-status-dot"></span>Annotations incomplete';
-    chip.title = 'Quran Tajweed annotations could not be fully aligned. Some words may not have rule metadata, so all 12 categories cannot be guaranteed for this surah.';
+    chip.title = 'Quran Tajweed annotations could not be fully aligned. Some words may not have rule metadata, so all 13 rules cannot be guaranteed for this surah.';
     chip.setAttribute('aria-label', 'Tajweed annotations incomplete');
     return;
   }
@@ -6071,26 +6113,34 @@ function updateTajweedStatusChip(){
     chip.setAttribute('aria-label', 'Loading Tajweed rule checks');
     return;
   }
+  if(!hasGetUserMedia()){
+    chip.className = 'toggle tj-status-error';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Limited rule checks · no mic access';
+    chip.title = 'This device or browser does not support getUserMedia, so microphone-waveform checks cannot run. Only limited transcript-based rule checks are available. Words whose rules cannot be verified are shown grey (unchecked).';
+    chip.setAttribute('aria-label', 'Limited Tajweed rule checks available on this device; microphone access not supported');
+    noteLimitedChecksNoGum();
+    return;
+  }
   if(acousticReady && wantMic && _acousticMode === 'transcript'){
     chip.className = 'toggle tj-status-error';
-    chip.innerHTML = '<span class="tj-status-dot"></span>Transcript only · mic silent';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Limited rule checks · mic silent';
     chip.title = 'The microphone stream is open but no usable audio is reaching the waveform analyser (often because speech recognition holds the mic). Madd, Ghunnah, Qalqalah and other sound rules are transcript estimates and are NOT verified.';
     chip.setAttribute('aria-label', 'Tajweed running in transcript-only mode; acoustic rules not verified');
   } else if(acousticReady){
     chip.className = 'toggle tj-status-ready';
-    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · mic clues';
-    chip.title = 'All 12 annotated Tajweed categories are available. ASR aligns words with Quran text and the microphone supplies word-level RMS/spectral clues. Acoustic checks are provisional estimates, not phoneme-level Tajweed certification; uncertain findings are shown as yellow warnings for teacher/listener review.';
-    chip.setAttribute('aria-label', '12 annotated Tajweed categories available with provisional microphone evidence');
+    chip.innerHTML = '<span class="tj-status-dot"></span>13 rules · mic clues';
+    chip.title = 'All 13 annotated Tajweed rules are available. ASR aligns words with Quran text and the microphone supplies word-level RMS/spectral clues. Acoustic checks are provisional estimates, not phoneme-level Tajweed certification; uncertain findings are shown as yellow warnings for teacher/listener review.';
+    chip.setAttribute('aria-label', '13 annotated Tajweed rules available with provisional microphone evidence');
   } else if(wantMic){
     chip.className = 'toggle tj-status-error';
-    chip.innerHTML = '<span class="tj-status-dot"></span>ASR only · audio unavailable';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Limited rule checks · audio unavailable';
     chip.title = 'ASR is listening, but a live getUserMedia/RMS stream is not available. Word alignment and limited transcript checks can continue; waveform-dependent Tajweed checks are not verified.';
     chip.setAttribute('aria-label', 'ASR active but microphone waveform analysis unavailable');
   } else {
     chip.className = 'toggle tj-status-loading';
-    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · start mic';
-    chip.title = 'The 12 Tajweed categories are available from Quran annotations where present. Start listening to activate microphone analysis. Acoustic findings remain provisional and may require a teacher/listener review.';
-    chip.setAttribute('aria-label', '12 Tajweed categories loaded; microphone analysis starts with recitation');
+    chip.innerHTML = '<span class="tj-status-dot"></span>13 rules · start mic';
+    chip.title = 'The 13 Tajweed rules are available from Quran annotations where present. Start listening to activate microphone analysis. Acoustic findings remain provisional and may require a teacher/listener review.';
+    chip.setAttribute('aria-label', '13 Tajweed rules loaded; microphone analysis starts with recitation');
   }
 }
 
@@ -6456,6 +6506,7 @@ function checkLaamShamsiyyah(w, heard, align){
     if (samples && samples.length >= 5){
       const onsetC = rmsAnalyser.onsetCentroid(w.audio.start, 75);
       const overallC = rmsAnalyser.meanCentroid(w.audio.start, w.audio.end);
+      if (onsetC > 0 && overallC > 0) tjVerified(w, 'laam_shamsiyah');
       /* Low onset centroid with much higher overall centroid suggests a voiced
          lateral onset rather than smooth solar assimilation (provisional). */
       if (onsetC > 0 && overallC > 0 && onsetC < 1450 && overallC > onsetC * 1.85){
@@ -6475,6 +6526,7 @@ function checkIkhfa(w, heard, align){
     (w.tjRules.allRules && w.tjRules.allRules.includes('ikhfa'))
   );
   if (!isIkhfa) return true;
+  if ((align && align.available && align.ctx.hasSignal) || heard) tjVerified(w, 'ikhfa');
 
   const hasAcoustic = !!(align && align.available && align.ctx.hasSignal && align.ctx.samples.length >= 4);
   if (hasAcoustic){
@@ -6501,6 +6553,7 @@ function checkExtraSyllable(w){
   if (!STRICT_FEATURES.silent()) return true;
   if (!w.audio) return true;
   const env = rmsAnalyser.samplesIn(w.audio.start, w.audio.end);
+  if (env && env.length >= 3) tjVerified(w, 'silent');
   const peaks = countPeaks(env, rmsAnalyser.minRms() * 0.5, 80);
   const expected = w.norm.length >= 4 ? 2 : 1;
   if (peaks > expected + 1){
@@ -6587,6 +6640,7 @@ function checkQalqalah(w, heard, align){
 
   const hasAcoustic = !!(align && align.available && align.ctx.hasSignal && align.ctx.samples.length >= 5);
   if (hasAcoustic && w.audio && w.audio.durationMs >= 90){
+    tjVerified(w, 'qalqalah');
     const samples = align.ctx.samples;
     const floor = rmsAnalyser.minRms();
     const burstThreshold = Math.max(floor * 1.75, 0.012);
@@ -6609,6 +6663,7 @@ function checkQalqalah(w, heard, align){
 
   /* Transcript fallback / supplement */
   if (heard && w.norm){
+    tjVerified(w, 'qalqalah');
     for (let i = 0; i < w.norm.length; i++){
       const ch = w.norm[i];
       if (QALQALAH_LETTERS.includes(ch) && !heard.includes(ch)){
@@ -6624,6 +6679,7 @@ function checkQalqalah(w, heard, align){
 function checkIdghaamNoGhunnah(w, heard, align){
   if (!w || !w.tjRules || !w.tjRules.hasIdghaamNoGhunnah) return true;
   if (align && align.available && align.ctx.hasSignal){
+    tjVerified(w, 'idghaam_no_ghunnah');
     const samples = align.ctx.samples;
     const vr = rmsAnalyser.vowelRun(w.audio.start, w.audio.end);
     const T = getBaseMsPerLetter();
@@ -6678,6 +6734,7 @@ function checkAllNasalRules(w, heard, align){
     }
 
     const expectedMs = ghunnahRequiredMs(type);
+    if (hasAcoustic || heard) tjVerified(w, type);
 
     if (hasAcoustic){
       if (!nasal && !textOk){
@@ -6840,7 +6897,7 @@ function markTajweedIssue(w, kind, detail, severity){
     if (!w._tajweedWarns) w._tajweedWarns = new Set();
     w._tajweedWarns.add(kind);
     if (w.el.classList.contains('error')) return;
-    w.el.classList.remove('current', 'correct', 'corrected');
+    w.el.classList.remove('current', 'correct', 'corrected', 'unchecked');
     w.el.classList.add('warned');
   }
 
@@ -6877,6 +6934,53 @@ function markTajweedIssue(w, kind, detail, severity){
 
 
 
+
+/* ── Unchecked (grey) state ─────────────────────────────────────────────
+   Every rule on a word must be evaluated. Checks call tjVerified(w, group) when
+   they actually ran. A rule-bearing word whose rules were not all evaluated is
+   shown grey and labelled "unchecked" — never green. */
+const TJ_GROUP_LABEL = {
+  madd:'Madd', ham_wasl:'Hamzat al-Wasl', laam_shamsiyah:'Laam Shamsiyyah', qalqalah:'Qalqalah',
+  ghunnah:'Ghunnah', ikhfa:'Ikhfa', idghaam_ghunnah:'Idghaam (with ghunnah)',
+  idghaam_no_ghunnah:'Idghaam (no ghunnah)', iqlab:'Iqlab', silent:'Silent letter'
+};
+function tjVerified(w, group){
+  if (!w) return;
+  (w._tjVerified || (w._tjVerified = new Set())).add(group);
+}
+function tjUncheckedNames(w){
+  return (w && w._tjUnchecked && w._tjUnchecked.length)
+    ? w._tjUnchecked.map(g => TJ_GROUP_LABEL[g] || g).join(', ') : '';
+}
+let _lastUncheckedNoteAt = 0;
+function tjApplyUncheckedState(w){
+  if (!w || !w.el || followOnly || !w.tjRules || !w.tjRules.allRules || !w.tjRules.allRules.length) return;
+  const need = new Set(w.tjRules.allRules.map(r => /^madda_/.test(r) ? 'madd' : r));
+  const done = w._tjVerified || new Set();
+  const missing = Array.from(need).filter(g => !done.has(g));
+  w._tjUnchecked = missing;
+  const el = w.el;
+  const base = buildRuleTooltip(w.tjRules.allRules, ' · ');
+  if (!missing.length){
+    if (el.classList.contains('unchecked')){
+      el.classList.remove('unchecked');
+      if (!el.classList.contains('warned') && !el.classList.contains('error')) el.classList.add('correct');
+    }
+    if (base) el.title = base;
+    return;
+  }
+  const names = tjUncheckedNames(w);
+  el.title = (base ? base + '\n' : '') + 'Unchecked: ' + names;
+  if (el.classList.contains('error') || el.classList.contains('warned')) return;   /* red / yellow outrank grey */
+  el.classList.remove('current', 'correct', 'corrected');
+  el.classList.add('unchecked');
+  const now = performance.now();
+  if (now - _lastUncheckedNoteAt > 2500){
+    _lastUncheckedNoteAt = now;
+    addFeedback('⬜ <b>Unchecked</b> · <span class="ar">' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</span> · ' +
+      escapeHtml(names) + ' could not be verified on this device', false, true);
+  }
+}
 
 function markStrict1Error(w, kind, detail){
   markTajweedIssue(w, kind, detail, 'red');
@@ -6931,12 +7035,13 @@ function detectAcousticGlottalAttack(prevAudio, curAudio){
 
 function checkHamzatWasl(w, idx, rawHeard){
   if (!STRICT_FEATURES.hamWasl() || !w || !w.tjRules || !w.tjRules.hamWasl) return;
-  if (idx <= 0) return;
+  if (idx <= 0){ tjVerified(w, 'ham_wasl'); return; }
   const prev = words[idx - 1];
-  if (!prev || prev.verse !== w.verse) return; // ayah start: wasl is pronounced
+  if (!prev || prev.verse !== w.verse){ tjVerified(w, 'ham_wasl'); return; } // ayah start: wasl is pronounced
 
   const acoustic = detectAcousticGlottalAttack(prevWordAudio, w.audio);
-  if (acoustic.paused) return; // reciter paused/restarted
+  if (acoustic.paused){ tjVerified(w, 'ham_wasl'); return; } // reciter paused/restarted
+  if (rawHeard || acoustic.gapMs !== null) tjVerified(w, 'ham_wasl');
 
   const lexical = detectGlottalOnset(rawHeard, w.raw);
 
@@ -6960,6 +7065,7 @@ function runStrict1Checks(idx, heard, opts){
   if (!coachTajweedReady) return;
   const w = words[idx];
   if (!w || w.isMuqattaat) return;
+  w._tjVerified = new Set();   /* rule groups actually evaluated for this word */
 
   /* 1. Emphatic letters (Tafkheem) on every commit path */
   if (STRICT_FEATURES.emphatics() && heard && w.norm && heard !== w.norm){
@@ -6993,6 +7099,7 @@ function runStrict1Checks(idx, heard, opts){
         : (T_mora !== null ? Math.round(T_mora * (MADD_MIN_HARAKAT[kind] || 1.7))
                             : (MADD_MIN_DELTA_MS[kind] || 0));
       const minSegMs = w.norm.length * (T_mora !== null ? T_mora : 100) * 0.55;
+      if (vowelMs > 0 && w.audio.durationMs >= minSegMs) tjVerified(w, 'madd');
       if (w.audio.durationMs >= minSegMs && vowelMs < required){
         const tag = 'madd-' + kind + (isEndOfAyah ? '-end' : '');
         const _maddMsg = 'estimated vowel-run ' + Math.round(vowelMs) + ' ms < ' + Math.round(required) + ' ms' +
@@ -7027,6 +7134,7 @@ function runStrict1Checks(idx, heard, opts){
       const asrMs = now - lastDirectCommitAt;
       if (w.tjRules && w.tjRules.madd && STRICT_FEATURES.madd()){
         const required = maddRequiredMs(w.tjRules.madd);
+        tjVerified(w, 'madd');
         if (asrMs < required){
           markStrict1Warning(w, 'madd-' + w.tjRules.madd + '-timing',
             'ASR timing estimate ' + Math.round(asrMs) + ' ms < ' + Math.round(required) + ' ms');
@@ -7078,6 +7186,7 @@ function runStrict1Checks(idx, heard, opts){
   if (STRICT_FEATURES.silent()) checkExtraSyllable(w);
   checkQalqalah(w, heard, align);
   checkIdghaamNoGhunnah(w, heard, align);
+  tjApplyUncheckedState(w);
 
   prevWordAudio = w.audio || prevWordAudio;
 
@@ -7548,11 +7657,12 @@ function createSpeechRecognition(forceNoPhrases, forceCloud){
   if(speechRecognition && !speechRecognition.__dead &&
      !!speechRecognition.__local === desiredLocal && speechRecognition.__followMode === followOnly) return speechRecognition;
   if(speechRecognition){
-    try{ const o = speechRecognition; o.onstart = null; o.onresult = null; o.onerror = null; o.onend = null; o.abort(); }catch(_){}
+    try{ killRecognizer(speechRecognition); }catch(_){}
     speechRecognition = null;
   }
 
   const rec = new SpeechRecognitionCtor();
+  _liveRecs.add(rec);
   rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
   rec.interimResults   = true;
@@ -8310,7 +8420,16 @@ let micSession = 0;
 const _micTestClosers = new Set();
 let _ctxSuspendedByUs = false;
 
-async function ensureMicStream(){
+/* Single-flight + registry: two overlapping getUserMedia() calls used to leave
+   the first stream orphaned (never stopped) so Safari kept the mic open. */
+const _allMicStreams = new Set();
+let _micOpening = null;
+function ensureMicStream(){
+  if(_micOpening) return _micOpening;
+  _micOpening = _ensureMicStreamImpl().finally(() => { _micOpening = null; });
+  return _micOpening;
+}
+async function _ensureMicStreamImpl(){
   if(micStream){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
     if(live){
@@ -8329,15 +8448,28 @@ async function ensureMicStream(){
   try{
     lastMicError = null;
     const _epoch = micEpoch;
-    const s = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-    });
+    let s = null;
+    for(let attempt = 0; attempt < 3; attempt++){
+      try{
+        s = await navigator.mediaDevices.getUserMedia({
+          audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+        });
+        break;
+      }catch(err){
+        const transient = err && (err.name === 'NotReadableError' || err.name === 'AbortError' || err.name === 'TrackStartError');
+        if(!transient || attempt === 2) throw err;
+        await new Promise(r => setTimeout(r, 250));     // device still being released: wait and retry
+        if(_epoch !== micEpoch) return null;
+      }
+    }
     if(_epoch !== micEpoch){
       // Stop / background / mode change happened while the permission
       // prompt or device was opening — never leave this stream live.
       try{ s.getTracks().forEach(t => t.stop()); }catch(_){}
       return null;
     }
+    _allMicStreams.add(s);
+    if(micStream && micStream !== s){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(_){} _allMicStreams.delete(micStream); }
     micStream = s;
     attachMicTrackListeners(s);
     const rmsOk = rmsAnalyser.start(s);
@@ -8354,7 +8486,10 @@ function releaseMicStream(){
   detachMicTrackListeners();
   if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; }
   rmsAnalyser.stop();
-  if(micStream){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(e){} micStream = null; }
+  if(micStream){ try{ micStream.getTracks().forEach(t => { try{ t.enabled = false; }catch(_){} t.stop(); }); }catch(e){} micStream = null; }
+  // Catch-all: stop every stream this page ever opened, even orphaned ones.
+  _allMicStreams.forEach(st => { try{ st.getTracks().forEach(t => { try{ t.enabled = false; }catch(_){} t.stop(); }); }catch(_){} });
+  _allMicStreams.clear();
 }
 function resetMicDiagState(){
   MIC_DIAG.startedAt = 0;
@@ -8742,6 +8877,7 @@ async function openMicTestModal(){
     if(SPEECH_SUPPORTED){
       try{
         testRecog = new SpeechRecognitionCtor();
+        _liveRecs.add(testRecog);
         testRecog.lang = 'ar-SA';
         testRecog.continuous = true;
         testRecog.interimResults = true;
@@ -8789,7 +8925,7 @@ async function openMicTestModal(){
         try{ testRms.src.disconnect(); testRms.an.disconnect(); if(testRms.owns) testRms.ctx.close(); }catch(_){}
         testRms = null;
       }
-      if(testRecog){ try{ testRecog.abort(); }catch(_){} testRecog = null; }
+      if(testRecog){ killRecognizer(testRecog); testRecog = null; }
       if(stream){ try{ stream.getTracks().forEach(tr => tr.stop()); }catch(_){} stream = null; }
     };
   }catch(e){
@@ -8890,11 +9026,14 @@ function setRecitationMode(modeName){
   applyMutexUI(); applyFollowOnlyUI();
   if(followOnly){
     releaseMicStream();
+    releaseWaveformStack();
     coachTajweedMicFailed = false;
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
   } else {
+    _waveTimers.forEach(t => clearTimeout(t)); _waveTimers = [];   // quick flip back: cancel pending Follow teardown
+    if(wantMic){ try{ unlockAudio(); }catch(_){} }   // recreate the audio context inside this tap (iOS gesture rule)
     addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
     if(wantMic && !rmsAnalyser.isRunning()){
@@ -9245,18 +9384,21 @@ function commitCorrect(i, seg){
   const w = words[i]; if(!w) return;
   if (seg) w.audio = seg;
   const warned = w.el.classList.contains('warned');
-  const baseCls = (hideText && followOnly) ? 'w revealed' : 'w correct';
+  const needsTj = !followOnly && coachTajweedReady && !w.isMuqattaat && w.tjRules && w.tjRules.allRules && w.tjRules.allRules.length;
+  const baseCls = (hideText && followOnly) ? 'w revealed' : (needsTj ? 'w unchecked' : 'w correct');
   w.el.className = baseCls + (warned ? ' warned' : '');
   maybeExplainRules(w);
 }
 function commitManyCorrect(start, end, seg){
   const toReveal = hideText && followOnly;
   const stop = Math.min(end, words.length);
-  const baseCls = toReveal ? 'w revealed' : 'w correct';
   for(let i = start; i < stop; i++){
     if (seg) words[i].audio = seg;
-    const warned = words[i].el.classList.contains('warned');
-    words[i].el.className = baseCls + (warned ? ' warned' : '');
+    const wi = words[i];
+    const warned = wi.el.classList.contains('warned');
+    const needsTj = !followOnly && coachTajweedReady && !wi.isMuqattaat && wi.tjRules && wi.tjRules.allRules && wi.tjRules.allRules.length;
+    const baseCls = toReveal ? 'w revealed' : (needsTj ? 'w unchecked' : 'w correct');
+    wi.el.className = baseCls + (warned ? ' warned' : '');
   }
   if(stop > start) maybeExplainRules(words[stop - 1]);
 }
@@ -9366,7 +9508,8 @@ function installWordDelegates(){
     if(!w || !w.tjRules || !w.tjRules.allRules || !w.tjRules.allRules.length) return;
     const tip = buildRuleTooltip(w.tjRules.allRules, ' · ');
     if(!tip) return;
-    showToast('🎵 <b>' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</b><br>' + escapeHtml(tip), 5000);
+    const _unc = (target.classList.contains('unchecked') && tjUncheckedNames(w)) ? '<br><b>Unchecked:</b> ' + escapeHtml(tjUncheckedNames(w)) + ' could not be verified on this device' : '';
+    showToast('🎵 <b>' + escapeHtml(w.raw.replace(TASHKEEL, '')) + '</b><br>' + escapeHtml(tip) + _unc, 5000);
   });
   if(IS_TOUCH){
     pageEl.addEventListener('touchstart', e => { if(e.touches.length !== 1) return; const idx = wordIdxFromEvent(e); if(idx < 0) return; const span = e.target.closest('.w'); beginWordPress(span, idx, e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
@@ -9387,7 +9530,22 @@ function setMicButton(){
   syncFsButtons();
 }
 
+let _startInFlight = 0;
+function micBusyForCleanup(){
+  try{
+    if(_startInFlight > 0 || wantMic) return true;
+    if(hifzState && (hifzState.speechActive || hifzState.active && hifzState.speechActive)) return true;
+    if(_micTestClosers && _micTestClosers.size > 0) return true;
+  }catch(_){}
+  return false;
+}
 async function startReciting(){
+  cancelAudioRelease();
+  _startInFlight++;
+  try{ return await _startRecitingImpl(); }
+  finally{ _startInFlight--; if(_startInFlight === 0 && !wantMic){ try{ releaseAudioSessionSoon(); }catch(_){} } }
+}
+async function _startRecitingImpl(){
   unlockAudio();
   const _myTok = micSession;
   if(!words.length){
@@ -9477,11 +9635,7 @@ function abortCoachSpeechRecognition(){
   // Detach callbacks before aborting so Safari cannot trigger a late onend
   // callback that attempts to restart the microphone after Stop was pressed.
   speechRecognition = null;
-  if(rec){
-    try{ rec.onstart = null; rec.onresult = null; rec.onerror = null; rec.onend = null; }catch(_){}
-    try{ rec.abort(); }catch(_){}
-    try{ rec.stop(); }catch(_){}
-  }
+  if(rec) killRecognizer(rec);
   speechStarting = false;
   recRunning = false;
 }
@@ -9517,7 +9671,7 @@ function stopReciting(silent){
   releaseWakeLock();
   // Nothing is playing: release the Web Audio session too (iOS keeps the
   // audio session / Android keeps the audio route while a context runs).
-  try{ if(!playing && !(viewerAudio && viewerAudio.active)) suspendSharedAudio(); }catch(_){}
+  try{ if(!playing && !(viewerAudio && viewerAudio.active)){ suspendSharedAudio(); if(_startInFlight === 0){ releaseAudioSession(); releaseAudioSessionSoon(); } } }catch(_){}
 
   setMicButton();
   if(!silent) setStatus('Ready','idle', micPermission==='granted'?'Mic ready':'Tap Start reciting to allow mic');
@@ -9544,6 +9698,81 @@ function resumeMic(){
     catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') console.warn('[Speech] resume failed:', e); }
     setStatus('Listening', 'listening', contextLabel());
   }
+}
+/* FULL audio-session release (iOS fix). Suspending an AudioContext is not
+   enough: iOS keeps the mic / 'play-and-record' session and the Now-Playing
+   state alive while a context or the hidden <audio> element still exists.
+   When nothing is intentionally playing we CLOSE the contexts, empty the
+   shared <audio> element and hand the session back to the system.        */
+function releaseAudioSession(){
+  try{ if(playing || (viewerAudio && viewerAudio.active) || micBusyForCleanup()) return; }catch(_){}
+  const seen = [];
+  [audioCtx, window.__sharedAudioCtx].forEach(c => {
+    if(!c || seen.indexOf(c) !== -1) return;
+    seen.push(c);
+    try{ if(c.state !== 'closed') c.close().catch(() => {}); }catch(_){}
+  });
+  audioCtx = null; window.__sharedAudioCtx = null; audioUnlocked = false; _ctxSuspendedByUs = false;
+  try{
+    if(sharedAudio){
+      if(sharedAudio._finish){ try{ sharedAudio._finish(false, 'released'); }catch(_){} sharedAudio._finish = null; }
+      sharedAudio.pause();
+      sharedAudio.onended = null; sharedAudio.onerror = null;
+      if(sharedAudio._playingHandler){ sharedAudio.removeEventListener('playing', sharedAudio._playingHandler); sharedAudio._playingHandler = null; }
+      if(sharedAudio._safetyTimer){ clearTimeout(sharedAudio._safetyTimer); sharedAudio._safetyTimer = null; }
+      sharedAudio.removeAttribute('src');
+      try{ sharedAudio.load(); }catch(_){}
+    }
+  }catch(_){}
+  try{ if(athaanAudio){ athaanAudio.pause(); } }catch(_){}
+  try{ if(navigator.audioSession) navigator.audioSession.type = 'auto'; }catch(_){}
+  try{ if(navigator.mediaSession){ navigator.mediaSession.playbackState = 'none'; navigator.mediaSession.metadata = null; } }catch(_){}
+}
+let _releaseVerifyTimer = null;
+let _releaseTimers = [];
+let _waveTimers = [];
+function cancelAudioRelease(){
+  _releaseTimers.forEach(t => clearTimeout(t)); _releaseTimers = [];
+  _waveTimers.forEach(t => clearTimeout(t)); _waveTimers = [];
+  if(_releaseVerifyTimer){ clearTimeout(_releaseVerifyTimer); _releaseVerifyTimer = null; }
+}
+function releaseAudioSessionSoon(){
+  // iOS tears the session down asynchronously: sweep ASR, stream, RMS analyser
+  // and audio contexts at 0 / 0.25 / 0.6 / 1.0 s so nothing outlives 1 second.
+  _releaseTimers.forEach(t => clearTimeout(t)); _releaseTimers = [];
+  [0, 250, 600, 1000].forEach(ms => {
+    _releaseTimers.push(setTimeout(() => {
+      if(micBusyForCleanup()) return;     // a new start / Hifz / mic test owns the mic
+      try{ releaseMicStream(); }catch(_){}
+      try{ killAllRecognizers(); }catch(_){}
+      try{ rmsAnalyser.stop(); }catch(_){}
+      releaseAudioSession();
+    }, ms));
+  });
+}
+/* Tajweed → Follow switch: Follow needs only ASR, so close the getUserMedia
+   stream, RMS/acoustic analyser and Web Audio contexts within 1 s. ASR keeps
+   running. Every pass aborts if the user flips back to Tajweed meanwhile. */
+function closeAudioContextsNow(){
+  const seen = [];
+  [audioCtx, window.__sharedAudioCtx].forEach(c => {
+    if(!c || seen.indexOf(c) !== -1) return;
+    seen.push(c);
+    try{ if(c.state !== 'closed') c.close().catch(() => {}); }catch(_){}
+  });
+  audioCtx = null; window.__sharedAudioCtx = null; audioUnlocked = false; _ctxSuspendedByUs = false;
+}
+function releaseWaveformStack(){
+  _waveTimers.forEach(t => clearTimeout(t)); _waveTimers = [];
+  const run = () => {
+    if(!followOnly || _startInFlight > 0) return;
+    try{ releaseMicStream(); }catch(_){}
+    try{ rmsAnalyser.stop(); }catch(_){}
+    try{ stopMicDiagnostic(); }catch(_){}
+    try{ if(!playing && !(viewerAudio && viewerAudio.active)) closeAudioContextsNow(); }catch(_){}
+  };
+  run();
+  [250, 600, 1000].forEach(ms => _waveTimers.push(setTimeout(run, ms)));
 }
 function suspendSharedAudio(){
   const seen = [];
@@ -9579,6 +9808,8 @@ function hardShutdownAudio(){
   try{ Array.from(_micTestClosers).forEach(f => { try{ f(); }catch(_){} }); }catch(_){}
   try{ releaseWakeLock(); }catch(_){}
   try{ suspendSharedAudio(); }catch(_){}
+  try{ killAllRecognizers(); }catch(_){}
+  try{ releaseAudioSession(); releaseAudioSessionSoon(); }catch(_){}
 }
 function stopEverything(silent){
   // Master Stop: stop playback plus every speech/microphone mode.
@@ -9596,6 +9827,7 @@ function finish(){
   cancelFollowPinTimer();
   abortCoachSpeechRecognition();
   releaseMicStream();
+  try{ releaseAudioSession(); releaseAudioSessionSoon(); }catch(_){}
   updateTajweedStatusChip();
   const allVerses = new Set(words.map(w => w.verse)); allVerses.forEach(v => completeVerse(v));
   const total=words.length;
@@ -10627,9 +10859,10 @@ async function downloadSurahAudio(surahNumber){
       if(r === 'ok' || r === 'cached') state.done++;
       else state.failed.push(ayah);
       refreshBtn();
+      await SmartCore.breathe();   // Smart Core: yield the main thread between ayahs
     }
   }
-  try{ const workers = []; for(let w = 0; w < DOWNLOAD_CONCURRENCY; w++) workers.push(worker()); await Promise.all(workers); }catch(err){ console.warn('[Download] failed:', err); }
+  try{ const workers = []; const _dlWorkers = SmartCore.downloadConcurrency(); for(let w = 0; w < _dlWorkers; w++) workers.push(worker()); await Promise.all(workers); }catch(err){ console.warn('[Download] failed:', err); }
   const wasAborted = controller.signal.aborted;
   dlState.delete(key);
   if(quotaHit){ showToast('⚠️ Storage is full. Free up space, then tap ⬇ to resume.', 4600); }
@@ -12184,7 +12417,15 @@ function requestNotificationPermission(){
   if(!('Notification' in window)) return;
   if(Notification.permission === 'default'){ try{ Notification.requestPermission(); }catch(e){} }
 }
-function startPrayerAlarmScheduler(){ if(prayerAlarmTimer) return; prayerAlarmTimer = setInterval(checkPrayerAlarms, 15000); checkPrayerAlarms(); }
+function startPrayerAlarmScheduler(){
+  if(prayerAlarmTimer) return;
+  prayerAlarmTimer = -1;
+  const loop = () => {
+    try{ checkPrayerAlarms(); }catch(_){}
+    prayerAlarmTimer = setTimeout(loop, SmartCore.nextAlarmDelay());   // wakes at the next prayer, at most every 60 s
+  };
+  loop();
+}
 function checkPrayerAlarms(){
   const now = new Date();
   const dayKey = now.toDateString();
@@ -12207,7 +12448,7 @@ function checkPrayerAlarms(){
 function firePrayerAlarm(p){
   showToast('🕌 It is time for <b>' + p.label + '</b> prayer.', 8000);
   if('Notification' in window && Notification.permission === 'granted'){
-    try{ new Notification('Prayer time — ' + p.label, { body: 'It is time for ' + p.label + ' prayer.', tag: 'prayer-' + p.key, renotify: true }); }catch(e){}
+    SmartCore.notify('Prayer time — ' + p.label, { body: 'It is time for ' + p.label + ' prayer.', tag: 'prayer-' + p.key, renotify: true, requireInteraction: true, vibrate: [200, 100, 200, 100, 200] });
   }
   if(prayerState.sound === 'mute') return;
   if(prayerState.sound === 'beep'){ playPrayerBeep(); return; }
@@ -12451,7 +12692,154 @@ function initPrayerTimes(){
   renderPrayerScreen(); startPrayerClock(); startPrayerAlarmScheduler();
   if(prayerState.sound !== 'mute' && Object.values(prayerState.alarms).some(Boolean)) requestNotificationPermission();
 }
-initPrayerTimes();
+
+/* ============================================================
+   SMART CORE MANAGEMENT SYSTEM (page side)
+   1. CPU / resource governor — adapts to cores, RAM, Data-Saver,
+      slow network, low battery and background state. Heavy work
+      (audio downloads) is throttled and yields the main thread.
+   2. Background-friendly timers — the 1 s prayer-clock UI tick
+      stops while the app is hidden; the alarm check sleeps until
+      the next prayer instead of polling.
+   3. Alarm keep-alive — posts the next 3 days of alarms to the
+      service worker, pings it (HEARTBEAT) so it stays armed, holds
+      a Web Lock so the page is not frozen, registers periodic sync.
+   ============================================================ */
+const SmartCore = (function(){
+  const nav = navigator;
+  const conn = nav.connection || nav.mozConnection || nav.webkitConnection || null;
+  const cores = Math.max(1, nav.hardwareConcurrency || 2);
+  const mem = nav.deviceMemory || 4;
+  let battery = null;
+  try{ if(nav.getBattery) nav.getBattery().then(b => { battery = b; }).catch(() => {}); }catch(_){}
+
+  function constrained(){
+    try{
+      if(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return true;
+      if(battery && !battery.charging && battery.level <= 0.15) return true;
+    }catch(_){}
+    return mem <= 1;
+  }
+  function downloadConcurrency(){
+    if(constrained()) return 1;
+    let n = cores >= 8 ? 4 : (cores >= 4 ? 3 : 2);
+    if(mem <= 2) n = Math.min(n, 2);
+    if(document.hidden) n = Math.min(n, 2);
+    return n;
+  }
+  function breathe(){
+    if(constrained()) return new Promise(r => setTimeout(r, 60));
+    try{ if(window.scheduler && typeof window.scheduler.yield === 'function') return window.scheduler.yield(); }catch(_){}
+    return new Promise(r => setTimeout(r, 0));
+  }
+
+  function nextAlarmDelay(){
+    const times = prayerState.todayTimes;
+    if(!times) return 60000;
+    const now = new Date();
+    let best = Infinity;
+    for(const p of PRAYERS){
+      if(!prayerState.alarms[p.key]) continue;
+      const t = times[p.key]; if(!t) continue;
+      const parts = t.split(':');
+      const d = new Date(now); d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+      const diff = d.getTime() - now.getTime();
+      if(diff >= 0 && diff < best) best = diff;
+    }
+    if(best === Infinity) return 60000;
+    return Math.max(1000, Math.min(60000, best + 250));
+  }
+
+  async function notify(title, opts){
+    try{
+      const reg = ('serviceWorker' in nav) ? await nav.serviceWorker.getRegistration() : null;
+      if(reg && reg.showNotification){ await reg.showNotification(title, opts); return true; }
+    }catch(_){}
+    try{ new Notification(title, opts); return true; }catch(_){}
+    return false;
+  }
+
+  function buildAlarms(){
+    if(prayerState.lat === null || prayerState.lng === null) return [];
+    const out = [], now = Date.now();
+    for(let d = 0; d < 3; d++){
+      const day = new Date(); day.setHours(12, 0, 0, 0); day.setDate(day.getDate() + d);
+      let raw; try{ raw = computePrayerTimes(day, prayerState.lat, prayerState.lng, prayerState.method, prayerState.asr); }catch(_){ continue; }
+      if(!raw) continue;
+      for(const p of PRAYERS){
+        if(!prayerState.alarms[p.key]) continue;
+        let v = raw[p.key]; if(typeof v !== 'number' || !isFinite(v)) continue;
+        v += (prayerState.offsets[p.key] || 0) / 60; v = ((v % 24) + 24) % 24;
+        let H = Math.floor(v), M = Math.round((v - H) * 60); if(M === 60){ M = 0; H = (H + 1) % 24; }
+        const t = new Date(day); t.setHours(H, M, 0, 0);
+        if(t.getTime() > now - 5 * 60000) out.push({ key: p.key, label: p.label, ts: t.getTime() });
+      }
+    }
+    return out;
+  }
+
+  async function swTarget(){
+    if(!('serviceWorker' in nav)) return null;
+    try{ const reg = await nav.serviceWorker.getRegistration(); return reg && (reg.active || null); }catch(_){ return null; }
+  }
+  let syncTimer = null, lastSync = 0;
+  function syncSchedule(){
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(async () => {
+      const sw = await swTarget(); if(!sw) return;
+      try{ sw.postMessage({ type: 'PRAYER_SCHEDULE', alarms: buildAlarms() }); lastSync = Date.now(); }catch(_){}
+    }, 400);
+  }
+
+  let hbTimer = null;
+  async function beat(){
+    clearTimeout(hbTimer);
+    if(buildAlarms().length){
+      const sw = await swTarget();
+      try{ if(sw) sw.postMessage({ type: 'HEARTBEAT' }); }catch(_){}
+      if(Date.now() - lastSync > 6 * 3600 * 1000) syncSchedule();
+    }
+    hbTimer = setTimeout(beat, document.hidden ? 55000 : 25000);
+  }
+
+  async function registerPeriodic(){
+    try{
+      const reg = await nav.serviceWorker.ready;
+      if(!reg || !('periodicSync' in reg)) return;
+      await reg.periodicSync.register('qc-prayer-check', { minInterval: 60 * 60 * 1000 });
+    }catch(_){}
+  }
+
+  function holdLock(){
+    try{ if(nav.locks) nav.locks.request('qc-core-alive', { mode: 'shared' }, () => new Promise(() => {})).catch(() => {}); }catch(_){}
+  }
+
+  function init(){
+    holdLock();
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){
+        if(prayerClockTimer){ clearInterval(prayerClockTimer); prayerClockTimer = null; }   // no UI ticking in background
+      } else {
+        startPrayerClock(); tickPrayerClock(); syncSchedule();
+      }
+      beat();
+    });
+    if('serviceWorker' in nav){
+      nav.serviceWorker.ready.then(() => { syncSchedule(); beat(); registerPeriodic(); }).catch(() => {});
+    }
+    if(document.hidden && prayerClockTimer){ clearInterval(prayerClockTimer); prayerClockTimer = null; }
+  }
+
+  return { downloadConcurrency, breathe, nextAlarmDelay, notify, syncSchedule, buildAlarms, init, constrained };
+})();
+
+// Any change to prayer settings (location, method, offsets, alarms) re-syncs the worker.
+(function(){
+  const _origSave = savePrayerSettings;
+  savePrayerSettings = function(){ const r = _origSave.apply(this, arguments); try{ SmartCore.syncSchedule(); }catch(_){} return r; };
+})();
+initPrayerTimes();   // must run after SmartCore exists (alarm loop uses it)
+SmartCore.init();
 
 const INSTALL_DONE_KEY = 'qc.installTabDone';
 let deferredPrompt = null;
@@ -12905,6 +13293,8 @@ function openCoachInfoModal(){
       '<li><b>Tajweed</b> is designed to highlight every mispronunciation.</li>' +
       '<li>On a mispronounced word the coach <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
       '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> — Haraka-based bounds: Tabee\'i [1.7–2.3], Wajib/Ja\'iz [3.6–5.4], Lazim [5.5–6.5] × Haraka.<br>• <b>Ghunnah</b> — nasal formant band 250–600 Hz verified in both transcript and spectrum.<br>• <b>Qalqalah</b> — plosive-burst detector catches missing bounce.<br>• <b>Laam Shamsiyyah</b> — onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> — glottal re-attack detection.<br>• <b>Idghaam (no ghunnah)</b> — nasalisation-overrun check.<br>• <b>Emphatic letters</b> (ص→س, ط→ت…) surfaced as warnings on every commit path.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped form.</li>' +
+      '<li><b>Colour key:</b> <b style="color:#ff6b7a">Red</b> = misread or Tajweed mistake · <b style="color:#ffd54a">Yellow</b> = Tajweed warning (uncertain) · <b style="color:#9aa3b2">Grey</b> = unchecked (a rule on that word could not be verified on this device).</li>' +
+      '<li>Tajweed detection on phones is approximate. Accuracy varies by device, microphone, browser and surroundings. Treat results as guidance, not a ruling.</li>' +
       '<li><b>Rule-ready chip:</b> shows whether rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules ready · transcript-only</b> · <b>● Rules unavailable</b> · <b>● Rules not ready</b> (microphone unreachable).</li>' +
     '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">4</span> 🙈 Hide text &amp; Reveal text</h3><ul>' +
@@ -13163,7 +13553,7 @@ window.addEventListener('pagehide', () => {
   try{ hardShutdownAudio(); }catch(_){}
   try{ if(wantMic) stopReciting(true); }catch(_){}
   try{ if(hifzState && hifzState.speechActive) stopHifzSpeech(); }catch(_){}
-  try{ if(speechRecognition){ speechRecognition.onend=null; speechRecognition.onerror=null; speechRecognition.onresult=null; speechRecognition.abort(); } }catch(_){}
+  try{ killAllRecognizers(); }catch(_){}
   try{ releaseMicStream(); }catch(_){}
 });
 document.addEventListener('keydown', e => {
