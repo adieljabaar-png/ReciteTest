@@ -1084,7 +1084,10 @@ body.page-light .qv-slot .juz-first-row{color:#fff !important;background:#000 !i
 body.page-dark  .qv-slot .juz-first-row{color:#000 !important;background:#fff !important;}
 body.page-light .qv-slot .juz-first-row *{color:#fff !important;background:transparent !important;border-color:#fff !important;}
 body.page-dark  .qv-slot .juz-first-row *{color:#000 !important;background:transparent !important;border-color:#000 !important;}
-.juz-first-row{-webkit-box-decoration-break:clone;box-decoration-break:clone;}
+/* FIRST ROW FULLY INVERTED: the wrapper is a full-width block, so the
+   black (light mode) / white (dark mode) bar runs edge to edge across
+   the whole page content — no white gaps at either end of the row. */
+.qv-slot .juz-first-row{display:block !important;width:100% !important;box-sizing:border-box !important;padding:3px 8px !important;margin:0 0 2px 0 !important;-webkit-box-decoration-break:clone;box-decoration-break:clone;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{content:none !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start .mushaf-ayah-mark{border-color:currentColor !important;}
 /* The non-Mushaf reading/index view uses block ayah rows too. */
@@ -3122,7 +3125,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">25 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">21:39</span>
+    <span class="pdr-item pdr-time" id="pdrTime">22:03</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -10988,9 +10991,12 @@ async function getSurahStartPage(surahNumber){
 }
 const _juzStartPageCache = new Map();
 async function getJuzStartPage(juzNumber){
-  if(_juzStartPageCache.has(juzNumber)) return _juzStartPageCache.get(juzNumber);
+  /* INDO-PAK ONLY: Quran.com by_juz returns the OLD Madani start verse
+     (e.g. Juz 11 -> 9:93, Juz 21 -> 29:46) and its Madani page, which can
+     be one page BEFORE the rectified Indo-Pak start (9:94 / 29:45).
+     That is why Juz 11 opened on the wrong page. The Juz index already
+     uses JUZ_START_PAGES_FALLBACK, so Juz taps must use the same page. */
   const fallback = JUZ_START_PAGES_FALLBACK[juzNumber - 1] || 1;
-  try{ const res = await fetchWithTimeout(QURAN_API_V4 + '/verses/by_juz/' + juzNumber + '?fields=' + READER_EDITION + '&per_page=1', FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.verses && j.verses.length && typeof j.verses[0].page_number === 'number'){ _juzStartPageCache.set(juzNumber, j.verses[0].page_number); return j.verses[0].page_number; } } }catch(e){}
   _juzStartPageCache.set(juzNumber, fallback);
   return fallback;
 }
@@ -11154,17 +11160,75 @@ function prefetchAdjacentPages(n){
     fetchPageData(p).then(data => { readerState.pages.set(p, data); if(readerState.currentPage + 1 === p) scheduleRukuReplace(); }).catch(() => {});
   });
 }
+
+async function ensureJuzStartAtTop(n, data){
+  try{
+    const startKey = juzStartKeyForPage(n);
+    if(!startKey || !data || !Array.isArray(data.ayahs) || !data.ayahs.length) return data;
+    if(data.ayahs.some(a => (a.surah + ':' + a.numberInSurah) === startKey)) return data;
+    const [sStr, aStr] = startKey.split(':'); const s = parseInt(sStr,10), a = parseInt(aStr,10);
+    const first = data.ayahs[0];
+    if(!(first.surah === s && first.numberInSurah > a)) return data; /* start verse is not just before this page */
+    /* Pull the rectified ayah up from the previous page (usually its last ayah). */
+    const prevN = n - 1;
+    let prev = readerState.pages.get(prevN);
+    if(!prev) { try{ prev = await fetchPageData(prevN); readerState.pages.set(prevN, prev); }catch(_){ return data; } }
+    if(!prev || !Array.isArray(prev.ayahs)) return data;
+    const idx = prev.ayahs.findIndex(x => (x.surah + ':' + x.numberInSurah) === startKey);
+    if(idx < 0) return data;
+    const moved = prev.ayahs.splice(idx, 1);
+    prev.__juzShiftDone = true; prev.__juzOverflowAppended = true;
+    data.ayahs = moved.concat(data.ayahs);
+    return data;
+  }catch(_){ return data; }
+}
+
+/* AUDIT (run in console: juzStartAudit()): checks all 30 Juz — one start
+   ayah each, one fallback page each, pages strictly increasing, and
+   juzStartKeyForPage(page) round-trips back to that Juz's ayah. */
+function juzStartAudit(){
+  const out = [];
+  let prevPage = 0;
+  for(let juz = 1; juz <= 30; juz++){
+    const page = JUZ_START_PAGES_FALLBACK[juz - 1];
+    const entry = Object.entries(JUZ_START_VERSE).find(([, v]) => v === juz);
+    const key = entry ? entry[0] : null;
+    const roundTrip = juzStartKeyForPage(page);
+    out.push({ juz, startAyah: key, page, ok: !!key && !!page && page > prevPage && roundTrip === key });
+    prevPage = page;
+  }
+  console.table(out);
+  return out;
+}
 async function loadReaderPage(pageNumber){
   const n = Math.max(1, Math.min(604, Math.round(pageNumber) || 1));
   const token = ++readerState.token;
   readerState.loading = true;
   words = []; ptr = 0; lastCurrentEl = null; recReset(); mushafDirtyForViewer = true;
-  if(readerState.pages.has(n)){ readerState.loading = false; renderReaderPage(n, token); return; }
+  if(readerState.pages.has(n)){
+    /* Cached Juz-start page: still run the pull-up — a page cached by
+       prefetch may have been stored before its rectified ayah was
+       pulled up from the previous page. */
+    if(juzStartKeyForPage(n)){
+      try{
+        const cached = readerState.pages.get(n);
+        const key = juzStartKeyForPage(n);
+        if(cached && cached.ayahs && !cached.ayahs.some(a => (a.surah + ':' + a.numberInSurah) === key)){
+          const fixed = await ensureJuzStartAtTop(n, cached);
+          if(token !== readerState.token) return;
+          readerState.pages.set(n, fixed);
+        }
+      }catch(_){}
+    }
+    readerState.loading = false; renderReaderPage(n, token); return;
+  }
   qvTitle.textContent = 'Loading page ' + n + '…';
   pageEl.classList.add('mushaf-book');
   pageEl.innerHTML = '<div class="mushaf-inner"><div class="loading">Loading page ' + n + '…</div></div>';
   try{
-    const data = await fetchPageData(n);
+    let data = await fetchPageData(n);
+    if(token !== readerState.token) return;
+    data = await ensureJuzStartAtTop(n, data);
     if(token !== readerState.token) return;
     readerState.pages.set(n, data);
     readerState.loading = false;
