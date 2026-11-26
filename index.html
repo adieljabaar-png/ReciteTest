@@ -5310,7 +5310,10 @@ const rmsAnalyser = (function(){
     if (!stream) return false;
     try{
       const shared = window.__sharedAudioCtx;
-      if (shared && shared.state === 'running'){ ctx = shared; ctxOwned = false; }
+      if (shared && shared.state !== 'closed'){
+        ctx = shared; ctxOwned = false;
+        if (shared.state === 'suspended'){ try{ shared.resume().catch(() => {}); }catch(_){} }
+      }
       else {
         try {
           ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -9572,9 +9575,22 @@ function setMicButton(){
   syncFsButtons();
 }
 
+/* Wait (bounded) until the shared audio context is actually running, so the RMS
+   analyser gets samples from the very first word after a restart. */
+async function ensureAudioRunning(){
+  try{
+    const c = audioCtx;
+    if(c && c.state === 'suspended'){
+      await Promise.race([ c.resume().catch(() => {}), new Promise(r => setTimeout(r, 900)) ]);
+    }
+  }catch(_){}
+  _ctxSuspendedByUs = false;
+}
 async function startReciting(){
   unlockAudio();
   const _myTok = micSession;
+  await ensureAudioRunning();
+  if(_myTok !== micSession) return;
   if(!words.length){
     if(mode !== 'surah'){ await loadSurah(STORE.surah, true); }
     if(_myTok !== micSession) return;
@@ -9631,6 +9647,15 @@ async function startReciting(){
   requestWakeLock(); resetSilenceTimer(true); scheduleSaveProgress();
   try{ bumpStreak(); }catch(_){}
   resetSpeechPipeline();
+  /* Mobile engines need a moment to release the previous recognition session
+     after abort(); starting at once can give a recogniser that never hears. */
+  {
+    const since = performance.now() - _lastRecAbortAt;
+    if(_lastRecAbortAt && since < 400){
+      await new Promise(r => setTimeout(r, 400 - since));
+      if(_myTok !== micSession || !wantMic) return;
+    }
+  }
   try{
     speechRecognition = createSpeechRecognition();
     if(!speechRecognition){ addFeedback('⚠️ Could not create speech recognizer.', true); wantMic = false; releaseMicStream(); setMicButton(); return; }
@@ -9657,8 +9682,10 @@ async function startReciting(){
   }
 }
 
+let _lastRecAbortAt = 0;
 function abortCoachSpeechRecognition(){
   const rec = speechRecognition;
+  if(rec) _lastRecAbortAt = performance.now();
   // Detach callbacks before aborting so Safari cannot trigger a late onend
   // callback that attempts to restart the microphone after Stop was pressed.
   speechRecognition = null;
@@ -9746,22 +9773,13 @@ function resumeSharedAudio(){
     if(c && c.state === 'suspended' && typeof c.resume === 'function'){ try{ c.resume().catch(() => {}); }catch(_){} }
   });
 }
-/* Close (not just suspend) the shared Web Audio context when nothing is being
-   played. A closed context releases the OS audio session on iOS Safari and the
-   audio route on Android. unlockAudio() recreates it on the next user gesture. */
-function closeSharedAudioContexts(){
-  let busy = false;
-  try{ busy = !!(playing || (viewerAudio && viewerAudio.active)); }catch(_){}
-  if(busy){ suspendSharedAudio(); return; }
-  const seen = [];
-  [audioCtx, window.__sharedAudioCtx].forEach(c => {
-    if(!c || seen.indexOf(c) !== -1) return;
-    seen.push(c);
-    try{ if(c.state !== 'closed' && typeof c.close === 'function') c.close().catch(() => {}); }catch(_){}
-  });
-  audioCtx = null; window.__sharedAudioCtx = null;
-  audioUnlocked = false; _ctxSuspendedByUs = false;
-}
+/* Release the shared Web Audio context when nothing is being played.
+   It is SUSPENDED, not closed: with every mic track stopped a suspended context
+   holds no capture, and the same context (already unlocked by a user gesture) is
+   resumed on the next Start. Closing it and creating a fresh one outside a user
+   gesture left iOS / Android WebKit with a suspended or silent analyser, so the
+   mic "did not hear" after a restart. */
+function closeSharedAudioContexts(){ suspendSharedAudio(); }
 /* The single "everything that touches the microphone or the audio hardware is
    off" routine. Idempotent. Used by Stop, silence auto-stop, surah completion,
    minimise / hidden / frozen / page-hide. Order matters: recognition first (it
