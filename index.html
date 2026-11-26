@@ -6289,9 +6289,9 @@ function tjProtectedNasalMissing(w, heard){
    A dropped madd letter is only flagged when the duration itself falls short. */
 function tjMakeMaddPend(w, heard, commitMs){
   const hn = normArCached(heard || ''), wn = w.norm || '';
-  const hm = (hn.match(/[اوي]/g) || []).length, wm = (wn.match(/[اوي]/g) || []).length;
-  return { kind: w.tjRules.madd, heardLen: hn.length || wn.length,
-           maddLetterDropped: hm < wm && hn.length < wn.length, commitMs: commitMs || 0 };
+  const dropped = Math.max(0, wn.length - hn.length);
+  if (dropped > 3) return null;            /* not a plausible attempt: no Madd verdict */
+  return { kind: w.tjRules.madd, fullLen: wn.length, dropped: dropped, commitMs: commitMs || 0 };
 }
 function tjJudgeMaddTimer(w, pend, ms, src){
   if (!pend || !(ms > 0)) return;
@@ -6305,18 +6305,19 @@ function tjJudgeMaddTimer(w, pend, ms, src){
     }
     return;
   }
+  /* ASR dropping 1-3 letters from the transcript does not shorten the sound, so the dropped
+     letters are added back: the timer always covers the full annotated word. */
   const counts = MADD_COUNTS[kind] || 2;
-  const letters = Math.max(1, pend.heardLen);
-  const maddHeard = !pend.maddLetterDropped;
-  const baseLetters = maddHeard ? letters - 1 : letters;
-  const needCounts = maddHeard ? counts : Math.max(1, counts - 1);
-  if (ms > Math.max(3000, T * (letters + counts) * 2.5)) return;   /* a pause or breath, not a Madd verdict */
+  const letters = Math.max(2, pend.fullLen);
+  const baseLetters = letters - 1;                      /* every letter but the Madd letter = 1 unit */
+  if (ms > Math.max(3000, T * (letters + counts) * 2.5)) return;   /* a pause or breath, not a verdict */
   const got = (ms - baseLetters * T) / T;
-  const ratio = got / needCounts;
+  const ratio = got / counts;
   if (ratio >= 0.85) return;
   const m1 = 'Madd count timer (' + (src === 'onset' ? 'ASR word onsets' : 'ASR commit interval') + '): about ' +
-    Math.max(0, got).toFixed(1) + ' of ' + needCounts + ' counts; word ' + Math.round(ms) + ' ms, ' + letters +
-    ' heard letters, pace ' + Math.round(T) + ' ms/letter (approximate, not phoneme-level)';
+    Math.max(0, got).toFixed(1) + ' of ' + counts + ' counts; word ' + Math.round(ms) + ' ms, ' + letters + ' letters' +
+    (pend.dropped ? ' (' + pend.dropped + ' dropped letter' + (pend.dropped > 1 ? 's' : '') + ' added back)' : '') +
+    ', pace ' + Math.round(T) + ' ms/letter (approximate, not phoneme-level)';
   if (ratio < 0.65) markStrict1Error(w, tag, m1); else markStrict1Warning(w, tag, m1);
 }
 function tjResolvePendingMadd(idx, w){
@@ -6329,7 +6330,7 @@ function tjResolvePendingMadd(idx, w){
   }
   /* ASR-onset pace sample for ordinary words the RMS could not time (e.g. iPhone RMS dropout) */
   if (d > 0 && d <= 1200 && !(q.tjRules && q.tjRules.madd) && !(q.audio && q.audio.durationMs > 0)){
-    recordPaceSample(d, Math.max(2, q._heardLen || (q.norm || '').length));
+    if (q._paceLetters >= 2) recordPaceSample(d, q._paceLetters);
   }
   const pend = q._maddPend;
   if (!pend) return;
@@ -7160,12 +7161,14 @@ function runStrict1Checks(idx, heard, opts){
 
   /* ASR word time stamp + pending Madd of the previous word (needs this word's onset) */
   w._maddPend = null;
-  w._heardLen = normArCached(heard || '').length || (w.norm || '').length;
+  { const _hl = normArCached(heard || '').length, _wl = (w.norm || '').length, _dr = _wl - _hl;
+    w._paceLetters = (_dr >= 0 && _dr <= 3) ? _wl : (_hl > _wl ? _hl : 0); }
   w._asrFirstAt = opts.noProtected ? 0 : (tjAsrSeenFor(opts.rawHeard || heard) || 0);
   tjResolvePendingMadd(idx, w);
 
   /* 1. Emphatic letters (Tafkheem) on every commit path */
-  if (STRICT_FEATURES.emphatics() && heard && w.norm && heard !== w.norm){
+  if (STRICT_FEATURES.emphatics() && heard && w.norm && heard !== w.norm &&
+      w.tjRules && w.tjRules.allRules && w.tjRules.allRules.includes('qalqalah')){   /* only colour-coded words are marked */
     const viol = emphaticViolation(heard, w.norm);
     if (viol.length){
       markTajweedIssue(w, 'emphatic-' + viol[0].expected,
@@ -8611,6 +8614,9 @@ async function ensureMicStream(){
     attachMicTrackListeners(s);
     const rmsOk = await waitForRms(s, _epoch);
     if (_epoch !== micEpoch) { try{s.getTracks().forEach(t=>t.stop());}catch(_){} return null; }
+    if (!rmsOk && rmsAnalyser.isRunning() && s.getAudioTracks().some(t => t.readyState === 'live')){
+      return s;   /* RMS still warming up or recovering (iPhone): hold the mic; the watchdog and heal keep it alive */
+    }
     if (!rmsOk){
       lastMicError = new Error('RMS analyser did not receive microphone samples');
       releaseMicStream();
@@ -8671,7 +8677,7 @@ function handleMicTrackIssue(kind){
       if(!wantMic) return;
       const t = micStream && micStream.getAudioTracks()[0];
       if(t && t.muted) reportMicProblem('track-muted');
-    }, 1500);
+    }, 10000);
     return;
   }
   if(kind === 'ended'){
@@ -9180,30 +9186,8 @@ function setRecitationMode(modeName){
         }
       };
 
-      ensureMicStream().then(s => {
-        if(s){
-          coachTajweedMicFailed = false;
-          updateTajweedStatusChip();
-          if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-            _rmsUnavailableNotified = true;
-            notifyRmsUnavailable();
-          }
-        } else {
-          const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-          if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-             nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-            markTajweedMicFailed();
-          } else {
-            coachTajweedMicFailed = false;
-            updateTajweedStatusChip();
-          }
-        }
-        restartRecognizer();
-      }).catch(() => {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-        restartRecognizer();
-      });
+      restartRecognizer();
+      scheduleTajweedMicStart(micSession);
     } else {
       updateTajweedStatusChip();
     }
@@ -9659,6 +9643,52 @@ function setMicButton(){
   syncFsButtons();
 }
 
+/* ── Tajweed mic sequence: ASR first, getUserMedia + RMS 0.6 s later, then held alive ── */
+const TJ_MIC_DELAY_MS = 600;
+let tjMicTimer = null, tjMicWatchdog = null, tjMicRetries = 0;
+function clearTajweedMicTimers(){
+  if(tjMicTimer){ clearTimeout(tjMicTimer); tjMicTimer = null; }
+  if(tjMicWatchdog){ clearInterval(tjMicWatchdog); tjMicWatchdog = null; }
+}
+function scheduleTajweedMicStart(tok){
+  clearTajweedMicTimers(); tjMicRetries = 0;
+  tjMicTimer = setTimeout(() => { tjMicTimer = null; tjAcquireMic(tok); }, TJ_MIC_DELAY_MS);
+}
+async function tjAcquireMic(tok){
+  if(tok !== micSession || !wantMic || followOnly || micPaused) return;
+  let st = null;
+  try{ st = await ensureMicStream(); }catch(_){ st = null; }
+  if(tok !== micSession || !wantMic || followOnly) return;
+  if(st){
+    coachTajweedMicFailed = false;
+    try{ MIC_DIAG.rmsSupported = rmsAnalyser.isRunning(); }catch(_){}
+    updateTajweedStatusChip();
+    updateMicStandbyChip('active', 'Acoustic capture');
+    startTajweedMicWatchdog(tok);
+    return;
+  }
+  const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
+  if(nm === 'NotAllowedError' || nm === 'NotFoundError' || nm === 'DevicesNotFoundError' || nm === 'SecurityError'){ markTajweedMicFailed(); return; }
+  if(++tjMicRetries <= 4){ tjMicTimer = setTimeout(() => { tjMicTimer = null; tjAcquireMic(tok); }, 1200); return; }
+  coachTajweedMicFailed = false; updateTajweedStatusChip();
+  if(!_rmsUnavailableNotified){ _rmsUnavailableNotified = true; notifyRmsUnavailable(); }
+}
+function startTajweedMicWatchdog(tok){
+  if(tjMicWatchdog) clearInterval(tjMicWatchdog);
+  tjMicWatchdog = setInterval(() => {
+    if(tok !== micSession || !wantMic || followOnly || micPaused){ clearInterval(tjMicWatchdog); tjMicWatchdog = null; return; }
+    const tr = micStream && micStream.getAudioTracks()[0];
+    const alive = !!(tr && tr.readyState === 'live');
+    const fresh = rmsAnalyser.isRunning() && rmsAnalyser.lastFrameAge() < 1500;
+    if(alive && fresh) return;
+    if(alive){   /* keep the stream; restart only the analyser on it */
+      try{ if(rmsAnalyser.isRunning()) rmsAnalyser.stop(); rmsAnalyser.start(micStream); }catch(_){}
+      return;
+    }
+    ensureMicStream().catch(() => null);   /* track ended: re-acquire */
+  }, 1000);
+}
+
 async function startReciting(){
   unlockAudio();
   const _myTok = micSession;
@@ -9685,43 +9715,11 @@ async function startReciting(){
     if(mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
       addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
     }
-    const _tajStream = await ensureMicStream();
-    if(_myTok !== micSession){ releaseMicStream(); return; }
-    if(_tajStream){
-      updateMicStandbyChip('pending','Verifying RMS input');
-      await new Promise(resolve=>setTimeout(resolve,300));
-      if(_myTok !== micSession || document.hidden || currentScreenName !== 'coach' || viewerOpen){ releaseMicStream(); return; }
-      const _liveTrack = _tajStream.getAudioTracks().find(t => t.readyState === 'live' && !t.muted);
-      const _rmsReady = !!(_liveTrack && rmsAnalyser.isRunning() && rmsAnalyser.sampleCount() >= 8);
-      if(!_rmsReady){
-        lastMicError = new Error('Microphone opened but RMS input did not become ready');
-        releaseMicStream();
-        coachTajweedMicFailed = true; updateTajweedStatusChip();
-        addFeedback('⚠️ Microphone opened, but acoustic samples are not arriving. Tajweed acoustic checks are paused; please stop and start again or check Safari microphone access.', true);
-        return;
-      }
-      updateMicStandbyChip('pending','Audio ready — starting ASR');
-    }
-    if(!_tajStream){
-      const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-      if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-         nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-        coachTajweedMicFailed = true;
-        updateTajweedStatusChip();
-      } else {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-      }
-    } else {
-      coachTajweedMicFailed = false;
-      updateTajweedStatusChip();
-      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-        _rmsUnavailableNotified = true;
-        notifyRmsUnavailable();
-      }
-    }
+    /* ASR starts first. getUserMedia + RMS are started 0.6 s after it (scheduleTajweedMicStart) and kept alive. */
+    releaseMicStream();
+    coachTajweedMicFailed = false;
+    updateTajweedStatusChip();
   }
-  
 
   if(finished) resetProgress(true);
   fsPaused = false; micPaused = false; wantMic = true; speechFatalError = false; speechServiceNotified = false;
@@ -9742,16 +9740,9 @@ async function startReciting(){
     recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
     if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
     setStatus('Listening', 'listening', contextLabel());
-    updateMicStandbyChip(!followOnly && micStream && rmsAnalyser.isRunning() ? 'active':'off', !followOnly?'Acoustic capture':'ASR only');
+    if(!followOnly) scheduleTajweedMicStart(_myTok);
+    updateMicStandbyChip(!followOnly ? 'pending':'off', !followOnly?'Acoustic capture starting':'ASR only');
     addFeedback('🎧 Listening — recite from anywhere in the page or surah.');
-    // Inform the user when acoustic rules are unavailable
-    if (!followOnly && !rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-      _rmsUnavailableNotified = true;
-      addFeedback(
-        'ℹ️ <b>Audio waveform analysis is unavailable.</b> ASR word alignment can continue, but waveform-dependent checks for Madd duration, Ghunnah resonance, Ikhfa, Idgham, Iqlab, Qalqalah echo, Laam Shamsiyyah and Hamzat al-Wasl cannot be verified reliably. The app will not label these acoustic checks as passed.',
-        false, true
-      );
-    }
     updateFsMicBtn(); syncFsButtons();
   }catch(e){
     console.error('[Speech] start failed:', e);
@@ -9776,6 +9767,7 @@ function abortCoachSpeechRecognition(){
 
 function stopReciting(silent){
   micSession++;
+  clearTajweedMicTimers();
   _acousticMode = null; _acousticMissStreak = 0;
   if(wantMic && !suppressProgressSave) saveProgressNow();
 
@@ -9816,6 +9808,7 @@ function stopReciting(silent){
 }
 function pauseMic(){
   micPaused = true; recRunning = false;
+  clearTajweedMicTimers();
   disarmSpeechKeepalive(); stopMicDiagnostic();
   if(speechRecognition){ try{ speechRecognition.stop(); }catch(e){} }
   releaseMicStream();
@@ -9825,7 +9818,7 @@ function resumeMic(){
   if(wantMic && !finished && !fsPaused){
     micPaused = false;
     if(!followOnly){
-      ensureMicStream().then(s => { if(!s) markTajweedMicFailed(); }).catch(() => {});
+      scheduleTajweedMicStart(micSession);
     }
     recRunning = true; speechFatalError = false;
     lastResultAt = performance.now();
