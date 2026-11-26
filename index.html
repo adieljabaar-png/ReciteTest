@@ -1128,45 +1128,6 @@ z-index:3;background:transparent;padding:0 .12em;border-radius:999px;
 }
 .mushaf-sajdah-mark{display:inline-block;font-size:.95em;margin:0 .15em;color:currentColor;vertical-align:middle;-webkit-text-stroke:0;opacity:.9;cursor:help;}
 
-
-/* ===== Downloaded Quran layout: fixed 15 lines per mushaf page, applied to reader opened from Juz/Surah index ===== */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page{ display:flex; flex-direction:column; }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content{
-  flex:1 1 auto; display:flex; flex-direction:column;
-  /* 15 equal lines: the downloaded edition's own line grid, not free flow */
-  line-height:var(--mushaf-line-h, 2.15); overflow:hidden;
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .mushaf-line{
-  flex:0 0 var(--mushaf-line-h, 2.15em); height:var(--mushaf-line-h, 2.15em);
-  display:flex; align-items:center; justify-content:center; gap:.35em;
-  overflow:hidden; white-space:nowrap; text-align:justify; text-align-last:center;
-  border-bottom:1px solid color-mix(in srgb, currentColor 12%, transparent);
-}
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .mushaf-line:last-child{ border-bottom:none; }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .mushaf-line .ayah{ display:inline; }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .mushaf-line .w{ white-space:nowrap; }
-
-/* Juz first row in the 15-line layout: the whole .mushaf-line row is the first row. Inverted vs theme. */
-body.page-light .qv-slot .mushaf-line.juz-first-row{color:#fff !important;background:#000 !important;}
-body.page-dark  .qv-slot .mushaf-line.juz-first-row{color:#000 !important;background:#fff !important;}
-body.page-light .qv-slot .mushaf-line.juz-first-row *{color:#fff !important;background:transparent !important;border-color:#fff !important;}
-body.page-dark  .qv-slot .mushaf-line.juz-first-row *{color:#000 !important;background:transparent !important;border-color:#000 !important;}
-/* ===== Juz / Surah index screens use the same mushaf page frame ===== */
-#screenSurahIndex .surah-list, #screenJuzIndex .surah-list{
-  background:var(--page-bg,#fff); color:var(--page-fg,#111);
-  border:5px double var(--page-border,#111); border-radius:4px;
-  padding:14px 14px 8px; box-shadow:0 18px 46px rgba(0,0,0,.35);
-  font-family:'IndoPakNastaleeq','Amiri',serif;
-}
-body:not(.light-mode) #screenSurahIndex .surah-list, body:not(.light-mode) #screenJuzIndex .surah-list{
-  --page-bg:#000; --page-fg:#fff; --page-border:#fff;
-}
-#screenSurahIndex .surah-list .surah-row, #screenJuzIndex .surah-list .surah-row{
-  border:none; border-bottom:1px solid color-mix(in srgb, currentColor 22%, transparent);
-  border-radius:0; background:transparent; box-shadow:none;
-}
-#screenSurahIndex .surah-list .surah-row:last-child, #screenJuzIndex .surah-list .surah-row:last-child{ border-bottom:none; }
-
 /* ===== Reader page frame: wider border, one-sided ع gutter (odd = right, even = left) ===== */
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book{
 --page-border-w:7px;            /* thickness of the double border around the Quran text */
@@ -3189,7 +3150,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">26 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">06:21</span>
+    <span class="pdr-item pdr-time" id="pdrTime">06:24</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -5877,7 +5838,7 @@ function toggleTajweedRule(rule, chip){
   const perPage = 50;
   let page = 1;
   for(let safety = 0; safety < 10; safety++){
-    const url = TJ_API_BASE + '/verses/by_chapter/' + surahNumber + '?mushaf=3&fields=text_uthmani_tajweed&per_page=' + perPage + '&page=' + page;
+    const url = TJ_API_BASE + '/verses/by_chapter/' + surahNumber + '?fields=text_uthmani_tajweed&per_page=' + perPage + '&page=' + page;
     const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
@@ -11136,7 +11097,7 @@ const readerState = { pages: new Map(), currentPage: 0, token: 0, highlightVerse
 const _surahStartPageCache = new Map();
 async function getSurahStartPage(surahNumber){
   if(_surahStartPageCache.has(surahNumber)) return _surahStartPageCache.get(surahNumber);
-  try{ const res = await fetchWithTimeout(QURAN_API_V4 + '/verses/by_chapter/' + surahNumber + '?mushaf=3&fields=' + READER_EDITION + '&per_page=1', FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.verses && j.verses.length && typeof j.verses[0].page_number === 'number'){ _surahStartPageCache.set(surahNumber, j.verses[0].page_number); return j.verses[0].page_number; } } }catch(e){}
+  try{ const res = await fetchWithTimeout(QURAN_API_V4 + '/verses/by_chapter/' + surahNumber + '?fields=' + READER_EDITION + '&per_page=1', FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.verses && j.verses.length && typeof j.verses[0].page_number === 'number'){ _surahStartPageCache.set(surahNumber, j.verses[0].page_number); return j.verses[0].page_number; } } }catch(e){}
   try{ const res = await fetchWithTimeout(ALQURAN_API + '/ayah/' + surahNumber + ':1/' + EDITION_FALLBACK, FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.code === 200 && j.data && typeof j.data.page === 'number'){ _surahStartPageCache.set(surahNumber, j.data.page); return j.data.page; } } }catch(e){}
   return 1;
 }
@@ -11144,7 +11105,7 @@ const _juzStartPageCache = new Map();
 async function getJuzStartPage(juzNumber){
   if(_juzStartPageCache.has(juzNumber)) return _juzStartPageCache.get(juzNumber);
   const fallback = JUZ_START_PAGES_FALLBACK[juzNumber - 1] || 1;
-  try{ const res = await fetchWithTimeout(QURAN_API_V4 + '/verses/by_juz/' + juzNumber + '?mushaf=3&fields=' + READER_EDITION + '&per_page=1', FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.verses && j.verses.length && typeof j.verses[0].page_number === 'number'){ _juzStartPageCache.set(juzNumber, j.verses[0].page_number); return j.verses[0].page_number; } } }catch(e){}
+  try{ const res = await fetchWithTimeout(QURAN_API_V4 + '/verses/by_juz/' + juzNumber + '?fields=' + READER_EDITION + '&per_page=1', FETCH_TIMEOUT_MS); if(res.ok){ const j = await res.json(); if(j.verses && j.verses.length && typeof j.verses[0].page_number === 'number'){ _juzStartPageCache.set(juzNumber, j.verses[0].page_number); return j.verses[0].page_number; } } }catch(e){}
   _juzStartPageCache.set(juzNumber, fallback);
   return fallback;
 }
@@ -11425,62 +11386,6 @@ if(!window.__juzLineObserver){
   window.addEventListener('resize',()=>{ resetJuzFirstRows(); scheduleJuzFirstVisualLines(); });
   document.addEventListener('DOMContentLoaded',scheduleJuzFirstVisualLines);
 }
-
-/* Downloaded layout: regroup the already-downloaded page's words into the edition's own 15 lines per page.
-   Uses live Range measurement (no reflow guesswork): walks word-by-word, closes a line when the next
-   word would wrap, and shrinks the page font until the whole downloaded page fits in 15 lines. */
-function applyDownloadedMushafLines(){
-  try{
-    var content=document.querySelector('.qv-slot .mushaf-book-content'); if(!content) return;
-    var page=content.closest('.mushaf-book-page'); if(!page) return;
-    if(content.dataset.mushafLines==='1') return; content.dataset.mushafLines='1';
-    // Flatten ayahs/words into ordered nodes, preserving ayah grouping for marks
-    var nodes=[]; content.querySelectorAll('.ayah').forEach(function(ay){
-      Array.from(ay.childNodes).forEach(function(n){
-        if(n.nodeType===3 && n.textContent.trim()) nodes.push({node:n, ayah:ay});
-        else if(n.nodeType===1) nodes.push({node:n, ayah:ay});
-      });
-    });
-    if(!nodes.length) return;
-    // Fit: try font sizes until 15 lines suffice (min readable size)
-    var book=content.closest('.mushaf-book')||content;
-    var baseSize=parseFloat(getComputedStyle(book).fontSize)||28;
-    function buildLines(){
-      // clear previous line wrappers
-      content.querySelectorAll('.mushaf-line').forEach(function(l){ while(l.firstChild) content.appendChild(l.firstChild); l.remove(); });
-      // group by visual row using Range rects
-      var lines=[[]], curTop=null;
-      nodes.forEach(function(it){
-        var r=document.createRange(); r.selectNodeContents(it.node);
-        var rect=r.getBoundingClientRect(); r.detach&&r.detach();
-        if(curTop===null) curTop=rect.top;
-        if(Math.abs(rect.top-curTop)>rect.height*0.4){ lines.push([]); curTop=rect.top; }
-        lines[lines.length-1].push(it);
-      });
-      return lines;
-    }
-    var lines=buildLines(), guard=0;
-    while(lines.length>15 && guard++<14){
-      book.style.fontSize=(baseSize*(1-guard*0.04))+'px';
-      lines=buildLines();
-    }
-    // Wrap each visual line in a fixed-height .mushaf-line row (max 15; overflow lines merged into line 15)
-    var frag=document.createDocumentFragment();
-    var juzMarked=false;
-    lines.slice(0,15).forEach(function(group){
-      var row=document.createElement('div'); row.className='mushaf-line';
-      if(!juzMarked && group.some(function(it){ return it.ayah && it.ayah.classList && it.ayah.classList.contains('juz-start'); })){ row.classList.add('juz-first-row'); juzMarked=true; }
-      group.forEach(function(it){ row.appendChild(it.node); });
-      frag.appendChild(row);
-    });
-    content.innerHTML=''; content.appendChild(frag);
-    // Line height = content height / 15 so the 15 lines fill the downloaded page exactly
-    requestAnimationFrame(function(){
-      var h=content.clientHeight||0; if(h>0) content.style.setProperty('--mushaf-line-h',(h/15)+'px');
-    });
-  }catch(e){ console.warn('[mushaf-lines]',e); }
-}
-
 function renderReaderPage(pageNumber, token){
   const page = readerState.pages.get(pageNumber);
   if(!page) return;
@@ -11566,7 +11471,7 @@ function renderReaderPage(pageNumber, token){
   inner.appendChild(frame); pageEl.appendChild(inner); pageEl.scrollTo({top:0,left:0,behavior:'instant'});
   if(readerZoom > 1.001) syncZoomSizer();
   scheduleRukuReplace();
-  scheduleReaderLayoutFix(); setTimeout(function(){ applyDownloadedMushafLines(); resetJuzFirstRows(); }, 60);
+  scheduleReaderLayoutFix();
   if(surahsOnPage.length === 1) qvTitle.textContent = surahsOnPage[0].surahEnglishName + ' · ' + surahsOnPage[0].surahName;
   else if(surahsOnPage.length > 1) qvTitle.textContent = surahsOnPage.map(a => a.surahEnglishName).join(' · ');
   else qvTitle.textContent = 'Page ' + pageNumber;
