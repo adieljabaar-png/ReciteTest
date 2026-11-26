@@ -1,7 +1,7 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v2.4.24
+   Quran Recitation Coach — Service Worker  v2.4.25
 
-   What changed in 2.4.24:
+   What changed in 2.4.25
      • Cache version bumped so installed apps fetch the updated
        index.html (Tajweed mic standby: getUserMedia opens 0.5 s before
        ASR and, together with the RMS analyser and its sample buffer,
