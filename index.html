@@ -1,25 +1,4 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -2500,23 +2479,6 @@ body.light-mode .copyright-footer { border-top-color: rgba(0, 0, 0, .08); }
 body.light-mode .toggles .progress-trigger {
   background: #eef2f8;
 }
-
-/* --- Reader edition tabs (Surah + Juz index) --- */
-.edition-tabs{display:flex;gap:8px;padding:0 2px 10px}
-.edition-tab{flex:1;height:34px;border:1px solid var(--border,#2a3446);border-radius:10px;background:#0d1421;color:var(--text);font-size:.82rem;font-weight:800;cursor:pointer}
-body.light-mode .edition-tab{background:#eef2f8}
-.edition-tab.active{background:#F5C542;color:#111;border-color:#F5C542}
-/* --- Uthmani Tajweed edition: black on white, outer border only --- */
-body.reader-uthmani .mushaf-book-page{background:#fff!important;color:#111!important;border:2px solid #111!important;box-shadow:none!important;outline:none!important}
-body.reader-uthmani .mushaf-book-page .mushaf-book-header-row{border:0!important;background:transparent!important;color:#111!important}
-body.reader-uthmani .mushaf-book-page .mushaf-book-content{border:0!important;background:transparent!important}
-body.reader-uthmani .mushaf-book-page .mushaf-book-footer-row{border:0!important;background:transparent!important;color:#111!important}
-body.reader-uthmani .mushaf-book-page .mushaf-ayah-line,body.reader-uthmani .mushaf-book-page .mushaf-ayah-row,body.reader-uthmani .mushaf-book-page .mushaf-line{border:0!important;box-shadow:none!important;background:transparent!important}
-body.reader-uthmani .mushaf-book-page .mushaf-book-header{background:#fff!important;border:1px solid #111!important;color:#111!important;box-shadow:none!important}
-body.reader-uthmani .mushaf-book-page .mushaf-surah-name,body.reader-uthmani .mushaf-book-page .mushaf-surah-meta,body.reader-uthmani .mushaf-book-page .mushaf-bismillah-line,body.reader-uthmani .mushaf-book-page .bism-text{color:#111!important;background:transparent!important}
-body.reader-uthmani .mushaf-book-page .mushaf-ayah-text,body.reader-uthmani .mushaf-book-page .mushaf-word{color:#111!important}
-body.reader-uthmani .mushaf-book-page .mushaf-ayah-mark{color:#111!important}
-
 .index-tabs{display:flex;gap:8px;padding:0 2px 10px}
 .index-tab{flex:1;height:44px;border:1px solid var(--border,#2a3446);border-radius:12px;background:#0d1421;color:var(--text);font-size:.92rem;font-weight:800;cursor:pointer}
 body.light-mode .index-tab{background:#eef2f8}
@@ -3016,10 +2978,6 @@ body.light-mode .share-arabic{color:#1a2233;}
     <label class="lang-label" for="surahIndexLang">🌐 Translation</label>
     <select class="lang-select" id="surahIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
   </div>
-  <div class="edition-tabs" role="tablist" aria-label="Quran edition">
-    <button class="edition-tab" type="button" data-edition="indopak" role="tab" aria-selected="true">Indo-Pak</button>
-    <button class="edition-tab" type="button" data-edition="uthmani" role="tab" aria-selected="false">Uthmani Tajweed</button>
-  </div>
   <div class="index-tabs" role="tablist" aria-label="Jump or continue">
     <button class="index-tab" type="button" id="surahIdxJumpTab" role="tab" aria-selected="false" aria-controls="surahIdxJumpPanel">Jump to</button>
     <button class="index-tab" type="button" id="surahIdxContinueTab" role="tab" aria-selected="false" aria-controls="surahIdxContinuePanel">Continue</button>
@@ -3054,10 +3012,6 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="lang-selector-wrap">
     <label class="lang-label" for="juzIndexLang">🌐 Translation</label>
     <select class="lang-select" id="juzIndexLang" aria-label="Select translation language"><option value="en" selected="">English</option><option value="tr">Türkçe</option></select>
-  </div>
-  <div class="edition-tabs" role="tablist" aria-label="Quran edition">
-    <button class="edition-tab" type="button" data-edition="indopak" role="tab" aria-selected="true">Indo-Pak</button>
-    <button class="edition-tab" type="button" data-edition="uthmani" role="tab" aria-selected="false">Uthmani Tajweed</button>
   </div>
   <div class="index-tabs" role="tablist" aria-label="Jump or continue">
     <button class="index-tab" type="button" id="juzIdxJumpTab" role="tab" aria-selected="false" aria-controls="juzIdxJumpPanel">Jump to</button>
@@ -6081,6 +6035,7 @@ function noteAcousticMode(available){
     if (_acousticMode !== 'full'){ _acousticMode = 'full'; try{ updateTajweedStatusChip(); }catch(_){} }
     return;
   }
+  if (_tajAudioPending) return; /* raw audio is still waiting for its 1.5 s start delay */
   _acousticMissStreak++;
   if (_acousticMissStreak >= 3 && _acousticMode !== 'transcript'){
     _acousticMode = 'transcript';
@@ -6127,6 +6082,11 @@ function updateTajweedStatusChip(){
     chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · mic clues';
     chip.title = 'All 12 annotated Tajweed categories are available. ASR aligns words with Quran text and the microphone supplies word-level RMS/spectral clues. Acoustic checks are provisional estimates, not phoneme-level Tajweed certification; uncertain findings are shown as yellow warnings for teacher/listener review.';
     chip.setAttribute('aria-label', '12 annotated Tajweed categories available with provisional microphone evidence');
+  } else if(wantMic && _tajAudioPending){
+    chip.className = 'toggle tj-status-loading';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Starting audio…';
+    chip.title = 'Speech recognition is listening. The microphone waveform (RMS / alignment) starts 1.5 seconds later so the phone does not drop the mic.';
+    chip.setAttribute('aria-label', 'Tajweed waveform analysis starting');
   } else if(wantMic){
     chip.className = 'toggle tj-status-error';
     chip.innerHTML = '<span class="tj-status-dot"></span>ASR only · audio unavailable';
@@ -6542,15 +6502,47 @@ function checkIkhfa(w, heard, align){
   return true;
 }
 
-function checkExtraSyllable(w){
+/* Silent letters (silent alif / waw, etc.): a voiced silent letter adds an extra
+   syllable. Three sources must AGREE before a word is flagged:
+     ASR  – the heard word matches this word (so the segment really is this word)
+     RMS  – more energy peaks than the word has syllables
+     MFA  – the word segment is clearly longer than the expected duration
+   RMS + MFA + ASR agree strongly  -> red (mistake)
+   RMS + MFA + ASR agree weakly    -> yellow (almost correct)
+   anything less (or no waveform)  -> not flagged. */
+function checkExtraSyllable(w, heard, align){
   if (!w || !w.tjRules || !w.tjRules.hasSilent) return true;
   if (!STRICT_FEATURES.silent()) return true;
   if (!w.audio) return true;
+  if (!align || !align.available) return true;
+  const dur = Number(w.audio.durationMs) || (w.audio.end - w.audio.start);
+  if (!isFinite(dur) || dur < 120) return true;
   const env = rmsAnalyser.samplesIn(w.audio.start, w.audio.end);
+  if (!env || env.length < 6) return true;
   const peaks = countPeaks(env, rmsAnalyser.minRms() * 0.5, 80);
-  const expected = w.norm.length >= 4 ? 2 : 1;
-  if (peaks > expected + 1){
-    markStrict1Warning(w, 'silent-extra-syllable', peaks + ' energy peaks vs expected ' + expected);
+
+  /* syllables ≈ consonants + a leading alif; later alif / waw / yaa are long-vowel or
+     silent letters and do not add a syllable of their own */
+  const WEAK = 'اٱأإآوىي';
+  const norm = w.norm || '';
+  let syl = 0;
+  for (let i = 0; i < norm.length; i++){ if (i === 0 || WEAK.indexOf(norm[i]) === -1) syl++; }
+  const expected = Math.max(1, syl);
+  const extra = peaks - expected;
+
+  const mfa = heard ? verifyMFAAlignmentSync(w, w.audio, heard)
+                    : { ok: false, normOk: false, ratio: 1, confidence: 0 };
+  if (!mfa.normOk) return true;                 /* ASR does not confirm this word */
+  const ratio = mfa.ratio || 1;
+
+  if (extra >= 3 && ratio >= 1.9){
+    markStrict1Error(w, 'silent-extra-syllable',
+      peaks + ' energy peaks vs ' + expected + ' expected and segment ' + ratio.toFixed(1) +
+      '× the expected length (ASR + RMS + MFA agree: silent letter voiced)');
+  } else if (extra >= 2 && ratio >= 1.5){
+    markStrict1Warning(w, 'silent-extra-syllable',
+      peaks + ' energy peaks vs ' + expected + ' expected and segment ' + ratio.toFixed(1) +
+      '× the expected length (possible voiced silent letter)');
   }
   return true;
 }
@@ -6586,7 +6578,7 @@ function verifyMFAAlignmentSync(w, seg, heard){
     (normOk ? 0.65 : Math.max(0, 0.65 - dist * 0.15)) +
     (durationOk ? 0.35 : 0.10)
   ));
-  return { ok: durationOk && normOk, confidence };
+  return { ok: durationOk && normOk, confidence, ratio, normOk, durationOk, dist };
 }
 
 /* Provisional acoustic check threshold: 70%.
@@ -6750,29 +6742,11 @@ function checkAllNasalRules(w, heard, align){
 }
 
 function strict1SilentOk(w, heard){
-  if (!w || !w.tjRules || !w.tjRules.hasSilent) return true;
-  if (heard === w.norm) return true; /* standard ASR spelling; acoustic extra-syllable check covers this */
-  const full = w.norm;
-  const noSilent = w.normNoSilent || (w.tjRules && w.tjRules.normNoSilent);
-  if (noSilent && noSilent.length >= 1 && noSilent !== full){
-    const dFull = lev(heard, full);
-    const dNoSilent = lev(heard, noSilent);
-    return dFull >= dNoSilent;
-  }
-  const dFull = lev(heard, full);
-  let best = dFull;
-  for (let i = 0; i < w.tjRules.silentLetters.length; i++){
-    const sl = w.tjRules.silentLetters[i];
-    if (!sl) continue;
-    for (let pos = 0; pos <= full.length - sl.length; pos++){
-      if (full.substr(pos, sl.length) !== sl) continue;
-      const variant = full.slice(0, pos) + full.slice(pos + sl.length);
-      if (!variant || variant === full) continue;
-      const d = lev(heard, variant);
-      if (d < best) best = d;
-    }
-  }
-  return dFull >= best;
+  /* ASR always writes the standard spelling, including silent alif / waw / hamzat-wasl
+     alif (e.g. كفروا, آمنوا). A transcript can therefore NEVER prove that a silent letter
+     was voiced, and a spelling that keeps it is not an error. Silent letters are judged
+     only by the synchronised ASR + RMS + MFA evidence in checkExtraSyllable(). */
+  return true;
 }
 
 const TAJWEED_ERROR_NAMES = {
@@ -6944,9 +6918,8 @@ function detectGlottalOnset(raw, targetRaw){
   if (/^[أإآءؤئ]/.test(h)){
     return { detected: true, reason: 'explicit hamza onset (' + h[0] + ')' };
   }
-  if (/^[اٱ]/.test(h) && /^[اٱ]/.test(t)){
-    return { detected: true, reason: 'audible Alif (ا) onset where Hamzat al-Wasl should be silent' };
-  }
+  /* A leading alif (ا / ٱ) in the transcript is just ASR's normal spelling of the
+     silent Hamzat al-Wasl alif — it is NOT evidence that it was sounded. */
   return { detected: false, reason: '' };
 }
 
@@ -6986,14 +6959,15 @@ function checkHamzatWasl(w, idx, rawHeard){
 
   const lexical = detectGlottalOnset(rawHeard, w.raw);
 
-  if (lexical.detected && (acoustic.spike || acoustic.gapMs === null || acoustic.gapMs >= 35)){
+  /* ASR hamza spelling alone is unreliable: it must be confirmed by a glottal attack
+     in the RMS signal before the word is flagged. */
+  if (lexical.detected && acoustic.spike){
     const evidence = [lexical.reason];
     if (acoustic.spike) evidence.push('glottal attack spike in RMS');
     if (acoustic.gapMs !== null) evidence.push('boundary ' + Math.round(acoustic.gapMs) + ' ms');
     const _hwMsg = 'Hamzat al-Wasl sounded instead of silent join — ' + evidence.join(', ');
-    if (acoustic.spike) markStrict1Error(w, 'hamzat-al-wasl', _hwMsg);
-    else markStrict1Warning(w, 'hamzat-al-wasl', _hwMsg);
-  } else if (acoustic.spike && acoustic.gapMs !== null && acoustic.gapMs >= 45 && acoustic.gapMs <= 380){
+    markStrict1Error(w, 'hamzat-al-wasl', _hwMsg);
+  } else if (acoustic.spike && acoustic.gapMs !== null && acoustic.gapMs >= 60 && acoustic.gapMs <= 380){
     markStrict1Warning(w, 'hamzat-al-wasl',
       'glottal attack detected on Hamzat al-Wasl during connected recitation (boundary ' +
       Math.round(acoustic.gapMs) + ' ms)');
@@ -7121,7 +7095,7 @@ function runStrict1Checks(idx, heard, opts){
     markStrict1Warning(w, 'silent',
       'ASR spelling differs from the annotated silent-letter form; transcript alone cannot prove that the silent letter was voiced');
   }
-  if (STRICT_FEATURES.silent()) checkExtraSyllable(w);
+  if (STRICT_FEATURES.silent()) checkExtraSyllable(w, heard, align);
   checkQalqalah(w, heard, align);
   checkIdghaamNoGhunnah(w, heard, align);
 
@@ -8353,6 +8327,16 @@ window.addEventListener('orientationchange', schedulePositionAudioOverlay);
                 aborts if it changed while it was awaiting.          */
 let micEpoch = 0;
 let micSession = 0;
+/* Tajweed audio start sequence: the ASR mic starts FIRST. getUserMedia + the raw
+   audio / RMS analyser (used by the RMS and MFA-style checks) start only after
+   TAJ_GUM_DELAY_MS, so the phone does not drop the mic when both start together. */
+const TAJ_GUM_DELAY_MS = 1500;
+var _tajGumTimer = null;
+var _tajAudioPending = false;
+function cancelTajweedAudioStart(){
+  if(_tajGumTimer){ clearTimeout(_tajGumTimer); _tajGumTimer = null; }
+  _tajAudioPending = false;
+}
 const _micTestClosers = new Set();
 let _ctxSuspendedByUs = false;
 
@@ -8397,6 +8381,7 @@ async function ensureMicStream(){
 function muteMicStream(){ if(micStream){ try{ micStream.getAudioTracks().forEach(t => { t.enabled = false; }); }catch(e){} } rmsAnalyser.stop(); }
 function releaseMicStream(){
   micEpoch++;
+  cancelTajweedAudioStart();
   detachMicTrackListeners();
   if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; }
   rmsAnalyser.stop();
@@ -8947,37 +8932,17 @@ function setRecitationMode(modeName){
       const wasRunning = recRunning;
       if(wasRunning){ try{ speechRecognition && speechRecognition.stop(); }catch(_){} }
 
+      /* ASR mic first; getUserMedia + raw audio start TAJ_GUM_DELAY_MS after ASR. */
+      const _swTok = micSession;
       const restartRecognizer = () => {
-        if(wasRunning && wantMic && !fsPaused && !micPaused){
+        if(_swTok !== micSession || !wantMic || fsPaused || micPaused || followOnly) return;
+        if(wasRunning){
           try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
           catch(_){ speechStarting = false; }
         }
+        scheduleTajweedAudioStart(_swTok);
       };
-
-      ensureMicStream().then(s => {
-        if(s){
-          coachTajweedMicFailed = false;
-          updateTajweedStatusChip();
-          if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-            _rmsUnavailableNotified = true;
-            notifyRmsUnavailable();
-          }
-        } else {
-          const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-          if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-             nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-            markTajweedMicFailed();
-          } else {
-            coachTajweedMicFailed = false;
-            updateTajweedStatusChip();
-          }
-        }
-        restartRecognizer();
-      }).catch(() => {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-        restartRecognizer();
-      });
+      setTimeout(restartRecognizer, 250);
     } else {
       updateTajweedStatusChip();
     }
@@ -9433,6 +9398,45 @@ function setMicButton(){
   syncFsButtons();
 }
 
+/* Waits TAJ_GUM_DELAY_MS after the ASR mic has started, then opens getUserMedia and
+   the raw-audio / RMS analyser. Cancelled by any stop / release / mode change. */
+function scheduleTajweedAudioStart(tok){
+  cancelTajweedAudioStart();
+  if(followOnly || !wantMic) return;
+  _tajAudioPending = true;
+  coachTajweedMicFailed = false;
+  try{ updateTajweedStatusChip(); }catch(_){}
+  _tajGumTimer = setTimeout(async () => {
+    _tajGumTimer = null;
+    if(tok !== micSession || !wantMic || followOnly || micPaused){ _tajAudioPending = false; return; }
+    let stream = null;
+    try{ stream = await ensureMicStream(); }catch(_){ stream = null; }
+    _tajAudioPending = false;
+    if(tok !== micSession || !wantMic || followOnly){
+      if(!wantMic) releaseMicStream();
+      return;
+    }
+    if(!stream){
+      const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
+      if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
+         nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
+        markTajweedMicFailed();
+        return;
+      }
+      coachTajweedMicFailed = false;
+    } else {
+      coachTajweedMicFailed = false;
+      /* fresh acoustic mode: words committed during the wait had no waveform */
+      _acousticMissStreak = 0; _acousticMode = null;
+      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
+        _rmsUnavailableNotified = true;
+        notifyRmsUnavailable();
+      }
+    }
+    try{ updateTajweedStatusChip(); }catch(_){}
+  }, TAJ_GUM_DELAY_MS);
+}
+
 async function startReciting(){
   unlockAudio();
   const _myTok = micSession;
@@ -9459,26 +9463,12 @@ async function startReciting(){
     if(mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
       addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
     }
-    const _tajStream = await ensureMicStream();
-    if(_myTok !== micSession){ releaseMicStream(); return; }
-    if(!_tajStream){
-      const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-      if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-         nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-        coachTajweedMicFailed = true;
-        updateTajweedStatusChip();
-      } else {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-      }
-    } else {
-      coachTajweedMicFailed = false;
-      updateTajweedStatusChip();
-      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-        _rmsUnavailableNotified = true;
-        notifyRmsUnavailable();
-      }
-    }
+    /* Permission may just have been granted through a live stream. Release it so
+       the ASR mic starts alone; getUserMedia + raw audio reopen TAJ_GUM_DELAY_MS
+       after ASR has started (see scheduleTajweedAudioStart). */
+    releaseMicStream();
+    coachTajweedMicFailed = false;
+    updateTajweedStatusChip();
   }
   
 
@@ -9502,14 +9492,9 @@ async function startReciting(){
     if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
     setStatus('Listening', 'listening', contextLabel());
     addFeedback('🎧 Listening — recite from anywhere in the page or surah.');
-    // Inform the user when acoustic rules are unavailable
-    if (!followOnly && !rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-      _rmsUnavailableNotified = true;
-      addFeedback(
-        'ℹ️ <b>Audio waveform analysis is unavailable.</b> ASR word alignment can continue, but waveform-dependent checks for Madd duration, Ghunnah resonance, Ikhfa, Idgham, Iqlab, Qalqalah echo, Laam Shamsiyyah and Hamzat al-Wasl cannot be verified reliably. The app will not label these acoustic checks as passed.',
-        false, true
-      );
-    }
+    /* ASR mic is running: now wait TAJ_GUM_DELAY_MS, then start getUserMedia + raw
+       audio (RMS / MFA). The "audio unavailable" notice is raised there if it fails. */
+    if(!followOnly) scheduleTajweedAudioStart(_myTok);
     updateFsMicBtn(); syncFsButtons();
   }catch(e){
     console.error('[Speech] start failed:', e);
@@ -9580,14 +9565,12 @@ function pauseMic(){
 function resumeMic(){
   if(wantMic && !finished && !fsPaused){
     micPaused = false;
-    if(!followOnly){
-      ensureMicStream().then(s => { if(!s) markTajweedMicFailed(); }).catch(() => {});
-    }
     recRunning = true; speechFatalError = false;
     lastResultAt = performance.now();
     if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
     try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
     catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') console.warn('[Speech] resume failed:', e); }
+    if(!followOnly) scheduleTajweedAudioStart(micSession);
     setStatus('Listening', 'listening', contextLabel());
   }
 }
@@ -10888,29 +10871,6 @@ async function getJuzStartPage(juzNumber){
   _juzStartPageCache.set(juzNumber, fallback);
   return fallback;
 }
-
-/* ---- Reader edition: Indo-Pak (default) or Uthmani Tajweed (second option) ---- */
-let readerEdition = 'indopak';
-try{ const _e = localStorage.getItem('qc.readerEdition'); if(_e === 'uthmani' || _e === 'indopak') readerEdition = _e; }catch(_){}
-function applyReaderEdition(){ document.body.classList.toggle('reader-uthmani', readerEdition === 'uthmani'); document.querySelectorAll('.edition-tab').forEach(b => { const on = b.dataset.edition === readerEdition; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }); }
-function setReaderEdition(ed){ if(ed !== 'uthmani' && ed !== 'indopak') return; if(ed === readerEdition){ applyReaderEdition(); return; } readerEdition = ed; try{ localStorage.setItem('qc.readerEdition', ed); }catch(_){} applyReaderEdition(); try{ if(readerState && readerState.pages) readerState.pages.clear(); }catch(_){} try{ if(readerState && readerState.currentPage) loadReaderPage(readerState.currentPage); }catch(_){} }
-document.addEventListener('click', (e) => { const b = e.target && e.target.closest ? e.target.closest('.edition-tab') : null; if(b) setReaderEdition(b.dataset.edition); });
-applyReaderEdition();
-async function fetchPageUthmani(pageNumber){
-  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=text_uthmani&per_page=300&translations=' + currentTextTranslationQuranComId();
-  const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const json = await res.json();
-  if(!json || !Array.isArray(json.verses)) throw new Error('Bad response');
-  return { pageNumber, ayahs: json.verses.map(v => {
-    const key = v.verse_key || ''; const [sStr, aStr] = key.split(':');
-    const s = parseInt(sStr, 10) || 1; const a = parseInt(aStr, 10) || 1;
-    let translation = '';
-    if(Array.isArray(v.translations) && v.translations.length){ translation = cleanTranslation(v.translations.map(tt => tt.text || '').join(' ')); }
-    return { text: v.text_uthmani || '', numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
-  })};
-}
-
 async function fetchPageIndopak(pageNumber){
   const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&word_fields=text_indopak&translations=' + currentTextTranslationQuranComId();
   const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
@@ -10991,8 +10951,6 @@ async function applyIndoPakText(data){
 }
 async function fetchPageData(pageNumber){
   let data = null;
-  if(readerEdition === 'uthmani'){ try{ data = await fetchPageUthmani(pageNumber); }catch(_e){ data = null; } }
-  if(!data){
   try{ data = await fetchPageIndopak(pageNumber); }
   catch(e1){
     try{
@@ -11007,7 +10965,6 @@ async function fetchPageData(pageNumber){
       if(enRes && enRes.ok){ const enJson = await enRes.json(); if(enJson.code === 200 && enJson.data && Array.isArray(enJson.data.ayahs)){ const trans = enJson.data.ayahs.map(a => cleanTranslation(a.text)); data.ayahs.forEach((a, i) => { a.translation = trans[i] || null; }); } }
     }catch(_){}
   }
-  if(readerEdition === 'uthmani') return data;
   return await applyIndoPakText(data);
 }
 function prefetchAdjacentPages(n){
@@ -12976,7 +12933,7 @@ function openCoachInfoModal(){
     '<div class="feature"><h3><span class="fnum">3</span> 🎵 Tajweed mode (error feedback)</h3><ul>' +
       '<li><b>Tajweed</b> is designed to highlight every mispronunciation.</li>' +
       '<li>On a mispronounced word the coach <b>marks the word red</b>, then <b>keeps following</b> the reciter.</li>' +
-      '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> — Haraka-based bounds: Tabee\'i [1.7–2.3], Wajib/Ja\'iz [3.6–5.4], Lazim [5.5–6.5] × Haraka.<br>• <b>Ghunnah</b> — nasal formant band 250–600 Hz verified in both transcript and spectrum.<br>• <b>Qalqalah</b> — plosive-burst detector catches missing bounce.<br>• <b>Laam Shamsiyyah</b> — onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> — glottal re-attack detection.<br>• <b>Idghaam (no ghunnah)</b> — nasalisation-overrun check.<br>• <b>Emphatic letters</b> (ص→س, ط→ت…) surfaced as warnings on every commit path.<br>• <b>Silent letters</b> cross-checked against the annotation-stripped form.</li>' +
+      '<li><b>Acoustic rule checks</b> are enabled by default:<br>• <b>Madd duration</b> — Haraka-based bounds: Tabee\'i [1.7–2.3], Wajib/Ja\'iz [3.6–5.4], Lazim [5.5–6.5] × Haraka.<br>• <b>Ghunnah</b> — nasal formant band 250–600 Hz verified in both transcript and spectrum.<br>• <b>Qalqalah</b> — plosive-burst detector catches missing bounce.<br>• <b>Laam Shamsiyyah</b> — onset spectral centroid.<br>• <b>Hamzat al-Wasl</b> — glottal re-attack detection.<br>• <b>Idghaam (no ghunnah)</b> — nasalisation-overrun check.<br>• <b>Emphatic letters</b> (ص→س, ط→ت…) surfaced as warnings on every commit path.<br>• <b>Silent letters</b> flagged only when ASR, RMS and MFA timing all agree.</li>' +
       '<li><b>Rule-ready chip:</b> shows whether rule checks are armed — <b>● Loading rules…</b> · <b>● Rules ready</b> · <b>● Rules ready · transcript-only</b> · <b>● Rules unavailable</b> · <b>● Rules not ready</b> (microphone unreachable).</li>' +
     '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">4</span> 🙈 Hide text &amp; Reveal text</h3><ul>' +
@@ -14017,4 +13974,4 @@ window.addEventListener('contextmenu', function(event) {
   });
 })();
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+</body></html>
