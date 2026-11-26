@@ -4857,7 +4857,7 @@ let micTrackMutedTimer = null;
 let micTrackListeners = [];
 const MIC_DIAG_TICK_MS = 500;
 const MIC_DIAG_SOFT_MS = 4000;
-const MIC_DIAG_HARD_MS = 8000;
+const MIC_DIAG_HARD_MS = 10000;
 const MIC_DIAG_FALLBACK_MS = 12000;
 const MIC_DIAG = {
   startedAt: 0,
@@ -5112,6 +5112,7 @@ const rmsAnalyser = (function(){
   let running = false, ctx = null, ctxOwned = false, source = null, analyser = null,
       timeBuf = null, freqBuf = null, timer = null;
   let _lastCalibrationAt = 0;
+  let _lastVoiceAt = 0;
 
   function calibrateMinRms(){
     if (samples.length < 60) return;
@@ -5199,6 +5200,7 @@ const rmsAnalyser = (function(){
       const b = computeBands(freqBuf);
       const harm = computeHarmonicity(timeBuf);
       samples.push({ t: now, rms, bands: b.bands, centroid: b.centroid, flatness: b.flatness, harmonicity: harm });
+      if (rms >= MIN_RMS) _lastVoiceAt = now;
       const cutoff = now - MAX_AGE_MS;
       while (samples.length && samples[0].t < cutoff) samples.shift();
       calibrateMinRms();
@@ -5227,6 +5229,7 @@ const rmsAnalyser = (function(){
       timeBuf = new Float32Array(analyser.fftSize);
       freqBuf = new Float32Array(analyser.frequencyBinCount);
       running = true;
+      _lastVoiceAt = performance.now();
       loop();
       return true;
     }catch(e){
@@ -5364,6 +5367,13 @@ const rmsAnalyser = (function(){
     bandNoiseFloor: () => bandNoiseFloor,
     isCalibrated: () => _calibrated,
     minRms: () => MIN_RMS,
+    lastVoiceAt: () => _lastVoiceAt,
+    /* iPhone can leave / put the audio context in 'suspended' after speech recognition
+       restarts; resume it so the waveform keeps flowing. */
+    ensureRunning: () => {
+      if (ctx && ctx.state === 'suspended'){ try{ ctx.resume().catch(() => {}); }catch(_){} }
+      return !!ctx && ctx.state === 'running';
+    },
     isRunning: () => running,
     sampleCount: () => samples.length
   };
@@ -6035,7 +6045,7 @@ function noteAcousticMode(available){
     if (_acousticMode !== 'full'){ _acousticMode = 'full'; try{ updateTajweedStatusChip(); }catch(_){} }
     return;
   }
-  if (_tajAudioPending) return; /* raw audio is still waiting for its 1 s start delay */
+  if (_tajAudioPending || _tajAudioDropped) return; /* raw audio waiting to start / released after silence */
   _acousticMissStreak++;
   if (_acousticMissStreak >= 3 && _acousticMode !== 'transcript'){
     _acousticMode = 'transcript';
@@ -6082,6 +6092,11 @@ function updateTajweedStatusChip(){
     chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · mic clues';
     chip.title = 'All 12 annotated Tajweed categories are available. ASR aligns words with Quran text and the microphone supplies word-level RMS/spectral clues. Acoustic checks are provisional estimates, not phoneme-level Tajweed certification; uncertain findings are shown as yellow warnings for teacher/listener review.';
     chip.setAttribute('aria-label', '12 annotated Tajweed categories available with provisional microphone evidence');
+  } else if(wantMic && _tajAudioDropped){
+    chip.className = 'toggle tj-status-loading';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Audio paused · silence';
+    chip.title = 'The microphone waveform was released after 10 seconds of silence. It restarts about 1 second after you recite again.';
+    chip.setAttribute('aria-label', 'Tajweed waveform paused after silence');
   } else if(wantMic && _tajAudioPending){
     chip.className = 'toggle tj-status-loading';
     chip.innerHTML = '<span class="tj-status-dot"></span>Starting audio…';
@@ -7358,6 +7373,7 @@ async function runSpeechResultProcessing(snap) {
   sessionHadResult = true;
   MIC_DIAG.asrResultCount++;
   MIC_DIAG.lastAsrResultAt = performance.now();
+  if (_tajAudioDropped && !followOnly && !_tajGumTimer && !micStream) scheduleTajweedAudioStart(micSession);
   if (!micDiagnosedWorking) markMicVerified();
   resetSilenceTimer(true);
   currentBatchId++;
@@ -8380,10 +8396,21 @@ let micSession = 0;
    audio / RMS analyser (used by the RMS and MFA-style checks) start only after
    TAJ_GUM_DELAY_MS, so the phone does not drop the mic when both start together. */
 const TAJ_GUM_DELAY_MS = 1000;
+/* Once getUserMedia has started it HOLDS the mic. It is dropped only after
+   TAJ_AUDIO_SILENCE_DROP_MS of continuous silence (no voice in the RMS signal AND no
+   ASR result). It is not dropped by ASR restarts, a muted/suspended track, or the
+   start-up checks; those are recovered instead. */
+const TAJ_AUDIO_SILENCE_DROP_MS = 10000;
 var _tajGumTimer = null;
 var _tajAudioPending = false;
+var _tajAudioDropped = false;
+var _tajHoldTimer = null;
+var _tajStreamStartAt = 0;
+var _tajLastReacquireAt = 0;
+var _tajReacquiring = false;
 function cancelTajweedAudioStart(){
   if(_tajGumTimer){ clearTimeout(_tajGumTimer); _tajGumTimer = null; }
+  if(_tajHoldTimer){ clearInterval(_tajHoldTimer); _tajHoldTimer = null; }
   _tajAudioPending = false;
 }
 const _micTestClosers = new Set();
@@ -8473,13 +8500,15 @@ function detachMicTrackListeners(){
 function handleMicTrackIssue(kind){
   if(!wantMic) return;
   if(kind === 'muted'){
-    if(micTrackMutedTimer) clearTimeout(micTrackMutedTimer);
+    /* HOLD: a muted track is not dropped or reported while ASR still hears speech;
+       the hold watchdog reopens it. Reported only after 10 s of silence. */
+    if(micTrackMutedTimer) return;
     micTrackMutedTimer = setTimeout(() => {
       micTrackMutedTimer = null;
       if(!wantMic) return;
       const t = micStream && micStream.getAudioTracks()[0];
-      if(t && t.muted) reportMicProblem('track-muted');
-    }, 1500);
+      if(t && t.muted && performance.now() - (MIC_DIAG.lastAsrResultAt || 0) >= TAJ_AUDIO_SILENCE_DROP_MS) reportMicProblem('track-muted');
+    }, TAJ_AUDIO_SILENCE_DROP_MS);
     return;
   }
   if(kind === 'ended'){
@@ -9449,7 +9478,59 @@ function setMicButton(){
 
 /* Waits TAJ_GUM_DELAY_MS after the ASR mic has started, then opens getUserMedia and
    the raw-audio / RMS analyser. Cancelled by any stop / release / mode change. */
+async function _tajReacquire(tok){
+  /* the stream is open but silent while ASR hears speech (phone muted the track):
+     reopen it and keep holding */
+  _tajReacquiring = true;
+  _tajLastReacquireAt = performance.now();
+  try{
+    micEpoch++;
+    detachMicTrackListeners();
+    rmsAnalyser.stop();
+    if(micStream){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(_){} micStream = null; }
+    const s = await ensureMicStream().catch(() => null);
+    if(tok !== micSession || !wantMic || followOnly){ if(!wantMic) releaseMicStream(); return; }
+    _tajStreamStartAt = performance.now();
+    if(s){ _acousticMissStreak = 0; _acousticMode = null; }
+    try{ updateTajweedStatusChip(); }catch(_){}
+  } finally { _tajReacquiring = false; }
+}
+function startTajweedHold(tok){
+  if(_tajHoldTimer){ clearInterval(_tajHoldTimer); _tajHoldTimer = null; }
+  _tajStreamStartAt = performance.now();
+  _tajHoldTimer = setInterval(() => {
+    if(tok !== micSession || !wantMic || followOnly || micPaused){
+      clearInterval(_tajHoldTimer); _tajHoldTimer = null; return;
+    }
+    if(_tajReacquiring) return;
+    const now = performance.now();
+    /* HOLD: keep the track enabled and the audio context running */
+    try{ if(micStream) micStream.getAudioTracks().forEach(t => { if(!t.enabled) t.enabled = true; }); }catch(_){}
+    rmsAnalyser.ensureRunning();
+    /* DROP: only after 10 s of continuous silence (no voice and no ASR result) */
+    const lastVoice = rmsAnalyser.lastVoiceAt();
+    const lastAsr = MIC_DIAG.lastAsrResultAt || 0;
+    const lastActive = Math.max(_tajStreamStartAt, lastVoice, lastAsr);
+    if(now - lastActive >= TAJ_AUDIO_SILENCE_DROP_MS){
+      _tajAudioDropped = true;
+      releaseMicStream();          /* getUserMedia + raw audio off (also clears this timer) */
+      addFeedback('⏸️ 10 seconds of silence — microphone audio released. It restarts when you recite again.', false, true);
+      try{ updateTajweedStatusChip(); }catch(_){}
+      return;
+    }
+    /* RECOVER: stream is dead-silent although ASR is hearing speech */
+    const tracks = micStream ? micStream.getAudioTracks() : [];
+    const trackBad = !tracks.length || tracks.every(t => t.readyState !== 'live' || t.muted);
+    const asrRecent = now - lastAsr < 3000;
+    const rmsQuiet = now - Math.max(_tajStreamStartAt, lastVoice) > 2500;
+    if(((asrRecent && rmsQuiet) || trackBad) && now - _tajLastReacquireAt > 4000){
+      _tajReacquire(tok);
+    }
+  }, 500);
+}
+
 function scheduleTajweedAudioStart(tok){
+  _tajAudioDropped = false;
   cancelTajweedAudioStart();
   if(followOnly || !wantMic) return;
   _tajAudioPending = true;
@@ -9481,6 +9562,7 @@ function scheduleTajweedAudioStart(tok){
         _rmsUnavailableNotified = true;
         notifyRmsUnavailable();
       }
+      startTajweedHold(tok);
     }
     try{ updateTajweedStatusChip(); }catch(_){}
   }, TAJ_GUM_DELAY_MS);
