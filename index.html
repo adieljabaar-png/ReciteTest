@@ -17,14 +17,15 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content [style*=
 
 
 /* Juz marker: invert the actual first visual row of the starting ayah, in strict monochrome. */
-body.page-light .qv-slot .juz-first-row{background:#000 !important;color:#fff !important;}
-body.page-dark .qv-slot .juz-first-row{background:#fff !important;color:#000 !important;}
+/* Juz-start top line: strict monochrome inversion, same in both themes. */
+body.page-light .qv-slot .juz-first-row,
+body.page-dark  .qv-slot .juz-first-row{background:#fff !important;color:#000 !important;}
 body.page-light .qv-slot .juz-first-row span,
 body.page-light .qv-slot .juz-first-row .w,
-body.page-light .qv-slot .juz-first-row .mushaf-ayah-mark{color:#fff !important;background:transparent !important;}
-body.page-dark .qv-slot .juz-first-row span,
-body.page-dark .qv-slot .juz-first-row .w,
-body.page-dark .qv-slot .juz-first-row .mushaf-ayah-mark{color:#000 !important;background:transparent !important;}
+body.page-light .qv-slot .juz-first-row .mushaf-ayah-mark,
+body.page-dark  .qv-slot .juz-first-row span,
+body.page-dark  .qv-slot .juz-first-row .w,
+body.page-dark  .qv-slot .juz-first-row .mushaf-ayah-mark{color:#000 !important;background:transparent !important;border-color:#000 !important;}
 </style><head><style>
 @font-face {
   font-family: "Optimistic";
@@ -6126,8 +6127,8 @@ function updateTajweedStatusChip(){
     chip.setAttribute('aria-label', 'Tajweed running in transcript-only mode; acoustic rules not verified');
   } else if(acousticReady){
     chip.className = 'toggle tj-status-ready';
-    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · mic clues';
-    chip.title = 'All 12 annotated Tajweed categories are available. ASR aligns words with Quran text and the microphone supplies word-level RMS/spectral clues. Acoustic checks are provisional estimates, not phoneme-level Tajweed certification; uncertain findings are shown as yellow warnings for teacher/listener review.';
+    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · ASR + RMS';
+    chip.title = 'ASR word matching, measured word timing (MFA-style alignment heuristics) and live RMS/spectral samples are fused where usable. Acoustic results remain provisional estimates—not phoneme-level Tajweed certification. Missing audio or alignment is reported as unverified rather than passed.';
     chip.setAttribute('aria-label', '12 annotated Tajweed categories available with provisional microphone evidence');
   } else if(wantMic){
     chip.className = 'toggle tj-status-error';
@@ -6396,6 +6397,9 @@ function maybeExplainRules(w){
 
 function strict1MaddOk(prevW, deltaMs){
   if (!prevW || !prevW.tjRules || !prevW.tjRules.madd) return true;
+  /* Unified ASR+timing pipeline: callers must supply measured aligned duration.
+     Null/undefined means timing is unavailable, never a silent pass. */
+  if (!Number.isFinite(deltaMs) || deltaMs <= 0) return false;
   const need = maddRequiredMs(prevW.tjRules.madd);
   return deltaMs >= need;
 }
@@ -6420,10 +6424,15 @@ function strict1GhunnahOk(w, heard){
     if (!hasN && !hasM) textOk = true;
     else textOk = (hasN && heard.indexOf(N) !== -1) || (hasM && heard.indexOf(M) !== -1);
   }
-  let spectralOk = true;
+  let spectralOk = null;
   if (w.audio && rmsAnalyser.isRunning()){
     const smp = rmsAnalyser.samplesIn(w.audio.start, w.audio.end);
     spectralOk = nasalPresent(smp);
+  }
+  /* ASR/transcript and audio evidence are fused: missing audio is unverified, not a pass. */
+  if (spectralOk === null){
+    markStrict1Warning(w, 'ghunnah-audio-unverified', 'No usable RMS segment was captured for nasal resonance; transcript evidence alone cannot verify Ghunnah.');
+    return false;
   }
   if (!spectralOk && !textOk){
     markStrict1Warning(w, 'ghunnah-' + gType, 'ASR and whole-word spectrum did not confirm the expected nasal; listen to the marked word before judging');
@@ -11385,7 +11394,7 @@ function renderReaderPage(pageNumber, token){
     span.dataset.verse = verseKey; span.dataset.page = String(pageNumber);
     if(typeof a.ruku === 'number') span.dataset.ruku = String(a.ruku);
     if(a.surahNumberOfAyahs) span.dataset.surahAyahs = String(a.surahNumberOfAyahs);
-    if(Number(a.surah) !== 1 && JUZ_START_VERSE[verseKey]) span.classList.add('juz-start');
+    if(JUZ_START_VERSE[verseKey]) span.classList.add('juz-start');
     span.appendChild(document.createTextNode(text + ' '));
     const mark = document.createElement('span'); mark.className = 'mushaf-ayah-mark'; mark.textContent = toAr(displayAyah);
     span.appendChild(mark);
