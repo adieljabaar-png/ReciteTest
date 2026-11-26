@@ -15,6 +15,16 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content [style*=
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content [class*="tajweed"] { color:inherit !important; }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content [style*="background"] { background-color:transparent !important; }
 
+
+/* Juz marker: invert the actual first visual row of the starting ayah, in strict monochrome. */
+body.page-light .qv-slot .juz-first-row{background:#000 !important;color:#fff !important;}
+body.page-dark .qv-slot .juz-first-row{background:#fff !important;color:#000 !important;}
+body.page-light .qv-slot .juz-first-row span,
+body.page-light .qv-slot .juz-first-row .w,
+body.page-light .qv-slot .juz-first-row .mushaf-ayah-mark{color:#fff !important;background:transparent !important;}
+body.page-dark .qv-slot .juz-first-row span,
+body.page-dark .qv-slot .juz-first-row .w,
+body.page-dark .qv-slot .juz-first-row .mushaf-ayah-mark{color:#000 !important;background:transparent !important;}
 </style><head><style>
 @font-face {
   font-family: "Optimistic";
@@ -6530,6 +6540,9 @@ function checkIkhfa(w, heard, align){
   } else if (heard && w.norm && w.norm.indexOf('ن') !== -1 && heard.indexOf('ن') === -1){
     markStrict1Warning(w, 'ghunnah-ikhfa',
       'hidden ن omitted in transcript during Ikhfa (transcript fallback)');
+  } else {
+    markStrict1Warning(w, 'ghunnah-ikhfa-unverified',
+      'Ikhfa nasalisation and hold could not be verified acoustically');
   }
   return true;
 }
@@ -6732,11 +6745,18 @@ function checkAllNasalRules(w, heard, align){
         markStrict1Warning(w, 'ghunnah-asr',
           'nasal resonance detected, but ASR did not transcribe م for Iqlab');
       }
-    } else if (!textOk){
-      if (type === 'iqlab') markStrict1Error(w, 'ghunnah-iqlab',
-        'expected م (Iqlab) missing in transcript (transcript-only mode)');
-      else markStrict1Warning(w, 'nasal-dropped',
-        'expected nasal consonant missing in transcript (transcript-only mode)');
+    } else {
+      /* Transcript-only mode cannot verify nasal resonance or its duration.
+         Never silently pass a marked nasal rule as acoustically confirmed. */
+      if (!textOk){
+        if (type === 'iqlab') markStrict1Error(w, 'ghunnah-iqlab',
+          'expected م (Iqlab) missing in transcript (transcript-only mode)');
+        else markStrict1Warning(w, 'nasal-dropped',
+          'expected nasal consonant missing in transcript (transcript-only mode)');
+      } else {
+        markStrict1Warning(w, 'ghunnah-unverified-' + type,
+          'nasal resonance and ghunnah duration could not be verified: no usable microphone segment');
+      }
     }
   });
 }
@@ -7049,6 +7069,9 @@ function runStrict1Checks(idx, heard, opts){
             ' ms (held too long; provisional phone-mic estimate)');
         }
       }
+    } else if (!opts.skipTiming && !prevInSameBatch && w.tjRules && w.tjRules.madd && STRICT_FEATURES.madd() && !align.available){
+      markStrict1Warning(w, 'madd-unverified-' + w.tjRules.madd,
+        'Madd duration could not be acoustically verified: no reliable microphone segment');
     }
 
     /* Pace sampling */
