@@ -1,639 +1,252 @@
-/* ============================================================
-   Quran Recitation Coach — Service Worker  v2.4.25
+/* ============================================================================
+ * Service Worker — Quran Recitation Coach (sw.js)
+ * © 2025 Quran Recitation Coach. All rights reserved.
+ * ============================================================================ */
 
-   What changed in 2.4.25
-     • salaah.html (Learn Salaah) is now pre-cached with the app
-       shell, so it opens offline from the Dashboard 'Salaah' tab
-       (including /salaah.html?theme=dark|light) and so its Back
-       button returns to the cached index.html Dashboard.
-     • REFRESH_MANIFEST also refreshes the cached salaah.html.
-     • Cache version bumped so installed apps fetch the updated
-       index.html and salaah.html.
+const CACHE_VERSION   = 'qc-v1';
+const STATIC_CACHE    = `${CACHE_VERSION}-static`;
+const API_CACHE       = `${CACHE_VERSION}-api`;
+const AUDIO_CACHE     = 'qc-audio'; // Matches AUDIO_CACHE_NAME in index.html
 
-   What changed in 2.5:
-     • Cache version bumped so installed apps fetch the updated
-       index.html (notification fix, Tajweed error-name fix).
-     • Push: added a 'pushsubscriptionchange' handler that silently
-       re-subscribes (same VAPID key as index.html) and re-posts the
-       subscription to /api/subscribe, so notifications keep working
-       when the browser rotates the subscription.
-     • The IndoPak font database (cdn.jsdelivr.net / raw.githubusercontent.com)
-       is now cached, so it also loads offline.
-
-   What this SW never touches (user data is safe across updates):
-     • localStorage (progress, bookmarks, streaks, settings,
-       'qc.lastReaderPage', 'qc.downloads', theme, mode, etc.)
-     • IndexedDB
-     • The persistent 'qc-audio' cache (downloaded surahs and
-       translation audio). Activation and CLEAR_CACHES only delete
-       old versioned shell/text/font/runtime caches.
-
-   Not intercepted (straight to network): /api/*, /my-analytics/*,
-   /_vercel/*, adhan from islamcan.com, bigdatacloud and open-meteo
-   location lookups.
-   ============================================================ */
-
-'use strict';
-
-const VERSION = '2.4.23';
-
-const SHELL_CACHE   = `qc-shell-${VERSION}`;
-const TEXT_CACHE    = `qc-text-${VERSION}`;
-const FONTS_CACHE   = `qc-fonts-${VERSION}`;
-const RUNTIME_CACHE = `qc-runtime-${VERSION}`;
-
-const VERSIONED_CACHES = [SHELL_CACHE, TEXT_CACHE, FONTS_CACHE, RUNTIME_CACHE];
-
-/* Persistent caches — NEVER deleted on activation, regardless of
-   version. Downloaded Quran audio (everyayah.com) and downloaded
-   translation audio (everyayah.com, Islamic Network, QuranEnc)
-   all live here. */
-const AUDIO_CACHE = 'qc-audio';
-const PERSISTENT_CACHES = [AUDIO_CACHE];
-
-const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-'];
-
-/* Pre-cache the shell, manifest, AND the real app icons so they
-   are available for the install prompt and offline usage.
-
-   Note: read.html is the new Read Arabic page. salaah.html is the
-   Learn Salaah app opened from the Dashboard. index.html is the
-   main dashboard; index_3.html is the previous dashboard copy
-   kept around for old links. */
-const SHELL_URLS = [
+const CORE_ASSETS = [
   './',
   './index.html',
-  './index_3.html',
-  './index_39.html',
-  './read.html',
-  './salaah.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './manifest.json'
 ];
 
-const HOST_ALQURAN              = 'api.alquran.cloud';
-const HOST_QURAN_COM            = 'api.quran.com';
-const HOST_EVERYAYAH            = 'everyayah.com';
-const HOST_QURANENC             = 'd.quranenc.com';
-const HOST_ISLAMIC_NETWORK      = 'cdn.islamic.network';
-const HOST_GOOGLE_FONTS_CSS     = 'fonts.googleapis.com';
-const HOST_GOOGLE_FONTS_STATIC  = 'fonts.gstatic.com';
-const HOST_JSDELIVR             = 'cdn.jsdelivr.net';
-const HOST_GITHUB_RAW           = 'raw.githubusercontent.com';
+// External APIs & CDNs that the app relies on
+const API_HOSTS = [
+  'api.alquran.cloud',
+  'api.quran.com',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com'
+];
 
-/* Must match VAPID_PUBLIC_KEY in index.html. */
-const VAPID_PUBLIC_KEY = 'BHpU2OJZjHoYab_-F8I369UTsJjx9ArleSiggsdQ2dcch4mTQFQLTEvanyto6J5f8xFh-tshGyGsJNiDj9xy1aE';
+const AUDIO_HOSTS = [
+  'everyayah.com',
+  'cdn.islamic.network'
+];
 
-/* 600 entries covers surah + page translations across all five
-   supported languages without thrashing. */
-const TEXT_CACHE_MAX = 600;
-const RUNTIME_MAX    = 120;
-const MANIFEST_TIMEOUT_MS = 2000;
-
-/* The exact Google Fonts stylesheet URL used by <link> in index.html
-   and read.html. Keep these identical so the pre-cached font CSS
-   hits both pages without a second network round-trip. */
-const FONT_CSS_URL = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap';
-const FONT_FETCH_TIMEOUT_MS   = 8000;
-const FONTS_PREFETCH_TOTAL_MS = 20000;
-
-/* Inline SVG icon used by push notifications. */
-const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
-  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'>" +
-    "<rect width='180' height='180' rx='40' fill='#000000'/>" +
-    "<path d='M90 62 Q58 48 28 50 L28 118 Q58 116 90 130 Z' fill='#F5C542'/>" +
-    "<path d='M90 62 Q122 48 152 50 L152 118 Q122 116 90 130 Z' fill='#D9A32B'/>" +
-  "</svg>"
-);
-
-/* ============================================================
-   INSTALL — cache shell + pre-cache Google Fonts
-   ============================================================ */
-self.addEventListener('install', event => {
-  event.waitUntil((async () => {
-    try{
-      const cache = await caches.open(SHELL_CACHE);
-      await Promise.all(SHELL_URLS.map(async url => {
-        try{
-          const req = new Request(url, { cache: 'reload' });
-          const res = await fetch(req);
-          if(res && (res.ok || res.type === 'opaque')) await cache.put(url, res.clone());
-        }catch(_){}
-      }));
-    }catch(_){}
-
-    try{
-      await Promise.race([
-        prefetchFonts().catch(() => {}),
-        new Promise(r => setTimeout(r, FONTS_PREFETCH_TOTAL_MS))
-      ]);
-    }catch(_){}
-
-    try{ await self.skipWaiting(); }catch(_){}
-  })());
+// ── Install: Pre-cache core app shell ────────────────────────────────────────
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE)
+      .then((cache) => cache.addAll(CORE_ASSETS))
+      .then(() => self.skipWaiting())
+      .catch((err) => console.warn('[SW] Pre-cache warning:', err))
+  );
 });
 
-/* ============================================================
-   ACTIVATE — drop stale versioned caches, claim clients
-   ============================================================ */
-self.addEventListener('activate', event => {
-  event.waitUntil((async () => {
-    try{
-      const keys = await caches.keys();
-      const toDelete = keys.filter(name => {
-        if(VERSIONED_CACHES.includes(name)) return false;
-        if(PERSISTENT_CACHES.includes(name)) return false;
-        const owned = OWNED_PREFIXES.some(p => name.startsWith(p));
-        if(!owned) return false;
-        return true;
-      });
-      await Promise.all(toDelete.map(name => caches.delete(name)));
-    }catch(_){}
-
-    if(self.registration && self.registration.navigationPreload){
-      try{ await self.registration.navigationPreload.disable(); }catch(_){}
-    }
-    try{ await self.clients.claim(); }catch(_){}
-  })());
+// ── Activate: Clean up outdated static/API caches (preserve qc-audio) ────────
+self.addEventListener('activate', (event) => {
+  const allowedCaches = new Set([STATIC_CACHE, API_CACHE, AUDIO_CACHE]);
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.map((key) => {
+          if (!allowedCaches.has(key)) {
+            return caches.delete(key);
+          }
+        })
+      ))
+      .then(() => self.clients.claim())
+  );
 });
 
-/* ============================================================
-   MESSAGES — SKIP_WAITING / CLEAR_CACHES / CLEAR_AUDIO_CACHE /
-              REFRESH_MANIFEST
-   ============================================================ */
-self.addEventListener('message', event => {
-  const data = event.data || {};
-  if(data.type === 'SKIP_WAITING'){
-    event.waitUntil(self.skipWaiting());
-    return;
-  }
-  if(data.type === 'CLEAR_CACHES'){
-    // SAFETY: never wipe the persistent audio cache here, and
-    // never touch localStorage (where 'qc.lastReaderPage' for
-    // Continue lives — the SW has no access to it and must
-    // not attempt to clear it). Only versioned caches are
-    // dropped; qc-audio is preserved.
-    event.waitUntil((async () => {
-      const keys = await caches.keys();
-      await Promise.all(keys.filter(k => !PERSISTENT_CACHES.includes(k)).map(k => caches.delete(k)));
-      if(event.source && event.source.postMessage) event.source.postMessage({ type: 'CACHES_CLEARED' });
-    })());
-    return;
-  }
-  if(data.type === 'CLEAR_AUDIO_CACHE'){
-    event.waitUntil((async () => {
-      try{ await caches.delete(AUDIO_CACHE); }catch(_){}
-      if(event.source && event.source.postMessage) event.source.postMessage({ type: 'AUDIO_CACHE_CLEARED' });
-    })());
-    return;
-  }
-  if(data.type === 'REFRESH_MANIFEST'){
-    event.waitUntil((async () => {
-      try{
-        const cache = await caches.open(SHELL_CACHE);
-        await Promise.all([
-          cache.delete('./manifest.json', { ignoreSearch: true }),
-          cache.delete('./index.html',    { ignoreSearch: true }),
-          cache.delete('./index_3.html',  { ignoreSearch: true }),
-          cache.delete('./read.html',     { ignoreSearch: true }),
-          cache.delete('./salaah.html',   { ignoreSearch: true }),
-          cache.delete('./',              { ignoreSearch: true })
-        ]);
-      }catch(_){}
-      if(event.source && event.source.postMessage) event.source.postMessage({ type: 'MANIFEST_REFRESHED' });
-    })());
-    return;
-  }
-});
-
-/* ============================================================
-   PUSH — show notification with the Recite logo
-   ============================================================ */
-self.addEventListener('push', event => {
-  let data = { title: 'Quran Recitation Coach', body: 'You have a new message.', url: './' };
-  try{ if(event.data) data = Object.assign(data, event.data.json()); }catch(_){}
-  event.waitUntil(self.registration.showNotification(data.title, {
-    body: data.body,
-    icon: NOTIFICATION_ICON,
-    badge: NOTIFICATION_ICON,
-    tag: data.tag || 'qc-notification',
-    renotify: true,
-    data: { url: data.url }
-  }));
-});
-
-function urlBase64ToUint8Array(b64){
-  const pad = '='.repeat((4 - b64.length % 4) % 4);
-  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
-  const out = new Uint8Array(raw.length);
-  for(let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-  return out;
-}
-
-self.addEventListener('pushsubscriptionchange', event => {
-  event.waitUntil((async () => {
-    try{
-      const sub = await self.registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
-      await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sub)
-      });
-    }catch(_){}
-  })());
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const target = (event.notification.data && event.notification.data.url) || './';
-  event.waitUntil((async () => {
-    const list = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for(const c of list){
-      if(c.url.startsWith(self.location.origin) && 'focus' in c){
-        const isSpecific =
-          target &&
-          target !== './' &&
-          target !== '/' &&
-          target !== self.registration.scope;
-        if(isSpecific){
-          try{ await c.navigate(target); }catch(_){}
-        }
-        return c.focus();
-      }
-    }
-    if(clients.openWindow) return clients.openWindow(target);
-  })());
-});
-
-/* ============================================================
-   FETCH — strategy dispatch
-   ============================================================ */
-self.addEventListener('fetch', event => {
+// ── Fetch: Intelligent routing per resource type ─────────────────────────────
+self.addEventListener('fetch', (event) => {
   const req = event.request;
+  if (req.method !== 'GET') return;
 
-  if(req.method !== 'GET') return;
+  const url = new URL(req.url);
 
-  let url;
-  try{ url = new URL(req.url); }catch(_){ return; }
-  if(url.protocol !== 'http:' && url.protocol !== 'https:') return;
+  // Ignore non-HTTP(S) schemes (e.g., chrome-extension://)
+  if (!url.protocol.startsWith('http')) return;
 
-  if(url.origin === self.location.origin){
-    if(url.pathname.startsWith('/my-analytics/')) return;
-    if(url.pathname.startsWith('/_vercel/'))       return;
-    if(url.pathname.startsWith('/api/'))           return;
-    if(url.pathname === '/sw.js')                  return;
-    if(url.pathname === '/robots.txt')             return;
-  }
-
-  if(url.hostname === HOST_QURAN_COM && url.search.includes('text_uthmani_tajweed')){
-    event.respondWith(networkFresh(req));
+  // 1. Audio files (everyayah.com & cdn.islamic.network) -> Cache-First
+  if (AUDIO_HOSTS.some((host) => url.hostname.endsWith(host)) || url.pathname.endsWith('.mp3')) {
+    event.respondWith(handleAudioRequest(req));
     return;
   }
 
-  if(url.hostname === HOST_EVERYAYAH || url.hostname === HOST_QURANENC || url.hostname === HOST_ISLAMIC_NETWORK){
-    event.respondWith(audioFromDownloadCache(req));
+  // 2. Quran APIs & Google Fonts -> Stale-While-Revalidate
+  if (API_HOSTS.some((host) => url.hostname.endsWith(host))) {
+    event.respondWith(handleApiRequest(req));
     return;
   }
 
-  if((url.hostname === HOST_JSDELIVR || url.hostname === HOST_GITHUB_RAW) && url.pathname.indexOf('quran8vs/IndoPak') !== -1){
-    event.respondWith(cacheFirst(req, FONTS_CACHE));
-    return;
-  }
-
-  if(url.hostname === HOST_GOOGLE_FONTS_CSS || url.hostname === HOST_GOOGLE_FONTS_STATIC){
-    event.respondWith(cacheFirst(req, FONTS_CACHE));
-    return;
-  }
-
-  if(url.hostname === HOST_QURAN_COM || url.hostname === HOST_ALQURAN){
-    event.respondWith(networkFirst(req, TEXT_CACHE, TEXT_CACHE_MAX));
-    return;
-  }
-
-  if(url.origin === self.location.origin){
-    if(url.pathname.endsWith('/manifest.json')){
-      event.respondWith(manifestFresh(req));
-      return;
-    }
-    if(req.mode === 'navigate'){
-      event.respondWith(shellNavigation(req));
-      return;
-    }
-    event.respondWith(cacheFirst(req, RUNTIME_CACHE, RUNTIME_MAX));
+  // 3. Same-origin app shell & navigation -> Network-First with Offline Fallback
+  if (url.origin === self.location.origin) {
+    event.respondWith(handleAppShellRequest(req));
     return;
   }
 });
 
-/* ============================================================
-   Audio — persistent download cache with Range + bypass support
-   ============================================================ */
-async function audioFromDownloadCache(req){
-  const bypass = req.cache === 'no-store' || req.cache === 'reload';
+/**
+ * Cache-First for Quran recitation & translation MP3s.
+ * Supports Safari/Chrome HTTP Range requests for cached audio blobs.
+ */
+async function handleAudioRequest(request) {
+  const cache = await caches.open(AUDIO_CACHE);
+  const cached = await cache.match(request, { ignoreSearch: true, ignoreVary: true });
 
-  if(!bypass){
-    try{
-      const cache = await caches.open(AUDIO_CACHE);
-      const hit = await cache.match(req, { ignoreSearch: true, ignoreVary: true });
-      if(hit){
-        const rangeHeader = req.headers.get('range');
-        if(rangeHeader) return serveRangeFromCached(hit, rangeHeader);
-        return hit;
-      }
-    }catch(_){}
+  if (cached) {
+    // Handle byte-range requests cleanly if the browser asks for partial content
+    if (request.headers.has('range') && cached.type !== 'opaque') {
+      return createRangeResponse(request, cached);
+    }
+    return cached;
   }
 
-  try{
-    return await fetch(req);
-  }catch(_){
-    if(bypass){
-      try{
-        const cache = await caches.open(AUDIO_CACHE);
-        const hit = await cache.match(req, { ignoreSearch: true, ignoreVary: true });
-        if(hit) return hit;
-      }catch(_){}
+  try {
+    const networkResponse = await fetch(request);
+    // Cache full 200 responses (or opaque cross-origin audio responses)
+    if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+      cache.put(request, networkResponse.clone()).catch(() => {});
     }
-    return new Response('', { status: 504, statusText: 'Gateway Timeout' });
+    return networkResponse;
+  } catch (err) {
+    return new Response('Offline audio unavailable', {
+      status: 503,
+      statusText: 'Service Unavailable'
+    });
   }
 }
 
-async function serveRangeFromCached(response, rangeHeader){
-  // If the cached response is opaque (e.g., from QuranEnc without CORS),
-  // we cannot read its size or slice it. Return the whole thing.
-  if (response.type === 'opaque') {
-    return response;
-  }
+/**
+ * Slices a cached audio Response to satisfy HTTP Range requests (e.g., iOS Safari).
+ */
+async function createRangeResponse(request, cachedResponse) {
+  try {
+    const rangeHeader = request.headers.get('range');
+    const buf = await cachedResponse.arrayBuffer();
+    const total = buf.byteLength;
+    const match = /bytes=(\d+)-(\d*)/.exec(rangeHeader);
 
-  let blob;
-  try{ blob = await response.blob(); }
-  catch(_){ return response; }
+    if (!match) return cachedResponse;
 
-  const size = blob.size;
-  if(!size) return response;
+    const start = Number(match[1]);
+    const end = match[2] ? Math.min(Number(match[2]), total - 1) : total - 1;
 
-  const m = /^bytes=(\d*)-(\d*)$/.exec((rangeHeader || '').trim());
-  if(!m){
-    return new Response(blob, {
-      status: 200,
+    if (start >= total || start > end) {
+      return new Response(null, {
+        status: 416,
+        headers: { 'Content-Range': `bytes */${total}` }
+      });
+    }
+
+    const sliced = buf.slice(start, end + 1);
+    return new Response(sliced, {
+      status: 206,
+      statusText: 'Partial Content',
       headers: {
-        'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
-        'Accept-Ranges': 'bytes',
-        'Content-Length': String(size)
+        'Content-Type': cachedResponse.headers.get('Content-Type') || 'audio/mpeg',
+        'Content-Range': `bytes ${start}-${end}/${total}`,
+        'Content-Length': String(sliced.byteLength),
+        'Accept-Ranges': 'bytes'
       }
     });
+  } catch (e) {
+    return cachedResponse;
+  }
+}
+
+/**
+ * Stale-While-Revalidate for Quran text, Tajweed metadata, translations & fonts.
+ */
+async function handleApiRequest(request) {
+  const cache = await caches.open(API_CACHE);
+  const cached = await cache.match(request);
+
+  const networkFetch = fetch(request)
+    .then((response) => {
+      if (response && response.ok) {
+        cache.put(request, response.clone()).catch(() => {});
+      }
+      return response;
+    })
+    .catch(() => null);
+
+  if (cached) {
+    return cached;
   }
 
-  let start, end;
-  if(m[1] === '' && m[2] !== ''){
-    const suffix = parseInt(m[2], 10);
-    if(!isFinite(suffix) || suffix <= 0) return response;
-    start = Math.max(0, size - suffix);
-    end   = size - 1;
-  } else if(m[1] !== '' && m[2] === ''){
-    start = parseInt(m[1], 10);
-    end   = size - 1;
-  } else {
-    start = parseInt(m[1], 10);
-    end   = parseInt(m[2], 10);
-  }
+  const fresh = await networkFetch;
+  if (fresh) return fresh;
 
-  if(!isFinite(start) || start < 0) start = 0;
-  if(!isFinite(end)   || end >= size) end = size - 1;
-
-  if(start > end){
-    return new Response('', {
-      status: 416,
-      statusText: 'Range Not Satisfiable',
-      headers: { 'Content-Range': 'bytes */' + size }
-    });
-  }
-
-  const slice = blob.slice(start, end + 1, 'audio/mpeg');
-  return new Response(slice, {
-    status: 206,
-    statusText: 'Partial Content',
-    headers: {
-      'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
-      'Content-Range': 'bytes ' + start + '-' + end + '/' + size,
-      'Content-Length': String(end - start + 1),
-      'Accept-Ranges': 'bytes'
-    }
+  return new Response(JSON.stringify({ code: 503, status: 'Offline', data: null }), {
+    status: 503,
+    headers: { 'Content-Type': 'application/json' }
   });
 }
 
-/* ============================================================
-   Fetch strategies
-   ============================================================ */
-
-async function cacheFirst(req, cacheName, maxEntries){
-  const cache = await caches.open(cacheName);
-  const hit = await cache.match(req);
-  if(hit) return hit;
-  try{
-    const res = await fetch(req);
-    if(res && (res.ok || res.type === 'opaque')){
-      const clone = res.clone();
-      cache.put(req, clone)
-        .then(() => { if(maxEntries) trimCache(cacheName, maxEntries); })
-        .catch(() => {});
+/**
+ * Network-First for HTML & local static assets so updates deploy immediately,
+ * falling back to cached index.html when offline.
+ */
+async function handleAppShellRequest(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse && networkResponse.ok) {
+      cache.put(request, networkResponse.clone()).catch(() => {});
     }
-    return res;
-  }catch(_){
-    return new Response('', { status: 504, statusText: 'Gateway Timeout' });
+    return networkResponse;
+  } catch (err) {
+    const cached = await cache.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+
+    if (request.mode === 'navigate') {
+      const fallback = await cache.match('./index.html') || await cache.match('./');
+      if (fallback) return fallback;
+    }
+
+    return new Response('Offline', { status: 503, statusText: 'Offline' });
   }
 }
 
-async function networkFirst(req, cacheName, maxEntries){
-  const cache = await caches.open(cacheName);
-  try{
-    const res = await fetch(req);
-    if(res && res.ok){
-      const clone = res.clone();
-      cache.put(req, clone)
-        .then(() => { if(maxEntries) trimCache(cacheName, maxEntries); })
-        .catch(() => {});
+// ── Push Notifications (matches VAPID subscription in index.html) ────────────
+self.addEventListener('push', (event) => {
+  let payload = {
+    title: 'Quran Recitation Coach',
+    body: 'Time for your daily Quran recitation or prayer reminder.',
+    url: './'
+  };
+
+  if (event.data) {
+    try {
+      const parsed = event.data.json();
+      payload = Object.assign(payload, parsed);
+    } catch (e) {
+      const text = event.data.text();
+      if (text) payload.body = text;
     }
-    return res;
-  }catch(_){
-    const hit = await cache.match(req);
-    if(hit) return hit;
-    return new Response(
-      JSON.stringify({ code: 503, status: 'OFFLINE', data: null }),
-      { status: 503, headers: { 'Content-Type': 'application/json' } }
-    );
   }
-}
 
-async function networkFresh(req){
-  try{
-    const freshReq = new Request(req, { cache: 'no-store' });
-    const res = await fetch(freshReq);
-    if(res && res.ok){
-      try{
-        const cache = await caches.open(TEXT_CACHE);
-        await cache.put(req, res.clone());
-        trimCache(TEXT_CACHE, TEXT_CACHE_MAX).catch(() => {});
-      }catch(_){}
-      return res;
-    }
-    throw new Error('bad response');
-  }catch(_){
-    try{
-      const cache = await caches.open(TEXT_CACHE);
-      const hit = await cache.match(req, { ignoreVary: true });
-      if(hit) return hit;
-    }catch(_){}
-    return new Response('', { status: 504, statusText: 'Gateway Timeout' });
-  }
-}
-
-async function manifestFresh(req){
-  const cache = await caches.open(SHELL_CACHE);
-  try{
-    const controller = new AbortController();
-    const timer = setTimeout(() => { try{ controller.abort(); }catch(_){} }, MANIFEST_TIMEOUT_MS);
-    let res;
-    try{
-      res = await fetch(req, { signal: controller.signal, cache: 'no-store' });
-    } finally {
-      clearTimeout(timer);
-    }
-    if(res && res.ok){
-      try{
-        const data = await res.clone().json();
-        // AUTO-ROTATE: never let a portrait-only manifest lock the installed app.
-        data.orientation = 'any';
-        const fixed = new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } });
-        cache.put('./manifest.json', fixed.clone()).catch(() => {});
-        return fixed;
-      }catch(_){
-        const clone = res.clone();
-        cache.put('./manifest.json', clone).catch(() => {});
-        return res;
-      }
-    }
-    throw new Error('bad response');
-  }catch(_){ /* fall through to cache */ }
-
-  try{
-    let hit = await cache.match('./manifest.json', { ignoreSearch: true });
-    if(!hit) hit = await cache.match(req, { ignoreSearch: true });
-    if(hit) return hit;
-  }catch(_){}
-
-  return new Response(
-    JSON.stringify({
-      name: 'Quran Recitation Coach',
-      short_name: 'Recite',
-      start_url: './',
-      scope: './',
-      display: 'standalone',
-      orientation: 'any',
-      background_color: '#0d1119',
-      theme_color: '#0d1119',
-      icons: []
-    }),
-    { status: 200, headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } }
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      tag: payload.tag || 'quran-coach-reminder',
+      renotify: true,
+      data: { url: payload.url || './' }
+    })
   );
-}
+});
 
-async function shellNavigation(req){
-  const cache = await caches.open(SHELL_CACHE);
-  try{
-    const freshReq = new Request(req, { cache: 'reload' });
-    const res = await fetch(freshReq);
-    if(res && res.ok && res.type === 'basic'){
-      const clone = res.clone();
-      // Cache the page that was actually requested (index.html,
-      // index_3.html, read.html or salaah.html) so each page works offline.
-      cache.put(req, clone).catch(() => {});
-    }
-    return res;
-  }catch(_){
-    let hit = null;
-    try{
-      // Try the exact URL first (so /read.html serves read.html
-      // offline, not the dashboard), then fall back to index.html.
-      hit = await cache.match(req, { ignoreSearch: true })
-         || await cache.match('./index.html', { ignoreSearch: true })
-         || await cache.match('./', { ignoreSearch: true });
-    }catch(_){}
-    if(hit) return hit;
-    return new Response(
-      '<!doctype html><meta charset="utf-8"><title>Offline</title>' +
-      '<body style="font-family:sans-serif;padding:2rem;text-align:center;background:#0d1119;color:#e8edf7">' +
-      '<h2>You are offline</h2>' +
-      '<p>Open the app once while online to enable offline mode.</p>' +
-      '<p style="font-size:.75rem;opacity:.6;margin-top:2rem">&copy; 2025 Quran Recitation Coach. All rights reserved.</p>',
-      { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-    );
-  }
-}
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || './';
 
-async function trimCache(cacheName, maxEntries){
-  try{
-    const cache = await caches.open(cacheName);
-    const keys = await cache.keys();
-    const over = keys.length - maxEntries;
-    if(over <= 0) return;
-    for(let i = 0; i < over; i++) await cache.delete(keys[i]);
-  }catch(_){}
-}
-
-/* ============================================================
-   Google Fonts pre-cache (bounded, best-effort)
-   ============================================================ */
-
-async function fetchWithTimeout(url, ms){
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => { try{ ctrl.abort(); }catch(_){} }, ms);
-  try{
-    return await fetch(url, {
-      signal: ctrl.signal,
-      mode: 'cors',
-      credentials: 'omit',
-      cache: 'no-store'
-    });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function prefetchFonts(){
-  let cache;
-  try{ cache = await caches.open(FONTS_CACHE); }catch(_){ return; }
-
-  let cssText = '';
-  try{
-    const cssRes = await fetchWithTimeout(FONT_CSS_URL, FONT_FETCH_TIMEOUT_MS);
-    if(cssRes && cssRes.ok){
-      cssText = await cssRes.clone().text();
-      try{ await cache.put(FONT_CSS_URL, cssRes); }catch(_){}
-    }
-  }catch(_){}
-
-  if(!cssText) return;
-
-  const urls = [];
-  const re = /url\(\s*(['"]?)([^'")\s]+)\1\s*\)/g;
-  let m;
-  while((m = re.exec(cssText)) !== null){
-    const u = m[2];
-    if(u && /^https?:\/\//i.test(u)) urls.push(u);
-  }
-
-  const unique = Array.from(new Set(urls));
-  await Promise.all(unique.map(async u => {
-    try{
-      const existing = await cache.match(u, { ignoreSearch: true });
-      if(existing) return;
-      const r = await fetchWithTimeout(u, FONT_FETCH_TIMEOUT_MS);
-      if(r && (r.ok || r.type === 'opaque')){
-        try{ await cache.put(u, r); }catch(_){}
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) {
+          return client.focus();
+        }
       }
-    }catch(_){}
-  }));
-}
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
