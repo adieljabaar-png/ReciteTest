@@ -5305,11 +5305,12 @@ const rmsAnalyser = (function(){
     }catch(_){}
     timer = setTimeout(loop, SAMPLE_MS);
   }
-  function start(stream){
+  function start(stream, opts){
     if (running) return true;
     if (!stream) return false;
+    const fresh = !!(opts && opts.fresh);
     try{
-      const shared = window.__sharedAudioCtx;
+      const shared = fresh ? null : window.__sharedAudioCtx;
       if (shared && shared.state !== 'closed'){
         ctx = shared; ctxOwned = false;
         if (shared.state === 'suspended'){ try{ shared.resume().catch(() => {}); }catch(_){} }
@@ -5467,6 +5468,7 @@ const rmsAnalyser = (function(){
     isCalibrated: () => _calibrated,
     minRms: () => MIN_RMS,
     isRunning: () => running,
+    ctxState: () => (ctx ? ctx.state : 'none'),
     sampleCount: () => samples.length
   };
 })();
@@ -8497,7 +8499,8 @@ let micSession = 0;
 const _micTestClosers = new Set();
 let _ctxSuspendedByUs = false;
 
-async function ensureMicStream(){
+async function ensureMicStream(opts){
+  opts = opts || {};
   if(micStream){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
     if(live){
@@ -8516,9 +8519,13 @@ async function ensureMicStream(){
   try{
     lastMicError = null;
     const _epoch = micEpoch;
-    const s = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-    });
+    /* opts.plainAudio: recovery attempt with the browser's default capture
+       processing. iOS speech recognition runs the mic in voice-processing mode;
+       a second capture that asks for raw (no echo-cancel / AGC) audio can be
+       handed silence while recognition is active. */
+    const s = await navigator.mediaDevices.getUserMedia(opts.plainAudio
+      ? { audio: true }
+      : { audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     if(_epoch !== micEpoch){
       // Stop / background / mode change happened while the permission
       // prompt or device was opening — never leave this stream live.
@@ -8527,7 +8534,7 @@ async function ensureMicStream(){
     }
     micStream = s;
     attachMicTrackListeners(s);
-    const rmsOk = rmsAnalyser.start(s);
+    const rmsOk = rmsAnalyser.start(s, { fresh: !!opts.freshCtx });
     if(!rmsOk && !_rmsUnavailableNotified){
       _rmsUnavailableNotified = true;
       notifyRmsUnavailable();
@@ -8560,7 +8567,16 @@ function attachMicTrackListeners(stream){
     const tracks = stream.getAudioTracks();
     for(const t of tracks){
       const onMute   = () => handleMicTrackIssue('muted');
-      const onUnmute = () => { if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; } };
+      const onUnmute = () => {
+        if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; }
+        /* The OS muted this track (speech recognition took the mic) and gave it
+           back. The old analyser graph can stay silent after that: rebuild it. */
+        setTimeout(() => {
+          if(!wantMic || followOnly || micStream !== stream || _acousticRecovering) return;
+          try{ rmsAnalyser.stop(); rmsAnalyser.start(stream, { fresh: true }); }catch(_){}
+          _acousticMode = null; _acousticMissStreak = 0;
+        }, 250);
+      };
       const onEnded  = () => handleMicTrackIssue('ended');
       t.addEventListener('mute', onMute);
       t.addEventListener('unmute', onUnmute);
@@ -9084,6 +9100,7 @@ function setRecitationMode(modeName){
   } else {
     addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
+    if(wantMic) startAcousticWatchdog();
     if(wantMic && !rmsAnalyser.isRunning()){
       const wasRunning = recRunning;
       if(wasRunning){ try{ speechRecognition && speechRecognition.stop(); }catch(_){} }
@@ -9664,6 +9681,7 @@ async function startReciting(){
     else { try{ speechStarting = true; speechRecognition.start(); }catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') throw e; } }
     recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
     if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
+    startAcousticWatchdog();
     setStatus('Listening', 'listening', contextLabel());
     addFeedback('🎧 Listening — recite from anywhere in the page or surah.');
     // Inform the user when acoustic rules are unavailable
@@ -9736,7 +9754,94 @@ function stopReciting(silent){
   updateFsMicBtn();
   syncFsButtons();
 }
+/* ── Acoustic watchdog (Tajweed mode) ───────────────────────────────────
+   getUserMedia (RMS) and SpeechRecognition (ASR) both want the phone's mic.
+   The browser may keep the getUserMedia track "live" yet feed it silence once
+   recognition starts (or restarts), so ASR keeps working while every acoustic
+   Tajweed rule (Madd, Ghunnah, Qalqalah …) is blind. The old diagnostics stop
+   as soon as ASR returns its first result, so that state was never repaired.
+   This watchdog notices "ASR hears speech but the analyser gets none" and
+   rebuilds the capture AFTER recognition is running. */
+let acousticWatchTimer = null, _acousticRecovering = false;
+let acousticSilentTicks = 0, acousticRecoveries = 0, _acousticGiveUpNotified = false;
+const ACOUSTIC_SILENT_TICKS_NEEDED = 3;      // seconds of speech with no signal
+const ACOUSTIC_MAX_RECOVERIES = 3;
+function startAcousticWatchdog(){
+  stopAcousticWatchdog();
+  if(followOnly) return;
+  acousticSilentTicks = 0; acousticRecoveries = 0; _acousticGiveUpNotified = false;
+  acousticWatchTimer = setInterval(acousticWatchTick, 1000);
+}
+function stopAcousticWatchdog(){
+  if(acousticWatchTimer){ clearInterval(acousticWatchTimer); acousticWatchTimer = null; }
+  acousticSilentTicks = 0;
+}
+function acousticSilentNow(){
+  const now = performance.now();
+  const track = micStream && micStream.getAudioTracks && micStream.getAudioTracks()[0];
+  if(!track || track.readyState !== 'live' || track.muted) return true;
+  if(!rmsAnalyser.isRunning()) return true;
+  if(rmsAnalyser.ctxState() === 'suspended') return true;
+  const samples = rmsAnalyser.samplesIn(now - 3000, now);
+  if(samples.length < 15) return true;                      // analyser not producing frames
+  let peak = 0;
+  for(const sm of samples) if(sm.rms > peak) peak = sm.rms;
+  return peak < rmsAnalyser.minRms() * 0.4;
+}
+function acousticWatchTick(){
+  if(!wantMic || followOnly || fsPaused || micPaused || _acousticRecovering || finished) return;
+  const now = performance.now();
+  /* Only judge the mic while the reciter is demonstrably speaking: ASR returned
+     a result in the last 2.5 s. Real silence between ayahs must not trigger it. */
+  const speaking = sessionHadResult && (now - MIC_DIAG.lastAsrResultAt) < 2500;
+  if(!speaking){ acousticSilentTicks = 0; return; }
+  if(!acousticSilentNow()){ acousticSilentTicks = 0; return; }
+  if(++acousticSilentTicks < ACOUSTIC_SILENT_TICKS_NEEDED) return;
+  acousticSilentTicks = 0;
+  if(acousticRecoveries >= ACOUSTIC_MAX_RECOVERIES){
+    if(!_acousticGiveUpNotified){
+      _acousticGiveUpNotified = true;
+      addFeedback('⚠️ <b>The microphone cannot be shared between speech recognition and the Tajweed waveform analyser on this phone.</b> Word checking continues; Madd, Ghunnah and the other sound rules stay transcript estimates. Closing other audio apps or using <b>Chrome</b> (Android) can help.', true, true);
+    }
+    return;
+  }
+  recoverAcousticPipeline();
+}
+async function recoverAcousticPipeline(){
+  if(_acousticRecovering || !wantMic || followOnly) return;
+  _acousticRecovering = true;
+  const tok = micSession;
+  const attempt = ++acousticRecoveries;
+  try{
+    addFeedback('🔄 Microphone waveform is silent while speech recognition is hearing you — reconnecting the microphone (attempt ' + attempt + ' of ' + ACOUSTIC_MAX_RECOVERIES + ')…', false, true);
+    releaseMicStream();                                   // stops tracks + analyser; ASR keeps running
+    await new Promise(r => setTimeout(r, attempt === 1 ? 200 : 450));
+    if(tok !== micSession || !wantMic) return;
+    /* Re-open AFTER recognition is running, with a fresh audio context. From the
+       2nd attempt use the browser's default capture processing. */
+    const s = await ensureMicStream({ freshCtx: true, plainAudio: attempt >= 2 });
+    if(tok !== micSession || !wantMic){ releaseMicStream(); return; }
+    if(!s){ coachTajweedMicFailed = false; updateTajweedStatusChip(); return; }
+    /* A context created outside a user tap can stay suspended: fall back to the
+       already-unlocked shared context in that case. */
+    await new Promise(r => setTimeout(r, 500));
+    if(tok !== micSession || !wantMic) return;
+    if(rmsAnalyser.ctxState() === 'suspended' && micStream){
+      rmsAnalyser.stop();
+      try{ if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume(); }catch(_){}
+      rmsAnalyser.start(micStream, { fresh: false });
+    }
+    _acousticMode = null; _acousticMissStreak = 0;
+    updateTajweedStatusChip();
+  }catch(e){
+    console.warn('[Tajweed] mic recovery failed:', e);
+  }finally{
+    _acousticRecovering = false;
+    acousticSilentTicks = 0;
+  }
+}
 function pauseMic(){
+  stopAcousticWatchdog();
   micPaused = true; recRunning = false;
   disarmSpeechKeepalive(); stopMicDiagnostic();
   if(speechRecognition){ try{ speechRecognition.stop(); }catch(e){} }
@@ -9750,7 +9855,7 @@ function resumeMic(){
     }
     recRunning = true; speechFatalError = false;
     lastResultAt = performance.now();
-    if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
+    if(!followOnly){ startMicDiagnostic(); startAcousticWatchdog(); } armSpeechKeepalive();
     try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
     catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') console.warn('[Speech] resume failed:', e); }
     setStatus('Listening', 'listening', contextLabel());
@@ -9786,6 +9891,7 @@ function closeSharedAudioContexts(){ suspendSharedAudio(); }
    owns its own capture on iOS / Android), then the getUserMedia tracks, then the
    analyser graph, then the wake lock, then the audio context. */
 function releaseAllMediaHardware(){
+  try{ stopAcousticWatchdog(); }catch(_){}
   try{ abortCoachSpeechRecognition(); }catch(_){}
   try{ releaseMicStream(); }catch(_){}          // bumps micEpoch, stops every track
   try{ rmsAnalyser.stop(); }catch(_){}
