@@ -2264,6 +2264,9 @@ body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{
 .w[title] { cursor: help; }
 .w[title]:active { filter: brightness(1.25); }
 body.light-mode .w[title]:active { filter: brightness(0.85); }
+#micStandbyChip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:.72rem;font-weight:700;background:rgba(176,138,45,.14);border:1px solid rgba(176,138,45,.45);color:var(--gold);white-space:nowrap}
+#micStandbyChip[data-state="active"]{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.45);color:#16a34a}
+#micStandbyChip[data-state="off"]{opacity:.75}
 #tajweedStatusChip{
   cursor: pointer;
   user-select: none;
@@ -2310,42 +2313,6 @@ body.light-mode #tajweedStatusChip.tj-status-error{
   color: #7a5500;
   border-color: rgba(198,138,0,.60);
   background: rgba(198,138,0,.10);
-}
-#micStandbyChip{
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  font-weight: 700;
-  letter-spacing: .01em;
-  transition: color .2s, border-color .2s, background .2s;
-}
-#micStandbyChip .mic-chip-dot{
-  display: inline-block;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
-}
-#micStandbyChip.mic-chip-standby{
-  color: var(--warn);
-  border-color: rgba(255,176,32,.60);
-  background: rgba(255,176,32,.10);
-}
-#micStandbyChip.mic-chip-live{
-  color: var(--good);
-  border-color: rgba(47,208,122,.55);
-  background: rgba(47,208,122,.10);
-}
-#micStandbyChip.mic-chip-live .mic-chip-dot{ animation: pulse 1.2s infinite; }
-body.light-mode #micStandbyChip.mic-chip-standby{
-  color: #7a5500;
-  border-color: rgba(198,138,0,.60);
-  background: rgba(198,138,0,.10);
-}
-body.light-mode #micStandbyChip.mic-chip-live{
-  color: #1f9a5a;
-  border-color: rgba(31,154,90,.55);
-  background: rgba(31,154,90,.10);
 }
 #aiBlockOverlay { display: none; }
 html.ai-blocked body > *:not(#aiBlockOverlay) { display: none !important; }
@@ -3211,7 +3178,7 @@ body.light-mode .share-arabic{color:#1a2233;}
 </div>
     <button class="toggle ondevice-chip" id="onDeviceChip" type="button" hidden=""></button>
     <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
-    <span class="toggle" id="micStandbyChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
+    <span id="micStandbyChip" data-state="off" role="status" aria-live="polite">🎤 Mic standby</span>
     <label class="toggle hide-text" id="hideTextChip">
       <input type="checkbox" id="chkHideText"> Hide text
     </label>
@@ -4892,18 +4859,6 @@ let micDiagTimer = null;
 let micDiagSoftToastShown = false;
 let micTrackMutedTimer = null;
 let micTrackListeners = [];
-/* Tajweed capture standby: once the mic is opened in Tajweed mode, the
-   getUserMedia stream, RMS analyser and its sample buffer stay live until the
-   Coach screen is left, the app is hidden/frozen/closed, or Follow mode is
-   chosen. Stop / silence / pause / finish only stop ASR. */
-let captureWarm = false;
-let captureOpenedAt = 0;
-const CAPTURE_LEAD_MS = 500;        // getUserMedia opens this long BEFORE ASR starts
-let _captureWatchdog = null;
-let _captureReacquiring = false;
-let _captureFailCount = 0;
-let _ensureInFlight = null;
-let _recStartInFlight = false;
 const MIC_DIAG_TICK_MS = 500;
 const MIC_DIAG_SOFT_MS = 4000;
 const MIC_DIAG_HARD_MS = 8000;
@@ -5406,13 +5361,8 @@ const rmsAnalyser = (function(){
     for (let i = 0; i < list.length; i++) sum += list[i].centroid;
     return sum / list.length;
   }
-  function ensureRunning(){
-    if (ctx && ctx.state !== 'running' && ctx.state !== 'closed' && typeof ctx.resume === 'function'){
-      try{ ctx.resume().catch(() => {}); }catch(_){}
-    }
-  }
   return {
-    start, stop, ensureRunning, voiceDurationMs, hasSignal,
+    start, stop, voiceDurationMs, hasSignal,
     samplesIn, segments, segmentEndingBefore, vowelRun, nasalRatio,
     onsetCentroid, meanCentroid,
     bandNoiseFloor: () => bandNoiseFloor,
@@ -5438,9 +5388,8 @@ function recReset(){
 }
 
 function showScreen(name){
+  if(name !== 'coach') shutdownCoachCapture('screen');
   currentScreenName = name;
-  // Leaving the Coach screen is a hard microphone shutdown (stream, RMS, ASR).
-  if(name !== 'coach'){ try{ shutdownCoachMic('screen:' + name); }catch(_){} }
   const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed, dashboard: screenDashboard };
   Object.entries(map).forEach(([k, el]) => { if(!el) return; el.hidden = (k !== name); });
   if(name !== 'coach' && readerFullscreen) exitReaderFullscreen();
@@ -6099,7 +6048,6 @@ function noteAcousticMode(available){
   }
 }
 function updateTajweedStatusChip(){
-  try{ updateMicStandbyChip(); }catch(_){}
   const chip = document.getElementById('tajweedStatusChip');
   if(!chip) return;
   if(followOnly){ chip.hidden = true; return; }
@@ -6946,18 +6894,20 @@ function markStrict1Warning(w, kind, detail){
    must be silent. Evidence: explicit hamza / audible Alif in ASR, and/or a
    closure-dip + sharp burst in RMS at the word boundary. */
 function detectGlottalOnset(raw, targetRaw){
+  /* Lenient lexical evidence: plain ASR alif variants are NOT enough on their
+     own to flag a wasl mistake. Require a distinct hamza-bearing transcription;
+     acoustic boundary evidence is evaluated separately and jointly below. */
   const clean = s => String(s || '').normalize('NFKC')
     .replace(TASHKEEL, '')
     .replace(/^[\s‎‏‪-‮⁦-⁩ـ]+/, '');
   const h = clean(raw);
   const t = clean(targetRaw);
-  if (!h) return { detected: false, reason: '' };
-  if (/^[أإآءؤئ]/.test(h)){
-    return { detected: true, reason: 'explicit hamza onset (' + h[0] + ')' };
+  if (!h || !t) return { detected: false, reason: '' };
+  if (/^[أإآءؤئ]/.test(h) && !/^[اٱ]/.test(h)){
+    return { detected: true, reason: 'distinct hamza-bearing ASR onset (' + h[0] + ')' };
   }
-  if (/^[اٱ]/.test(h) && /^[اٱ]/.test(t)){
-    return { detected: true, reason: 'audible Alif (ا) onset where Hamzat al-Wasl should be silent' };
-  }
+  /* ASR commonly inserts/removes/normalises bare alif in Arabic. Treat that
+     ambiguity as neutral, not as a positive error signal. */
   return { detected: false, reason: '' };
 }
 
@@ -6996,18 +6946,16 @@ function checkHamzatWasl(w, idx, rawHeard){
   if (acoustic.paused) return; // reciter paused/restarted
 
   const lexical = detectGlottalOnset(rawHeard, w.raw);
-
-  if (lexical.detected && (acoustic.spike || acoustic.gapMs === null || acoustic.gapMs >= 35)){
-    const evidence = [lexical.reason];
-    if (acoustic.spike) evidence.push('glottal attack spike in RMS');
-    if (acoustic.gapMs !== null) evidence.push('boundary ' + Math.round(acoustic.gapMs) + ' ms');
-    const _hwMsg = 'Hamzat al-Wasl sounded instead of silent join — ' + evidence.join(', ');
-    if (acoustic.spike) markStrict1Error(w, 'hamzat-al-wasl', _hwMsg);
-    else markStrict1Warning(w, 'hamzat-al-wasl', _hwMsg);
-  } else if (acoustic.spike && acoustic.gapMs !== null && acoustic.gapMs >= 45 && acoustic.gapMs <= 380){
-    markStrict1Warning(w, 'hamzat-al-wasl',
-      'glottal attack detected on Hamzat al-Wasl during connected recitation (boundary ' +
-      Math.round(acoustic.gapMs) + ' ms)');
+  /* Conservative combined decision: transcript evidence and a clear, close-boundary
+     acoustic spike must agree. Weak/ambiguous alif or noisy RMS produces no flag. */
+  const tightJoin = acoustic.gapMs !== null && acoustic.gapMs >= 0 && acoustic.gapMs <= 220;
+  if (lexical.detected && acoustic.spike && tightJoin){
+    const evidence = [lexical.reason, 'strong RMS glottal-attack evidence', 'boundary ' + Math.round(acoustic.gapMs) + ' ms'];
+    markStrict1Error(w, 'hamzat-al-wasl', 'Hamzat al-Wasl sounded instead of silent join — ' + evidence.join(', '));
+  } else if (acoustic.spike && tightJoin){
+    /* Acoustic evidence alone is deliberately provisional: never red-flag a word
+       from a phone-mic onset estimate without ASR corroboration. */
+    markStrict1Warning(w, 'hamzat-al-wasl', 'possible glottal onset at connected join; ASR evidence was inconclusive');
   }
 }
 
@@ -7033,6 +6981,15 @@ function runStrict1Checks(idx, heard, opts){
 
   /* 2. RMS + alignment context (graceful fallback when mic RMS is unavailable) */
   const align = checkTajweedAudioAlignment(w, heard);
+  /* Shared synchronous word-evidence bundle: every rule below receives this same
+     committed word, transcript and RMS/MFA segment snapshot. */
+  w._synchronousEvidence = {
+    heard: String(heard || ''), rawHeard: String(opts.rawHeard || heard || ''),
+    audio: w.audio ? { start:w.audio.start, end:w.audio.end, durationMs:w.audio.durationMs } : null,
+    rmsAvailable: !!(align && align.available && align.ctx && align.ctx.hasSignal),
+    mfa: align && align.available ? verifyMFAAlignmentSync(w, w.audio, heard) : null,
+    checkedAt: now
+  };
   noteAcousticMode(!!align.available);
   updateTajweedStatusChip();
 
@@ -8367,24 +8324,12 @@ let micSession = 0;
 const _micTestClosers = new Set();
 let _ctxSuspendedByUs = false;
 
-function markCaptureWarm(){
-  if(!isCoachScreenShown() || followOnly) return;
-  captureWarm = true;
-  _captureFailCount = 0;
-  startCaptureWatchdog();
-  try{ updateMicStandbyChip(); }catch(_){}
+function updateMicStandbyChip(state, label){
+  const chip=document.getElementById('micStandbyChip'); if(!chip)return;
+  chip.dataset.state=state||'off';
+  chip.textContent=state==='active'?'🎤 '+(label||'Mic active'):state==='pending'?'⏳ '+(label||'Preparing mic'):'🎤 Mic standby';
 }
-/* Concurrent callers (Start button, track-ended handler, watchdog) share one
-   getUserMedia so a second stream can never overwrite — and leak — the first. */
-function ensureMicStream(){
-  if(_ensureInFlight) return _ensureInFlight;
-  const p = _ensureMicStreamImpl();
-  _ensureInFlight = p;
-  const clear = () => { if(_ensureInFlight === p) _ensureInFlight = null; };
-  p.then(clear, clear);
-  return p;
-}
-async function _ensureMicStreamImpl(){
+async function ensureMicStream(){
   if(micStream){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
     if(live){
@@ -8396,7 +8341,6 @@ async function _ensureMicStreamImpl(){
           notifyRmsUnavailable();
         }
       }
-      markCaptureWarm();
       return micStream;
     }
   }
@@ -8414,115 +8358,22 @@ async function _ensureMicStreamImpl(){
       return null;
     }
     micStream = s;
-    captureOpenedAt = performance.now();
     attachMicTrackListeners(s);
     const rmsOk = rmsAnalyser.start(s);
     if(!rmsOk && !_rmsUnavailableNotified){
       _rmsUnavailableNotified = true;
       notifyRmsUnavailable();
     }
-    markCaptureWarm();
     return s;
-  }catch(e){ lastMicError = e; micStream = null; captureOpenedAt = 0; rmsAnalyser.stop(); return null; }
+  }catch(e){ lastMicError = e; micStream = null; rmsAnalyser.stop(); return null; }
 }
 function muteMicStream(){ if(micStream){ try{ micStream.getAudioTracks().forEach(t => { t.enabled = false; }); }catch(e){} } rmsAnalyser.stop(); }
-/* HARD release: stops every track, the RMS analyser and the sample buffer.
-   Only call this when capture must really end (Coach screen left, app
-   hidden/frozen/closed, Follow mode, fatal mic error). Stop / silence /
-   pause / finish use releaseOrKeepCapture() instead. */
 function releaseMicStream(){
   micEpoch++;
-  captureWarm = false; captureOpenedAt = 0; _captureReacquiring = false; _captureFailCount = 0;
-  stopCaptureWatchdog();
   detachMicTrackListeners();
   if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; }
   rmsAnalyser.stop();
   if(micStream){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(e){} micStream = null; }
-  try{ updateMicStandbyChip(); }catch(_){}
-}
-function isCoachScreenShown(){
-  try{ return currentScreenName === 'coach' && !viewerOpen && !document.hidden; }catch(_){ return false; }
-}
-function canKeepCapture(){ return !followOnly && captureWarm && isCoachScreenShown(); }
-function keepCaptureStandby(){
-  if(!micStream) return;
-  try{ micStream.getAudioTracks().forEach(t => { if(t.readyState === 'live') t.enabled = true; }); }catch(_){}
-  if(!rmsAnalyser.isRunning()){ try{ rmsAnalyser.start(micStream); }catch(_){} }
-  try{ rmsAnalyser.ensureRunning(); }catch(_){}
-  try{ updateMicStandbyChip(); }catch(_){}
-}
-function releaseOrKeepCapture(){
-  if(canKeepCapture()) keepCaptureStandby(); else releaseMicStream();
-}
-/* Opens getUserMedia and waits until it has been live for CAPTURE_LEAD_MS
-   (0.5 s) so the stream, analyser and RMS buffer are running BEFORE ASR starts.
-   A stream that is already warm returns immediately. */
-async function armCapture(){
-  const s = await ensureMicStream();
-  if(!s) return null;
-  const ep = micEpoch;
-  try{ rmsAnalyser.ensureRunning(); }catch(_){}
-  const remaining = captureOpenedAt ? CAPTURE_LEAD_MS - (performance.now() - captureOpenedAt) : 0;
-  if(remaining > 0) await new Promise(r => setTimeout(r, remaining));
-  if(ep !== micEpoch || !micStream) return null;
-  return micStream;
-}
-/* Coach screen no longer displayed (other screen, viewer): everything off. */
-function shutdownCoachMic(reason){
-  if(wantMic){ stopReciting(true, { hard: true }); }
-  if(micStream || captureWarm) releaseMicStream();
-  else updateMicStandbyChip();
-}
-function startCaptureWatchdog(){
-  if(_captureWatchdog) return;
-  _captureWatchdog = setInterval(captureWatchdogTick, 1000);
-}
-function stopCaptureWatchdog(){
-  if(_captureWatchdog){ clearInterval(_captureWatchdog); _captureWatchdog = null; }
-}
-function captureWatchdogTick(){
-  if(!captureWarm){ stopCaptureWatchdog(); return; }
-  // Safety net: warm capture must never outlive the Coach screen / Tajweed mode.
-  if(followOnly || (!wantMic && !isCoachScreenShown())){ releaseMicStream(); return; }
-  if(document.hidden) return;
-  const live = !!(micStream && micStream.getAudioTracks().some(t => t.readyState === 'live'));
-  if(!live){ reacquireCapture(); return; }
-  try{ micStream.getAudioTracks().forEach(t => { if(!t.enabled) t.enabled = true; }); }catch(_){}
-  if(!rmsAnalyser.isRunning()){ try{ rmsAnalyser.start(micStream); }catch(_){} }
-  try{ rmsAnalyser.ensureRunning(); }catch(_){}
-}
-async function reacquireCapture(){
-  if(_captureReacquiring) return;
-  _captureReacquiring = true;
-  const ep = micEpoch;
-  try{
-    try{ rmsAnalyser.stop(); }catch(_){}
-    detachMicTrackListeners();
-    if(micStream){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(_){} micStream = null; }
-    const s = await ensureMicStream();
-    if(ep !== micEpoch) return;
-    if(s){ _captureFailCount = 0; }
-    else if(++_captureFailCount >= 3){
-      releaseMicStream();
-      showToast('🎙️ Mic standby ended — tap Start to reopen the microphone.', 4200);
-    }
-  }finally{
-    _captureReacquiring = false;
-    try{ updateTajweedStatusChip(); }catch(_){}
-  }
-}
-function updateMicStandbyChip(){
-  const chip = document.getElementById('micStandbyChip');
-  if(!chip) return;
-  if(followOnly || !captureWarm){ chip.hidden = true; return; }
-  const listening = !!wantMic && !micPaused;
-  chip.hidden = false;
-  chip.className = 'toggle ' + (listening ? 'mic-chip-live' : 'mic-chip-standby');
-  chip.innerHTML = '<span class="mic-chip-dot"></span>' + (listening ? 'Mic live' : 'Mic standby');
-  chip.title = listening
-    ? 'Microphone, waveform analysis and speech recognition are listening.'
-    : 'Microphone and waveform analysis stay on while Tajweed mode is open, so recitation starts instantly. Speech recognition is stopped. Everything turns off when you leave this screen or minimise the app.';
-  chip.setAttribute('aria-label', listening ? 'Microphone live' : 'Microphone standby');
 }
 function resetMicDiagState(){
   MIC_DIAG.startedAt = 0;
@@ -8559,9 +8410,8 @@ function detachMicTrackListeners(){
   micTrackListeners = [];
 }
 function handleMicTrackIssue(kind){
-  if(!wantMic && !captureWarm) return;
+  if(!wantMic) return;
   if(kind === 'muted'){
-    if(!wantMic) return;   // standby: no modal; the watchdog keeps the stream healthy
     if(micTrackMutedTimer) clearTimeout(micTrackMutedTimer);
     micTrackMutedTimer = setTimeout(() => {
       micTrackMutedTimer = null;
@@ -8573,20 +8423,17 @@ function handleMicTrackIssue(kind){
   }
   if(kind === 'ended'){
     (async () => {
-      try{ rmsAnalyser.stop(); }catch(_){}   // the old source is dead: rebuild the analyser graph
       const s = await ensureMicStream().catch(() => null);
-      if(!wantMic && !captureWarm){ releaseMicStream(); return; }
+      if(!wantMic){ releaseMicStream(); return; }
       if(s){
         showToast('🔄 Microphone reconnected.', 2600);
-        if(wantMic){
-          micDiagnosedWorking = false;
-          startMicDiagnostic();
-          if(!recRunning && !speechStarting && speechRecognition){
-            try{ speechStarting = true; speechRecognition.start(); }
-            catch(e){ speechStarting = false; }
-          }
+        micDiagnosedWorking = false;
+        startMicDiagnostic();
+        if(!recRunning && !speechStarting && speechRecognition){
+          try{ speechStarting = true; speechRecognition.start(); }
+          catch(e){ speechStarting = false; }
         }
-      } else if(wantMic){
+      } else {
         reportMicProblem('reacquire-failed');
       }
     })();
@@ -8793,8 +8640,7 @@ function reportMicProblem(kind){
 async function openMicTestModal(){
   // Avoid competing with an active recognizer
   const wasReciting = wantMic;
-  // The diagnostic opens its own stream: release the warm capture too.
-  try{ if(wasReciting) stopReciting(true, { hard: true }); releaseMicStream(); }catch(_){}
+  if(wasReciting){ try{ stopReciting(true); }catch(_){} }
   stopMicDiagnostic();
   const bg = document.createElement('div');
   bg.className = 'modal-bg';
@@ -9558,16 +9404,9 @@ function setMicButton(){
   micButton.innerHTML = wantMic ? '⏹ Stop' : 'Start Reciting 🎤';
   micButton.classList.toggle('on',wantMic);
   syncFsButtons();
-  try{ updateMicStandbyChip(); }catch(_){}
 }
 
 async function startReciting(){
-  if(_recStartInFlight) return;
-  _recStartInFlight = true;
-  try{ return await _startRecitingImpl(); }
-  finally{ _recStartInFlight = false; }
-}
-async function _startRecitingImpl(){
   unlockAudio();
   const _myTok = micSession;
   if(!words.length){
@@ -9583,7 +9422,7 @@ async function _startRecitingImpl(){
   } else {
     if(micPermission !== 'granted'){
       const ok = await promptForMic();
-      if(_myTok !== micSession){ releaseOrKeepCapture(); return; }
+      if(_myTok !== micSession){ releaseMicStream(); return; }
       if(!ok){
         coachTajweedMicFailed = true;
         updateTajweedStatusChip();
@@ -9593,10 +9432,9 @@ async function _startRecitingImpl(){
     if(mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
       addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
     }
-    // getUserMedia + RMS analyser go live first; ASR starts >= 0.5 s later.
-    setStatus('Opening microphone…', 'loading');
-    const _tajStream = await armCapture();
-    if(_myTok !== micSession){ releaseOrKeepCapture(); return; }
+    const _tajStream = await ensureMicStream();
+    if(_myTok !== micSession){ releaseMicStream(); return; }
+    if(_tajStream){ updateMicStandbyChip('pending','Buffer settling'); await new Promise(resolve=>setTimeout(resolve,500)); if(_myTok !== micSession || document.hidden || currentScreenName !== 'coach' || viewerOpen){ releaseMicStream(); return; } if(!rmsAnalyser.isRunning()) { try{ rmsAnalyser.start(_tajStream); }catch(_){} } }
     if(!_tajStream){
       const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
       if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
@@ -9624,7 +9462,7 @@ async function _startRecitingImpl(){
   recReset(); pendingJumpTarget = -1;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
-  setMicButton(); setStatus('Starting…', 'loading');
+  setMicButton(); updateMicStandbyChip('pending','Starting recognition'); setStatus('Starting…', 'loading');
   requestWakeLock(); resetSilenceTimer(true); scheduleSaveProgress();
   try{ bumpStreak(); }catch(_){}
   resetSpeechPipeline();
@@ -9637,6 +9475,7 @@ async function _startRecitingImpl(){
     recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
     if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
     setStatus('Listening', 'listening', contextLabel());
+    updateMicStandbyChip(!followOnly && micStream && rmsAnalyser.isRunning() ? 'active':'off', !followOnly?'Acoustic capture':'ASR only');
     addFeedback('🎧 Listening — recite from anywhere in the page or surah.');
     // Inform the user when acoustic rules are unavailable
     if (!followOnly && !rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
@@ -9668,7 +9507,7 @@ function abortCoachSpeechRecognition(){
   recRunning = false;
 }
 
-function stopReciting(silent, opts){
+function stopReciting(silent){
   micSession++;
   _acousticMode = null; _acousticMissStreak = 0;
   if(wantMic && !suppressProgressSave) saveProgressNow();
@@ -9694,16 +9533,16 @@ function stopReciting(silent, opts){
   lastCommitBatchId = -1;
   prevWordAudio = null;
 
-  // Tajweed mode on the Coach screen: only ASR/timers stop — the mic stream,
-  // RMS analyser and sample buffer stay on (standby). Hard stop otherwise.
-  if(opts && opts.hard) releaseMicStream(); else releaseOrKeepCapture();
+  // Stop every track, not merely mute it, and disconnect the RMS graph.
+  releaseMicStream();
+  updateMicStandbyChip('off','Mic standby');
   releaseWakeLock();
   // Nothing is playing: release the Web Audio session too (iOS keeps the
   // audio session / Android keeps the audio route while a context runs).
   try{ if(!playing && !(viewerAudio && viewerAudio.active)) suspendSharedAudio(); }catch(_){}
 
   setMicButton();
-  if(!silent) setStatus('Ready','idle', captureWarm ? 'Mic standby' : (micPermission==='granted'?'Mic ready':'Tap Start reciting to allow mic'));
+  if(!silent) setStatus('Ready','idle', micPermission==='granted'?'Mic ready':'Tap Start reciting to allow mic');
   updateTajweedStatusChip();
   updateFsMicBtn();
   syncFsButtons();
@@ -9712,7 +9551,8 @@ function pauseMic(){
   micPaused = true; recRunning = false;
   disarmSpeechKeepalive(); stopMicDiagnostic();
   if(speechRecognition){ try{ speechRecognition.stop(); }catch(e){} }
-  releaseOrKeepCapture();
+  releaseMicStream();
+  updateMicStandbyChip('off','Mic standby');
 }
 function resumeMic(){
   if(wantMic && !finished && !fsPaused){
@@ -9729,7 +9569,6 @@ function resumeMic(){
   }
 }
 function suspendSharedAudio(){
-  if(captureWarm) return;   // a suspended context would freeze the live RMS analyser
   const seen = [];
   [audioCtx, window.__sharedAudioCtx].forEach(c => {
     if(!c || seen.indexOf(c) !== -1) return;
@@ -9751,9 +9590,15 @@ function resumeSharedAudio(){
    MFA / speech queue, diagnostics, keep-alive timers, wake lock and
    the Web Audio session. Used when the app is minimised, hidden,
    frozen or closed. */
+function shutdownCoachCapture(reason){
+  if((reason==='screen' && currentScreenName==='coach') || (reason==='viewer' && currentScreenName==='coach')){
+    try{ hardShutdownAudio(); }catch(_){}
+    updateMicStandbyChip('off','Mic standby');
+  }
+}
 function hardShutdownAudio(){
   micSession++;
-  try{ stopReciting(true, { hard: true }); }catch(_){}
+  try{ stopReciting(true); }catch(_){}
   try{ abortCoachSpeechRecognition(); }catch(_){}
   try{ stopHifzSpeech(); }catch(_){}
   try{ stopMicDiagnostic(); disarmSpeechKeepalive(); clearSilenceTimer(); cancelFollowPinTimer(); }catch(_){}
@@ -9770,7 +9615,7 @@ function stopEverything(silent){
   try{ if(viewerAudio && viewerAudio.active) viewerAudioStop(); }catch(_){}
   try{ if(hifzState && (hifzState.speechActive || hifzState.active)) stopHifzTest(true); }catch(_){}
   stopReciting(true);
-  try{ releaseOrKeepCapture(); }catch(_){}
+  try{ releaseMicStream(); }catch(_){}
   if(!silent) setStatus('Ready','idle');
 }
 function finish(){
@@ -9779,7 +9624,7 @@ function finish(){
   clearSilenceTimer(); stopMicDiagnostic();
   cancelFollowPinTimer();
   abortCoachSpeechRecognition();
-  releaseOrKeepCapture();
+  releaseMicStream();
   updateTajweedStatusChip();
   const allVerses = new Set(words.map(w => w.verse)); allVerses.forEach(v => completeVerse(v));
   const total=words.length;
@@ -11543,6 +11388,8 @@ function applyPageColor(){
 }
 function openViewer(mode, opts){
   opts = opts || {};
+  // The full Quran viewer overlays and replaces the Coach screen: release capture.
+  shutdownCoachCapture('viewer');
   viewerHideFullscreen = !!opts.hideFullscreen;
   if(viewerOpen){
     viewerMode = mode;
@@ -11554,8 +11401,6 @@ function openViewer(mode, opts){
   }
   viewerReturnScreen = currentScreenName;
   resetReaderZoom();
-  // The Coach screen is no longer displayed while the viewer is open.
-  try{ shutdownCoachMic('viewer'); }catch(_){}
   viewerOpen = true;
   viewerMode = mode;
   quranViewer.hidden = false;
@@ -12974,16 +12819,6 @@ function openCopyrightModal(){
     else { showToast('⏳ Fetching Tajweed annotations from Quran.com…', 3000); }
   });
 })();
-(function wireMicStandbyChip(){
-  const chip = document.getElementById('micStandbyChip');
-  if(!chip) return;
-  chip.addEventListener('click', (e) => {
-    e.stopPropagation();
-    showToast(wantMic && !micPaused
-      ? '🎙️ Mic live — listening for your recitation.'
-      : '🎙️ Mic standby — the microphone and waveform analysis stay on in Tajweed mode so Start is instant. They switch off when you leave this screen or minimise the app.', 5200);
-  });
-})();
 function urlBase64ToUint8Array(base64String){
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -13326,7 +13161,8 @@ if(qrFullscreen){ qrFullscreen.addEventListener('click', (e) => { if(e.target ==
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
     resumeSharedAudio();
-    if(wantMic && !finished && !fsPaused && !followOnly) resumeMic();
+    // Returning to foreground never reopens the microphone automatically.
+    if(wantMic){ stopReciting(true); updateMicStandbyChip('off','Tap Start'); setStatus('Paused (background)','idle','Tap Start to resume'); }
     if((wantMic||playing||viewerAudio.active) && !wakeLock) requestWakeLock();
     schedulePositionAudioOverlay();
     if(audioListRendered) refreshAudioRowStates();
@@ -13334,7 +13170,7 @@ document.addEventListener('visibilitychange',()=>{
     // Backgrounding is a hard microphone shutdown for Follow and Tajweed.
     const _wasOn = wantMic;
     if(_wasOn) saveProgressNow();
-    hardShutdownAudio();
+    hardShutdownAudio(); updateMicStandbyChip('off','Tap Start');
     if(_wasOn) setStatus('Paused (background)', 'idle', 'Tap Start to resume');
   }
 });

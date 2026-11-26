@@ -1,17 +1,6 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker  v2.4.25
 
-   What changed in 2.4.25
-     • Cache version bumped so installed apps fetch the updated
-       index.html (Tajweed mic standby: getUserMedia opens 0.5 s before
-       ASR and, together with the RMS analyser and its sample buffer,
-       stays live while Tajweed mode is listening or idle; it is shut
-       down only when the Coach screen is left, the app is minimised /
-       frozen / closed, or Follow mode is chosen). A 'Mic standby' chip
-       shows the state.
-     • No service-worker logic changed: this SW never holds the
-       microphone, so it cannot affect capture.
-
    What changed in 2.4.23:
      • salaah.html (Learn Salaah) is now pre-cached with the app
        shell, so it opens offline from the Dashboard 'Salaah' tab
@@ -46,7 +35,7 @@
 
 'use strict';
 
-const VERSION = '2.4.24';
+const VERSION = '2.4.25';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
