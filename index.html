@@ -1,21 +1,4 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }
-/* IndoPak Quran text: strictly monochrome in both themes; suppress Tajweed colour overrides. */
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content *,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-surah-name,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-surah-meta,
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-ruku-mark { color:var(--page-fg) !important; }
-body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book,
-body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page { --page-bg:#fff; --page-fg:#000; --page-border:#000; }
-body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book,
-body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-page { --page-bg:#000; --page-fg:#fff; --page-border:#fff; }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content [style*="color"],
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content [class*="tajweed"] { color:inherit !important; }
-body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content [style*="background"] { background-color:transparent !important; }
-
-</style><head><style>
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -3506,7 +3489,7 @@ const QURAN_API_V4 = 'https://api.quran.com/api/v4';
 const AYAH_AUDIO_BASE = 'https://everyayah.com/data/';
 const FALLBACK_RECITER = 'Alafasy_128kbps';
 const FETCH_TIMEOUT_MS = 15000;
-const READER_EDITION = 'text_indopak_nastaleeq';
+const READER_EDITION = 'text_indopak';
 const EDITION_FALLBACK = 'quran-uthmani';
 const EDITION_COACH = 'quran-uthmani';
 const TEXT_TRANSLATION_OPTIONS = [
@@ -3690,23 +3673,6 @@ const IS_SAMSUNG_BROWSER = /SamsungBrowser/i.test(UA);
 const IS_MAC_SAFARI = /Safari/i.test(UA) && !/Chrome|Chromium|CriOS|Android|Edg|OPR/i.test(UA);
 const IS_IN_APP_BROWSER = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|WhatsApp|SnapChat|TikTok|BytedanceWebview|Musical_ly|Telegram|Twitter|LinkedInApp|Pinterest|Slack|Discord|GSA\/|KAKAOTALK|Naver|DaumApps|Everyfarm/i.test(UA);
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-/* Safari/WebKit ignores abort()/stop() while a recognizer is still *starting*,
-   so the mic stays open after Stop. killRecognizer() retries and also aborts the
-   instant a pending start completes. Every recognizer is tracked so none can leak. */
-const _liveRecs = new Set();
-function killRecognizer(rec){
-  if(!rec) return;
-  try{ rec.__dead = true; }catch(_){}
-  try{ rec.onresult = null; rec.onerror = null; rec.onend = null; rec.onaudiostart = null; rec.onspeechstart = null; }catch(_){}
-  const hit = () => { try{ rec.abort(); }catch(_){} try{ rec.stop(); }catch(_){} };
-  try{ rec.onstart = hit; }catch(_){}
-  hit();
-  [150, 600, 1500, 3500].forEach(ms => setTimeout(hit, ms));
-  setTimeout(() => { try{ rec.onstart = null; }catch(_){} _liveRecs.delete(rec); }, 4000);
-}
-function killAllRecognizers(except){
-  Array.from(_liveRecs).forEach(r => { if(r !== except) killRecognizer(r); });
-}
 const SPEECH_SUPPORTED = !!SpeechRecognitionCtor;
 const SPEECH_LANG = 'ar-SA';
 /* ── On-device Arabic voice pack (Chrome 139+) ─────────────────────────
@@ -3778,7 +3744,7 @@ function fallbackFromOnDevice(){
   if(_localFallbackDone || !speechRecognition || !speechRecognition.__local) return false;
   _localFallbackDone = true;
   onDeviceState = 'unsupported'; renderOnDeviceChip();
-  try{ killRecognizer(speechRecognition); }catch(_){}
+  try{ const o = speechRecognition; o.onstart = null; o.onresult = null; o.onerror = null; o.onend = null; o.abort(); }catch(_){}
   speechRecognition = null;
   try{
     speechRecognition = createSpeechRecognition(false, true);
@@ -3934,6 +3900,34 @@ function phonLooseArCached(s){
   let v = _phonLooseCache.get(s);
   if(v === undefined){ v = phonNormLooseAr(s); trimCache(_phonLooseCache, CACHE_MAX); _phonLooseCache.set(s, v); }
   return v;
+}
+/* ── Tajweed-mode loose phonetic form ────────────────────────────────────
+   Same folding as PHON_LOOSE, but the Ghunnah letters (ن and م) are NOT part
+   of it. The loose form is only a "is this plausibly the right word" gate; it
+   must never be able to forgive a missing nasal, because Ghunnah / Ikhfa /
+   Idghaam / Iqlab are verified separately by the Tajweed engine
+   (checkAllNasalRules) against the expected word. */
+const TJ_GHUNNAH_LETTERS = 'نم';
+const _phonLooseTjCache = new Map();
+function phonLooseTajweedAr(s){
+  const n = normArCached(s);
+  let out = '';
+  for(let i = 0; i < n.length; i++){
+    const ch = n[i];
+    if(TJ_GHUNNAH_LETTERS.indexOf(ch) !== -1) continue;
+    out += PHON_LOOSE[ch] || ch;
+  }
+  return out;
+}
+function phonLooseTajweedCached(s){
+  let v = _phonLooseTjCache.get(s);
+  if(v === undefined){ v = phonLooseTajweedAr(s); trimCache(_phonLooseTjCache, CACHE_MAX); _phonLooseTjCache.set(s, v); }
+  return v;
+}
+function tjWordLoose(w){
+  if(!w) return '';
+  if(w._phonLooseTj === undefined) w._phonLooseTj = phonLooseTajweedCached(w.raw || w.norm || '');
+  return w._phonLooseTj;
 }
 function gregorianToJDN(y, m, d){
   const a  = Math.floor((14 - m) / 12);
@@ -4216,6 +4210,77 @@ function isPlausiblePronunciationAttempt(heard, hPhon, w){
   if(hPhon.length >= 2 && w.phon.length >= 2 &&
      lev(hPhon, w.phon) <= tol + (followOnly ? 1 : 2)) return true;
   return false;
+}
+/* ── Dropped-letter analysis (Tajweed mode) ──────────────────────────────
+   When a word is accepted although the transcript lost 1–3 of its letters,
+   the Tajweed engine still has to judge Madd, Ghunnah, Qalqalah, Silent and
+   the rest. These helpers say WHICH expected letters are missing, so the
+   rule checks can adjust their expectations instead of being skipped. */
+const TJ_MAX_DROPPED_LETTERS = 3;
+const TJ_MADD_CARRIERS = 'اوي';
+function tjAlignLetters(heard, target){
+  const m = heard.length, n = target.length;
+  if(m > 40 || n > 40) return null;
+  const eq = (x, y) => x === y || (PHON[x] || x) === (PHON[y] || y);
+  const dp = [];
+  for(let i = 0; i <= m; i++){ dp.push(new Array(n + 1).fill(0)); dp[i][0] = i; }
+  for(let j = 0; j <= n; j++) dp[0][j] = j;
+  for(let i = 1; i <= m; i++){
+    for(let j = 1; j <= n; j++){
+      const sub = dp[i - 1][j - 1] + (eq(heard[i - 1], target[j - 1]) ? 0 : 1);
+      const ins = dp[i - 1][j] + 1;   // extra letter in transcript
+      const del = dp[i][j - 1] + 1;   // expected letter missing from transcript
+      dp[i][j] = Math.min(sub, ins, del);
+    }
+  }
+  const dropped = []; let inserted = 0, substituted = 0;
+  let i = m, j = n;
+  while(i > 0 || j > 0){
+    if(i > 0 && j > 0){
+      const same = eq(heard[i - 1], target[j - 1]);
+      if(dp[i][j] === dp[i - 1][j - 1] + (same ? 0 : 1)){
+        if(!same) substituted++;
+        i--; j--; continue;
+      }
+    }
+    if(j > 0 && dp[i][j] === dp[i][j - 1] + 1){ dropped.push({ idx: j - 1, ch: target[j - 1] }); j--; continue; }
+    inserted++; i--;
+  }
+  dropped.reverse();
+  return { dropped, inserted, substituted };
+}
+function tjDropInfo(w, heard){
+  const len = (w && w.norm) ? w.norm.length : 0;
+  const none = { dropCount: 0, inserted: 0, substituted: 0, droppedMadd: false,
+                 droppedNasal: false, droppedQalqalah: false, effLen: len };
+  if(!w || !w.norm || !heard || heard === w.norm) return none;
+  const al = tjAlignLetters(heard, w.norm);
+  if(!al) return none;
+  const d = al.dropped;
+  const dropCount = Math.min(d.length, TJ_MAX_DROPPED_LETTERS);
+  return {
+    dropCount: dropCount,
+    inserted: al.inserted,
+    substituted: al.substituted,
+    droppedMadd: !!(w.tjRules && w.tjRules.madd) && d.some(x => TJ_MADD_CARRIERS.indexOf(x.ch) !== -1),
+    droppedNasal: d.some(x => TJ_GHUNNAH_LETTERS.indexOf(x.ch) !== -1),
+    droppedQalqalah: d.some(x => QALQALAH_LETTERS.indexOf(x.ch) !== -1),
+    effLen: Math.max(1, len - dropCount)
+  };
+}
+/* Tajweed-mode "plausible word with 1–3 letters dropped" gate. Ghunnah letters
+   are excluded from both sides (see phonLooseTajweedAr) so this can never be
+   the reason a nasal is forgiven. A word accepted here is shown green by the
+   ASR check and is then ALWAYS handed to runStrict1Checks. */
+function isTajweedLooseMatch(heard, hLoose, w){
+  if(followOnly || !w || !w.norm || !heard || !hLoose) return false;
+  const wl = tjWordLoose(w);
+  if(!wl || wl.length < 4 || hLoose.length < 3) return false;
+  if(hLoose.length < Math.ceil(wl.length * 0.5)) return false;
+  const al = tjAlignLetters(hLoose, wl);
+  if(!al) return false;
+  if(al.dropped.length > TJ_MAX_DROPPED_LETTERS) return false;
+  return (al.inserted + al.substituted) <= 1;
 }
 const FOLLOW_MAX_MERGE_WORDS = 3;
 const FOLLOW_MAX_SPLIT_TOKENS = 4;
@@ -5418,13 +5483,6 @@ function recReset(){
 }
 
 function showScreen(name){
-  // Leaving the recitation-coach screen is a hard acoustic shutdown.
-  // Only the Coach screen may retain its live-recitation session; screen
-  // changes invalidate pending getUserMedia opens via micEpoch and stop all
-  // registered tracks, RMS/MFA diagnostics, recognizers and audio contexts.
-  if(name !== 'coach' && name !== currentScreenName){
-    try{ hardShutdownAudio(); }catch(e){ console.warn('[AudioLifecycle] screen-change shutdown:', e); }
-  }
   currentScreenName = name;
   const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed, dashboard: screenDashboard };
   Object.entries(map).forEach(([k, el]) => { if(!el) return; el.hidden = (k !== name); });
@@ -5612,7 +5670,6 @@ function startHifzSpeech(){
   stopHifzSpeech();
   try{
     const rec = new SpeechRecognitionCtor();
-    _liveRecs.add(rec);
     rec.lang = 'ar-SA'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 3;
     rec.onresult = (event) => {
       if(!hifzState.active) return;
@@ -5653,7 +5710,11 @@ function stopHifzSpeech(){
   hifzState.speechActive = false;
   const rec = hifzState.recognizer;
   hifzState.recognizer = null;
-  if(rec) killRecognizer(rec);
+  if(rec){
+    try{ rec.onstart = null; rec.onresult = null; rec.onerror = null; rec.onend = null; }catch(_){}
+    try{ rec.abort(); }catch(_){}
+    try{ rec.stop(); }catch(_){}
+  }
 }
 function checkAyahComplete(aIdx){
   const words = hifzState.words.filter(w => w.aIdx === aIdx);
@@ -6305,7 +6366,7 @@ function parseTajweedWordRules(decoratedHtml){
     hasGhunnah: false, hasSilent: false, ghunnahType: null, hasGhunnahContext: false,
     normNoSilent: null, laamShamsiyyahPositions: [], hamWasl: false,
     silentPositionsInNorm: [], allRules: [],
-    hasIdghaamNoGhunnah: false, idghaamNoGhunnahLetters: []
+    hasIdghaamNoGhunnah: false, idghaamNoGhunnahLetters: [], qalqalahLetters: [], nasalSpanLetters: {}
   };
   if (!decoratedHtml) return rules;
   if (decoratedHtml.indexOf('tj-madda_necessary') !== -1) rules.madd = 'necessary';
@@ -6348,6 +6409,14 @@ function parseTajweedWordRules(decoratedHtml){
     }
   }
   if (decoratedHtml.indexOf('tj-ham_wasl') !== -1) rules.hamWasl = true;
+  if (decoratedHtml.indexOf('tj-qalqalah') !== -1) {
+    const qRe = /<span[^>]*class="(?:[^"]*\s)?tj-qalqalah(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/span>/g;
+    let qm;
+    while ((qm = qRe.exec(decoratedHtml)) !== null){
+      const n = normArCached(qm[1]);
+      if (n) rules.qalqalahLetters.push(n);
+    }
+  }
 
   /* NEW: idghaam_no_ghunnah parsing */
   if (decoratedHtml.indexOf('tj-idghaam_no_ghunnah') !== -1) {
@@ -6359,6 +6428,19 @@ function parseTajweedWordRules(decoratedHtml){
       if (n) rules.idghaamNoGhunnahLetters.push(n);
     }
   }
+
+  /* The ن / م letters that the Tajweed source marked INSIDE each nasal-rule span.
+     Used so a dropped ن is not hidden by an unrelated م elsewhere in the word. */
+  ['ikhfa', 'idghaam_ghunnah', 'iqlab'].forEach(type => {
+    if (decoratedHtml.indexOf('tj-' + type) === -1) return;
+    const re = new RegExp('<span[^>]*class="(?:[^"]*\\s)?tj-' + type + '(?:\\s[^"]*)?"[^>]*>([\\s\\S]*?)<\\/span>', 'g');
+    let sm, letters = '';
+    while ((sm = re.exec(decoratedHtml)) !== null){
+      const n = normArCached(sm[1]);
+      for (let i = 0; i < n.length; i++) if (TJ_GHUNNAH_LETTERS.indexOf(n[i]) !== -1) letters += n[i];
+    }
+    if (letters) rules.nasalSpanLetters[type] = letters;
+  });
 
   const seen = new Set();
   const classRe = /class="([^"]*)"/g;
@@ -6538,10 +6620,17 @@ function checkExtraSyllable(w){
   if (!w || !w.tjRules || !w.tjRules.hasSilent) return true;
   if (!STRICT_FEATURES.silent()) return true;
   if (!w.audio) return true;
+  /* Lenient (was: expected 1–2 syllables, flag at +2 peaks, which hit long
+     words and multi-word segments). Syllables scale with word length; a
+     segment far longer than one word is skipped because it spans neighbours. */
+  const T = getBaseMsPerLetter();
+  const perLetter = (T !== null ? T : 110);
+  const segMs = Number(w.audio.durationMs) || (w.audio.end - w.audio.start);
+  if (!(segMs > 0) || segMs > w.norm.length * perLetter * 2.2 + 450) return true;
   const env = rmsAnalyser.samplesIn(w.audio.start, w.audio.end);
   const peaks = countPeaks(env, rmsAnalyser.minRms() * 0.5, 80);
-  const expected = w.norm.length >= 4 ? 2 : 1;
-  if (peaks > expected + 1){
+  const expected = Math.max(1, Math.ceil(w.norm.length / 2));
+  if (peaks > expected + 2){
     markStrict1Warning(w, 'silent-extra-syllable', peaks + ' energy peaks vs expected ' + expected);
   }
   return true;
@@ -6647,8 +6736,12 @@ function checkQalqalah(w, heard, align){
 
   /* Transcript fallback / supplement */
   if (heard && w.norm){
-    for (let i = 0; i < w.norm.length; i++){
-      const ch = w.norm[i];
+    /* Only the letters the Tajweed source actually marked as Qalqalah — other
+       ق ط ب ج د in the same word are ordinary (moving) letters. */
+    const qLetters = (w.tjRules.qalqalahLetters && w.tjRules.qalqalahLetters.length)
+      ? w.tjRules.qalqalahLetters.join('') : w.norm;
+    for (let i = 0; i < qLetters.length; i++){
+      const ch = qLetters[i];
       if (QALQALAH_LETTERS.includes(ch) && !heard.includes(ch)){
         markStrict1Error(w, 'qalqalah-letter-dropped',
           'Qalqalah letter (' + ch + ') missing from transcript');
@@ -6683,7 +6776,7 @@ function checkIdghaamNoGhunnah(w, heard, align){
 
 /* Unified Ghunnah / Ikhfa / Idghaam-with-Ghunnah / Iqlab check.
    RMS spectral verification when available; transcript fallback otherwise. */
-function checkAllNasalRules(w, heard, align){
+function checkAllNasalRules(w, heard, align, drop){
   if (!w || !w.tjRules || !STRICT_FEATURES.ghunnah()) return;
   const rules = w.tjRules.allRules || [];
   const nasalRules = ['ghunnah', 'ikhfa', 'idghaam_ghunnah', 'iqlab'].filter(r => rules.includes(r));
@@ -6709,6 +6802,11 @@ function checkAllNasalRules(w, heard, align){
         const ch = req[i];
         if ((ch === N || ch === M) && heard && heard.indexOf(ch) === -1){ textOk = false; break; }
       }
+    } else if (w.tjRules.nasalSpanLetters && w.tjRules.nasalSpanLetters[type]){
+      const req = w.tjRules.nasalSpanLetters[type];
+      for (let i = 0; i < req.length; i++){
+        if (heard && heard.indexOf(req[i]) === -1){ textOk = false; break; }
+      }
     } else if (heard){
       const hasN = w.norm.indexOf(N) !== -1;
       const hasM = w.norm.indexOf(M) !== -1;
@@ -6720,7 +6818,8 @@ function checkAllNasalRules(w, heard, align){
     if (hasAcoustic){
       if (!nasal && !textOk){
         markStrict1Error(w, 'ghunnah-' + type,
-          'neither spectrum nor transcript confirmed nasalisation for ' + type);
+          'neither spectrum nor transcript confirmed nasalisation for ' + type +
+          ((drop && drop.droppedNasal) ? ' [nasal letter missing from transcript]' : ''));
       } else if (!nasal){
         markStrict1Warning(w, 'ghunnah-' + type,
           'microphone spectrum did not clearly show nasal resonance; check by listening');
@@ -6736,35 +6835,49 @@ function checkAllNasalRules(w, heard, align){
       if (type === 'iqlab') markStrict1Error(w, 'ghunnah-iqlab',
         'expected م (Iqlab) missing in transcript (transcript-only mode)');
       else markStrict1Warning(w, 'nasal-dropped',
-        'expected nasal consonant missing in transcript (transcript-only mode)');
+        'expected nasal consonant missing in transcript (transcript-only mode)' +
+        ((drop && drop.dropCount) ? ' [' + drop.dropCount + ' letter(s) missing — nasal could not be verified]' : ''));
     }
   });
 }
 
-function strict1SilentOk(w, heard){
+/* Silent letters (e.g. the alif after wāw al-jamāʿah in قالوا, the silent
+   wāw of أولئك).  ASR always writes the standard orthography, WITH the silent
+   letter, so a transcript can never show that the letter was not pronounced and
+   an ordinary spelling difference elsewhere in the word is no evidence at all.
+   The old test ("heard is closer to the full spelling than to the spelling
+   without the silent letter") therefore flagged correct recitation.
+
+   New rule: the transcript only counts as evidence of a VOICED silent letter
+   when it is the expected word PLUS an extra letter that sits right next to a
+   silent-letter position and nothing else differs (no dropped letters, no
+   substitutions). Everything else passes. The acoustic extra-syllable check
+   (checkExtraSyllable) remains the main evidence. */
+function strict1SilentOk(w, heard, drop){
   if (!w || !w.tjRules || !w.tjRules.hasSilent) return true;
-  if (heard === w.norm) return true; /* standard ASR spelling; acoustic extra-syllable check covers this */
+  if (!heard || heard === w.norm) return true;
+  if (drop && drop.dropCount > 0) return true;           // lost letters explain every difference
   const full = w.norm;
   const noSilent = w.normNoSilent || (w.tjRules && w.tjRules.normNoSilent);
-  if (noSilent && noSilent.length >= 1 && noSilent !== full){
-    const dFull = lev(heard, full);
-    const dNoSilent = lev(heard, noSilent);
-    return dFull >= dNoSilent;
-  }
-  const dFull = lev(heard, full);
-  let best = dFull;
+  if (noSilent && heard === noSilent) return true;       // silent letter correctly not written/heard
+  if (heard.length <= full.length) return true;          // nothing extra was heard
+  if (heard.length - full.length > 2) return true;       // unrelated word: not a silent-letter question
+  const al = tjAlignLetters(heard, full);
+  if (!al) return true;
+  if (al.substituted > 0 || al.dropped.length > 0) return true;
+  /* Exactly the expected word plus 1–2 extra letters: are they glued to a
+     silent letter? Look for the silent letter(s) in the full word and test
+     whether the transcript has that letter repeated / followed by an extra
+     alif-waw-yaa-hamza. */
   for (let i = 0; i < w.tjRules.silentLetters.length; i++){
     const sl = w.tjRules.silentLetters[i];
     if (!sl) continue;
-    for (let pos = 0; pos <= full.length - sl.length; pos++){
-      if (full.substr(pos, sl.length) !== sl) continue;
-      const variant = full.slice(0, pos) + full.slice(pos + sl.length);
-      if (!variant || variant === full) continue;
-      const d = lev(heard, variant);
-      if (d < best) best = d;
-    }
+    const at = full.indexOf(sl);
+    if (at === -1) continue;
+    const win = heard.slice(Math.max(0, at - 1), at + sl.length + 3);
+    if (/[\u0627\u0648\u064A\u0621]{2}/.test(win) && win.split(sl).length > 2) return false;
   }
-  return dFull >= best;
+  return true;
 }
 
 const TAJWEED_ERROR_NAMES = {
@@ -6841,7 +6954,7 @@ function getTajweedRuleInfo(kind){
   else if (kind.indexOf('madda_permissible') !== -1) rule = 'madda_permissible';
   else if (kind.indexOf('madda_normal')      !== -1) rule = 'madda_normal';
   else if (kind.indexOf('idghaam_ghunnah')   !== -1) rule = 'idghaam_ghunnah';
-  else if (kind.indexOf('idghaam_no_ghunnah')!== -1) rule = 'idghaam_no_ghunnah';
+  else if (kind.indexOf('idghaam_no_ghunnah')!== -1 || kind.indexOf('idghaam-no-ghunnah') !== -1) rule = 'idghaam_no_ghunnah';
   else if (kind.indexOf('ikhfa')             !== -1) rule = 'ikhfa';
   else if (kind.indexOf('iqlab')             !== -1) rule = 'iqlab';
   else if (kind.indexOf('ghunnah')           !== -1) rule = 'ghunnah';
@@ -6936,9 +7049,10 @@ function detectGlottalOnset(raw, targetRaw){
   if (/^[أإآءؤئ]/.test(h)){
     return { detected: true, reason: 'explicit hamza onset (' + h[0] + ')' };
   }
-  if (/^[اٱ]/.test(h) && /^[اٱ]/.test(t)){
-    return { detected: true, reason: 'audible Alif (ا) onset where Hamzat al-Wasl should be silent' };
-  }
+  /* NOTE: a transcript that starts with a plain alif (ا / ٱ) is NOT evidence.
+     ASR writes the standard orthography (الحمد, اهدنا …) whether or not the
+     reciter attacked the hamza, so that used to flag every correct wasl word.
+     Only an explicit hamza letter (above) or the acoustic glottal attack counts. */
   return { detected: false, reason: '' };
 }
 
@@ -6978,7 +7092,11 @@ function checkHamzatWasl(w, idx, rawHeard){
 
   const lexical = detectGlottalOnset(rawHeard, w.raw);
 
-  if (lexical.detected && (acoustic.spike || acoustic.gapMs === null || acoustic.gapMs >= 35)){
+  /* Lenient: with a waveform, an explicit-hamza transcript alone is not enough
+     (the connected-speech boundary can be a natural 35+ ms gap); it needs the
+     glottal-attack spike. Without a waveform the transcript is all there is,
+     so it stays a yellow warning only. */
+  if (lexical.detected && (acoustic.spike || acoustic.gapMs === null)){
     const evidence = [lexical.reason];
     if (acoustic.spike) evidence.push('glottal attack spike in RMS');
     if (acoustic.gapMs !== null) evidence.push('boundary ' + Math.round(acoustic.gapMs) + ' ms');
@@ -6998,6 +7116,14 @@ function runStrict1Checks(idx, heard, opts){
   if (!coachTajweedReady) return;
   const w = words[idx];
   if (!w || w.isMuqattaat) return;
+
+  /* Accepted on waveform shape alone -> the transcript is not evidence. */
+  if (opts.acousticOnly) heard = '';
+  /* Which expected letters did the transcript lose (1–3 for a "plausible" word)?
+     Merged-token slices are approximations, so they are not analysed. */
+  const drop = (opts.skipTiming && !opts.plausible) ? tjDropInfo(w, '') : tjDropInfo(w, heard);
+  const dropN = drop.dropCount;
+  const dropNote = dropN ? ' [' + dropN + ' letter' + (dropN === 1 ? '' : 's') + ' missing from transcript]' : '';
 
   /* 1. Emphatic letters (Tafkheem) on every commit path */
   if (STRICT_FEATURES.emphatics() && heard && w.norm && heard !== w.norm){
@@ -7030,11 +7156,15 @@ function runStrict1Checks(idx, heard, opts){
         ? (T_mora !== null ? Math.round(T_mora * MADD_MIN_HARAKAT.normal) : END_OF_AYAH_MADD_MIN_MS)
         : (T_mora !== null ? Math.round(T_mora * (MADD_MIN_HARAKAT[kind] || 1.7))
                             : (MADD_MIN_DELTA_MS[kind] || 0));
-      const minSegMs = w.norm.length * (T_mora !== null ? T_mora : 100) * 0.55;
+      /* Letters the transcript lost are not in the audio segment's expected
+         length either, so the "is this segment word-sized" gate uses the
+         effective length (expected letters minus the dropped ones). */
+      const minSegMs = drop.effLen * (T_mora !== null ? T_mora : 100) * 0.55;
       if (w.audio.durationMs >= minSegMs && vowelMs < required){
         const tag = 'madd-' + kind + (isEndOfAyah ? '-end' : '');
         const _maddMsg = 'estimated vowel-run ' + Math.round(vowelMs) + ' ms < ' + Math.round(required) + ' ms' +
-          (T_mora !== null ? ' (T=' + Math.round(T_mora) + 'ms/mora)' : '');
+          (T_mora !== null ? ' (T=' + Math.round(T_mora) + 'ms/mora)' : '') +
+          (drop.droppedMadd ? ' [madd letter missing from transcript]' : dropNote);
         if (vowelMs < required * 0.65) markStrict1Error(w, tag, _maddMsg);
         else markStrict1Warning(w, tag, _maddMsg);
       } else if (!isEndOfAyah && T_mora !== null){
@@ -7042,7 +7172,7 @@ function runStrict1Checks(idx, heard, opts){
            and when the segment is much longer than one word, because the segment
            can then span several words and the longest vowel may belong elsewhere. */
         const maxMs = maddMaxMs(kind);
-        const wordSized = w.audio.durationMs <= (w.norm.length * T_mora + maxMs) * 1.3;
+        const wordSized = w.audio.durationMs <= (drop.effLen * T_mora + maxMs) * 1.3;
         if (isFinite(maxMs) && wordSized && vowelMs > maxMs){
           markStrict1Warning(w, 'madd-' + kind + '-long',
             'estimated vowel-run ' + Math.round(vowelMs) + ' ms > ' + Math.round(maxMs) +
@@ -7055,7 +7185,8 @@ function runStrict1Checks(idx, heard, opts){
     if (opts.timingReliable && align.available && lastDirectCommitIdx >= 0 && idx === lastDirectCommitIdx + 1){
       const isMadd = !!(w.tjRules && w.tjRules.madd);
       const sampleMs = rmsAnalyser.vowelRun(w.audio.start, w.audio.end).durationMs;
-      if (!isMadd && sampleMs > 0) recordPaceSample(sampleMs, Math.max(1, w.norm.length));
+      /* A word with dropped letters would corrupt the ms-per-letter pace. */
+      if (!isMadd && sampleMs > 0 && dropN === 0) recordPaceSample(sampleMs, Math.max(1, w.norm.length));
     }
   }
 
@@ -7079,6 +7210,13 @@ function runStrict1Checks(idx, heard, opts){
         }
       }
     }
+  }
+
+  /* 4b. Plausible word whose Madd letter is missing from the transcript and no
+     waveform is available: the length cannot be proven, so say so (yellow). */
+  if (opts.plausible && !align.available && drop.droppedMadd && w.tjRules && w.tjRules.madd && STRICT_FEATURES.madd()){
+    markStrict1Warning(w, 'madd-' + w.tjRules.madd + '-timing',
+      'madd letter missing from transcript and no microphone waveform to measure the length' + dropNote);
   }
 
   /* 5. Batch timing accumulation for fast multi-word ASR commits */
@@ -7105,11 +7243,11 @@ function runStrict1Checks(idx, heard, opts){
   }
 
   /* 6. Independent rule checks (RMS where available, transcript fallback otherwise) */
-  checkAllNasalRules(w, heard, align);
+  checkAllNasalRules(w, heard, align, drop);
   checkIkhfa(w, heard, align);
   if (STRICT_FEATURES.laam()) checkLaamShamsiyyah(w, heard, align);
-  checkHamzatWasl(w, idx, opts.rawHeard || heard);
-  if (!strict1SilentOk(w, heard)){
+  checkHamzatWasl(w, idx, opts.acousticOnly ? '' : (opts.rawHeard || heard));
+  if (!strict1SilentOk(w, heard, drop)){
     markStrict1Warning(w, 'silent',
       'ASR spelling differs from the annotated silent-letter form; transcript alone cannot prove that the silent letter was voiced');
   }
@@ -7586,12 +7724,11 @@ function createSpeechRecognition(forceNoPhrases, forceCloud){
   if(speechRecognition && !speechRecognition.__dead &&
      !!speechRecognition.__local === desiredLocal && speechRecognition.__followMode === followOnly) return speechRecognition;
   if(speechRecognition){
-    try{ killRecognizer(speechRecognition); }catch(_){}
+    try{ const o = speechRecognition; o.onstart = null; o.onresult = null; o.onerror = null; o.onend = null; o.abort(); }catch(_){}
     speechRecognition = null;
   }
 
   const rec = new SpeechRecognitionCtor();
-  _liveRecs.add(rec);
   rec.lang             = SPEECH_LANG;
   rec.continuous       = true;
   rec.interimResults   = true;
@@ -7620,14 +7757,14 @@ function createSpeechRecognition(forceNoPhrases, forceCloud){
       if(fallbackFromOnDevice()) return;
     }
     if(err === 'service-not-allowed'){
-      releaseMicStream(); stopMicDiagnostic();
+      releaseAllMediaHardware(); stopMicDiagnostic();
       speechFatalError = true; wantMic = false; disarmSpeechKeepalive();
       setMicButton(); updateFsMicBtn(); syncFsButtons();
       notifySpeechServiceUnreachable();
       return;
     }
     if(err === 'not-allowed'){
-      releaseMicStream(); stopMicDiagnostic();
+      releaseAllMediaHardware(); stopMicDiagnostic();
       speechFatalError = true; wantMic = false; disarmSpeechKeepalive();
       setMicButton();
       setStatus('Microphone blocked', 'error');
@@ -7639,7 +7776,7 @@ function createSpeechRecognition(forceNoPhrases, forceCloud){
       return;
     }
     if(err === 'audio-capture'){
-      releaseMicStream(); stopMicDiagnostic();
+      releaseAllMediaHardware(); stopMicDiagnostic();
       speechFatalError = true; wantMic = false; disarmSpeechKeepalive();
       setMicButton(); setStatus('No microphone', 'error');
       addFeedback('⚠️ No microphone was found on this device.', true);
@@ -7862,6 +7999,8 @@ async function gradeFull(tokens, startIdx){
       if(ptr >= words.length){ used++; continue; }
       const hPhon = phonArCached(rawTok);
       const hPhonLoose = phonLooseArCached(rawTok);
+      /* Tajweed mode: loose form WITHOUT the Ghunnah letters (ن م). */
+      const hPhonLooseTj = phonLooseTajweedCached(rawTok);
 
       {
         const mqW = words[ptr];
@@ -7949,7 +8088,9 @@ async function gradeFull(tokens, startIdx){
       const _needsVowelRun = !followOnly && _wRms.tjRules && (_wRms.tjRules.madd || _wRms.tjRules.hasGhunnahContext);
       if (_needsVowelRun && seg && isAcousticWordShapeMatch(_wRms, seg)) {
         commitCorrect(ptr, seg);
-        runStrict1Checks(ptr, heard, { timingReliable: false, rawHeard: rawTok });
+        /* Accepted on waveform shape alone: the transcript is not evidence for
+           this word, so text-based rule checks are skipped (acousticOnly). */
+        runStrict1Checks(ptr, heard, { timingReliable: false, rawHeard: rawTok, acousticOnly: true });
         advancePast(1);
         pendingHeard.length = 0;
         noteFollowProgress();
@@ -7966,11 +8107,14 @@ async function gradeFull(tokens, startIdx){
 
       {
         const curW = words[ptr];
-        if(curW && isPlausiblePronunciationAttempt(heard, hPhon, curW)){
+        if(curW && (isPlausiblePronunciationAttempt(heard, hPhon, curW) || isTajweedLooseMatch(heard, hPhonLooseTj, curW))){
           const voiced = seg && seg.durationMs > 40 && rmsAnalyser.voiceDurationMs(seg.start, seg.end) > 20;
           if(voiced){
             commitCorrect(ptr, seg);
-            if(!followOnly){ runStrict1Checks(ptr, heard, { timingReliable: false, skipTiming: true, rawHeard: rawTok }); }
+            /* Green by the ASR check, then ALWAYS tested by the Tajweed engine.
+               Timing is NOT skipped: Madd / Ghunnah adjust for the 1–3 letters
+               the transcript lost (runStrict1Checks -> tjDropInfo). */
+            if(!followOnly){ runStrict1Checks(ptr, heard, { timingReliable: false, plausible: true, rawHeard: rawTok }); }
             lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; prevWordAudio = null;
             advancePast(1);
             pendingHeard.length = 0;
@@ -8170,6 +8314,7 @@ function showPermissionHelp(msg){
 
 let audioCtx=null, audioUnlocked=false;
 function unlockAudio(){
+  if(audioCtx && audioCtx.state === 'closed'){ audioCtx = null; audioUnlocked = false; window.__sharedAudioCtx = null; }
   if(audioUnlocked){ try{ if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); _ctxSuspendedByUs = false; }catch(_){} return audioCtx; }
   try{
     audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
@@ -8349,16 +8494,7 @@ let micSession = 0;
 const _micTestClosers = new Set();
 let _ctxSuspendedByUs = false;
 
-/* Single-flight + registry: two overlapping getUserMedia() calls used to leave
-   the first stream orphaned (never stopped) so Safari kept the mic open. */
-const _allMicStreams = new Set();
-let _micOpening = null;
-function ensureMicStream(){
-  if(_micOpening) return _micOpening;
-  _micOpening = _ensureMicStreamImpl().finally(() => { _micOpening = null; });
-  return _micOpening;
-}
-async function _ensureMicStreamImpl(){
+async function ensureMicStream(){
   if(micStream){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
     if(live){
@@ -8377,28 +8513,15 @@ async function _ensureMicStreamImpl(){
   try{
     lastMicError = null;
     const _epoch = micEpoch;
-    let s = null;
-    for(let attempt = 0; attempt < 3; attempt++){
-      try{
-        s = await navigator.mediaDevices.getUserMedia({
-          audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-        });
-        break;
-      }catch(err){
-        const transient = err && (err.name === 'NotReadableError' || err.name === 'AbortError' || err.name === 'TrackStartError');
-        if(!transient || attempt === 2) throw err;
-        await new Promise(r => setTimeout(r, 250));     // device still being released: wait and retry
-        if(_epoch !== micEpoch) return null;
-      }
-    }
+    const s = await navigator.mediaDevices.getUserMedia({
+      audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
     if(_epoch !== micEpoch){
       // Stop / background / mode change happened while the permission
       // prompt or device was opening — never leave this stream live.
       try{ s.getTracks().forEach(t => t.stop()); }catch(_){}
       return null;
     }
-    _allMicStreams.add(s);
-    if(micStream && micStream !== s){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(_){} _allMicStreams.delete(micStream); }
     micStream = s;
     attachMicTrackListeners(s);
     const rmsOk = rmsAnalyser.start(s);
@@ -8415,10 +8538,7 @@ function releaseMicStream(){
   detachMicTrackListeners();
   if(micTrackMutedTimer){ clearTimeout(micTrackMutedTimer); micTrackMutedTimer = null; }
   rmsAnalyser.stop();
-  if(micStream){ try{ micStream.getTracks().forEach(t => { try{ t.enabled = false; }catch(_){} t.stop(); }); }catch(e){} micStream = null; }
-  // Catch-all: stop every stream this page ever opened, even orphaned ones.
-  _allMicStreams.forEach(st => { try{ st.getTracks().forEach(t => { try{ t.enabled = false; }catch(_){} t.stop(); }); }catch(_){} });
-  _allMicStreams.clear();
+  if(micStream){ try{ micStream.getTracks().forEach(t => t.stop()); }catch(e){} micStream = null; }
 }
 function resetMicDiagState(){
   MIC_DIAG.startedAt = 0;
@@ -8806,7 +8926,6 @@ async function openMicTestModal(){
     if(SPEECH_SUPPORTED){
       try{
         testRecog = new SpeechRecognitionCtor();
-        _liveRecs.add(testRecog);
         testRecog.lang = 'ar-SA';
         testRecog.continuous = true;
         testRecog.interimResults = true;
@@ -8854,7 +8973,7 @@ async function openMicTestModal(){
         try{ testRms.src.disconnect(); testRms.an.disconnect(); if(testRms.owns) testRms.ctx.close(); }catch(_){}
         testRms = null;
       }
-      if(testRecog){ killRecognizer(testRecog); testRecog = null; }
+      if(testRecog){ try{ testRecog.abort(); }catch(_){} testRecog = null; }
       if(stream){ try{ stream.getTracks().forEach(tr => tr.stop()); }catch(_){} stream = null; }
     };
   }catch(e){
@@ -8954,21 +9073,12 @@ function setRecitationMode(modeName){
   _phrasesRetryDone = false;
   applyMutexUI(); applyFollowOnlyUI();
   if(followOnly){
-    // Follow mode may continue ASR, but acoustic Tajweed evidence (getMedia,
-    // RMS, spectrum, MFA waveform diagnostics and Web Audio contexts) must
-    // immediately stop. Release tracks and invalidate late stream opens.
     releaseMicStream();
-    try{ rmsAnalyser.stop(); }catch(_){}
-    try{ stopMicDiagnostic(); }catch(_){}
-    try{ closeAudioContextsNow(); }catch(_){}
-    releaseWaveformStack();
     coachTajweedMicFailed = false;
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
   } else {
-    _waveTimers.forEach(t => clearTimeout(t)); _waveTimers = [];   // quick flip back: cancel pending Follow teardown
-    if(wantMic){ try{ unlockAudio(); }catch(_){} }   // recreate the audio context inside this tap (iOS gesture rule)
     addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
     if(wantMic && !rmsAnalyser.isRunning()){
@@ -8983,6 +9093,7 @@ function setRecitationMode(modeName){
       };
 
       ensureMicStream().then(s => {
+        if(!wantMic){ releaseMicStream(); return; }   // stopped while the mic was opening
         if(s){
           coachTajweedMicFailed = false;
           updateTajweedStatusChip();
@@ -9461,22 +9572,7 @@ function setMicButton(){
   syncFsButtons();
 }
 
-let _startInFlight = 0;
-function micBusyForCleanup(){
-  try{
-    if(_startInFlight > 0 || wantMic) return true;
-    if(hifzState && (hifzState.speechActive || hifzState.active && hifzState.speechActive)) return true;
-    if(_micTestClosers && _micTestClosers.size > 0) return true;
-  }catch(_){}
-  return false;
-}
 async function startReciting(){
-  cancelAudioRelease();
-  _startInFlight++;
-  try{ return await _startRecitingImpl(); }
-  finally{ _startInFlight--; if(_startInFlight === 0 && !wantMic){ try{ releaseAudioSessionSoon(); }catch(_){} } }
-}
-async function _startRecitingImpl(){
   unlockAudio();
   const _myTok = micSession;
   if(!words.length){
@@ -9557,7 +9653,7 @@ async function _startRecitingImpl(){
   }catch(e){
     console.error('[Speech] start failed:', e);
     addFeedback('⚠️ Could not start listening: ' + (e.message || e), true);
-    wantMic = false; releaseMicStream(); stopMicDiagnostic(); setMicButton(); updateFsMicBtn(); syncFsButtons();
+    wantMic = false; releaseAllMediaHardware(); stopMicDiagnostic(); setMicButton(); updateFsMicBtn(); syncFsButtons();
   }
 }
 
@@ -9566,7 +9662,11 @@ function abortCoachSpeechRecognition(){
   // Detach callbacks before aborting so Safari cannot trigger a late onend
   // callback that attempts to restart the microphone after Stop was pressed.
   speechRecognition = null;
-  if(rec) killRecognizer(rec);
+  if(rec){
+    try{ rec.onstart = null; rec.onresult = null; rec.onerror = null; rec.onend = null; }catch(_){}
+    try{ rec.abort(); }catch(_){}
+    try{ rec.stop(); }catch(_){}
+  }
   speechStarting = false;
   recRunning = false;
 }
@@ -9597,12 +9697,11 @@ function stopReciting(silent){
   lastCommitBatchId = -1;
   prevWordAudio = null;
 
-  // Stop every track, not merely mute it, and disconnect the RMS graph.
-  releaseMicStream();
-  releaseWakeLock();
-  // Nothing is playing: release the Web Audio session too (iOS keeps the
-  // audio session / Android keeps the audio route while a context runs).
-  try{ if(!playing && !(viewerAudio && viewerAudio.active)){ suspendSharedAudio(); if(_startInFlight === 0){ releaseAudioSession(); releaseAudioSessionSoon(); } } }catch(_){}
+  // Stop every track (not merely mute), disconnect + stop the RMS graph, stop
+  // speech recognition, release the screen wake lock and close the Web Audio
+  // session when nothing is playing (iOS keeps the audio session / Android keeps
+  // the audio route while a context is alive).
+  releaseAllMediaHardware();
 
   setMicButton();
   if(!silent) setStatus('Ready','idle', micPermission==='granted'?'Mic ready':'Tap Start reciting to allow mic');
@@ -9630,81 +9729,6 @@ function resumeMic(){
     setStatus('Listening', 'listening', contextLabel());
   }
 }
-/* FULL audio-session release (iOS fix). Suspending an AudioContext is not
-   enough: iOS keeps the mic / 'play-and-record' session and the Now-Playing
-   state alive while a context or the hidden <audio> element still exists.
-   When nothing is intentionally playing we CLOSE the contexts, empty the
-   shared <audio> element and hand the session back to the system.        */
-function releaseAudioSession(){
-  try{ if(playing || (viewerAudio && viewerAudio.active) || micBusyForCleanup()) return; }catch(_){}
-  const seen = [];
-  [audioCtx, window.__sharedAudioCtx].forEach(c => {
-    if(!c || seen.indexOf(c) !== -1) return;
-    seen.push(c);
-    try{ if(c.state !== 'closed') c.close().catch(() => {}); }catch(_){}
-  });
-  audioCtx = null; window.__sharedAudioCtx = null; audioUnlocked = false; _ctxSuspendedByUs = false;
-  try{
-    if(sharedAudio){
-      if(sharedAudio._finish){ try{ sharedAudio._finish(false, 'released'); }catch(_){} sharedAudio._finish = null; }
-      sharedAudio.pause();
-      sharedAudio.onended = null; sharedAudio.onerror = null;
-      if(sharedAudio._playingHandler){ sharedAudio.removeEventListener('playing', sharedAudio._playingHandler); sharedAudio._playingHandler = null; }
-      if(sharedAudio._safetyTimer){ clearTimeout(sharedAudio._safetyTimer); sharedAudio._safetyTimer = null; }
-      sharedAudio.removeAttribute('src');
-      try{ sharedAudio.load(); }catch(_){}
-    }
-  }catch(_){}
-  try{ if(athaanAudio){ athaanAudio.pause(); } }catch(_){}
-  try{ if(navigator.audioSession) navigator.audioSession.type = 'auto'; }catch(_){}
-  try{ if(navigator.mediaSession){ navigator.mediaSession.playbackState = 'none'; navigator.mediaSession.metadata = null; } }catch(_){}
-}
-let _releaseVerifyTimer = null;
-let _releaseTimers = [];
-let _waveTimers = [];
-function cancelAudioRelease(){
-  _releaseTimers.forEach(t => clearTimeout(t)); _releaseTimers = [];
-  _waveTimers.forEach(t => clearTimeout(t)); _waveTimers = [];
-  if(_releaseVerifyTimer){ clearTimeout(_releaseVerifyTimer); _releaseVerifyTimer = null; }
-}
-function releaseAudioSessionSoon(){
-  // iOS tears the session down asynchronously: sweep ASR, stream, RMS analyser
-  // and audio contexts at 0 / 0.25 / 0.6 / 1.0 s so nothing outlives 1 second.
-  _releaseTimers.forEach(t => clearTimeout(t)); _releaseTimers = [];
-  [0, 250, 600, 1000].forEach(ms => {
-    _releaseTimers.push(setTimeout(() => {
-      if(micBusyForCleanup()) return;     // a new start / Hifz / mic test owns the mic
-      try{ releaseMicStream(); }catch(_){}
-      try{ killAllRecognizers(); }catch(_){}
-      try{ rmsAnalyser.stop(); }catch(_){}
-      releaseAudioSession();
-    }, ms));
-  });
-}
-/* Tajweed → Follow switch: Follow needs only ASR, so close the getUserMedia
-   stream, RMS/acoustic analyser and Web Audio contexts within 1 s. ASR keeps
-   running. Every pass aborts if the user flips back to Tajweed meanwhile. */
-function closeAudioContextsNow(){
-  const seen = [];
-  [audioCtx, window.__sharedAudioCtx].forEach(c => {
-    if(!c || seen.indexOf(c) !== -1) return;
-    seen.push(c);
-    try{ if(c.state !== 'closed') c.close().catch(() => {}); }catch(_){}
-  });
-  audioCtx = null; window.__sharedAudioCtx = null; audioUnlocked = false; _ctxSuspendedByUs = false;
-}
-function releaseWaveformStack(){
-  _waveTimers.forEach(t => clearTimeout(t)); _waveTimers = [];
-  const run = () => {
-    if(!followOnly || _startInFlight > 0) return;
-    try{ releaseMicStream(); }catch(_){}
-    try{ rmsAnalyser.stop(); }catch(_){}
-    try{ stopMicDiagnostic(); }catch(_){}
-    try{ if(!playing && !(viewerAudio && viewerAudio.active)) closeAudioContextsNow(); }catch(_){}
-  };
-  run();
-  [250, 600, 1000].forEach(ms => _waveTimers.push(setTimeout(run, ms)));
-}
 function suspendSharedAudio(){
   const seen = [];
   [audioCtx, window.__sharedAudioCtx].forEach(c => {
@@ -9721,6 +9745,34 @@ function resumeSharedAudio(){
   [audioCtx, window.__sharedAudioCtx].forEach(c => {
     if(c && c.state === 'suspended' && typeof c.resume === 'function'){ try{ c.resume().catch(() => {}); }catch(_){} }
   });
+}
+/* Close (not just suspend) the shared Web Audio context when nothing is being
+   played. A closed context releases the OS audio session on iOS Safari and the
+   audio route on Android. unlockAudio() recreates it on the next user gesture. */
+function closeSharedAudioContexts(){
+  let busy = false;
+  try{ busy = !!(playing || (viewerAudio && viewerAudio.active)); }catch(_){}
+  if(busy){ suspendSharedAudio(); return; }
+  const seen = [];
+  [audioCtx, window.__sharedAudioCtx].forEach(c => {
+    if(!c || seen.indexOf(c) !== -1) return;
+    seen.push(c);
+    try{ if(c.state !== 'closed' && typeof c.close === 'function') c.close().catch(() => {}); }catch(_){}
+  });
+  audioCtx = null; window.__sharedAudioCtx = null;
+  audioUnlocked = false; _ctxSuspendedByUs = false;
+}
+/* The single "everything that touches the microphone or the audio hardware is
+   off" routine. Idempotent. Used by Stop, silence auto-stop, surah completion,
+   minimise / hidden / frozen / page-hide. Order matters: recognition first (it
+   owns its own capture on iOS / Android), then the getUserMedia tracks, then the
+   analyser graph, then the wake lock, then the audio context. */
+function releaseAllMediaHardware(){
+  try{ abortCoachSpeechRecognition(); }catch(_){}
+  try{ releaseMicStream(); }catch(_){}          // bumps micEpoch, stops every track
+  try{ rmsAnalyser.stop(); }catch(_){}
+  try{ releaseWakeLock(); }catch(_){}
+  try{ closeSharedAudioContexts(); }catch(_){}
 }
 /* One call that guarantees every microphone-related activity is off:
    ASR (coach, Hifz, mic test), RMS analyser, getUserMedia tracks,
@@ -9739,8 +9791,7 @@ function hardShutdownAudio(){
   try{ Array.from(_micTestClosers).forEach(f => { try{ f(); }catch(_){} }); }catch(_){}
   try{ releaseWakeLock(); }catch(_){}
   try{ suspendSharedAudio(); }catch(_){}
-  try{ killAllRecognizers(); }catch(_){}
-  try{ releaseAudioSession(); releaseAudioSessionSoon(); }catch(_){}
+  try{ releaseAllMediaHardware(); }catch(_){}
 }
 function stopEverything(silent){
   // Master Stop: stop playback plus every speech/microphone mode.
@@ -9752,13 +9803,16 @@ function stopEverything(silent){
   if(!silent) setStatus('Ready','idle');
 }
 function finish(){
-  finished=true; wantMic=false; micPaused=false; speechFatalError=true;
-  disarmSpeechKeepalive(); setMicButton(); recRunning = false; releaseWakeLock();
+  micSession++;                       // invalidate any in-flight start / restart
+  _acousticMode = null; _acousticMissStreak = 0;
+  finished=true; wantMic=false; micPaused=false; fsPaused=false; speechFatalError=true;
+  disarmSpeechKeepalive(); setMicButton(); recRunning = false;
   clearSilenceTimer(); stopMicDiagnostic();
   cancelFollowPinTimer();
-  abortCoachSpeechRecognition();
-  releaseMicStream();
-  try{ releaseAudioSession(); releaseAudioSessionSoon(); }catch(_){}
+  try{ resetSpeechPipeline(); }catch(_){}
+  // Surah complete: mic tracks, getUserMedia stream, RMS analyser, speech
+  // recognition, wake lock and the audio session all go off.
+  releaseAllMediaHardware();
   updateTajweedStatusChip();
   const allVerses = new Set(words.map(w => w.verse)); allVerses.forEach(v => completeVerse(v));
   const total=words.length;
@@ -10790,10 +10844,9 @@ async function downloadSurahAudio(surahNumber){
       if(r === 'ok' || r === 'cached') state.done++;
       else state.failed.push(ayah);
       refreshBtn();
-      await SmartCore.breathe();   // Smart Core: yield the main thread between ayahs
     }
   }
-  try{ const workers = []; const _dlWorkers = SmartCore.downloadConcurrency(); for(let w = 0; w < _dlWorkers; w++) workers.push(worker()); await Promise.all(workers); }catch(err){ console.warn('[Download] failed:', err); }
+  try{ const workers = []; for(let w = 0; w < DOWNLOAD_CONCURRENCY; w++) workers.push(worker()); await Promise.all(workers); }catch(err){ console.warn('[Download] failed:', err); }
   const wasAborted = controller.signal.aborted;
   dlState.delete(key);
   if(quotaHit){ showToast('⚠️ Storage is full. Free up space, then tap ⬇ to resume.', 4600); }
@@ -11006,9 +11059,8 @@ async function getJuzStartPage(juzNumber){
   _juzStartPageCache.set(juzNumber, fallback);
   return fallback;
 }
-/* Page requests explicitly use Quran.com Mushaf ID 3 (604-page general IndoPak layout). */
 async function fetchPageIndopak(pageNumber){
-  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?mushaf=3&fields=' + READER_EDITION + '&per_page=300&word_fields=text_indopak_nastaleeq&translations=' + currentTextTranslationQuranComId();
+  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&word_fields=text_indopak&translations=' + currentTextTranslationQuranComId();
   const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
@@ -11019,7 +11071,7 @@ async function fetchPageIndopak(pageNumber){
     const s = parseInt(sStr, 10) || 1; const a = parseInt(aStr, 10) || 1;
     let translation = '';
     if(Array.isArray(v.translations) && v.translations.length){ translation = cleanTranslation(v.translations.map(t => t.text || '').join(' ')); }
-    return { text: v.text_indopak_nastaleeq || v.text_indopak || '', numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
+    return { text: v.text_indopak || '', numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
   })};
 }
 async function _fetchPageByEditionFallback(pageNumber){
@@ -12349,15 +12401,7 @@ function requestNotificationPermission(){
   if(!('Notification' in window)) return;
   if(Notification.permission === 'default'){ try{ Notification.requestPermission(); }catch(e){} }
 }
-function startPrayerAlarmScheduler(){
-  if(prayerAlarmTimer) return;
-  prayerAlarmTimer = -1;
-  const loop = () => {
-    try{ checkPrayerAlarms(); }catch(_){}
-    prayerAlarmTimer = setTimeout(loop, SmartCore.nextAlarmDelay());   // wakes at the next prayer, at most every 60 s
-  };
-  loop();
-}
+function startPrayerAlarmScheduler(){ if(prayerAlarmTimer) return; prayerAlarmTimer = setInterval(checkPrayerAlarms, 15000); checkPrayerAlarms(); }
 function checkPrayerAlarms(){
   const now = new Date();
   const dayKey = now.toDateString();
@@ -12380,7 +12424,7 @@ function checkPrayerAlarms(){
 function firePrayerAlarm(p){
   showToast('🕌 It is time for <b>' + p.label + '</b> prayer.', 8000);
   if('Notification' in window && Notification.permission === 'granted'){
-    SmartCore.notify('Prayer time — ' + p.label, { body: 'It is time for ' + p.label + ' prayer.', tag: 'prayer-' + p.key, renotify: true, requireInteraction: true, vibrate: [200, 100, 200, 100, 200] });
+    try{ new Notification('Prayer time — ' + p.label, { body: 'It is time for ' + p.label + ' prayer.', tag: 'prayer-' + p.key, renotify: true }); }catch(e){}
   }
   if(prayerState.sound === 'mute') return;
   if(prayerState.sound === 'beep'){ playPrayerBeep(); return; }
@@ -12398,7 +12442,7 @@ function firePrayerAlarm(p){
 function playPrayerBeep(){
   stopPrayerBeep();
   try{
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(!audioCtx || audioCtx.state === 'closed') audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(audioCtx.state === 'suspended') audioCtx.resume();
     const t0 = audioCtx.currentTime;
     const beepDur = 0.18, beepGap = 0.18;
@@ -12624,154 +12668,7 @@ function initPrayerTimes(){
   renderPrayerScreen(); startPrayerClock(); startPrayerAlarmScheduler();
   if(prayerState.sound !== 'mute' && Object.values(prayerState.alarms).some(Boolean)) requestNotificationPermission();
 }
-
-/* ============================================================
-   SMART CORE MANAGEMENT SYSTEM (page side)
-   1. CPU / resource governor — adapts to cores, RAM, Data-Saver,
-      slow network, low battery and background state. Heavy work
-      (audio downloads) is throttled and yields the main thread.
-   2. Background-friendly timers — the 1 s prayer-clock UI tick
-      stops while the app is hidden; the alarm check sleeps until
-      the next prayer instead of polling.
-   3. Alarm keep-alive — posts the next 3 days of alarms to the
-      service worker, pings it (HEARTBEAT) so it stays armed, holds
-      a Web Lock so the page is not frozen, registers periodic sync.
-   ============================================================ */
-const SmartCore = (function(){
-  const nav = navigator;
-  const conn = nav.connection || nav.mozConnection || nav.webkitConnection || null;
-  const cores = Math.max(1, nav.hardwareConcurrency || 2);
-  const mem = nav.deviceMemory || 4;
-  let battery = null;
-  try{ if(nav.getBattery) nav.getBattery().then(b => { battery = b; }).catch(() => {}); }catch(_){}
-
-  function constrained(){
-    try{
-      if(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return true;
-      if(battery && !battery.charging && battery.level <= 0.15) return true;
-    }catch(_){}
-    return mem <= 1;
-  }
-  function downloadConcurrency(){
-    if(constrained()) return 1;
-    let n = cores >= 8 ? 4 : (cores >= 4 ? 3 : 2);
-    if(mem <= 2) n = Math.min(n, 2);
-    if(document.hidden) n = Math.min(n, 2);
-    return n;
-  }
-  function breathe(){
-    if(constrained()) return new Promise(r => setTimeout(r, 60));
-    try{ if(window.scheduler && typeof window.scheduler.yield === 'function') return window.scheduler.yield(); }catch(_){}
-    return new Promise(r => setTimeout(r, 0));
-  }
-
-  function nextAlarmDelay(){
-    const times = prayerState.todayTimes;
-    if(!times) return 60000;
-    const now = new Date();
-    let best = Infinity;
-    for(const p of PRAYERS){
-      if(!prayerState.alarms[p.key]) continue;
-      const t = times[p.key]; if(!t) continue;
-      const parts = t.split(':');
-      const d = new Date(now); d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
-      const diff = d.getTime() - now.getTime();
-      if(diff >= 0 && diff < best) best = diff;
-    }
-    if(best === Infinity) return 60000;
-    return Math.max(1000, Math.min(60000, best + 250));
-  }
-
-  async function notify(title, opts){
-    try{
-      const reg = ('serviceWorker' in nav) ? await nav.serviceWorker.getRegistration() : null;
-      if(reg && reg.showNotification){ await reg.showNotification(title, opts); return true; }
-    }catch(_){}
-    try{ new Notification(title, opts); return true; }catch(_){}
-    return false;
-  }
-
-  function buildAlarms(){
-    if(prayerState.lat === null || prayerState.lng === null) return [];
-    const out = [], now = Date.now();
-    for(let d = 0; d < 3; d++){
-      const day = new Date(); day.setHours(12, 0, 0, 0); day.setDate(day.getDate() + d);
-      let raw; try{ raw = computePrayerTimes(day, prayerState.lat, prayerState.lng, prayerState.method, prayerState.asr); }catch(_){ continue; }
-      if(!raw) continue;
-      for(const p of PRAYERS){
-        if(!prayerState.alarms[p.key]) continue;
-        let v = raw[p.key]; if(typeof v !== 'number' || !isFinite(v)) continue;
-        v += (prayerState.offsets[p.key] || 0) / 60; v = ((v % 24) + 24) % 24;
-        let H = Math.floor(v), M = Math.round((v - H) * 60); if(M === 60){ M = 0; H = (H + 1) % 24; }
-        const t = new Date(day); t.setHours(H, M, 0, 0);
-        if(t.getTime() > now - 5 * 60000) out.push({ key: p.key, label: p.label, ts: t.getTime() });
-      }
-    }
-    return out;
-  }
-
-  async function swTarget(){
-    if(!('serviceWorker' in nav)) return null;
-    try{ const reg = await nav.serviceWorker.getRegistration(); return reg && (reg.active || null); }catch(_){ return null; }
-  }
-  let syncTimer = null, lastSync = 0;
-  function syncSchedule(){
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(async () => {
-      const sw = await swTarget(); if(!sw) return;
-      try{ sw.postMessage({ type: 'PRAYER_SCHEDULE', alarms: buildAlarms() }); lastSync = Date.now(); }catch(_){}
-    }, 400);
-  }
-
-  let hbTimer = null;
-  async function beat(){
-    clearTimeout(hbTimer);
-    if(buildAlarms().length){
-      const sw = await swTarget();
-      try{ if(sw) sw.postMessage({ type: 'HEARTBEAT' }); }catch(_){}
-      if(Date.now() - lastSync > 6 * 3600 * 1000) syncSchedule();
-    }
-    hbTimer = setTimeout(beat, document.hidden ? 55000 : 25000);
-  }
-
-  async function registerPeriodic(){
-    try{
-      const reg = await nav.serviceWorker.ready;
-      if(!reg || !('periodicSync' in reg)) return;
-      await reg.periodicSync.register('qc-prayer-check', { minInterval: 60 * 60 * 1000 });
-    }catch(_){}
-  }
-
-  function holdLock(){
-    try{ if(nav.locks) nav.locks.request('qc-core-alive', { mode: 'shared' }, () => new Promise(() => {})).catch(() => {}); }catch(_){}
-  }
-
-  function init(){
-    holdLock();
-    document.addEventListener('visibilitychange', () => {
-      if(document.hidden){
-        if(prayerClockTimer){ clearInterval(prayerClockTimer); prayerClockTimer = null; }   // no UI ticking in background
-      } else {
-        startPrayerClock(); tickPrayerClock(); syncSchedule();
-      }
-      beat();
-    });
-    if('serviceWorker' in nav){
-      nav.serviceWorker.ready.then(() => { syncSchedule(); beat(); registerPeriodic(); }).catch(() => {});
-    }
-    if(document.hidden && prayerClockTimer){ clearInterval(prayerClockTimer); prayerClockTimer = null; }
-  }
-
-  return { downloadConcurrency, breathe, nextAlarmDelay, notify, syncSchedule, buildAlarms, init, constrained };
-})();
-
-// Any change to prayer settings (location, method, offsets, alarms) re-syncs the worker.
-(function(){
-  const _origSave = savePrayerSettings;
-  savePrayerSettings = function(){ const r = _origSave.apply(this, arguments); try{ SmartCore.syncSchedule(); }catch(_){} return r; };
-})();
-initPrayerTimes();   // must run after SmartCore exists (alarm loop uses it)
-SmartCore.init();
+initPrayerTimes();
 
 const INSTALL_DONE_KEY = 'qc.installTabDone';
 let deferredPrompt = null;
@@ -13455,12 +13352,10 @@ document.addEventListener('visibilitychange',()=>{
     schedulePositionAudioOverlay();
     if(audioListRendered) refreshAudioRowStates();
   } else {
-    // Backgrounding is a hard microphone shutdown regardless of mode or
-    // whether wantMic has already become false (e.g. an in-flight prompt).
-    const _wasOn = wantMic || recRunning || !!micStream || rmsAnalyser.isRunning();
-    if(wantMic) saveProgressNow();
+    // Backgrounding is a hard microphone shutdown for Follow and Tajweed.
+    const _wasOn = wantMic;
+    if(_wasOn) saveProgressNow();
     hardShutdownAudio();
-    try{ if(navigator.mediaSession) navigator.mediaSession.playbackState = 'none'; }catch(_){}
     if(_wasOn) setStatus('Paused (background)', 'idle', 'Tap Start to resume');
   }
 });
@@ -13481,11 +13376,12 @@ window.addEventListener('beforeunload',()=>{
   }
 });
 window.addEventListener('freeze', () => { try{ hardShutdownAudio(); }catch(_){} });
+document.addEventListener('freeze', () => { try{ hardShutdownAudio(); }catch(_){} });
 window.addEventListener('pagehide', () => {
   try{ hardShutdownAudio(); }catch(_){}
   try{ if(wantMic) stopReciting(true); }catch(_){}
   try{ if(hifzState && hifzState.speechActive) stopHifzSpeech(); }catch(_){}
-  try{ killAllRecognizers(); }catch(_){}
+  try{ if(speechRecognition){ speechRecognition.onend=null; speechRecognition.onerror=null; speechRecognition.onresult=null; speechRecognition.abort(); } }catch(_){}
   try{ releaseMicStream(); }catch(_){}
 });
 document.addEventListener('keydown', e => {
