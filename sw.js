@@ -1,7 +1,7 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v5.0.0
+   Quran Recitation Coach — Service Worker  v5.0.1
 
-   What changed in 5.0.0:
+   What changed in 5.0.1:
      • Cache version bumped to 5.0.0 so installed apps fetch the
        new 3-mode coach index.html:
        Follow (strict, unchanged) / Test (lenient practice:
