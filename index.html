@@ -10723,7 +10723,7 @@ async function getJuzStartPage(juzNumber){
   return fallback;
 }
 async function fetchPageIndopak(pageNumber){
-  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&words=true&word_fields=text_uthmani,line_number,page_number,verse_key,location&translations=' + currentTextTranslationQuranComId();
+  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=50&words=true&word_fields=text_uthmani,line_number,page_number,verse_key,location&translations=' + currentTextTranslationQuranComId();
   const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
