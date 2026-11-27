@@ -2773,7 +2773,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   }
 </style>
 </head>
-<body class="page-dark tajweed-full surah-mode">
+<body class="page-dark tajweed-full">
 <script>
 (function () {
   'use strict';
@@ -2802,7 +2802,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <small>© 2025 Quran Recitation Coach. All rights reserved.</small>
   </main>
 </div>
-<div class="app screen" id="screenHome" hidden="">
+<div class="app screen" id="screenHome">
   <div class="home-topbar">
     <div class="home-menu-wrap" id="homeMenuWrap">
       <button id="homeMenuBtn" class="iconbtn" aria-label="Open menu" aria-haspopup="menu" aria-expanded="false">☰</button>
@@ -3123,14 +3123,14 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">28 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">00:02</span>
+    <span class="pdr-item pdr-time" id="pdrTime">00:38</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
     Tap the bell next to any prayer to toggle its alarm on / off.<br><br>Please note, for the Athaan alarm to sound, do not fully close the app and leave the media volume on.
   </div>
 </div>
-<div class="app screen" id="screenCoach">
+<div class="app screen" id="screenCoach" hidden="">
   <header>
     <button id="btnBackHome" class="back-pill" aria-label="Back to home">Back</button>
     <span class="coach-title">Quran Recitation Coach</span>
@@ -3138,33 +3138,33 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button id="btnTheme" class="iconbtn" aria-label="Toggle theme">🌙</button>
   </header>
   <div id="support" class="warnbox" hidden=""></div>
-  <div class="statusbar error" id="statusbar" role="status" aria-live="polite">
+  <div class="statusbar idle" id="statusbar" role="status" aria-live="polite">
     <span class="dot"></span>
-    <span class="label" id="statusLabel">Load failed</span>
-    <span class="hint" id="statusHint">Tap Retry</span><button id="btnReciteSettings" class="toggle" type="button" style="margin-left:8px" aria-expanded="true">⚙️ Setting</button>
-  </div><div class="setting-panel open" id="reciteSettingsPanel"><b>Settings</b><label>Follow: <input type="checkbox" id="chkHideTextSetting"> Hide text<small>hides the text in Follow mode and reveals it as you recite correctly (Follow only)</small></label><label>Recite pointer: <select id="recitePointerSel"><option value="stop">Recite-stop</option><option value="mark">Recite-mark</option></select><small>Recite-stop: stops pointer on an incorrect word and waits for it to be corrected before pointer advances. Recite-mark: marks wrong word red, but continue to follow.</small></label><label>Mode tab next to Follow: <button id="settingTajweedBtn" class="toggle active" type="button">Tajweed mode</button> <button id="settingReciteBtn" class="toggle" type="button">Recite mode</button><small>Tajweed mode replaces the Recite tab next to Follow with a Tajweed tab. Recite mode swaps it back.</small></label></div>
+    <span class="label" id="statusLabel">Loading…</span>
+    <span class="hint" id="statusHint"></span><button id="btnReciteSettings" class="toggle" type="button" style="margin-left:8px" aria-expanded="false">⚙️ Setting</button>
+  </div><div class="setting-panel" id="reciteSettingsPanel"><b>Settings</b><label>Follow: <input type="checkbox" id="chkHideTextSetting"> Hide text<small>hides the text in Follow mode and reveals it as you recite correctly (Follow only)</small></label><label>Recite pointer: <select id="recitePointerSel"><option value="stop">Recite-stop</option><option value="mark">Recite-mark</option></select><small>Recite-stop: stops pointer on an incorrect word and waits for it to be corrected before pointer advances. Recite-mark: marks wrong word red, but continue to follow.</small></label><label>Mode tab next to Follow: <button id="settingTajweedBtn" class="toggle" type="button">Tajweed mode</button> <button id="settingReciteBtn" class="toggle active" type="button">Recite mode</button><small>Tajweed mode replaces the Recite tab next to Follow with a Tajweed tab. Recite mode swaps it back.</small></label></div>
   <section class="panel hide-immersive">
-    <div class="row" id="surahNavRow">
+    <div class="row" id="surahNavRow" hidden="">
       <button id="btnPrevSurah" class="ghost icon" aria-label="Next surah">◀</button>
       <div class="surah-info">
-        <span class="surah-en" id="surahEn">Surah 1</span>
-        <span class="surah-ar" id="surahAr"></span>
+        <span class="surah-en" id="surahEn">—</span>
+        <span class="surah-ar" id="surahAr">—</span>
         <span class="surah-count" id="surahCount"></span>
       </div>
-      <button id="btnNextSurah" class="ghost icon" aria-label="Previous surah" disabled="">▶</button>
+      <button id="btnNextSurah" class="ghost icon" aria-label="Previous surah">▶</button>
       <button id="btnSurah" class="ghost" style="padding:0 12px">📖 Surah</button>
     </div>
   </section>
   <section class="hud">
     <div class="stat"><span id="statProgress">0%</span><small>Progress</small></div>
-    <div class="stat"><span id="statErrors">0</span><small>Mistakes</small></div>
-    <div class="stat"><span id="statAcc">100%</span><small>Accuracy</small></div>
+    <div class="stat"><span id="statErrors">—</span><small>Mistakes</small></div>
+    <div class="stat"><span id="statAcc">—</span><small>Accuracy</small></div>
   </section>
   <div class="barwrap"><div class="bar" id="bar" style="width: 0%;"></div></div>
   <div class="toggles hide-immersive">
-    <button class="toggle mode-pill" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="false">Follow</button>
-    <button class="toggle mode-pill" id="modeReciteBtn" type="button" data-mode="recite" aria-pressed="false" style="display: none;">Recite</button>
-     <button class="toggle mode-pill active" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="true" data-swap-hidden="1" aria-label="Tajweed mode" style="">Tajweed</button>
+    <button class="toggle mode-pill active" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
+    <button class="toggle mode-pill" id="modeReciteBtn" type="button" data-mode="recite" aria-pressed="false">Recite</button>
+     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false" data-swap-hidden="1" style="display: none;">Tajweed</button>
     <div class="progress-section" id="progressSection">
     <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
   <span class="pt-text">
@@ -3198,7 +3198,7 @@ body.light-mode .share-arabic{color:#1a2233;}
   </div>
 </div>
     <button class="toggle ondevice-chip" id="onDeviceChip" type="button" hidden=""></button>
-    <span class="toggle tj-status-loading" id="tajweedStatusChip" role="status" aria-live="polite" aria-atomic="true" title="Fetching and aligning Tajweed annotations for the selected Quran text." aria-label="Loading Tajweed rule checks"><span class="tj-status-dot"></span>Loading rules…</span>
+    <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
     
   </div>
   <div class="recite-controls">
@@ -3214,14 +3214,16 @@ body.light-mode .share-arabic{color:#1a2233;}
     </div>
     <ol class="mistakes-list" id="mistakesList"></ol>
   </section>
-  <section class="mushaf" id="pageEl" aria-label="Quran text"><div class="mushaf-inner"><div class="loading"><span class="err">⚠️ Could not load Surah 1</span>The Quran server did not respond. Check your connection and tap Retry.<div class="detail">Arabic edition: Load failed</div><button id="btnRetry" class="primary">↻ Retry</button></div></div><button id="mushafFsBtn" type="button" class="mushaf-fs-btn" aria-label="Toggle fullscreen reader">⛶</button></section>
+  <section class="mushaf" id="pageEl" aria-label="Quran text">
+    <div class="mushaf-inner"><div class="loading">Loading…</div></div>
+  </section>
   <div class="legend hide-immersive">
     <span><i style="background:#2fd07a"></i>correct</span>
     <span><i style="background:#ff5a6a"></i>misread</span>
     <span>· Scrolls automatically as you recite</span>
     <span>· Hold a word 3 s to start from there</span>
   </div>
-  <section class="feedback hide-immersive" id="feedback"><div class="line soft">🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.</div><div class="line soft">📖 <b>Recite</b> mode — Green=correct, Yellow=dropped 2-3 letters / Madd under 250ms / tashkeel (advance), Red=incorrect (stop, correct it, it stays red), Brown=peeked.</div><div class="line soft">🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.</div><div class="line soft">📖 <b>Recite</b> mode — Green=correct, Yellow=dropped 2-3 letters / Madd under 250ms / tashkeel (advance), Red=incorrect (stop, correct it, it stays red), Brown=peeked.</div><div class="line soft">🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.</div><div class="line soft">📖 <b>Recite</b> mode — Green=correct, Yellow=dropped 2-3 letters / Madd under 250ms / tashkeel (advance), Red=incorrect (stop, correct it, it stays red), Brown=peeked.</div><div class="line soft">🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.</div><div class="line soft">📖 <b>Recite</b> mode — Green=correct, Yellow=dropped 2-3 letters / Madd under 250ms / tashkeel (advance), Red=incorrect (stop, correct it, it stays red), Brown=peeked.</div><div class="line soft">🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.</div>
+  <section class="feedback hide-immersive" id="feedback">
     <div class="line">Loading…</div>
   </section>
 </div>
@@ -3343,7 +3345,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button class="qv-btn qv-fs" id="qvFullscreen" aria-label="Enter fullscreen">⛶</button>
   </div>
 </div>
-<div class="fs-badge" id="fsBadge"><span class="dot"></span><span id="fsBadgeText">Load failed</span></div>
+<div class="fs-badge" id="fsBadge"><span class="dot"></span><span id="fsBadgeText">Ready</span></div>
 <div class="fs-controls" id="fsControls" role="toolbar" aria-label="Fullscreen controls">
   <button id="fsMic" aria-label="Toggle microphone">🎤</button>
   <span class="fs-sep"></span>
@@ -7702,14 +7704,14 @@ async function runMFAInference(w, seg, heard) {
 }
 
 
-/* ===== RECITE v2 helpers ===== */
-function reciteStripSilent(s){ if(!s) return ''; let out=String(s).replace(/[ـٰ]/g,''); out=out.replace(/وا$/,'و'); return out; }
-function reciteDroppedCount(expected, heard){ const e=reciteStripSilent(expected), h=reciteStripSilent(heard); const hc={}; for(const c of h) hc[c]=(hc[c]||0)+1; let miss=0; for(const c of e){ if(hc[c]>0) hc[c]--; else miss++; } return miss; }
-function reciteHasMadd(raw){ if(!raw) return false; return /[ٓآ]/.test(raw) || /[اوي][ءئ]/.test(raw); }
-function reciteMark(i, kind){ const w=words[i]; if(!w||!w.el) return; if(kind==='red'){ w.el.className='w error'; } else if(kind==='yellow'){ w.el.className='w warned'; } else { w.el.className='w correct'; } }
-function reciteGradeFor(i, heard){ if(!reciteMode) return 'green'; const w=words[i]; const dropped=reciteDroppedCount(w.norm||w.raw, heard||''); if(dropped>=2) return 'yellow'; if(reciteHasMadd(w.raw||'') && reciteWordStart>0 && (performance.now()-reciteWordStart)<250) return 'yellow'; return 'green'; }
-function reciteCommit(i, heard){ const wasRed = (reciteRedPtr === i); const k=reciteGradeFor(i, heard); if(reciteMode){ if(wasRed){ reciteMark(i,'red'); } else { reciteMark(i,k); } } else { commitCorrect(i,null); } return k; }
-
+/* ===== RECITE helpers — Tarteel-aligned: word-level only (missed / incorrect / extra / tashkeel). No letter-level, no Madd timing, no dropped-letter counting. ===== */
+let reciteWrongStreak = 0;
+function reciteTashkeelMismatch(expectedRaw, heardRaw){ if(!expectedRaw||!heardRaw) return false; const diac=/[\u064B-\u0652\u0670\u0653]/g; const e=(String(expectedRaw).match(diac)||[]).join(''); const h=(String(heardRaw).match(diac)||[]).join(''); if(!h) return false; return h!==e; }
+function reciteMark(i, kind, reason){ const w=words[i]; if(!w||!w.el) return; w.reciteKind=kind; w.reciteReason=reason||kind; if(kind==='red'){ w.el.className='w error'; } else if(kind==='peeked'){ w.el.className='w peeked'; } else if(kind==='yellow'){ w.el.className='w warned'; } else { w.el.className='w correct'; } if(w.el.dataset){ w.el.dataset.recite=kind; w.el.dataset.reciteReason=w.reciteReason; } }
+function reciteExplain(i){ const w=words[i]; if(!w) return 'Correct'; const r=w.reciteReason||w.reciteKind; if(r==='peeked') return 'Peeked word — you looked at this word before reciting it.'; if(r==='tashkeel') return 'Tashkeel mistake — the vowel marks (tashkeel) were not correct.'; if(r==='missed') return 'Missed word — this word was skipped.'; if(r==='extra') return 'Extra word — a word was said that is not in the text.'; if(r==='incorrect') return 'Incorrect word — this word was not recited correctly. It stays red after correction.'; return 'Correct — this word was recited correctly.'; }
+function reciteRecordMistake(i, type, heard){ try{ const w=words[i]; if(!w) return; const m={idx:(mistakes.length+1), correct:w.raw||'', heard:heard||'', severity:'red', tajweedName:type, verse:w.verse||''}; mistakes.push(m); if(typeof mistakesPanel!=='undefined' && mistakesPanel) mistakesPanel.hidden=false; if(typeof mistakeCountBadge!=='undefined' && mistakeCountBadge) mistakeCountBadge.textContent=String(mistakes.length); if(typeof mistakesList!=='undefined' && mistakesList){ const li=document.createElement('li'); li.classList.add('severity-red'); li.innerHTML='<span class="idx">'+m.idx+'</span><span class="tj-kind">'+type+'</span><span class="correct">'+escapeHtml(m.correct)+'</span>'+(heard?'<span class="heard">→ '+escapeHtml(heard)+'</span>':''); mistakesList.appendChild(li); mistakesList.scrollTop=mistakesList.scrollHeight; } }catch(e){} }
+function reciteGradeFor(i, heard, rawHeard){ if(!reciteMode) return 'green'; const w=words[i]; if(reciteTashkeelMismatch(w.raw||'', rawHeard||'')){ w.reciteReason='tashkeel'; return 'yellow'; } w.reciteReason='correct'; return 'green'; }
+function reciteCommit(i, heard, rawHeard){ const wasRed = (reciteRedPtr === i); const k=reciteGradeFor(i, heard, rawHeard); if(reciteMode){ if(wasRed){ reciteMark(i,'red','incorrect'); } else { reciteMark(i,k, k==='yellow'?'tashkeel':'correct'); } } else { commitCorrect(i,null); } return k; }
 function gradeFollowFast(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -7725,7 +7727,7 @@ function gradeFollowFast(tokens, startIdx){
     if (w && w.isMuqattaat) {
       const mr = tryMuqattaatProgress(heard, hPhon, hPhonLoose, w);
       if (mr === 'complete') {
-        if(reciteMode){ reciteCommit(ptr, heard); } else { commitCorrect(ptr, null); }
+        if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
         advancePast(1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -7758,7 +7760,7 @@ function gradeFollowFast(tokens, startIdx){
         if (conf < FOLLOW_TAU_EXIT) exitOk = false;
       }
       if (exitOk){
-        if(reciteMode){ reciteCommit(ptr, heard); } else { commitCorrect(ptr, null); }
+        if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
         advancePast(1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -7803,7 +7805,7 @@ function gradeFollowFast(tokens, startIdx){
       if (futureW.verse !== w.verse) break;
       const sim = followSimilarity(heard, hPhon, hPhonLoose, futureW);
       if (sim >= FOLLOW_TAU_JUMP){
-        if(reciteMode){ for(let _i=ptr;_i<ptr+k+1;_i++) reciteCommit(_i, heard); } else { commitManyCorrect(ptr, ptr + k + 1, null); }
+        if(reciteMode){ for(let _i=ptr;_i<ptr+k;_i++){ reciteMark(_i,'red','missed'); reciteRecordMistake(_i,'Missed',''); } reciteCommit(ptr+k, heard, rawTok); } else { commitManyCorrect(ptr, ptr + k + 1, null); }
         advancePast(k + 1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -7815,7 +7817,7 @@ function gradeFollowFast(tokens, startIdx){
 
     /* 5. MFA phonetic */
     if (isFollowMFAMatch(w, heard, hPhon, hPhonLoose)){
-      if(reciteMode){ reciteCommit(ptr, heard); } else { commitCorrect(ptr, null); }
+      if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
       advancePast(1);
       noteFollowProgress();
       pendingHeard.length = 0;
@@ -7824,16 +7826,15 @@ function gradeFollowFast(tokens, startIdx){
 
     /* 6. Plausible fallback */
     if (isFollowPlausible(heard, hPhon, hPhonLoose, w)){
-      if(reciteMode){ reciteCommit(ptr, heard); } else { commitCorrect(ptr, null); }
+      if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
       advancePast(1);
       noteFollowProgress();
       pendingHeard.length = 0;
       used++; continue;
     }
 
-    /* 7. Hold state — Recite incorrect=red; stop=>pin, mark=>leave red and continue. Follow: no marking. */
-    if(reciteMode && reciteRedPtr !== ptr){ reciteMark(ptr,'red'); reciteRedPtr = ptr; errors++; try{ scheduleHUD(); }catch(e){} }
-    if(reciteMode && recitePointer === 'stop'){ noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; }
+    /* 7. Hold state — Recite (Tarteel): 1st unmatched token = Extra (recorded, pointer stays); 2nd+ = Incorrect (red). Follow: no marking. */
+    if(reciteMode){ reciteWrongStreak++; if(reciteWrongStreak===1){ reciteRecordMistake(ptr,'Extra',rawTok); noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } if(reciteRedPtr !== ptr){ reciteMark(ptr,'red','incorrect'); reciteRecordMistake(ptr,'Incorrect',rawTok); reciteRedPtr = ptr; errors++; try{ scheduleHUD(); }catch(e){} } if(recitePointer === 'stop'){ noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } }
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     /* Keep a small rolling buffer to recover ASR word-boundary shifts without
@@ -8900,7 +8901,7 @@ function resetSilenceTimer(force){
 function clearSilenceTimer(){ clearTimeout(silenceTimer); silenceTimer = null; }
 
 let updatingMutex = false;
-function applyMutexUI(){ try{ applyTajweedSwap(); }catch(e){} const reciteBtn=document.getElementById('modeReciteBtn'); if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly && !reciteMode); modeFollowBtn.setAttribute('aria-pressed', (followOnly && !reciteMode) ? 'true' : 'false'); } if(reciteBtn){ reciteBtn.classList.toggle('active', !!reciteMode); reciteBtn.setAttribute('aria-pressed', reciteMode ? 'true' : 'false'); } if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly && !reciteMode); modeTajweedBtn.setAttribute('aria-pressed', (!followOnly && !reciteMode) ? 'true' : 'false'); }
+function applyMutexUI(){ try{ document.body.classList.toggle('recite-mode', !!reciteMode); }catch(e){} try{ applyTajweedSwap(); }catch(e){} const reciteBtn=document.getElementById('modeReciteBtn'); if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly && !reciteMode); modeFollowBtn.setAttribute('aria-pressed', (followOnly && !reciteMode) ? 'true' : 'false'); } if(reciteBtn){ reciteBtn.classList.toggle('active', !!reciteMode); reciteBtn.setAttribute('aria-pressed', reciteMode ? 'true' : 'false'); } if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly && !reciteMode); modeTajweedBtn.setAttribute('aria-pressed', (!followOnly && !reciteMode) ? 'true' : 'false'); }
   if(chkHideText) chkHideText.checked = hideText;
   applyHideTextUI();
   updateTajweedStatusChip();
@@ -8918,7 +8919,7 @@ function setRecitationMode(modeName){ const newRecite = (modeName === 'recite');
   if(followOnly){
     releaseMicStream();
     coachTajweedMicFailed = false;
-    addFeedback(reciteMode ? '📖 <b>Recite</b> mode — Green=correct, Yellow=dropped 2-3 letters / Madd under 250ms / tashkeel (advance), Red=incorrect (stop, correct it, it stays red), Brown=peeked.' : '👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
+    addFeedback(reciteMode ? '📖 <b>Recite</b> mode — Green=correct, Light yellow=Tashkeel or Peeked, Light red=Incorrect / Missed (stop, correct it, it stays red). Tap a coloured word for its explanation.' : '👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
   } else {
@@ -9259,7 +9260,7 @@ function advancePast(n){
   notePaceCommit(advanced);
   const leaving = new Set();
   for(let i = ptr; i < endPtr; i++){ if(words[i]) leaving.add(words[i].verse); }
-  ptr = endPtr; reciteWordStart = performance.now(); reciteRedPtr = -1;
+  ptr = endPtr; reciteWordStart = performance.now(); reciteRedPtr = -1; reciteWrongStreak = 0;
   const nextVerse = ptr < words.length ? words[ptr].verse : null;
   try {
     const sr = speechRecognition;
@@ -9387,6 +9388,7 @@ function installWordDelegates(){
   pageEl.addEventListener('selectstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
   pageEl.addEventListener('dragstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
   pageEl.addEventListener('click', (e) => {
+    if(reciteMode){ const target=e.target.closest ? e.target.closest('.w') : null; if(target && pageEl.contains(target)){ const idx=parseInt(target.dataset.idx,10); if(Number.isFinite(idx)){ if(target.dataset && target.dataset.recite){ showToast('<b>'+escapeHtml((words[idx]&&words[idx].raw)||'')+'</b><br>'+escapeHtml(reciteExplain(idx)), 5000); return; } if(idx>ptr){ reciteMark(idx,'peeked','peeked'); reciteRecordMistake(idx,'Peeked',''); showToast('<b>'+escapeHtml((words[idx]&&words[idx].raw)||'')+'</b><br>Peeked word — you looked at this word before reciting it.', 4000); return; } } } }
     if(followOnly) return;
     if(longPressTriggered) return;
     const target = e.target.closest ? e.target.closest('.w') : null;
@@ -13916,7 +13918,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13979,4 +13981,13 @@ window.addEventListener('contextmenu', function(event) {
 
 <!-- RECITE v2: integrated in host script -->
 <!-- RECITE v2 -->
+<style id="reciteTarteelOverrides">
+/* Recite (Tarteel-aligned): light fills, no underlining, light-blue pointer */
+body.recite-mode .w.current, .w.recite-current, .w.current.recite-pointer{background:#bfdbfe !important;color:#1e3a8a !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;}
+.w.error{background:#fecaca !important;color:#7f1d1d !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;border-radius:6px;}
+.w.warned{background:#fef08a !important;color:#713f12 !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;border-radius:6px;}
+.w.peeked{background:#fef08a !important;color:#713f12 !important;text-decoration:none !important;box-shadow:none !important;border-radius:6px;}
+.w.correct{background:transparent !important;text-decoration:none !important;}
+.w.error [class^="tj-"], .w.error [class*=" tj-"], .w.warned [class^="tj-"], .w.warned [class*=" tj-"]{background:transparent !important;text-decoration:none !important;box-shadow:none !important;}
+</style>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
