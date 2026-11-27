@@ -1,36 +1,11 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v5.0.0
+   Quran Recitation Coach — Service Worker  v2.5.0
 
-   What changed in 5.0.0:
-     • Cache version bumped to 5.0.0 so installed apps fetch the
-       new 3-mode coach index.html:
-       Follow (strict, unchanged) / Test (lenient practice:
-       pass 50%, plausible 0.58, wider Madd windows, timing-only
-       issues are yellow hints) / Tajweed (strict server MFA,
-       max 5 ayahs, split per ayah, no model download).
-     • Coach chip is now always "Rules ready" once loaded, dot
-       green only when mic is on.
-     • New Tajweed mode shows a small "Server not connected"
-       notice with Retry when /api/tajweed-check is unreachable.
-     • /api/tajweed-check is NEVER intercepted / cached by this
-       SW (all /api/* goes straight to network, POSTs are never
-       handled here) so server MFA checks always hit the live
-       server and never serve a stale cached result.
-     • No service-worker logic changed otherwise: this SW never
-       holds the microphone, never touches localStorage /
-       IndexedDB / qc-audio.
-
-
-   What changed in 2.4.24:
-     • Cache version bumped so installed apps fetch the updated
-       index.html (Tajweed mic standby: getUserMedia opens 0.5 s before
-       ASR and, together with the RMS analyser and its sample buffer,
-       stays live while Tajweed mode is listening or idle; it is shut
-       down only when the Coach screen is left, the app is minimised /
-       frozen / closed, or Follow mode is chosen). A 'Mic standby' chip
-       shows the state.
-     • No service-worker logic changed: this SW never holds the
-       microphone, so it cannot affect capture.
+   What changed in 2.5.0:
+     • Recite mode added (ASR only + Madd timer, green/red/yellow/brown marking).
+     • Tajweed mode kept fully working but hidden by default; Settings can swap Recite <-> Tajweed.
+     • index_recite.html added to pre-cache and REFRESH_MANIFEST.
+     • Cache version bumped so installed apps fetch the updated index.html / index_recite.html.
 
    What changed in 2.4.23:
      • salaah.html (Learn Salaah) is now pre-cached with the app
@@ -59,15 +34,14 @@
        translation audio). Activation and CLEAR_CACHES only delete
        old versioned shell/text/font/runtime caches.
 
-   Not intercepted (straight to network): /api/* (incl. /api/tajweed-check
-   server MFA), /my-analytics/*,
+   Not intercepted (straight to network): /api/*, /my-analytics/*,
    /_vercel/*, adhan from islamcan.com, bigdatacloud and open-meteo
    location lookups.
    ============================================================ */
 
 'use strict';
 
-const VERSION = '5.0.3';
+const VERSION = '2.5.0';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -97,6 +71,7 @@ const SHELL_URLS = [
   './index.html',
   './index_3.html',
   './index_39.html',
+  './index_recite.html',
   './read.html',
   './salaah.html',
   './manifest.json',
@@ -316,7 +291,7 @@ self.addEventListener('fetch', event => {
   if(url.origin === self.location.origin){
     if(url.pathname.startsWith('/my-analytics/')) return;
     if(url.pathname.startsWith('/_vercel/'))       return;
-    if(url.pathname.startsWith('/api/'))           return; // incl. /api/tajweed-check — never cached
+    if(url.pathname.startsWith('/api/'))           return;
     if(url.pathname === '/sw.js')                  return;
     if(url.pathname === '/robots.txt')             return;
   }
