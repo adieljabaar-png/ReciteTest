@@ -3149,7 +3149,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">08:55</span>
+    <span class="pdr-item pdr-time" id="pdrTime">09:01</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3434,6 +3434,7 @@ const hideTextChip   = document.getElementById('hideTextChip');
 const fsRevealBtn    = document.getElementById('fsReveal');
 const modeFollowBtn  = document.getElementById('modeFollowBtn');
 const modeTajweedBtn = document.getElementById('modeTajweedBtn');
+const modeTestBtn = document.getElementById('modeTestBtn');
 const supportBox     = document.getElementById('support');
 const mistakesPanel  = document.getElementById('mistakesPanel');
 const mistakesList   = document.getElementById('mistakesList');
@@ -6472,6 +6473,11 @@ const TAJWEED_PROVISIONAL_PASS_PCT = 70;
     const TAJWEED_SERVER_MAX_AYAHS = 5;
     const TAJWEED_SERVER_ENDPOINT = '/api/tajweed-check';
     let coachMode = 'follow'; // 'follow' | 'test' | 'tajweed-server'
+    try{
+      const savedMode = localStorage.getItem('qc.coachMode');
+      if(savedMode==='follow'||savedMode==='test'||savedMode==='tajweed-server') coachMode = savedMode;
+      else if(localStorage.getItem('qc.followOnly')==='0') coachMode = 'test'; // old Tajweed = now Test (lenient)
+    }catch(_){}
     let tajweedServerQueue = []; // [{surah, ayah, ayahText, audioBlob}]
     let tajweedServerResults = [];
     function isTestMode(){ return coachMode === 'test'; }
@@ -8624,8 +8630,10 @@ function clearSilenceTimer(){ clearTimeout(silenceTimer); silenceTimer = null; }
 
 let updatingMutex = false;
 function applyMutexUI(){
-  if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly); modeFollowBtn.setAttribute('aria-pressed', followOnly ? 'true' : 'false'); }
-  if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly); modeTajweedBtn.setAttribute('aria-pressed', !followOnly ? 'true' : 'false'); }
+  const _m = (typeof coachMode!=='undefined' && coachMode) ? coachMode : (followOnly ? 'follow' : 'test');
+  if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', _m==='follow'); modeFollowBtn.setAttribute('aria-pressed', _m==='follow' ? 'true' : 'false'); }
+  if(typeof modeTestBtn!=='undefined' && modeTestBtn){ modeTestBtn.classList.toggle('active', _m==='test'); modeTestBtn.setAttribute('aria-pressed', _m==='test' ? 'true' : 'false'); }
+  if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', _m==='tajweed-server'); modeTajweedBtn.setAttribute('aria-pressed', _m==='tajweed-server' ? 'true' : 'false'); }
   if(hideTextChip) hideTextChip.hidden = !followOnly;
   if(chkHideText) chkHideText.checked = hideText;
   if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
@@ -8636,11 +8644,16 @@ function applyMutexUI(){
 }
 
 function setRecitationMode(modeName){
-  const newFollow = (modeName === 'follow');
-  if(newFollow === followOnly && !updatingMutex) return;
+  // Normalise: old 'tajweed' = new strict server Tajweed; 'test' = old Tajweed engine, lenient
+  let norm = modeName;
+  if(norm==='tajweed') norm = 'tajweed-server';
+  if(norm!=='follow' && norm!=='test' && norm!=='tajweed-server') norm = 'test';
+  if(norm === coachMode && !updatingMutex) return;
   updatingMutex = true;
-  followOnly = newFollow;
+  coachMode = norm;
+  followOnly = (norm === 'follow');
   try{ localStorage.setItem('qc.followOnly', followOnly ? '1' : '0'); }catch(e){}
+  try{ localStorage.setItem('qc.coachMode', coachMode); }catch(e){}
   pendingHeard.length = 0; consecutiveReds = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
@@ -8650,56 +8663,37 @@ function setRecitationMode(modeName){
   if(followOnly){
     releaseMicStream();
     coachTajweedMicFailed = false;
+    try{ hideTajweedServerNotice(); }catch(_){}
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
-  } else {
-    addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
+  } else if(coachMode==='test'){
+    // TEST = old Tajweed engine, but lenient: pass 50%, timing-only = yellow hint, not red
+    try{ hideTajweedServerNotice(); }catch(_){}
+    addFeedback('🧪 <b>Test</b> mode — lenient practice. Timing issues are hints (yellow), only a clearly wrong / skipped word is red. Pass threshold 50%.', false, true);
     applyTajweedColorsToCoach();
-    if(wantMic && !rmsAnalyser.isRunning()){
-      const wasRunning = recRunning;
-      if(wasRunning){ try{ speechRecognition && speechRecognition.stop(); }catch(_){} }
-
-      const restartRecognizer = () => {
-        if(wasRunning && wantMic && !fsPaused && !micPaused){
-          try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
-          catch(_){ speechStarting = false; }
-        }
-      };
-
-      ensureMicStream().then(s => {
-        if(s){
-          coachTajweedMicFailed = false;
-          updateTajweedStatusChip();
-          if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-            _rmsUnavailableNotified = true;
-            notifyRmsUnavailable();
-          }
-        } else {
-          const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-          if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-             nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-            markTajweedMicFailed();
-          } else {
-            coachTajweedMicFailed = false;
-            updateTajweedStatusChip();
-          }
-        }
-        restartRecognizer();
-      }).catch(() => {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-        restartRecognizer();
-      });
-    } else {
-      updateTajweedStatusChip();
+    updateTajweedStatusChip();
+    // Live ASR continues exactly as the old Tajweed mode did (see start path below)
+    if(wantMic && !recRunning && !speechStarting && speechRecognition){
+      try{ speechStarting = true; speechRecognition.start(); }catch(_){ speechStarting = false; }
     }
+  } else {
+    // TAJWEED-SERVER = strict, server MFA, max 5 ayahs, split per ayah. No live ASR.
+    addFeedback('🎵 <b>Tajweed</b> mode — strict server check. Select 1–5 ayahs, record one ayah at a time, then send for MFA + RMS + ASR checking. No model download.', false, true);
+    applyTajweedColorsToCoach();
+    updateTajweedStatusChip();
+    try{ showTajweedServerNotice('Server not connected — Tajweed server check unavailable. Follow and Test modes still work.'); }catch(_){}
+    try{ checkTajweedServerConnection(); }catch(_){}
+    // Stop live ASR so it does not fight the per-ayah recording
+    try{ if(speechRecognition){ speechRecognition.stop(); } }catch(_){}
   }
   updatingMutex = false;
 }
 
 if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
-if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); }
+if(typeof modeTestBtn!=='undefined' && modeTestBtn){ modeTestBtn.addEventListener('click', () => setRecitationMode('test')); }
+if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed-server')); }
+try{ applyMutexUI(); }catch(_){}
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
 function applyHideTextUI(){
   if(hideText && followOnly){
@@ -13720,7 +13714,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
