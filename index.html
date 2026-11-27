@@ -3122,7 +3122,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">05:32</span>
+    <span class="pdr-item pdr-time" id="pdrTime">05:45</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -6215,8 +6215,9 @@ function getBaseMsPerLetter(){
 }
 function resetPaceSamples(){ paceSamples.length = 0; }
 
-function maddRequiredMs(kind){ const T=(typeof getBaseMsPerLetter==='function'?getBaseMsPerLetter():null)||450; const mult=MADD_MIN_HARAKAT[kind]||MADD_MIN_HARAKAT.normal; return Math.round(T*mult); }
-function maddMaxMs(kind){ const T=(typeof getBaseMsPerLetter==='function'?getBaseMsPerLetter():null)||450; const mult=MADD_MAX_HARAKAT[kind]||MADD_MAX_HARAKAT.normal; return Math.round(T*mult); }
+const MADD_PRACTICAL_BONUS_MS = 300; /* Practical check: Madd must be at least 300ms longer */
+function maddRequiredMs(kind){ const T=(typeof getBaseMsPerLetter==='function'?getBaseMsPerLetter():null)||450; const mult=MADD_MIN_HARAKAT[kind]||MADD_MIN_HARAKAT.normal; return Math.round(T*mult) + MADD_PRACTICAL_BONUS_MS; }
+function maddMaxMs(kind){ const T=(typeof getBaseMsPerLetter==='function'?getBaseMsPerLetter():null)||450; const mult=MADD_MAX_HARAKAT[kind]||MADD_MAX_HARAKAT.normal; return Math.round(T*mult) + MADD_PRACTICAL_BONUS_MS; }
 
 const GHUNNAH_HARAKAT = 2; /* Ghunnah held 2 harakah */
  const GHUNNAH_MIN_MS = {
@@ -6384,33 +6385,7 @@ function countPeaks(samples, threshold, minSepMs){
 const SOLAR_LETTERS = 'تثدذرزسشصضطظلن';
 const QALQALAH_LETTERS = 'قطبجد';
 
-function checkLaamShamsiyyah(w, heard, align){
-  if (!w || !w.tjRules) return true;
-  const hasSolarAnnotation = !!(
-    (w.tjRules.laamShamsiyyahPositions && w.tjRules.laamShamsiyyahPositions.length) ||
-    (w.tjRules.allRules && w.tjRules.allRules.includes('laam_shamsiyah'))
-  );
-  if (!hasSolarAnnotation || !STRICT_FEATURES.laam()) return true;
-
-  /* NOTE: no transcript test here. ASR always spells the article with its written
-     ل (e.g. الليل, الشمس), so spelling cannot show whether the lām was assimilated.
-     Only the acoustic evidence below is used. */
-  if (align && align.available && align.ctx.hasSignal && w.audio && w.audio.durationMs >= 120){
-    const samples = align.ctx.samples;
-    if (samples && samples.length >= 5){
-      const onsetC = rmsAnalyser.onsetCentroid(w.audio.start, 75);
-      const overallC = rmsAnalyser.meanCentroid(w.audio.start, w.audio.end);
-      /* Low onset centroid with much higher overall centroid suggests a voiced
-         lateral onset rather than smooth solar assimilation (provisional). */
-      if (onsetC > 0 && overallC > 0 && onsetC < 1450 && overallC > onsetC * 1.85){
-        markStrict1Warning(w, 'silent-laam-shamsiyyah',
-          'possible voiced/unassimilated onset (onset centroid ' + Math.round(onsetC) +
-          ' Hz vs ' + Math.round(overallC) + ' Hz); spectral centroid is provisional evidence');
-      }
-    }
-  }
-  return true;
-}
+function checkLaamShamsiyyah(w, heard, align){ if (!w || !w.tjRules) return true; const hasSolarAnnotation = !!((w.tjRules.laamShamsiyyahPositions && w.tjRules.laamShamsiyyahPositions.length) || (w.tjRules.allRules && w.tjRules.allRules.includes('laam_shamsiyah'))); if (!hasSolarAnnotation || !STRICT_FEATURES.laam()) return true; if (!heard) return true; /* unverifiable = green */ if (heard === w.norm) return true; /* standard ASR spelling (الشمس) writes ال - spelling is not sound, never flag */ const SOLAR = '\u062a\u062b\u062f\u0630\u0631\u0632\u0633\u0634\u0635\u0636\u0637\u0638\u0638\u0638\u0644\u0646'; const solarSet = 'تثدذرزسشصضطظلن'; let sounded = false, why = ''; if (/\u0627\u0644\u0644/.test(heard)){ const after = heard[heard.indexOf('\u0627\u0644\u0644') + 3]; if (after !== '\u0644'){ sounded = true; why = 'double laam (الل) heard before a solar letter'; } } if (!sounded && /(^|\s)\u0644[\u062a\u062b\u062f\u0630\u0631\u0632\u0633\u0634\u0635\u0636\u0637\u0638\u0638\u0644\u0646]/.test(heard)){ sounded = true; why = 'bare laam (ل) heard before a solar letter'; } if (!sounded && /(^|\s)\u0627\u0644\s/.test(heard)){ sounded = true; why = 'separate ال token heard before a solar word'; } if (sounded){ markStrict1Error(w, 'silent-laam-shamsiyyah', 'Laam Shamsiyyah sounded - ' + why + ' - solar laam must NOT be heard (heard: ' + heard + ')'); return false; } return true; }
 
 function checkIkhfa(w, heard, align){
   if (!w || !w.tjRules || !STRICT_FEATURES.ghunnah()) return true;
@@ -6434,8 +6409,8 @@ function checkIkhfa(w, heard, align){
         'Ikhfa nasal hold ~' + holdMs + ' ms < target ' + Math.round(minHoldMs) + ' ms');
     }
   } else if (heard && w.norm && w.norm.indexOf('ن') !== -1 && heard.indexOf('ن') === -1){
-    markStrict1Warning(w, 'ghunnah-ikhfa',
-      'hidden ن omitted in transcript during Ikhfa (transcript fallback)');
+    markStrict1Error(w, 'ghunnah-ikhfa',
+      'Ghunnah MUST be heard - hidden ن omitted in ASR transcript during Ikhfa');
   }
   return true;
 }
@@ -6561,37 +6536,13 @@ function checkAllNasalRules(w, heard, align){
     } else if (!textOk){
       if (type === 'iqlab') markStrict1Error(w, 'ghunnah-iqlab',
         'expected م (Iqlab) missing in transcript (transcript-only mode)');
-      else markStrict1Warning(w, 'nasal-dropped',
-        'expected nasal consonant missing in transcript (transcript-only mode)');
+      else markStrict1Error(w, 'nasal-dropped',
+        'Ghunnah MUST be heard - expected nasal consonant missing in ASR transcript');
     }
   });
 }
 
-function strict1SilentOk(w, heard){
-  if (!w || !w.tjRules || !w.tjRules.hasSilent) return true;
-  if (heard === w.norm) return true; /* standard ASR spelling; acoustic extra-syllable check covers this */
-  const full = w.norm;
-  const noSilent = w.normNoSilent || (w.tjRules && w.tjRules.normNoSilent);
-  if (noSilent && noSilent.length >= 1 && noSilent !== full){
-    const dFull = lev(heard, full);
-    const dNoSilent = lev(heard, noSilent);
-    return dFull >= dNoSilent;
-  }
-  const dFull = lev(heard, full);
-  let best = dFull;
-  for (let i = 0; i < w.tjRules.silentLetters.length; i++){
-    const sl = w.tjRules.silentLetters[i];
-    if (!sl) continue;
-    for (let pos = 0; pos <= full.length - sl.length; pos++){
-      if (full.substr(pos, sl.length) !== sl) continue;
-      const variant = full.slice(0, pos) + full.slice(pos + sl.length);
-      if (!variant || variant === full) continue;
-      const d = lev(heard, variant);
-      if (d < best) best = d;
-    }
-  }
-  return dFull >= best;
-}
+function strict1SilentOk(w, heard){ return true; } /* RELAXED: silent letter / silent alif never flagged from ASR spelling - ASR writes the full orthographic form whether the letter was sounded or not. Unverifiable = green. */
 
 const TAJWEED_ERROR_NAMES = {
   'madd-normal':            'Madd (normal) — too short',
@@ -6752,21 +6703,7 @@ function markStrict1Warning(w, kind, detail){
 /* Hamzat al-Wasl (ٱ / ا) glottal-attack detection. When joined within an ayah it
    must be silent. Evidence: explicit hamza / audible Alif in ASR, and/or a
    closure-dip + sharp burst in RMS at the word boundary. */
-function detectGlottalOnset(raw, targetRaw){
-  const clean = s => String(s || '').normalize('NFKC')
-    .replace(TASHKEEL, '')
-    .replace(/^[\s‎‏‪-‮⁦-⁩ـ]+/, '');
-  const h = clean(raw);
-  const t = clean(targetRaw);
-  if (!h) return { detected: false, reason: '' };
-  if (/^[أإآءؤئ]/.test(h)){
-    return { detected: true, reason: 'explicit hamza onset (' + h[0] + ')' };
-  }
-  if (/^[اٱ]/.test(h) && /^[اٱ]/.test(t)){
-    return { detected: true, reason: 'audible Alif (ا) onset where Hamzat al-Wasl should be silent' };
-  }
-  return { detected: false, reason: '' };
-}
+function detectGlottalOnset(raw, targetRaw){ const clean = s => String(s || '').normalize('NFKC').replace(TASHKEEL, '').replace(/^[\s\u200e\u200f\u202a-\u202e\u2066-\u2069\u0640]+/, ''); const h = clean(raw); if (!h) return { detected: false, reason: '' }; if (/^[\u0621\u0624\u0626]/.test(h)){ return { detected: true, reason: 'explicit standalone hamza onset (' + h[0] + ') - Hamzat al-Wasl was sounded' }; } return { detected: false, reason: '' }; } /* RELAXED: plain ا / أ / إ / آ are ASR spelling for Hamzat al-Wasl itself, never evidence it was sounded */
 
 function detectAcousticGlottalAttack(prevAudio, curAudio){ return {spike:false,gapMs:null}; /* ASR-only */
   if (!prevAudio || !curAudio || typeof rmsAnalyser === 'undefined' || !rmsAnalyser.isRunning()){
