@@ -19,6 +19,49 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><style>* { -webkit-text-size-adjust: 132% !important; }.w.warned{background:#facc15 !important;color:#111 !important;} .w.error{background:#ef4444 !important;color:#fff !important;} .setting-panel{display:none;margin:8px 0;padding:10px;border:1px solid #c9a227;border-radius:10px;font-size:13px;line-height:1.6;} .setting-panel.open{display:block;} .setting-panel label{display:block;margin:6px 0;} .setting-panel small{color:#888;display:block;}
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style><style>
 @font-face {
   font-family: "Optimistic";
@@ -2771,6 +2814,29 @@ body.light-mode .share-arabic{color:#1a2233;}
     .app{max-width:1200px}
   }
 </style>
+
+<style id="coach-page-fix">
+#pageEl .mushaf-inner{direction:rtl;text-align:justify;text-align-last:center;}
+#pageEl .ayah{display:inline;padding:0;margin:0;background:transparent !important;box-shadow:none !important;border-radius:0;}
+#pageEl .ayah.bismillah-line{display:block;text-align:center;}
+#pageEl .ayah .translation{display:none !important;}
+#pageEl .ayah-num{display:inline;font-family:'Amiri','Amiri Quran',serif;font-size:.72em;vertical-align:middle;color:inherit;background:transparent !important;border:0 !important;border-radius:0;padding:0 .15em;margin:0 .15em;direction:rtl;}
+#pageEl .w{display:inline;padding:0;margin:0;border:0;border-radius:0;box-shadow:none !important;text-decoration:none !important;text-shadow:none !important;transform:none !important;animation:none !important;}
+#pageEl .w-deco{display:inline;padding:0;margin:0;}
+#pageEl .w.current{background:rgba(79,140,255,.28) !important;color:inherit !important;}
+#pageEl .w.correct{background:rgba(47,208,122,.22) !important;color:inherit !important;}
+#pageEl .w.follow-skipped{background:rgba(47,208,122,.22) !important;color:inherit !important;}
+#pageEl .w.error{background:rgba(255,90,106,.28) !important;color:inherit !important;}
+#pageEl .w.warned{background:rgba(255,193,7,.28) !important;color:inherit !important;}
+#pageEl .w.skipped{background:rgba(255,176,32,.22) !important;color:inherit !important;}
+#pageEl .w.pressing{background:rgba(79,140,255,.28) !important;color:inherit !important;}
+#pageEl .w [class*="tj-"]{font-weight:inherit !important;background:transparent !important;box-shadow:none !important;text-decoration:none !important;}
+body.hide-text-mode #pageEl .w:not(.revealed){color:transparent !important;background:transparent !important;}
+body.hide-text-mode #pageEl .w.revealed{color:inherit !important;}
+body.hide-text-mode #pageEl .w.correct.revealed, body.hide-text-mode #pageEl .w.follow-skipped.revealed{background:rgba(47,208,122,.22) !important;}
+body.hide-text-mode #pageEl .w.current{color:transparent !important;background:transparent !important;}
+body.hide-text-mode.reveal-all-text #pageEl .w.current{color:inherit !important;background:rgba(79,140,255,.28) !important;box-shadow:none !important;}
+</style>
 </head>
 <body class="page-dark tajweed-full">
 <script>
@@ -3110,7 +3176,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="sub-note" id="prayerSubNote">Today</span>
   </div>
   <div class="prayer-top">
-    <button class="prayer-settings-btn" id="prayerSettingsBtn" type="button" aria-label="Prayer settings">⚙️<div id="reciteSettingsBox" style="margin: 10px 0px; padding: 10px; border: 1px solid rgb(201, 162, 39); border-radius: 10px; font-size: 13px;"><b>Recite settings</b><br><label><input type="checkbox" id="reciteSwapChk"> Show Tajweed instead of Recite (swap places)</label><br><label>On incorrect word: <select id="recitePointerSel"><option value="stop">Stop and wait until correct</option><option value="skip">Mark red and continue to follow</option></select></label><br><label>Madd seconds per count: <input id="reciteMaddInput" type="number" min="0.2" max="1" step="0.05" style="width:70px"></label><div style="opacity:.75">Recite: green=correct, light red=incorrect / skipped, light yellow=tashkeel / peeked / missed (3+ letters dropped). Default: mark red and continue to follow.</div></div></button>
+    <button class="prayer-settings-btn" id="prayerSettingsBtn" type="button" aria-label="Prayer settings">⚙️</button>
     <div class="prayer-city-wrap">
       <span class="prayer-city" id="prayerCityName">Set your location</span>
       <span class="prayer-method" id="prayerMethodName">Egyptian General Authority of Survey</span>
@@ -3122,7 +3188,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">28 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">01:20</span>
+    <span class="pdr-item pdr-time" id="pdrTime">01:52</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3140,8 +3206,8 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="statusbar idle" id="statusbar" role="status" aria-live="polite">
     <span class="dot"></span>
     <span class="label" id="statusLabel">Loading…</span>
-    <span class="hint" id="statusHint"></span>
-  </div>
+    <span class="hint" id="statusHint"></span><button id="btnReciteSettings" class="toggle" type="button" style="margin-left:8px" aria-expanded="false">⚙️ Setting</button>
+  </div><div class="setting-panel" id="reciteSettingsPanel"><b>Settings</b><label>Follow: <input type="checkbox" id="chkHideTextSetting"> Hide text<small>hides the text in Follow mode and reveals it as you recite correctly (Follow only)</small></label><label>Recite pointer: <select id="recitePointerSel"><option value="stop">Recite-stop</option><option value="mark">Recite-mark</option></select><small>Recite-stop: stops pointer on an incorrect word and waits for it to be corrected before pointer advances. Recite-mark: marks wrong word red, but continue to follow.</small></label><label>Mode tab next to Follow: <button id="settingTajweedBtn" class="toggle" type="button">Tajweed mode</button> <button id="settingReciteBtn" class="toggle active" type="button">Recite mode</button><small>Tajweed mode replaces the Recite tab next to Follow with a Tajweed tab. Recite mode swaps it back.</small></label></div>
   <section class="panel hide-immersive">
     <div class="row" id="surahNavRow" hidden="">
       <button id="btnPrevSurah" class="ghost icon" aria-label="Next surah">◀</button>
@@ -3178,7 +3244,7 @@ body.light-mode .share-arabic{color:#1a2233;}
           <span class="pi-text"><strong>Follow</strong><small id="progressFollowSub">No saved session</small></span>
         </button>
         <button class="progress-item" id="progressRecite" type="button" role="menuitem"><span class="pi-icon">📖</span><span class="pi-text"><strong>Recite</strong><small id="progressReciteSub">No saved session</small></span></button>
-         <button class="progress-item" id="progressTajweed" type="button" role="menuitem" style="display: none;">
+         <button class="progress-item" id="progressTajweed" type="button" role="menuitem">
           <span class="pi-icon">🎵</span>
           <span class="pi-text"><strong>Tajweed</strong><small id="progressTajweedSub">No saved session</small></span>
         </button>
@@ -3198,9 +3264,7 @@ body.light-mode .share-arabic{color:#1a2233;}
 </div>
     <button class="toggle ondevice-chip" id="onDeviceChip" type="button" hidden=""></button>
     <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
-    <label class="toggle hide-text" id="hideTextChip">
-      <input type="checkbox" id="chkHideText"> Hide text
-    </label>
+    
   </div>
   <div class="recite-controls">
     <button id="btnStop" class="gold-control-small" aria-label="Pause">⏸</button>
@@ -3406,7 +3470,7 @@ const infoBtn        = document.getElementById('btnInfo');
 const chkHideText    = document.getElementById('chkHideText');
 const hideTextChip   = document.getElementById('hideTextChip');
 const fsRevealBtn    = document.getElementById('fsReveal');
-const modeFollowBtn  = document.getElementById('modeFollowBtn');
+const modeFollowBtn  = document.getElementById('modeFollowBtn'); const modeReciteBtn = document.getElementById('modeReciteBtn');
 const modeTajweedBtn = document.getElementById('modeTajweedBtn');
 const supportBox     = document.getElementById('support');
 const mistakesPanel  = document.getElementById('mistakesPanel');
@@ -3970,6 +4034,11 @@ function gregorianToHijri(date){
 }
 const matchLevel = 'strict';
 let followOnly   = localStorage.getItem('qc.followOnly') !== '0';
+let reciteMode = localStorage.getItem('qc.reciteMode') === '1';
+let recitePointer = localStorage.getItem('qc.recitePointer') || 'mark';
+let reciteWordStart = 0; let reciteRedPtr = -1;
+let tajweedSwapped = localStorage.getItem('qc.tajweedSwapped') === '1';
+function applyTajweedSwap(){ const rb=document.getElementById('modeReciteBtn'); const tb=document.getElementById('modeTajweedBtn'); if(rb) rb.style.display = tajweedSwapped ? 'none' : ''; if(tb) tb.style.display = tajweedSwapped ? '' : 'none'; const st=document.getElementById('settingTajweedBtn'); const sr=document.getElementById('settingReciteBtn'); if(st) st.classList.toggle('active', tajweedSwapped); if(sr) sr.classList.toggle('active', !tajweedSwapped); }
 let hideText     = localStorage.getItem('qc.hideText') === '1';
 let revealAllText = false;
 let theme        = localStorage.getItem('qc.theme') || 'dark';
@@ -5407,6 +5476,7 @@ function recReset(){
 }
 
 function showScreen(name){
+  if(name !== 'coach' && typeof wantMic !== 'undefined' && wantMic){ try{ hardShutdownAudio(); }catch(_){} }
   currentScreenName = name;
   const map = { home: screenHome, index: screenSurahIndex, juz: screenJuzIndex, bookmarks: screenBookmarks, audio: screenAudio, coach: screenCoach, prayer: screenPrayer, hifz: screenHifz, tajweed: screenTajweed, dashboard: screenDashboard };
   Object.entries(map).forEach(([k, el]) => { if(!el) return; el.hidden = (k !== name); });
@@ -7154,7 +7224,16 @@ function splitSegmentByWords(seg, wordsArr, startIdx, count){
 const FOLLOW_TAU_PLAUSIBLE  = 0.72;
 const FOLLOW_TAU_JUMP       = 0.85;
 const FOLLOW_TAU_EXIT       = 0.68;
-const FOLLOW_MAX_LOOKAHEAD  = 0;
+const FOLLOW_MAX_LOOKAHEAD  = 2;
+const FOLLOW_MAX_SKIP_PER_AYAH = 2;
+let followSkipCountByVerse = new Map();
+function followSkipsUsed(verse){ return followSkipCountByVerse.get(verse) || 0; }
+function markFollowSkipped(i){
+  const w = words[i]; if(!w) return;
+  followSkipCountByVerse.set(w.verse, followSkipsUsed(w.verse) + 1);
+  const reveal = (hideText && followOnly && !reciteMode) ? ' revealed' : '';
+  w.el.className = 'w follow-skipped' + reveal;
+}
 
 function followSimilarity(heard, hPhon, hPhonLoose, w){
   if (!w || !heard) return 0;
@@ -7699,6 +7778,16 @@ async function runMFAInference(w, seg, heard) {
   return durationOk && (normOk || phonOk);
 }
 
+
+/* ===== RECITE helpers — Tarteel-aligned: word-level only (missed / incorrect / extra / tashkeel). No letter-level, no Madd timing, no dropped-letter counting. ===== */
+let reciteWrongStreak = 0;
+function reciteDroppedCount(expected, heard){ const e=String(expected||'').replace(/[\u064B-\u0652\u0670\u0653\u0640]/g,''); const h=String(heard||'').replace(/[\u064B-\u0652\u0670\u0653\u0640]/g,''); const hc={}; for(const c of h) hc[c]=(hc[c]||0)+1; let miss=0; for(const c of e){ if(hc[c]>0) hc[c]--; else miss++; } return miss; }
+function reciteTashkeelMismatch(expectedRaw, heardRaw){ if(!expectedRaw||!heardRaw) return false; const diac=/[\u064B-\u0652\u0670\u0653]/g; const e=(String(expectedRaw).match(diac)||[]).join(''); const h=(String(heardRaw).match(diac)||[]).join(''); if(!h) return false; return h!==e; }
+function reciteMark(i, kind, reason){ const w=words[i]; if(!w||!w.el) return; w.reciteKind=kind; w.reciteReason=reason||kind; if(kind==='red'){ w.el.className='w error'; } else if(kind==='peeked'){ w.el.className='w peeked'; } else if(kind==='yellow'){ w.el.className='w warned'; } else { w.el.className='w correct'; } if(w.el.dataset){ w.el.dataset.recite=kind; w.el.dataset.reciteReason=w.reciteReason; } }
+function reciteExplain(i){ const w=words[i]; if(!w) return 'Correct'; const r=w.reciteReason||w.reciteKind; if(r==='peeked') return 'Peeked word — you looked at this word before reciting it.'; if(r==='tashkeel') return 'Tashkeel mistake — the vowel marks (tashkeel) were not correct.'; if(r==='missed') return 'Missed — 3 or more letters were dropped from this word: '+(w.raw||''); if(r==='extra') return 'Extra word — a word was said that is not in the text.'; if(r==='incorrect') return 'Incorrect word — this word was not recited correctly. It stays red after correction.'; return 'Correct — this word was recited correctly.'; }
+function reciteRecordMistake(i, type, heard){ try{ const w=words[i]; if(!w) return; const m={idx:(mistakes.length+1), correct:w.raw||'', heard:heard||'', severity:'red', tajweedName:type, verse:w.verse||''}; mistakes.push(m); if(typeof mistakesPanel!=='undefined' && mistakesPanel) mistakesPanel.hidden=false; if(typeof mistakeCountBadge!=='undefined' && mistakeCountBadge) mistakeCountBadge.textContent=String(mistakes.length); if(typeof mistakesList!=='undefined' && mistakesList){ const li=document.createElement('li'); li.classList.add('severity-red'); li.innerHTML='<span class="idx">'+m.idx+'</span><span class="tj-kind">'+type+'</span><span class="correct">'+escapeHtml(m.correct)+'</span>'+(heard?'<span class="heard">→ '+escapeHtml(heard)+'</span>':''); mistakesList.appendChild(li); mistakesList.scrollTop=mistakesList.scrollHeight; } }catch(e){} }
+function reciteGradeFor(i, heard, rawHeard){ if(!reciteMode) return 'green'; const w=words[i]; if(reciteDroppedCount(w.norm||w.raw, heard) >= 3){ w.reciteReason='missed'; return 'yellow'; } if(reciteTashkeelMismatch(w.raw||'', rawHeard||'')){ w.reciteReason='tashkeel'; return 'yellow'; } w.reciteReason='correct'; return 'green'; }
+function reciteCommit(i, heard, rawHeard){ const wasRed = (reciteRedPtr === i); const k=reciteGradeFor(i, heard, rawHeard); if(reciteMode){ if(wasRed){ reciteMark(i,'red','incorrect'); } else { reciteMark(i,k, k==='yellow'?w.reciteReason:'correct'); if(k==='yellow' && w.reciteReason==='missed'){ try{ showToast('<b>'+escapeHtml(w.raw)+'</b><br>missed — 3 or more letters were dropped.',4000); }catch(e){} } } } else { commitCorrect(i,null); } return k; }
 function gradeFollowFast(tokens, startIdx){
   const start = startIdx || 0;
   let used = 0;
@@ -7710,12 +7799,11 @@ function gradeFollowFast(tokens, startIdx){
     const hPhon      = phonArCached(rawTok);
     const hPhonLoose = followOnly ? phonLooseArCached(rawTok) : null;
     const w          = words[ptr];
-    window.__lastHeardRaw = rawTok; window.__lastHeardNorm = heard;
 
     if (w && w.isMuqattaat) {
       const mr = tryMuqattaatProgress(heard, hPhon, hPhonLoose, w);
       if (mr === 'complete') {
-        commitCorrect(ptr, null);
+        if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
         advancePast(1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -7748,7 +7836,7 @@ function gradeFollowFast(tokens, startIdx){
         if (conf < FOLLOW_TAU_EXIT) exitOk = false;
       }
       if (exitOk){
-        commitCorrect(ptr, null);
+        if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
         advancePast(1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -7765,7 +7853,7 @@ function gradeFollowFast(tokens, startIdx){
        resets the counter via noteFollowProgress(). */
     const pendingN = tryPendingCombinedMatch(rawTok);
     if (pendingN > 0){
-      commitManyCorrect(ptr, ptr + pendingN, null);
+      if(reciteMode){ for(let _i=ptr;_i<ptr+pendingN;_i++) reciteCommit(_i, heard); } else { commitManyCorrect(ptr, ptr + pendingN, null); }
       advancePast(pendingN);
       noteFollowProgress();
       pendingHeard.length = 0;
@@ -7787,14 +7875,18 @@ function gradeFollowFast(tokens, startIdx){
 
     /* 4. Restricted look-ahead k ≤ 2, τ_jump = 0.85, same-ayah only */
     let jumped = false;
-    for (let k = 1; k <= ((window.__currentMode==='recite') ? 2 : FOLLOW_MAX_LOOKAHEAD); k++){
+    for (let k = 1; k <= (reciteMode ? 2 : FOLLOW_MAX_LOOKAHEAD); k++){
       if (ptr + k >= words.length) break;
       const futureW = words[ptr + k];
       if (futureW.verse !== w.verse) break;
       const sim = followSimilarity(heard, hPhon, hPhonLoose, futureW);
-      if (window.__currentMode==='recite' ? isFollowPlausible(heard, hPhon, hPhonLoose, futureW) : (sim >= FOLLOW_TAU_JUMP)){
-        if(window.__currentMode==='recite' && window.__reciteJump){ window.__reciteJump(k, rawTok); }
-        else commitManyCorrect(ptr, ptr + k + 1, null);
+      if (reciteMode ? isFollowPlausible(heard, hPhon, hPhonLoose, futureW) : (sim >= FOLLOW_TAU_JUMP)){
+        if(reciteMode){ for(let _i=ptr;_i<ptr+k;_i++){ reciteMark(_i,'red','skipped'); reciteRecordMistake(_i,'Skipped',''); } reciteCommit(ptr+k, heard, rawTok); }
+        else {
+          if(k > (FOLLOW_MAX_SKIP_PER_AYAH - followSkipsUsed(w.verse))){ continue; }
+          for(let _i=ptr;_i<ptr+k;_i++){ markFollowSkipped(_i); }
+          commitCorrect(ptr + k, null);
+        }
         advancePast(k + 1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -7806,7 +7898,7 @@ function gradeFollowFast(tokens, startIdx){
 
     /* 5. MFA phonetic */
     if (isFollowMFAMatch(w, heard, hPhon, hPhonLoose)){
-      commitCorrect(ptr, null);
+      if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
       advancePast(1);
       noteFollowProgress();
       pendingHeard.length = 0;
@@ -7815,15 +7907,15 @@ function gradeFollowFast(tokens, startIdx){
 
     /* 6. Plausible fallback */
     if (isFollowPlausible(heard, hPhon, hPhonLoose, w)){
-      commitCorrect(ptr, null);
+      if(reciteMode){ reciteCommit(ptr, heard, rawTok); } else { commitCorrect(ptr, null); }
       advancePast(1);
       noteFollowProgress();
       pendingHeard.length = 0;
       used++; continue;
     }
 
-    /* 7. Hold state — Recite: 1st unmatched = Extra, 2nd = Incorrect (red), 3rd+ no-match = Skip (red, "skipped", show word). Follow: no marking. */
-    if(window.__currentMode==='recite' && window.__reciteHold && window.__reciteHold(rawTok, heard)){ used++; continue; }
+    /* 7. Hold state — Recite (Tarteel): 1st unmatched token = Extra (recorded, pointer stays); 2nd+ = Incorrect (red). Follow: no marking. */
+    if(reciteMode){ reciteWrongStreak++; if(reciteWrongStreak>=3){ reciteMark(ptr,'red','skipped'); reciteRecordMistake(ptr,'Skipped',rawTok); try{ showToast('<b>'+escapeHtml(w.raw)+'</b><br>skipped — word not recognised.',4000); }catch(e){} advancePast(1); noteFollowProgress(); pendingHeard.length = 0; reciteWrongStreak = 0; used++; continue; } if(reciteWrongStreak===1){ reciteRecordMistake(ptr,'Extra',rawTok); noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } if(reciteRedPtr !== ptr){ reciteMark(ptr,'red','incorrect'); reciteRecordMistake(ptr,'Incorrect',rawTok); reciteRedPtr = ptr; errors++; try{ scheduleHUD(); }catch(e){} } if(recitePointer === 'stop'){ noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } }
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     /* Keep a small rolling buffer to recover ASR word-boundary shifts without
@@ -8336,6 +8428,23 @@ let micSession = 0;
 const _micTestClosers = new Set();
 let _ctxSuspendedByUs = false;
 
+let tajweedRmsTimer = null;
+function clearTajweedRmsTimer(){ if(tajweedRmsTimer){ clearTimeout(tajweedRmsTimer); tajweedRmsTimer = null; } }
+function scheduleTajweedRms(reason){
+  clearTajweedRmsTimer();
+  if(followOnly) return;
+  const myTok = (typeof micSession !== 'undefined') ? micSession : 0;
+  tajweedRmsTimer = setTimeout(async () => {
+    tajweedRmsTimer = null;
+    if(myTok !== micSession || !wantMic) return;
+    const s = await ensureMicStream().catch(() => null);
+    if(myTok !== micSession || !wantMic){ releaseMicStream(); return; }
+    if(!s || !rmsAnalyser.isRunning()){
+      coachTajweedMicFailed = false; updateTajweedStatusChip();
+      addFeedback('ℹ️ <b>Tajweed is running on speech recognition (ASR) only.</b> Microphone waveform (RMS) could not be started' + (lastMicError && lastMicError.name ? ' (' + lastMicError.name + ')' : '') + ', so waveform checks for Madd duration, Ghunnah, Ikhfa, Idgham, Iqlab, Qalqalah, Laam and Hamzat al-Wasl cannot be verified. Word matching still works.', false, true);
+    } else { coachTajweedMicFailed = false; updateTajweedStatusChip(); }
+  }, 1000);
+}
 async function ensureMicStream(){
   if(micStream){
     const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
@@ -8890,24 +8999,15 @@ function resetSilenceTimer(force){
 function clearSilenceTimer(){ clearTimeout(silenceTimer); silenceTimer = null; }
 
 let updatingMutex = false;
-function applyMutexUI(){
-  if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly); modeFollowBtn.setAttribute('aria-pressed', followOnly ? 'true' : 'false'); }
-  if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly); modeTajweedBtn.setAttribute('aria-pressed', !followOnly ? 'true' : 'false'); }
-  if(hideTextChip) hideTextChip.hidden = !followOnly;
+function applyMutexUI(){ try{ document.body.classList.toggle('recite-mode', !!reciteMode); }catch(e){} try{ applyTajweedSwap(); }catch(e){} const reciteBtn=document.getElementById('modeReciteBtn'); if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly && !reciteMode); modeFollowBtn.setAttribute('aria-pressed', (followOnly && !reciteMode) ? 'true' : 'false'); } if(reciteBtn){ reciteBtn.classList.toggle('active', !!reciteMode); reciteBtn.setAttribute('aria-pressed', reciteMode ? 'true' : 'false'); } if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly && !reciteMode); modeTajweedBtn.setAttribute('aria-pressed', (!followOnly && !reciteMode) ? 'true' : 'false'); }
   if(chkHideText) chkHideText.checked = hideText;
-  if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
   applyHideTextUI();
   updateTajweedStatusChip();
   syncRevealButtons();
 
 }
 
-function setRecitationMode(modeName){
-  const newFollow = (modeName === 'follow');
-  if(newFollow === followOnly && !updatingMutex) return;
-  updatingMutex = true;
-  followOnly = newFollow;
-  try{ localStorage.setItem('qc.followOnly', followOnly ? '1' : '0'); }catch(e){}
+function setRecitationMode(modeName){ const newRecite = (modeName === 'recite'); const newFollow = (modeName !== 'tajweed'); if(newFollow === followOnly && newRecite === reciteMode && !updatingMutex) return; updatingMutex = true; followOnly = newFollow; reciteMode = newRecite; reciteRedPtr = -1; reciteWordStart = performance.now(); if(modeName==='tajweed'){ tajweedSwapped=true; } if(modeName==='recite'){ tajweedSwapped=false; } try{ localStorage.setItem('qc.followOnly', followOnly ? '1' : '0'); localStorage.setItem('qc.reciteMode', reciteMode ? '1' : '0'); localStorage.setItem('qc.tajweedSwapped', tajweedSwapped ? '1' : '0'); }catch(e){}
   pendingHeard.length = 0; consecutiveReds = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
@@ -8917,7 +9017,7 @@ function setRecitationMode(modeName){
   if(followOnly){
     releaseMicStream();
     coachTajweedMicFailed = false;
-    addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
+    addFeedback(reciteMode ? '📖 <b>Recite</b> mode — Green=correct, Light yellow=Tashkeel or Peeked, Light red=Incorrect / Missed (stop, correct it, it stays red). Tap a coloured word for its explanation.' : '👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
   } else {
@@ -8934,30 +9034,8 @@ function setRecitationMode(modeName){
         }
       };
 
-      ensureMicStream().then(s => {
-        if(s){
-          coachTajweedMicFailed = false;
-          updateTajweedStatusChip();
-          if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-            _rmsUnavailableNotified = true;
-            notifyRmsUnavailable();
-          }
-        } else {
-          const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-          if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-             nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-            markTajweedMicFailed();
-          } else {
-            coachTajweedMicFailed = false;
-            updateTajweedStatusChip();
-          }
-        }
-        restartRecognizer();
-      }).catch(() => {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-        restartRecognizer();
-      });
+      scheduleTajweedRms('mode-switch');
+      restartRecognizer();
     } else {
       updateTajweedStatusChip();
     }
@@ -8965,11 +9043,15 @@ function setRecitationMode(modeName){
   updatingMutex = false;
 }
 
-if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
+if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); } if(modeReciteBtn){ modeReciteBtn.addEventListener('click', () => setRecitationMode('recite')); }
 if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); }
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
+
+/* Recite settings panel wiring */
+(function(){ const btn=document.getElementById('btnReciteSettings'), panel=document.getElementById('reciteSettingsPanel'); if(btn&&panel){ btn.addEventListener('click',()=>{ const open=panel.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); const sel=document.getElementById('recitePointerSel'); if(sel) sel.value=recitePointer; const hc=document.getElementById('chkHideTextSetting'); if(hc) hc.checked=hideText; try{ applyTajweedSwap(); }catch(e){} }); } const sel=document.getElementById('recitePointerSel'); if(sel){ sel.value=recitePointer; sel.addEventListener('change',()=>{ recitePointer=sel.value; try{localStorage.setItem('qc.recitePointer',recitePointer);}catch(e){} }); } const stBtn=document.getElementById('settingTajweedBtn'); if(stBtn) stBtn.addEventListener('click',()=>{ tajweedSwapped=true; try{localStorage.setItem('qc.tajweedSwapped','1');}catch(e){} applyTajweedSwap(); setRecitationMode('tajweed'); }); const srBtn=document.getElementById('settingReciteBtn'); if(srBtn) srBtn.addEventListener('click',()=>{ tajweedSwapped=false; try{localStorage.setItem('qc.tajweedSwapped','0');}catch(e){} applyTajweedSwap(); setRecitationMode('recite'); }); const hc=document.getElementById('chkHideTextSetting'); if(hc){ hc.checked=hideText; hc.addEventListener('change',()=>{ hideText=hc.checked; try{localStorage.setItem('qc.hideText', hideText?'1':'0');}catch(e){} if(chkHideText) chkHideText.checked=hideText; applyHideTextUI(); }); } })();
+
 function applyHideTextUI(){
-  if(hideText && followOnly){
+  if(hideText && followOnly && !reciteMode){
     document.body.classList.add('hide-text-mode');
     words.forEach(w => {
       if(w.el.classList.contains('correct') || w.el.classList.contains('corrected') || w.el.classList.contains('warned')){ w.el.classList.add('revealed'); w.el.classList.remove('correct','corrected','warned'); }
@@ -8988,7 +9070,7 @@ function applyFollowOnlyUI(){
   if(followOnly){
     mistakesPanel.hidden = true; mistakesList.innerHTML = ''; mistakes = []; mistakeCounter = 0;
     mistakeCountBadge.textContent = '0'; errors = 0;
-    words.forEach(w => { w.el.classList.remove('error','skipped','corrected','warned'); });
+    if(!reciteMode){ words.forEach(w => { w.el.classList.remove('error','skipped','corrected','warned'); }); }
     updateHUD();
     const e = document.getElementById('statErrors'); const a = document.getElementById('statAcc');
     if(e) e.textContent = '—'; if(a) a.textContent = '—';
@@ -9126,7 +9208,7 @@ function renderVerses(ayahs, translations){
       pushWord(tok, surahId, displayAyah, line);
     });
     const num=document.createElement('span');
-    num.className='ayah-num'; num.textContent = toAr(displayAyah);
+    num.className='ayah-num'; num.textContent = '\uFD3F' + toAr(displayAyah) + '\uFD3E';
     line.appendChild(num);
     if(translations && translations[i]){
       const t = document.createElement('div');
@@ -9254,7 +9336,7 @@ function advancePast(n){
   notePaceCommit(advanced);
   const leaving = new Set();
   for(let i = ptr; i < endPtr; i++){ if(words[i]) leaving.add(words[i].verse); }
-  ptr = endPtr;
+  ptr = endPtr; reciteWordStart = performance.now(); reciteRedPtr = -1; reciteWrongStreak = 0;
   const nextVerse = ptr < words.length ? words[ptr].verse : null;
   try {
     const sr = speechRecognition;
@@ -9268,18 +9350,17 @@ function advancePast(n){
   updateCurrent(); noteAdvance(advanced); scheduleSaveProgress();
 }
 function commitCorrect(i, seg){
-  if(window.__currentMode==='recite' && window.__reciteCommit){ window.__reciteCommit(i); return; }
   const w = words[i]; if(!w) return;
   if (seg) w.audio = seg;
   const warned = w.el.classList.contains('warned');
-  const baseCls = (hideText && followOnly) ? 'w revealed' : 'w correct';
+  const baseCls = (hideText && followOnly && !reciteMode) ? 'w correct revealed' : 'w correct';
   w.el.className = baseCls + (warned ? ' warned' : '');
   maybeExplainRules(w);
 }
 function commitManyCorrect(start, end, seg){
-  const toReveal = hideText && followOnly;
+  const toReveal = hideText && followOnly && !reciteMode;
   const stop = Math.min(end, words.length);
-  const baseCls = toReveal ? 'w revealed' : 'w correct';
+  const baseCls = toReveal ? 'w correct revealed' : 'w correct';
   for(let i = start; i < stop; i++){
     if (seg) words[i].audio = seg;
     const warned = words[i].el.classList.contains('warned');
@@ -9318,7 +9399,7 @@ function resetProgress(fullReset){
     resetPace();
     resetPaceSamples();
   }
-  lastCurrentEl = null; longPressTriggered = false; hudPending = false;
+  lastCurrentEl = null; longPressTriggered = false; hudPending = false; followSkipCountByVerse = new Map();
   words.forEach(w=>{ w.el.className='w'; w.audio = null; w._tajweedErrs = null; w._tajweedWarns = null; w.muqattaatCursor = 0; w._muqStuckCount = 0; });
   _tajweedWarnThrottle.clear();
   pageEl.querySelectorAll('.ayah').forEach(a=>a.classList.remove('done','playing'));
@@ -9383,6 +9464,7 @@ function installWordDelegates(){
   pageEl.addEventListener('selectstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
   pageEl.addEventListener('dragstart', e => { if(e.target.closest && e.target.closest('.w')) e.preventDefault(); });
   pageEl.addEventListener('click', (e) => {
+    if(reciteMode){ const target=e.target.closest ? e.target.closest('.w') : null; if(target && pageEl.contains(target)){ const idx=parseInt(target.dataset.idx,10); if(Number.isFinite(idx)){ if(target.dataset && target.dataset.recite){ showToast('<b>'+escapeHtml((words[idx]&&words[idx].raw)||'')+'</b><br>'+escapeHtml(reciteExplain(idx)), 5000); return; } if(idx>ptr){ reciteMark(idx,'peeked','peeked'); reciteRecordMistake(idx,'Peeked',''); showToast('<b>'+escapeHtml((words[idx]&&words[idx].raw)||'')+'</b><br>Peeked word — you looked at this word before reciting it.', 4000); return; } } } }
     if(followOnly) return;
     if(longPressTriggered) return;
     const target = e.target.closest ? e.target.closest('.w') : null;
@@ -9429,37 +9511,17 @@ async function startReciting(){
     releaseMicStream();
   } else {
     if(micPermission !== 'granted'){
-      const ok = await promptForMic();
+      /* Do NOT call promptForMic() here: it opens getUserMedia immediately.
+         ASR starts first (below); the delayed RMS call will trigger the
+         mic permission prompt 1s later, and a denial falls back to ASR-only. */
+      try{ await refreshPermissionState(); }catch(_){}
       if(_myTok !== micSession){ releaseMicStream(); return; }
-      if(!ok){
-        coachTajweedMicFailed = true;
-        updateTajweedStatusChip();
-        return;
-      }
     }
     if(mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
       addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
     }
-    const _tajStream = await ensureMicStream();
-    if(_myTok !== micSession){ releaseMicStream(); return; }
-    if(!_tajStream){
-      const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-      if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-         nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-        coachTajweedMicFailed = true;
-        updateTajweedStatusChip();
-      } else {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-      }
-    } else {
-      coachTajweedMicFailed = false;
-      updateTajweedStatusChip();
-      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-        _rmsUnavailableNotified = true;
-        notifyRmsUnavailable();
-      }
-    }
+    /* Tajweed: ASR starts now (below). getUserMedia / RMS starts 1s later. */
+    scheduleTajweedRms('startReciting');
   }
   
 
@@ -9514,6 +9576,7 @@ function abortCoachSpeechRecognition(){
 }
 
 function stopReciting(silent){
+  clearTajweedRmsTimer();
   micSession++;
   _acousticMode = null; _acousticMissStreak = 0;
   if(wantMic && !suppressProgressSave) saveProgressNow();
@@ -9737,7 +9800,7 @@ fsMinimizeBtn.addEventListener('click', () => exitReaderFullscreen());
 fsContinueBtn.disabled = true;
 function syncRevealButtons(){
   if(!fsRevealBtn) return;
-  const show = !!(hideText && followOnly);
+  const show = !!(hideText && followOnly && !reciteMode);
   fsRevealBtn.style.display = show ? '' : 'none';
   fsRevealBtn.textContent = revealAllText ? 'Hide text' : 'Reveal text';
   fsRevealBtn.classList.toggle('active', revealAllText);
@@ -9776,7 +9839,7 @@ function loadSavedProgress(key){
 function saveProgressNow(){
   if(suppressProgressSave) return;
   if(!words.length) return;
-  const key = followOnly ? 'follow' : 'tajweed';
+  const key = reciteMode ? 'recite' : (followOnly ? 'follow' : 'tajweed');
   const idx = Math.min(Math.max(0, ptr), words.length - 1);
   const w = words[idx]; if(!w) return;
   let offsetInVerse = 0;
@@ -9796,17 +9859,17 @@ function findWordIndexInWords(surah, ayah, offset){
   return -1;
 }
 function refreshProgressMenu(){
-  const f = loadSavedProgress('follow'); const t = loadSavedProgress('tajweed');
+  const f = loadSavedProgress('follow'); const r = loadSavedProgress('recite'); const t = loadSavedProgress('tajweed');
   const fmt = d => d ? ('Surah ' + d.surah + ' · ' + (d.ayah === 0 ? 'Bismillah' : ('ayah ' + d.ayah))) : 'No saved session';
   if(progressFollowSub) progressFollowSub.textContent = fmt(f);
-  if(progressTajweedSub) progressTajweedSub.textContent = fmt(t);
+  if(progressTajweedSub) progressTajweedSub.textContent = fmt(t); const prSub=document.getElementById('progressReciteSub'); if(prSub) prSub.textContent = fmt(r);
 }
 async function resumeRecitationSession(modeKey){
   const data = loadSavedProgress(modeKey);
-  if(!data){ showToast('No saved <b>' + (modeKey === 'follow' ? 'Follow' : 'Tajweed') + '</b> session yet.'); return; }
+  if(!data){ showToast('No saved <b>' + (modeKey === 'follow' ? 'Follow' : (modeKey === 'recite' ? 'Recite' : 'Tajweed')) + '</b> session yet.'); return; }
   suppressProgressSave = true;
   try{
-    followOnly = (modeKey === 'follow');
+    followOnly = (modeKey !== 'tajweed'); reciteMode = (modeKey === 'recite'); try{ localStorage.setItem('qc.reciteMode', reciteMode ? '1' : '0'); }catch(e){}
     localStorage.setItem('qc.followOnly', followOnly ? '1' : '0');
     lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false; prevWordAudio = null;
     applyMutexUI(); applyFollowOnlyUI();
@@ -12752,7 +12815,7 @@ function openCopyrightModal(){
   progressTrigger.addEventListener('click', (e) => { e.stopPropagation(); if(progressMenu.hidden) openMenu(); else closeMenu(); });
   document.addEventListener('click', (e) => { if(progressMenu.hidden) return; if(progressSection.contains(e.target)) return; closeMenu(); });
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && !progressMenu.hidden) closeMenu(); });
-  progressFollow.addEventListener('click', () => { closeMenu(); resumeRecitationSession('follow'); });
+  progressFollow.addEventListener('click', () => { closeMenu(); resumeRecitationSession('follow'); }); const progressReciteBtn=document.getElementById('progressRecite'); if(progressReciteBtn) progressReciteBtn.addEventListener('click', () => { closeMenu(); resumeRecitationSession('recite'); });
   progressTajweed.addEventListener('click', () => { closeMenu(); resumeRecitationSession('tajweed'); });
 })();
 (function wireNewHomeFeatures(){
@@ -13165,7 +13228,7 @@ if(qrFullscreen){ qrFullscreen.addEventListener('click', (e) => { if(e.target ==
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
     resumeSharedAudio();
-    if(wantMic && !finished && !fsPaused && !followOnly) resumeMic();
+    /* No auto-resume from background: mic stays stopped until Start is tapped. */
     if((wantMic||playing||viewerAudio.active) && !wakeLock) requestWakeLock();
     schedulePositionAudioOverlay();
     if(audioListRendered) refreshAudioRowStates();
@@ -13920,7 +13983,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13981,189 +14044,19 @@ window.addEventListener('contextmenu', function(event) {
 })();
 </script>
 
-<!-- RECITE MODE (built on Follow structure) : ASR only + Madd timer. No Tajweed engine changes. -->
-<script>
-(function(){
-"use strict";
-var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v===null?d:v;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
-window.__recite={pointer:LS.get('qc.recitePointer','skip'),swap:LS.get('qc.swapReciteTajweed','0')==='1',maddSecPerCount:parseFloat(LS.get('qc.reciteMaddSecPerCount','0.5'))||0.5};
-function reciteMaddRequired(wordText){
-  // Returns required seconds, or 0 if no Madd rule detected. Timings: 1 count = qc.reciteMaddSecPerCount (default 0.5s)
-  // Madd Laazim (6) > Madd Wajib (4-5) > Madd Aarid (2/4/6, use 4 as check) > Madd Tabeei (2)
-  var s=String(wordText||'');
-  if(/[\\u0640\\u0653]/.test(s)) return 6*window.__recite.maddSecPerCount; // maddah ~ laazim check
-  if(/\\u0622/.test(s)) return 6*window.__recite.maddSecPerCount;
-  return 0;
-}
-function reciteHasDroppedLetters(expected, heard){
-  // Strict: every distinctive letter of expected (normalised) must appear in heard.
-  // This catches words ASR accepts as "plausibly correct" with letters dropped.
-  function norm(x){return String(x||'').replace(/[\\u064B-\\u0652\\u0670\\u0640]/g,'').replace(/\\s+/g,'').trim();}
-  var e=norm(expected), h=norm(heard);
-  if(!e||!h) return false;
-  // Count letters: if any expected letter count exceeds heard count, letters were dropped.
-  var ce={}, ch={};
-  for(var i=0;i<e.length;i++) ce[e[i]]=(ce[e[i]]||0)+1;
-  for(var j=0;j<h.length;j++) ch[h[j]]=(ch[h[j]]||0)+1;
-  for(var k in ce){ if((ch[k]||0)<ce[k]) return true; }
-  return false;
-}
-window.__reciteMaddRequired=reciteMaddRequired;
-window.__reciteHasDroppedLetters=reciteHasDroppedLetters;
-// Settings UI injection: add to any settings / info panel if present, else create a small panel in coach screen
-function ensureReciteSettings(){
-  if(document.getElementById('reciteSettingsBox')) return;
-  var box=document.createElement('div'); box.id='reciteSettingsBox';
-  box.style.cssText='margin:10px 0;padding:10px;border:1px solid #c9a227;border-radius:10px;font-size:13px;';
-  box.innerHTML='<b>Recite settings</b><br>'
-   +'<label><input type="checkbox" id="reciteSwapChk"> Show Tajweed instead of Recite (swap places)</label><br>'
-   +'<label>On incorrect word: <select id="recitePointerSel"><option value="stop">Stop and wait until correct</option><option value="skip">Mark red and continue to follow</option></select></label><br>'
-   +'<label>Madd seconds per count: <input id="reciteMaddInput" type="number" min="0.2" max="1" step="0.05" style="width:70px"></label>'
-   +'<div style="opacity:.75">Recite: green=correct, light red=incorrect / skipped, light yellow=tashkeel / peeked / missed (3+ letters dropped). Default: mark red and continue to follow.</div>';
-  // Try to place inside settings screen, otherwise after toggles
-  var host=document.querySelector('[id*="setting" i], [class*="setting" i]')||document.querySelector('.toggles');
-  if(host) host.appendChild(box); else document.body.appendChild(box);
-  var chk=document.getElementById('reciteSwapChk'), sel=document.getElementById('recitePointerSel'), inp=document.getElementById('reciteMaddInput');
-  chk.checked=window.__recite.swap; sel.value=window.__recite.pointer; inp.value=window.__recite.maddSecPerCount;
-  chk.addEventListener('change',function(){window.__recite.swap=chk.checked; LS.set('qc.swapReciteTajweed',chk.checked?'1':'0'); applySwap();});
-  sel.addEventListener('change',function(){window.__recite.pointer=sel.value; LS.set('qc.recitePointer',sel.value);});
-  inp.addEventListener('change',function(){var v=parseFloat(inp.value)||0.5; window.__recite.maddSecPerCount=v; LS.set('qc.reciteMaddSecPerCount',String(v));});
-}
-function applySwap(){
-  var reciteBtn=document.getElementById('modeReciteBtn'), tajBtn=document.getElementById('modeTajweedBtn');
-  var reciteProg=document.getElementById('progressRecite'), tajProg=document.getElementById('progressTajweed');
-  var showTaj=window.__recite.swap;
-  if(reciteBtn) reciteBtn.style.display=showTaj?'none':'';
-  if(tajBtn) tajBtn.style.display=showTaj?'':'none';
-  if(reciteProg) reciteProg.style.display=showTaj?'none':'';
-  if(tajProg) tajProg.style.display=showTaj?'':'none';
-  // If current mode is hidden by swap, fall back to visible mode
-  try{
-    if(showTaj && window.__currentMode==='recite' && typeof setRecitationMode==='function') setRecitationMode('tajweed');
-    if(!showTaj && window.__currentMode==='tajweed' && typeof setRecitationMode==='function') setRecitationMode('recite');
-  }catch(e){}
-}
-// Recite pointer rule helper for host grading code to call:
-// returns 'stop' | 'skip-one' | 'continue'
-window.__recitePointerAction=function(isWrong, nextWordCorrect){
-  if(!isWrong) return 'continue';
-  if(window.__recite.pointer==='skip') return nextWordCorrect ? 'skip-one' : 'stop';
-  return 'stop';
-};
-// ---- Recite grading helpers (Tarteel-aligned) ----
-window.__currentMode = window.__currentMode || 'follow';
-window.__reciteWrongStreak = 0;
-window.__reciteDroppedCount = function(expected, heard){
-  function norm(x){ return String(x||'').replace(/[\u064B-\u0652\u0670\u0640]/g,'').replace(/\s+/g,'').trim(); }
-  var e=norm(expected), h=norm(heard); var hc={}; for(var i=0;i<h.length;i++) hc[h[i]]=(hc[h[i]]||0)+1;
-  var miss=0; for(var j=0;j<e.length;j++){ if(hc[e[j]]>0) hc[e[j]]--; else miss++; } return miss;
-};
-window.__reciteTashkeelMismatch = function(expectedRaw, heardRaw){
-  if(!expectedRaw||!heardRaw) return false;
-  var diac=/[\u064B-\u0652\u0670\u0653]/g;
-  var e=(String(expectedRaw).match(diac)||[]).join(''); var h=(String(heardRaw).match(diac)||[]).join('');
-  if(!h) return false; return h!==e;
-};
-window.__reciteMark = function(i, kind, reason){
-  var w=(typeof words!=='undefined')?words[i]:null; if(!w||!w.el) return;
-  w.__reciteKind=kind; w.__reciteReason=reason||kind;
-  if(kind==='red') w.el.className='w error';
-  else if(kind==='peeked') w.el.className='w peeked';
-  else if(kind==='yellow') w.el.className='w warned';
-  else w.el.className='w correct';
-  if(w.el.dataset){ w.el.dataset.recite=kind; w.el.dataset.reciteReason=w.__reciteReason; }
-};
-window.__reciteExplain = function(i){
-  var w=(typeof words!=='undefined')?words[i]:null; if(!w) return 'Correct';
-  var r=w.__reciteReason||w.__reciteKind;
-  if(r==='peeked') return 'Peeked word — you looked at this word before reciting it.';
-  if(r==='tashkeel') return 'Tashkeel mistake — the vowel marks (tashkeel) were not correct.';
-  if(r==='missed') return 'Missed — 3 or more letters were dropped from this word: '+(w.raw||'');
-  if(r==='skipped') return 'Skipped word — this word was skipped: '+(w.raw||'');
-  if(r==='extra') return 'Extra word — a word was said that is not in the text.';
-  if(r==='incorrect') return 'Incorrect word — this word was not recited correctly. It stays red after correction.';
-  return 'Correct — this word was recited correctly.';
-};
-window.__reciteRecord = function(i, type, heard){
-  try{
-    var w=words[i]; if(!w) return;
-    var m={idx:(mistakes.length+1), correct:w.raw||'', heard:heard||'', severity:'red', tajweedName:type, verse:w.verse||''};
-    mistakes.push(m);
-    if(typeof mistakesPanel!=='undefined' && mistakesPanel) mistakesPanel.hidden=false;
-    if(typeof mistakeCountBadge!=='undefined' && mistakeCountBadge) mistakeCountBadge.textContent=String(mistakes.length);
-    if(typeof mistakesList!=='undefined' && mistakesList){
-      var li=document.createElement('li'); li.classList.add('severity-red');
-      li.innerHTML='<span class="idx">'+m.idx+'</span><span class="tj-kind">'+type+'</span><span class="correct">'+escapeHtml(m.correct)+'</span>'+(heard?'<span class="heard">→ '+escapeHtml(heard)+'</span>':'');
-      mistakesList.appendChild(li); mistakesList.scrollTop=mistakesList.scrollHeight;
-    }
-  }catch(e){}
-};
-window.__reciteCommit = function(i){
-  var w=words[i]; if(!w) return;
-  window.__reciteWrongStreak=0;
-  var raw=window.__lastHeardRaw||'', heard=window.__lastHeardNorm||'';
-  var dropped=window.__reciteDroppedCount(w.norm||w.raw, heard);
-  if(dropped>=3){ window.__reciteMark(i,'yellow','missed'); window.__reciteRecord(i,'Missed',raw); try{ showToast('<b>'+escapeHtml(w.raw)+'</b><br>missed — 3 or more letters were dropped.',4000);}catch(e){} return; }
-  if(window.__reciteTashkeelMismatch(w.raw||'', raw)){ window.__reciteMark(i,'yellow','tashkeel'); window.__reciteRecord(i,'Tashkeel',raw); return; }
-  window.__reciteMark(i,'green','correct');
-};
-window.__reciteJump = function(k, heardRaw){
-  window.__reciteWrongStreak=0;
-  for(var j=ptr;j<ptr+k;j++){ window.__reciteMark(j,'red','skipped'); window.__reciteRecord(j,'Skipped',''); }
-  window.__reciteCommit(ptr+k);
-};
-window.__reciteHold = function(rawTok, heard){
-  window.__reciteWrongStreak=(window.__reciteWrongStreak||0)+1;
-  var w=words[ptr]; if(!w) return true;
-  if(window.__reciteWrongStreak>=3){
-    window.__reciteMark(ptr,'red','skipped'); window.__reciteRecord(ptr,'Skipped',rawTok);
-    try{ showToast('<b>'+escapeHtml(w.raw)+'</b><br>skipped — word not recognised.',4000);}catch(e){}
-    advancePast(1); try{ noteFollowProgress(); }catch(e){} pendingHeard.length=0; window.__reciteWrongStreak=0; return true;
-  }
-  if(window.__reciteWrongStreak===1){ window.__reciteRecord(ptr,'Extra',rawTok); pendingHeard.length=0; return true; }
-  window.__reciteMark(ptr,'red','incorrect'); window.__reciteRecord(ptr,'Incorrect',rawTok);
-  pendingHeard.length=0; return true;
-};
-document.addEventListener('DOMContentLoaded', function(){
-  var pe=document.getElementById('page')||document.querySelector('.mushaf')||document.body;
-  if(pe) pe.addEventListener('click', function(e){
-    if(window.__currentMode!=='recite') return;
-    var target=e.target.closest?e.target.closest('.w'):null; if(!target) return;
-    var idx=parseInt(target.dataset.idx,10); if(!Number.isFinite(idx)) return;
-    if(target.dataset && target.dataset.recite){ try{ showToast('<b>'+escapeHtml((words[idx]&&words[idx].raw)||'')+'</b><br>'+escapeHtml(window.__reciteExplain(idx)),5000);}catch(err){} return; }
-    if(idx>ptr){ window.__reciteMark(idx,'peeked','peeked'); window.__reciteRecord(idx,'Peeked',''); try{ showToast('<b>'+escapeHtml((words[idx]&&words[idx].raw)||'')+'</b><br>Peeked word — you looked at this word before reciting it.',4000);}catch(err){} }
-  });
-});
-// Wire Recite button: use Tajweed grading path is NOT used; Recite reuses Follow grading by
-// setting followOnly=true in host, then Recite strict checks are applied via __reciteHasDroppedLetters / __reciteMaddRequired
-// in the marking step (see notes in file footer comment). Keep Tajweed button working unchanged.
-document.addEventListener('DOMContentLoaded',function(){
-  ensureReciteSettings(); applySwap();
-  var rb=document.getElementById('modeReciteBtn');
-  if(rb) rb.addEventListener('click',function(){
-    window.__currentMode='recite'; document.body.classList.add('recite-mode');
-    try{ if(typeof setRecitationMode==='function') setRecitationMode('follow'); }catch(e){}
-    document.querySelectorAll('.mode-pill').forEach(function(b){b.classList.remove('active'); b.setAttribute('aria-pressed','false');});
-    rb.classList.add('active'); rb.setAttribute('aria-pressed','true');
-    try{ if(typeof addFeedback==='function') addFeedback('📖 <b>Recite</b> mode — Green=correct, Light red=Incorrect / Skipped, Light yellow=Tashkeel / Peeked / Missed (3+ letters dropped). Tap a coloured word for its explanation.', false, true); }catch(e){}
-  });
-  var tb=document.getElementById('modeTajweedBtn');
-  if(tb) tb.addEventListener('click',function(){ window.__currentMode='tajweed'; document.body.classList.remove('recite-mode'); });
-  var fb=document.getElementById('modeFollowBtn');
-  if(fb) fb.addEventListener('click',function(){ window.__currentMode='follow'; document.body.classList.remove('recite-mode'); });
-});
-})();
-</script>
-<!-- RECITE NOTES: Recite reuses Follow grading. Checks: Correct / Skipped / Incorrect / Extra / Tashkeel / Peeked. Dropped 3+ letters = yellow 'missed'. Not recognised after 3 unmatched tokens = skip, red 'skipped'. Skip: up to 2 words, next word must be plausibly correct. Default pointer: mark red and continue to follow (skip). Madd timing removed. -->
-<style id="reciteFixes">
-/* Recite: light fills, no underlining, light-blue pointer */
+<!-- RECITE v2: integrated in host script -->
+<!-- RECITE v2 -->
+<style id="reciteTarteelOverrides">
+/* Recite (Tarteel-aligned): light fills, no underlining, light-blue pointer */
+body.recite-mode .w.current, .w.recite-current, .w.current.recite-pointer{background:#bfdbfe !important;color:#1e3a8a !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;}
 .w.error{background:#fecaca !important;color:#7f1d1d !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;border-radius:6px;}
 .w.warned{background:#fef08a !important;color:#713f12 !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;border-radius:6px;}
 .w.peeked{background:#fef08a !important;color:#713f12 !important;text-decoration:none !important;box-shadow:none !important;border-radius:6px;}
 .w.correct{background:transparent !important;text-decoration:none !important;}
-body.recite-mode .w.current{background:#bfdbfe !important;color:#1e3a8a !important;text-decoration:none !important;box-shadow:none !important;}
-/* Tabs: active = unmistakable gold */
+.w.error [class^="tj-"], .w.error [class*=" tj-"], .w.warned [class^="tj-"], .w.warned [class*=" tj-"]{background:transparent !important;text-decoration:none !important;box-shadow:none !important;}
+</style>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><style id="fixActiveTabs">
 .mode-pill[data-mode="follow"].active, .mode-pill[data-mode="recite"].active, .mode-pill[data-mode="tajweed"].active{background:#d4af37 !important;color:#1a1400 !important;font-weight:800 !important;border:2px solid #8a6d00 !important;box-shadow:0 4px 14px rgba(0,0,0,.35) !important;}
 .mode-pill:not(.active){opacity:.75;}
 </style>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
