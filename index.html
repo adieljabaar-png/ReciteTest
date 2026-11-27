@@ -1085,6 +1085,9 @@ body.page-dark  .qv-slot .juz-first-row{color:#000 !important;background:#fff !i
 body.page-light .qv-slot .juz-first-row *{color:#fff !important;background:transparent !important;border-color:#fff !important;}
 body.page-dark  .qv-slot .juz-first-row *{color:#000 !important;background:transparent !important;border-color:#000 !important;}
 .juz-first-row{-webkit-box-decoration-break:clone;box-decoration-break:clone;}
+/* Pages 502 + 582: the Juz-start first row inverts edge to edge, not just behind the ayah text. */
+body.page-light .qv-slot .juz-first-row.juz-first-row-full{display:block !important;width:100% !important;}
+body.page-dark .qv-slot .juz-first-row.juz-first-row-full{display:block !important;width:100% !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start::before{content:none !important;}
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-book-content .ayah.juz-start .mushaf-ayah-mark{border-color:currentColor !important;}
 /* The non-Mushaf reading/index view uses block ayah rows too. */
@@ -3122,7 +3125,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">06:50</span>
+    <span class="pdr-item pdr-time" id="pdrTime">07:46</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -10815,6 +10818,7 @@ function applyJuzFirstVisualLines(root){
       if(end>0){
         if(end<value.length) textNode.splitText(end);
         const wrap=document.createElement('span');wrap.className='juz-first-row';
+        try{ const pg=(typeof readerState!=='undefined'&&readerState.currentPage)||0; if(pg===502||pg===582) wrap.classList.add('juz-first-row-full'); }catch(_){}
         textNode.parentNode.insertBefore(wrap,textNode);wrap.appendChild(textNode);
         /* verse fits on one row: take the ayah number medallion (and sajdah sign) with it */
         if(allOnRow){
@@ -10834,6 +10838,7 @@ function applyJuzFirstVisualLines(root){
       }
       if(selected.length){
         const wrap=document.createElement('span');wrap.className='juz-first-row';
+        try{ const pg=(typeof readerState!=='undefined'&&readerState.currentPage)||0; if(pg===502||pg===582) wrap.classList.add('juz-first-row-full'); }catch(_){}
         el.insertBefore(wrap,selected[0]);selected.forEach(n=>wrap.appendChild(n));
       }
     }
@@ -13644,7 +13649,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
