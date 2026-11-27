@@ -3122,7 +3122,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">06:38</span>
+    <span class="pdr-item pdr-time" id="pdrTime">06:50</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -10649,6 +10649,33 @@ async function applyPage401_402Boundary(data){
   }catch(_){}
   return data;
 }
+/* PAGE 500/501/502 BOUNDARY (this Mushaf): the API starts page 501 one verse early and leaves the last five verses of Surah 45 (45:33-37) at the top of page 502. In this Mushaf page 500 closes with page 501's first verse, page 501 closes with 45:33-37, and page 502 opens with 46:1 (Juz 26 start, "Ha Meem"), whose first row is inverted. Juz 26's start verse is already 46:1, so no JUZ_START_VERSE change is needed. */
+async function applyPage500_502Boundary(data){
+  if(!data || !Array.isArray(data.ayahs)) return data;
+  async function rawPage(n){
+    try{ return await fetchPageIndopak(n); }
+    catch(e){ const fb = await _fetchPageByEditionFallback(n); return { pageNumber: n, ayahs: fb.ayahs.map(a => ({ text: a.text, numberInSurah: a.numberInSurah, surah: a.surah ? a.surah.number : 1, surahName: a.surah ? a.surah.name : '', surahEnglishName: a.surah ? a.surah.englishName : '', surahNumberOfAyahs: (a.surah && a.surah.numberOfAyahs) ? a.surah.numberOfAyahs : 0, juz: (typeof a.juz === 'number') ? a.juz : 1, manzil: (typeof a.manzil === 'number') ? a.manzil : 1, ruku: (typeof a.ruku === 'number') ? a.ruku : null, sajda: !!a.sajda, translation: null })) }; }
+  }
+  async function fillTranslations(ayahs, pageNum, idxs){
+    if(!ayahs.some(a => !a.translation)) return;
+    try{ const enRes = await fetchWithTimeout(ALQURAN_API + '/page/' + pageNum + '/' + translationTextId, FETCH_TIMEOUT_MS).catch(() => null);
+      if(enRes && enRes.ok){ const enJson = await enRes.json(); if(enJson.code === 200 && enJson.data && Array.isArray(enJson.data.ayahs)){ const trans = enJson.data.ayahs.map(a => cleanTranslation(a.text)); ayahs.forEach((a, i) => { if(!a.translation) a.translation = trans[idxs[i]] || null; }); } }
+    }catch(_){}
+  }
+  try{
+    if(data.pageNumber === 500){
+      const raw = await rawPage(501);
+      if(raw && Array.isArray(raw.ayahs) && raw.ayahs.length){ const extra = raw.ayahs.slice(0, 1); await fillTranslations(extra, 501, [0]); data.ayahs = data.ayahs.concat(extra); }
+    } else if(data.pageNumber === 501){
+      data.ayahs = data.ayahs.slice(1);
+      const raw = await rawPage(502);
+      if(raw && Array.isArray(raw.ayahs) && raw.ayahs.length >= 5){ const extra = raw.ayahs.slice(0, 5); await fillTranslations(extra, 502, [0, 1, 2, 3, 4]); data.ayahs = data.ayahs.concat(extra); }
+    } else if(data.pageNumber === 502){
+      data.ayahs = data.ayahs.slice(5);
+    }
+  }catch(_){}
+  return data;
+}
 async function fetchPageData(pageNumber){
   let data = null;
   try{ data = await fetchPageIndopak(pageNumber); }
@@ -10667,6 +10694,7 @@ async function fetchPageData(pageNumber){
   }
   data = await applyPage381_382Boundary(data);
   data = await applyPage401_402Boundary(data);
+  data = await applyPage500_502Boundary(data);
   return await applyIndoPakText(data);
 }
 function prefetchAdjacentPages(n){
@@ -13616,7 +13644,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
