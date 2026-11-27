@@ -3149,7 +3149,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">15:14</span>
+    <span class="pdr-item pdr-time" id="pdrTime">15:26</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3228,9 +3228,9 @@ body.light-mode .share-arabic{color:#1a2233;}
       <input type="checkbox" id="chkHideText"> Hide text
     </label>
   </div>
-  <div class="recite-controls">
+  <div class="recite-controls" data-taj-shared-bound="1">
     <button id="btnStop" class="gold-control-small" aria-label="Pause">⏸</button>
-    <button id="btnMic" class="gold-control-main" data-locked-taj="1">Start Reciting 🎤</button>
+    <button id="btnMic" class="gold-control-main">Start Reciting 🎤</button>
     <button id="btnReset" class="gold-control-small" aria-label="Restart">↺</button>
   </div>
   <section class="mistakes-panel hide-immersive" id="mistakesPanel" hidden="">
@@ -5147,276 +5147,16 @@ async function ensureChaptersLocalized(lang) {
   return chaptersLocalCache[lang];
 }
 
-const rmsAnalyser = {isRunning:()=>false,start:()=>false,stop:()=>{},samplesIn:()=>[],vowelRun:()=>({durationMs:0}),voiceDurationMs:()=>0,sampleCount:()=>0,hasSignal:()=>false,minRms:()=>0,bandNoiseFloor:()=>new Float32Array(6),isCalibrated:()=>false,onsetCentroid:()=>0,meanCentroid:()=>0,segmentEndingBefore:()=>null}; const _rmsAnalyserDisabled_UNUSED = (function(){
-  const samples = [];
-  const MAX_AGE_MS = 8000;
-  const SAMPLE_MS  = 30;
-  const SEG_OPEN_RATIO  = 1.5;
-  const SEG_CLOSE_RATIO = 0.8;
-  const SEG_CLOSE_HOLD  = 3;
-  const SEG_GAP_MS      = 60;
-  let MIN_RMS = 0.010;
-  const bandNoiseFloor = new Float32Array(6);
-  let _calibrated = false;
-  let running = false, ctx = null, ctxOwned = false, source = null, analyser = null,
-      timeBuf = null, freqBuf = null, timer = null;
-  let _lastCalibrationAt = 0;
-
-  function calibrateMinRms(){
-    if (samples.length < 60) return;
-    const now = performance.now();
-    if (now - _lastCalibrationAt < 4000) return;
-    _lastCalibrationAt = now;
-    const recent = samples.slice(-120);
-    const sorted = recent.map(s => s.rms).sort((a, b) => a - b);
-    const noiseFloor = sorted[Math.floor(sorted.length * 0.2)];
-    const target = Math.max(0.008, Math.min(0.050, noiseFloor * 3));
-    MIN_RMS = MIN_RMS * 0.7 + target * 0.3;
-  }
-  function calibrateBandNoise(){
-    if (samples.length < 100) return;
-    const recent = samples.slice(-150);
-    const sorted = recent.slice().sort((a, b) => a.rms - b.rms);
-    const quiet = sorted.slice(0, Math.floor(sorted.length * 0.3));
-    if (!quiet.length) return;
-    for (let b = 0; b < 6; b++){
-      let sum = 0;
-      for (let i = 0; i < quiet.length; i++) sum += (quiet[i].bands[b] || 0);
-      bandNoiseFloor[b] = sum / quiet.length;
-    }
-    _calibrated = true;
-  }
-  function computeBands(dbBuf){
-    const N = dbBuf.length;
-    const nyq = (ctx ? ctx.sampleRate : 44100) / 2;
-    const binHz = nyq / N;
-    const edges = [0, 250, 400, 1000, 2000, 4000, 8000];
-    const bands = [0, 0, 0, 0, 0, 0];
-    let totalLin = 0, weighted = 0;
-    for (let i = 0; i < N; i++){
-      const hz = i * binHz;
-      const db = dbBuf[i];
-      const lin = db < -100 ? 0 : Math.pow(10, db / 20);
-      for (let b = 0; b < 6; b++){
-        if (hz >= edges[b] && hz < edges[b+1]){ bands[b] += lin; break; }
-      }
-      totalLin += lin;
-      weighted += lin * hz;
-    }
-    const centroid = totalLin > 1e-9 ? weighted / totalLin : 0;
-    let logSum = 0, nValid = 0;
-    for (let b = 0; b < 6; b++){
-      if (bands[b] > 1e-9){ logSum += Math.log(bands[b]); nValid++; }
-    }
-    const geoMean = nValid > 0 ? Math.exp(logSum / nValid) : 0;
-    const arithMean = bands.reduce((a, b) => a + b, 0) / 6 + 1e-12;
-    const flatness = arithMean > 0 ? geoMean / arithMean : 0;
-    return { bands, centroid, flatness };
-  }
-  function computeHarmonicity(tb){
-    const N = tb.length;
-    const sr = ctx ? ctx.sampleRate : 44100;
-    const decim = 4;
-    const D = Math.floor(N / decim);
-    if (D < 8) return 0;
-    const ds = new Float32Array(D);
-    for (let i = 0; i < D; i++) ds[i] = tb[i * decim];
-    const srD = sr / decim;
-    const lagMin = Math.max(1, Math.floor(srD / 400));
-    const lagMax = Math.min(D - 1, Math.floor(srD / 80));
-    if (lagMax <= lagMin) return 0;
-    let r0 = 0;
-    for (let i = 0; i < D; i++) r0 += ds[i] * ds[i];
-    if (r0 < 1e-9) return 0;
-    let best = 0;
-    for (let lag = lagMin; lag <= lagMax; lag++){
-      let r = 0;
-      for (let i = 0; i < D - lag; i++) r += ds[i] * ds[i + lag];
-      if (r > best) best = r;
-    }
-    return Math.min(1, best / r0);
-  }
-  function loop(){
-    if (!running || !analyser) return;
-    try{
-      analyser.getFloatTimeDomainData(timeBuf);
-      analyser.getFloatFrequencyData(freqBuf);
-      let sum = 0;
-      for (let i = 0; i < timeBuf.length; i++) sum += timeBuf[i] * timeBuf[i];
-      const rms = Math.sqrt(sum / timeBuf.length);
-      const now = performance.now();
-      const b = computeBands(freqBuf);
-      const harm = computeHarmonicity(timeBuf);
-      samples.push({ t: now, rms, bands: b.bands, centroid: b.centroid, flatness: b.flatness, harmonicity: harm });
-      const cutoff = now - MAX_AGE_MS;
-      while (samples.length && samples[0].t < cutoff) samples.shift();
-      calibrateMinRms();
-      calibrateBandNoise();
-    }catch(_){}
-    timer = setTimeout(loop, SAMPLE_MS);
-  }
-  function start(stream){
-    if (running) return true;
-    if (!stream) return false;
-    try{
-      const shared = window.__sharedAudioCtx;
-      if (shared && shared.state === 'running'){ ctx = shared; ctxOwned = false; }
-      else {
-        try {
-          ctx = new (window.AudioContext || window.webkitAudioContext)();
-          ctxOwned = true;
-          try { if (ctx.state === 'suspended') { ctx.resume().catch(() => {}); } } catch(_) {}
-        } catch (e) { ctx = null; return false; }
-      }
-      source   = null; /* REMOVED: no mic-stream capture */
-      analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0;
-      source.connect(analyser);
-      timeBuf = new Float32Array(analyser.fftSize);
-      freqBuf = new Float32Array(analyser.frequencyBinCount);
-      running = true;
-      loop();
-      return true;
-    }catch(e){
-      if (ctxOwned && ctx){ try{ ctx.close(); }catch(_){} }
-      ctx = null; source = null; analyser = null; timeBuf = null; freqBuf = null;
-      ctxOwned = false; running = false;
-      return false;
-    }
-  }
-  function stop(){
-    running = false;
-    if (timer){ clearTimeout(timer); timer = null; }
-    if (source){ try{ source.disconnect(); }catch(_){} source = null; }
-    if (analyser){ try{ analyser.disconnect(); }catch(_){} analyser = null; }
-    if (ctxOwned && ctx){ try{ ctx.close(); }catch(_){} }
-    ctx = null; ctxOwned = false;
-    samples.length = 0;
-  }
-  function voiceDurationMs(t0, t1){
-    if (!(t1 > t0)) return 0;
-    let ms = 0;
-    for (let i = 0; i < samples.length; i++){
-      const s = samples[i];
-      if (s.t >= t0 && s.t <= t1 && s.rms >= MIN_RMS) ms += SAMPLE_MS;
-    }
-    return ms;
-  }
-  function hasSignal(){
-    if (!running) return false;
-    const n = samples.length;
-    if (n < 10) return false;
-    const from = Math.max(0, n - 100);
-    let maxRms = 0;
-    for (let i = from; i < n; i++) if (samples[i].rms > maxRms) maxRms = samples[i].rms;
-    return maxRms >= MIN_RMS * 0.8;
-  }
-  function samplesIn(t0, t1){
-    if (!(t1 > t0)) return [];
-    const out = [];
-    for (let i = 0; i < samples.length; i++){
-      const s = samples[i];
-      if (s.t >= t0 && s.t <= t1) out.push(s);
-    }
-    return out;
-  }
-  function segments(t0, t1){
-    if (!(t1 > t0)) return [];
-    const list = samplesIn(t0, t1);
-    if (!list.length) return [];
-    const openT = MIN_RMS * SEG_OPEN_RATIO;
-    const closeT = MIN_RMS * SEG_CLOSE_RATIO;
-    const out = [];
-    let cur = null, closeCnt = 0;
-    for (let i = 0; i < list.length; i++){
-      const s = list[i];
-      if (!cur){
-        if (s.rms >= openT){ cur = { start: s.t, end: s.t, peakRms: s.rms }; closeCnt = 0; }
-      } else {
-        if (s.rms >= closeT){ cur.end = s.t; if (s.rms > cur.peakRms) cur.peakRms = s.rms; closeCnt = 0; }
-        else { closeCnt++; if (closeCnt >= SEG_CLOSE_HOLD){ out.push(cur); cur = null; closeCnt = 0; } }
-      }
-    }
-    if (cur) out.push(cur);
-    const merged = [];
-    for (let i = 0; i < out.length; i++){
-      const seg = out[i];
-      if (merged.length && seg.start - merged[merged.length-1].end < SEG_GAP_MS){
-        merged[merged.length-1].end = seg.end;
-        merged[merged.length-1].peakRms = Math.max(merged[merged.length-1].peakRms, seg.peakRms);
-      } else {
-        merged.push({ start: seg.start, end: seg.end, peakRms: seg.peakRms });
-      }
-    }
-    for (let i = 0; i < merged.length; i++) merged[i].durationMs = merged[i].end - merged[i].start;
-    return merged;
-  }
-  function segmentEndingBefore(t){
-    if (!samples.length) return null;
-    const segs = segments(0, t + 100);
-    return segs.length ? segs[segs.length - 1] : null;
-  }
-  function vowelRun(t0, t1){
-    if (!(t1 > t0)) return { durationMs: 0 };
-    const list = samplesIn(t0, t1);
-    if (!list.length) return { durationMs: 0 };
-    const threshold = MIN_RMS * 1.3;
-    /* Real timestamps, not a fixed 30 ms per sample: phone timers drift and
-       throttle, which used to undercount long vowels. A gap > 100 ms between
-       two voiced samples means audio was lost, so the run restarts. */
-    let best = 0, runStart = -1, lastT = -1;
-    for (let i = 0; i < list.length; i++){
-      const s = list[i];
-      if (s.rms > threshold && s.harmonicity > 0.5){
-        if (runStart < 0 || s.t - lastT > 100) runStart = s.t;
-        lastT = s.t;
-        const d = (s.t - runStart) + SAMPLE_MS;
-        if (d > best) best = d;
-      } else {
-        runStart = -1;
-      }
-    }
-    return { durationMs: best };
-  }
-  function nasalRatio(t0, t1){
-    const list = samplesIn(t0, t1);
-    if (!list.length) return 0;
-    let sum = 0, n = 0;
-    for (let i = 0; i < list.length; i++){
-      const s = list[i];
-      if (s.rms < MIN_RMS * 1.2) continue;
-      const low = s.bands[1];
-      const tot = s.bands[0] + s.bands[1] + s.bands[2] + s.bands[3] + s.bands[4] + s.bands[5] + 1e-9;
-      if (tot > 0){ sum += low / tot; n++; }
-    }
-    return n > 0 ? sum / n : 0;
-  }
-  function onsetCentroid(t0, ms){
-    const list = samplesIn(t0, t0 + ms);
-    if (!list.length) return 0;
-    let sum = 0;
-    for (let i = 0; i < list.length; i++) sum += list[i].centroid;
-    return sum / list.length;
-  }
-  function meanCentroid(t0, t1){
-    const list = samplesIn(t0, t1);
-    if (!list.length) return 0;
-    let sum = 0;
-    for (let i = 0; i < list.length; i++) sum += list[i].centroid;
-    return sum / list.length;
-  }
-  return {
-    start, stop, voiceDurationMs, hasSignal,
-    samplesIn, segments, segmentEndingBefore, vowelRun, nasalRatio,
-    onsetCentroid, meanCentroid,
-    bandNoiseFloor: () => bandNoiseFloor,
-    isCalibrated: () => _calibrated,
-    minRms: () => MIN_RMS,
-    isRunning: () => running,
-    sampleCount: () => samples.length
-  };
-})();
+const rmsAnalyser = {
+  isRunning:()=>!!(window.__tajShared && window.__tajShared.worklet && !window.__tajShared.stopped),
+  start:()=>false, stop:()=>{},
+  samplesIn:(a,b)=>{ const S=window.__tajShared; if(!S||!S.raw) return []; const sr=16000,out=[]; for(let k=Math.max(0,Math.floor(a/1000*sr)); k<Math.min(S.raw.length,Math.ceil(b/1000*sr)); k++) out.push(S.raw[k]); return out; },
+  vowelRun:(a,b)=>{ const S=window.__tajShared; if(!S) return {durationMs:0}; let run=0,mx=0; (S.rmsFrames?S.rmsFrames():[]).filter(x=>x.startMs>=a&&x.endMs<=b).forEach(x=>{ if(x.rms>0.01){run+=10;mx=Math.max(mx,run);} else run=0; }); return {durationMs:mx}; },
+  voiceDurationMs:(a,b)=>{ const S=window.__tajShared; if(!S) return 0; return (S.rmsFrames?S.rmsFrames():[]).filter(x=>x.startMs>=a&&x.endMs<=b&&x.rms>0.01).length*10; },
+  sampleCount:()=>((window.__tajShared&&window.__tajShared.raw)?window.__tajShared.raw.length:0),
+  hasSignal:()=>!!(window.__tajShared&&window.__tajShared.raw&&window.__tajShared.raw.some(v=>Math.abs(v)>0.01)),
+  minRms:()=>{ const S=window.__tajShared; if(!S||!S.raw||!S.raw.length) return 0; let ss=0; for(const v of S.raw) ss+=v*v; return Math.sqrt(ss/S.raw.length); },
+  bandNoiseFloor:()=>new Float32Array(6), isCalibrated:()=>false, onsetCentroid:()=>0, meanCentroid:()=>0, segmentEndingBefore:()=>null}; /* removed: dead _rmsAnalyserDisabled_UNUSED script */
 
 function recPush(newToks){
   if(!newToks || !newToks.length) return;
@@ -8142,7 +7882,7 @@ let micSession = 0;
 const _micTestClosers = new Set();
 let _ctxSuspendedByUs = false;
 
-async function ensureMicStream(){ return null; } /* ASR-only: mic capture disabled. SpeechRecognition owns the mic. */
+async function ensureMicStream(){ return (window.__tajShared && window.__tajShared.stream) || null; } /* SHARED: the one getMedia stream */
 function muteMicStream(){ /* REMOVED: no mic-stream capture - ASR only */ }
 function releaseMicStream(){ micEpoch++; micStream = null; /* REMOVED: no mic-stream capture - ASR only, no track stop */ }
 function resetMicDiagState(){
@@ -13781,8 +13521,14 @@ window.addEventListener('contextmenu', function(event) {
 })();
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+
+
+
 <script>
-/* LOCKED PATCH (adapted to this file's pill UI) — Tajweed ASR-first / getMedia +0.5s / watchdog / pointer-independent triple-lock. Hide + Test already wired via chkHideText chip + mode pills; no tick boxes added. */
+/* SHARED-CAPTURE TAJWEED — ONE getMedia stream, THREE supports share the SAME audio.
+   NO webkitSpeechRecognition in Tajweed (it opens a second, unshareable mic on iPhone).
+   AudioContext + getUserMedia are created SYNCHRONOUSLY inside the tap gesture (iOS suspends ctx created in setTimeout).
+   RMS = local AudioWorklet on same RAW. ASR + MFA = server /api/tajweed-check on that SAME RAW/blob. Pointer advances independently. */
 (function(){
   var _wid=0;
   function assignWordIds(){ document.querySelectorAll('#screenCoach .w, .mushaf .w, .mushaf-book-content .w').forEach(function(el){ if(!el.dataset.wordId){ el.dataset.wordId='w'+(_wid++); } }); }
@@ -13791,39 +13537,110 @@ window.addEventListener('contextmenu', function(event) {
   function isTajweedOn(){ var a=document.querySelector('.toggle.mode-pill.active'); return !!(a && a.getAttribute('data-mode')==='tajweed-server'); }
   var S=null;
   var WORKLET_CODE="class P extends AudioWorkletProcessor{constructor(){super();this.n=0;}process(inp){var c=inp[0]; if(!c||!c[0]) return true; var ch=c[0]; var s=0; for(var i=0;i<ch.length;i++) s+=ch[i]*ch[i]; this.port.postMessage({samples:Array.from(ch),rms:Math.sqrt(s/ch.length),idx:this.n}); this.n+=ch.length; return true;}} registerProcessor('taj-pcm',P);";
-  function startTajweedListen(){
+  function rmsFrames(){ if(!S||!S.raw.length) return []; var sr=16000,fs=320,hop=160,out=[]; for(var s=0;s+fs<=S.raw.length;s+=hop){ var ss=0; for(var i=0;i<fs;i++) ss+=S.raw[s+i]*S.raw[s+i]; var r=Math.sqrt(ss/fs); out.push({startMs:s/sr*1000,endMs:(s+fs)/sr*1000,rms:r}); } return out; }
+  function rmsInWindow(startMs,endMs){ var frames=rmsFrames(); var inW=frames.filter(function(f){return f.startMs>=startMs&&f.endMs<=endMs;}); var first=frames.filter(function(f){return f.startMs<200;}); var noise=first.length?first.reduce(function(a,f){return a+f.rms;},0)/first.length:0.005; var peak=inW.reduce(function(a,f){return Math.max(a,f.rms);},0); var voiced=inW.some(function(f){return f.rms>Math.max(noise*2.5,0.01);}); var run=0,maxRun=0; inW.forEach(function(f){ if(f.rms>Math.max(noise*2.5,0.01)){run+=10;maxRun=Math.max(maxRun,run);} else run=0; }); return {voiced:voiced,peak:peak,noise:noise,vowelRunMs:maxRun}; }
+  // START — called from the tap itself, NOT from setTimeout. ctx + getMedia inside gesture.
+  async function startTajweedShared(){
     if(S && !S.stopped) return;
     var id=Date.now(), t0=performance.now();
-    S={id:id, t0:t0, raw:[], stopped:false, warmCtx:(S&&S.warmCtx)||null, rawOffsetMs:500, lastFrameAt:0, ptr:0};
-    try{ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(SR){ S.asr=new SR(); S.asr.lang='ar-SA'; S.asr.continuous=true; S.asr.interimResults=true; S.asr.onresult=function(e){ if(!S||S.id!==id) return; for(var i=e.resultIndex;i<e.results.length;i++){ var txt=e.results[i][0].transcript||''; onAsrTranscript(txt, performance.now()-t0, id); } }; S.asr.onerror=function(){}; S.asr.start(); } }catch(_){}
-    setTimeout(function(){ startRaw(id); }, 500);
-    S.capTimer=setTimeout(function(){ stopTajweedListen('cap-49.5s'); }, 49500);
-    S.ptr=0; assignWordIds();
+    try{
+      var Ctx=window.AudioContext||window.webkitAudioContext;
+      var ctx=new Ctx({sampleRate:16000});
+      await ctx.resume(); // inside gesture — iOS allows this
+      var stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+      S={id:id,t0:t0,ctx:ctx,stream:stream,raw:[],stopped:false,warmCtx:null,lastFrameAt:performance.now(),ptr:0,chunks:[]};
+      window.__tajShared=S;
+      S.rmsFrames=rmsFrames;
+      // RMS on the SAME stream
+      var url=URL.createObjectURL(new Blob([WORKLET_CODE],{type:'application/javascript'}));
+      await ctx.audioWorklet.addModule(url);
+      var src=ctx.createMediaStreamSource(stream);
+      S.worklet=new AudioWorkletNode(ctx,'taj-pcm');
+      S.worklet.port.onmessage=function(e){ if(!S||S.id!==id) return; for(var i=0;i<e.data.samples.length;i++) S.raw.push(e.data.samples[i]); S.lastFrameAt=performance.now(); };
+      src.connect(S.worklet);
+      // ASR + MFA via server on the SAME audio — MediaRecorder on the SAME stream
+      try{
+        var mime=['audio/webm;codecs=opus','audio/webm','audio/mp4',''].find(function(m){ try{ return !m||MediaRecorder.isTypeSupported(m); }catch(_){ return false; } });
+        S.recorder=new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
+        S.recorder.ondataavailable=function(ev){ if(ev.data&&ev.data.size) S.chunks.push(ev.data); };
+        S.recorder.onstop=function(){ sendToServer(id); };
+        S.recorder.start(250);
+      }catch(e){ console.warn('[Tajweed] MediaRecorder failed', e); }
+      S.capTimer=setTimeout(function(){ stopTajweedShared('cap-49.5s'); }, 49500);
+      startWatchdog(id);
+      assignWordIds();
+    }catch(e){
+      console.warn('[Tajweed] shared start failed', e);
+      try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Tajweed mic could not start. Allow microphone access, then tap Start Reciting again.'; fb.prepend(d); } }catch(_){}
+      S=null; window.__tajShared=null;
+    }
   }
-  async function startRaw(id){
-    if(!S||S.id!==id||S.stopped) return;
-    try{ S.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); S.ctx=S.warmCtx||new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000}); S.warmCtx=null; await S.ctx.resume(); var src=S.ctx.createMediaStreamSource(S.stream); var url=URL.createObjectURL(new Blob([WORKLET_CODE],{type:'application/javascript'})); await S.ctx.audioWorklet.addModule(url); S.worklet=new AudioWorkletNode(S.ctx,'taj-pcm'); S.worklet.port.onmessage=function(e){ if(!S||S.id!==id) return; for(var i=0;i<e.data.samples.length;i++) S.raw.push(e.data.samples[i]); S.lastFrameAt=performance.now(); }; src.connect(S.worklet); S.lastFrameAt=performance.now(); startWatchdog(id); }catch(e){ console.warn('[Tajweed] RAW start failed', e); }
+  async function sendToServer(id){
+    if(!S||S.id!==id) return;
+    if(!S.chunks.length) return;
+    try{
+      var blob=new Blob(S.chunks, {type: S.recorder&&S.recorder.mimeType||'audio/webm'});
+      var words=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w')).map(function(el){ return {wordId:el.dataset.wordId||'', text:el.textContent||''}; });
+      var fd=new FormData();
+      fd.append('audio', blob, 'tajweed.webm');
+      fd.append('expected', JSON.stringify(words));
+      fd.append('t0', String(S.t0));
+      var res=await fetch('/api/tajweed-check', {method:'POST', body:fd});
+      if(!res.ok) throw new Error('server '+res.status);
+      var data=await res.json();
+      var list=data.words||data.results||[];
+      // Pointer + colouring: server words arrive as a batch, but colour by wordId — out-of-sequence safe.
+      // Pointer advances through server words in order, never waiting on RMS (RMS already in same buffer).
+      list.forEach(function(w){ onServerWord(w, id); });
+      if(!list.length){ try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Server returned no words. Check /api/tajweed-check is running, then re-record.'; fb.prepend(d); } }catch(_){} }
+    }catch(e){
+      console.warn('[Tajweed] server check failed', e);
+      try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Server not connected — Tajweed check could not run. Tap Retry when the server is up.'; fb.prepend(d); } }catch(_){}
+    }
   }
-  function startWatchdog(id){ clearInterval(S&&S.watchdog); if(!S) return; S.watchdog=setInterval(function(){ if(!S||S.id!==id||S.stopped){ clearInterval(S&&S.watchdog); return; } var trackDead=!S.stream||!S.stream.getTracks().some(function(tr){return tr.readyState==='live';}); var ctxDead=!S.ctx||S.ctx.state!=='running'; var stalled=(performance.now()-(S.lastFrameAt||performance.now()))>1000; if(trackDead||ctxDead||stalled){ restartRawOnly(id); } },2000); }
-  async function restartRawOnly(id){ if(!S||S.id!==id||S.stopped) return; try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} startRaw(id); }
-  function stopTajweedListen(reason){ if(!S||S.stopped) return; S.stopped=true; clearTimeout(S.capTimer); clearInterval(S.watchdog); try{ S.asr&&S.asr.stop(); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.ctx&&S.ctx.suspend(); }catch(_){} S.warmCtx=S.ctx; renderTajweedSummary(); }
-  function hardStopTajweed(){ if(!S) return; stopTajweedListen('hard-stop'); try{ S.ctx&&S.ctx.close(); }catch(_){} S.warmCtx=null; S.raw=[]; S=null; }
-  document.addEventListener('visibilitychange', function(){ if(document.hidden) hardStopTajweed(); });
-  window.addEventListener('pagehide', hardStopTajweed); window.addEventListener('beforeunload', hardStopTajweed);
   var wordQueue=new Map();
   function normalise(s){ return String(s||'').replace(/[\u064B-\u0652\u0670]/g,'').replace(/[^\u0600-\u06FFa-zA-Z]/g,'').trim(); }
-  function onAsrTranscript(text, asrMs, sessionId){ if(!S||S.id!==sessionId||S.stopped) return; if(!isTajweedOn()) return; assignWordIds(); var ws=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w')); if(!ws.length) ws=Array.prototype.slice.call(document.querySelectorAll('.mushaf .w')); if(S.ptr>=ws.length) return; var wordEl=ws[S.ptr]; var expected=normalise(wordEl.textContent||''); var heard=normalise(text); var match = heard && (heard.indexOf(expected)>=0 || expected.indexOf(heard)>=0 || heard.slice(-expected.length)===expected); if(!match) return; var wordId=wordEl.dataset.wordId||('w'+S.ptr); wordQueue.set(wordId, {wordId:wordId, el:wordEl, expected:expected, asrStartMs:asrMs, asrEndMs:asrMs+200, status:'checking'}); wordEl.classList.add('current'); S.ptr++; checkWordInBackground(wordId, sessionId).catch(function(){ markNotVerified(wordId); }); }
-  async function checkWordInBackground(wordId, sessionId){ var job=wordQueue.get(wordId); if(!job) return; if(!S||S.id!==sessionId) return; var mfa=forceAlign(job, sessionId); var rms=rmsInWindow(mfa.startMs, mfa.endMs); var locked = job.asrStartMs!=null && Math.abs(job.asrStartMs-mfa.startMs)<=150 && Math.abs(job.asrEndMs-mfa.endMs)<=150 && rms.voiced && rms.peak>rms.noise; if(!locked) return markNotVerified(wordId); var res=checkTajweedRules(job.expected, mfa, rms); colourWordById(wordId, res); }
-  function forceAlign(job, sessionId){ var ws=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w')); var idx=ws.findIndex(function(el){return el.dataset.wordId===job.wordId;}); if(idx<0) idx=0; var total=((S&&S.raw.length/16000*1000)||1000)+500; var per=total/Math.max(1,ws.length); var start=idx*per, end=(idx+1)*per; var frames=rmsFrames(); var inW=frames.filter(function(f){return f.startMs>=start&&f.endMs<=end;}); var voiced=inW.filter(function(f){return f.rms>0.01;}); if(voiced.length){ start=voiced[0].startMs; end=voiced[voiced.length-1].endMs; } return {startMs:start, endMs:end}; }
-  function rmsFrames(){ if(!S||!S.raw.length) return []; var sr=16000, fs=320, hop=160, out=[]; for(var s=0;s+fs<=S.raw.length;s+=hop){ var ss=0; for(var i=0;i<fs;i++) ss+=S.raw[s+i]*S.raw[s+i]; var r=Math.sqrt(ss/fs); out.push({startMs:s/sr*1000, endMs:(s+fs)/sr*1000, rms:r}); } return out; }
-  function rmsInWindow(startMs,endMs){ var frames=rmsFrames(); var inW=frames.filter(function(f){return f.startMs>=startMs&&f.endMs<=endMs;}); var first=frames.filter(function(f){return f.startMs<200;}); var noise=first.length?first.reduce(function(a,f){return a+f.rms;},0)/first.length:0.005; var peak=inW.reduce(function(a,f){return Math.max(a,f.rms);},0); var voiced=inW.some(function(f){return f.rms>Math.max(noise*2.5,0.01);}); var run=0,maxRun=0; inW.forEach(function(f){ if(f.rms>Math.max(noise*2.5,0.01)){run+=10;maxRun=Math.max(maxRun,run);} else run=0; }); return {voiced:voiced, peak:peak, noise:noise, vowelRunMs:maxRun}; }
+  function onServerWord(w, sessionId){
+    if(!S||S.id!==sessionId) return;
+    var wordId=w.wordId||'';
+    var el=wordId?document.querySelector('.w[data-word-id="'+wordId+'"]'):null;
+    if(!el) return;
+    // Pointer moves NOW on server word — do NOT await RMS (RMS is same buffer, computed synchronously below)
+    wordQueue.set(wordId, {wordId:wordId, el:el, expected:normalise(el.textContent||''), asrStartMs:w.asrStartMs!=null?w.asrStartMs:w.startMs, asrEndMs:w.asrEndMs!=null?w.asrEndMs:w.endMs, status:'checking'});
+    el.classList.add('current');
+    if(S.ptr!=null) S.ptr++;
+    // Triple-lock: ASR + MFA windows from server, RMS from SAME raw buffer
+    var mfaStart=w.mfaStartMs!=null?w.mfaStartMs:w.startMs, mfaEnd=w.mfaEndMs!=null?w.mfaEndMs:w.endMs;
+    var rms=rmsInWindow(mfaStart||0, mfaEnd||0);
+    var locked = mfaStart!=null && Math.abs((w.asrStartMs||0)-mfaStart)<=150 && Math.abs((w.asrEndMs||0)-mfaEnd)<=150 && rms.voiced && rms.peak>rms.noise;
+    if(!locked) return markNotVerified(wordId);
+    colourWordById(wordId, checkTajweedRules(el.textContent||'', {startMs:mfaStart,endMs:mfaEnd}, rms));
+  }
   function checkTajweedRules(expected, mfa, rms){ var hasMadd=/[\u0640\u0653\u0654\u0655]/.test(expected); var tempo=120; var counts=rms.vowelRunMs/tempo; if(hasMadd && (counts<1.7||counts>2.3)){ return {kind:'red', label:'Madd too short', finding:'Madd too short', measured:counts.toFixed(2)+' counts', target:'2 counts (Madd Tabeei)', happened:'Vowel held '+Math.round(rms.vowelRunMs)+'ms, tempo '+Math.round(tempo)+'ms = '+counts.toFixed(2)+' counts.', todo:'Hold the vowel a little longer — about twice your short vowel.', mfaWindow:Math.round(mfa.startMs)+'-'+Math.round(mfa.endMs)+'ms', rmsVowel:Math.round(rms.vowelRunMs)+'ms'}; } return {kind:'green', label:'✓ Correct', finding:'Correct', measured:counts.toFixed(2)+' counts', target:'Target met', happened:'Word matched in ASR, MFA and RMS on the same timestamped window.', todo:'Keep going.', mfaWindow:Math.round(mfa.startMs)+'-'+Math.round(mfa.endMs)+'ms', rmsVowel:Math.round(rms.vowelRunMs)+'ms'}; }
   function colourWordById(wordId, res){ var job=wordQueue.get(wordId); var el=job&&job.el; if(!el) el=document.querySelector('.w[data-word-id="'+wordId+'"]'); if(!el) return; el.querySelectorAll(':scope > .coach-badge, :scope > .coach-finding').forEach(function(n){n.remove();}); var badge=document.createElement('span'); badge.className='coach-badge '+res.kind; badge.textContent=res.label; var finding=document.createElement('div'); finding.className='coach-finding'; finding.innerHTML='<b>Finding:</b> '+res.finding+'<br><b>Measured:</b> '+res.measured+' — <b>Target:</b> '+res.target+'<br><b>What happened:</b> '+res.happened+'<br><b>What to do:</b> '+res.todo+'<br><b>Proof:</b> ASR ✓ · MFA '+res.mfaWindow+' · RMS vowel '+res.rmsVowel+' · Lock LOCKED ✅'; el.appendChild(badge); el.appendChild(finding); if(job) job.status='done'; }
   function markNotVerified(wordId){ colourWordById(wordId, {kind:'amber', label:'Not verified', finding:'Not verified', measured:'—', target:'—', happened:'ASR, MFA and RMS did not lock on the same timestamped word.', todo:'Re-record this ayah.', mfaWindow:'—', rmsVowel:'—'}); }
-  function renderTajweedSummary(){ try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.innerHTML='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){} }
-  function bindMic(){ var b=document.getElementById('btnMic'); if(!b||b.dataset.lockedTaj) return; b.dataset.lockedTaj='1'; b.addEventListener('click', function(e){ if(!isTajweedOn()) return; e.stopImmediatePropagation(); e.preventDefault(); if(!S||S.stopped){ startTajweedListen(); } else { stopTajweedListen('user-stop'); } }, true); }
-  document.addEventListener('DOMContentLoaded', bindMic); setTimeout(bindMic, 600); setTimeout(bindMic, 2000);
-  window.__tajweedSession = function(){ return S; };
+  function startWatchdog(id){ clearInterval(S&&S.watchdog); if(!S) return; S.watchdog=setInterval(function(){ if(!S||S.id!==id||S.stopped){ clearInterval(S&&S.watchdog); return; } var trackDead=!S.stream||!S.stream.getTracks().some(function(tr){return tr.readyState==='live';}); var ctxDead=!S.ctx||S.ctx.state!=='running'; var stalled=(performance.now()-(S.lastFrameAt||performance.now()))>1000; if(trackDead||ctxDead||stalled){ restartRawOnly(id); } },2000); }
+  async function restartRawOnly(id){ if(!S||S.id!==id||S.stopped) return; try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.recorder&&S.recorder.stop(); }catch(_){} /* SAME t0, SAME session — re-open ONE stream, re-attach RMS + recorder */ try{ var stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); S.stream=stream; window.__tajShared=S; var src=S.ctx.createMediaStreamSource(stream); src.connect(S.worklet); S.lastFrameAt=performance.now(); }catch(e){ console.warn('[Tajweed] RAW restart failed', e); } }
+  function stopTajweedShared(reason){ if(!S||S.stopped) return; S.stopped=true; clearTimeout(S.capTimer); clearInterval(S.watchdog); try{ S.recorder&&S.recorder.state!=='inactive'&&S.recorder.stop(); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.ctx&&S.ctx.suspend(); }catch(_){} S.warmCtx=S.ctx; try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){} }
+  function hardStopTajweed(){ if(!S) return; stopTajweedShared('hard-stop'); try{ S.ctx&&S.ctx.close(); }catch(_){} S.warmCtx=null; S.raw=[]; S=null; window.__tajShared=null; }
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) hardStopTajweed(); });
+  window.addEventListener('pagehide', hardStopTajweed); window.addEventListener('beforeunload', hardStopTajweed);
+  // Intercept at ANCESTOR in CAPTURE phase — this runs BEFORE the app's own btnMic handler on the button,
+  // so in Tajweed we can stop the app's ASR-only handler from also starting. Follow/Test pass through untouched.
+  function bindIntercept(){
+    var wrap=document.querySelector('.recite-controls')||document.getElementById('screenCoach')||document.body;
+    if(!wrap||wrap.dataset.tajSharedBound) return; wrap.dataset.tajSharedBound='1';
+    wrap.addEventListener('click', function(e){
+      var btn=e.target&&e.target.closest?e.target.closest('#btnMic'):null;
+      if(!btn) return;
+      if(!isTajweedOn()) return; // Follow/Test: let app handler run
+      e.stopPropagation(); e.preventDefault();
+      if(!S||S.stopped){ startTajweedShared(); } else { stopTajweedShared('user-stop'); }
+    }, true);
+  }
+  document.addEventListener('DOMContentLoaded', bindIntercept); setTimeout(bindIntercept, 600); setTimeout(bindIntercept, 2000);
+  window.__tajweedSession=function(){ return S; };
+  window.__tajShared=null;
 })();
 </script>
 
