@@ -1,7 +1,7 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v5.0.1
+   Quran Recitation Coach — Service Worker  v5.0.0
 
-   What changed in 5.0.1:
+   What changed in 5.0.0:
      • Cache version bumped to 5.0.0 so installed apps fetch the
        new 3-mode coach index.html:
        Follow (strict, unchanged) / Test (lenient practice:
@@ -20,15 +20,14 @@
        holds the microphone, never touches localStorage /
        IndexedDB / qc-audio.
 
-
    What changed in 2.4.24:
-     • Cache version bumped so installed apps fetch the updated
-       index.html (Tajweed mic standby: getUserMedia opens 0.5 s before
-       ASR and, together with the RMS analyser and its sample buffer,
-       stays live while Tajweed mode is listening or idle; it is shut
-       down only when the Coach screen is left, the app is minimised /
-       frozen / closed, or Follow mode is chosen). A 'Mic standby' chip
-       shows the state.
+     • CORRECTED to locked spec: in Tajweed, ASR starts first at
+       0.0s, getMedia (RMS analyser + sample buffer) starts 0.5s
+       later, and stays live while Tajweed mode is listening or
+       idle; it is shut down only when the Coach screen is left,
+       the app is minimised / frozen / closed, or Follow mode is
+       chosen. The SW never holds the microphone, so it cannot
+       affect capture. A 'Mic standby' chip shows the state.
      • No service-worker logic changed: this SW never holds the
        microphone, so it cannot affect capture.
 
@@ -201,11 +200,6 @@ self.addEventListener('message', event => {
     return;
   }
   if(data.type === 'CLEAR_CACHES'){
-    // SAFETY: never wipe the persistent audio cache here, and
-    // never touch localStorage (where 'qc.lastReaderPage' for
-    // Continue lives — the SW has no access to it and must
-    // not attempt to clear it). Only versioned caches are
-    // dropped; qc-audio is preserved.
     event.waitUntil((async () => {
       const keys = await caches.keys();
       await Promise.all(keys.filter(k => !PERSISTENT_CACHES.includes(k)).map(k => caches.delete(k)));
@@ -393,8 +387,6 @@ async function audioFromDownloadCache(req){
 }
 
 async function serveRangeFromCached(response, rangeHeader){
-  // If the cached response is opaque (e.g., from QuranEnc without CORS),
-  // we cannot read its size or slice it. Return the whole thing.
   if (response.type === 'opaque') {
     return response;
   }
@@ -536,7 +528,6 @@ async function manifestFresh(req){
     if(res && res.ok){
       try{
         const data = await res.clone().json();
-        // AUTO-ROTATE: never let a portrait-only manifest lock the installed app.
         data.orientation = 'any';
         const fixed = new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } });
         cache.put('./manifest.json', fixed.clone()).catch(() => {});
@@ -579,16 +570,12 @@ async function shellNavigation(req){
     const res = await fetch(freshReq);
     if(res && res.ok && res.type === 'basic'){
       const clone = res.clone();
-      // Cache the page that was actually requested (index.html,
-      // index_3.html, read.html or salaah.html) so each page works offline.
       cache.put(req, clone).catch(() => {});
     }
     return res;
   }catch(_){
     let hit = null;
     try{
-      // Try the exact URL first (so /read.html serves read.html
-      // offline, not the dashboard), then fall back to index.html.
       hit = await cache.match(req, { ignoreSearch: true })
          || await cache.match('./index.html', { ignoreSearch: true })
          || await cache.match('./', { ignoreSearch: true });

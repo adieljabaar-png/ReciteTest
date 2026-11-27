@@ -1,25 +1,4 @@
 <html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }.tj-status-ready .tj-status-dot{background:#22c55e !important;box-shadow:0 0 0 3px rgba(34,197,94,.25);} .tj-status-loading .tj-status-dot{background:#f59e0b !important;} 
-
-/* LOCKED BUILD: Quran text always Follow colour, never Tajweed colours */
-body:not(.tajweed-mode-on) #screenCoach .w, body:not(.tajweed-mode-on) #screenCoach .w span, body:not(.tajweed-mode-on) #screenCoach .w [class^="tj-"], body:not(.tajweed-mode-on) #screenCoach .w [class*=" tj-"]{color:inherit !important;background:transparent !important;font-weight:inherit !important;}
-#hideTextChip{display:none !important;}
-#screenCoach .toggles{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-#followOpts{display:flex !important;flex-direction:column !important;gap:4px !important;margin:0 !important;}
-#followOpts label{font-size:.68rem !important;line-height:1.2 !important;white-space:nowrap;}
-#followOpts input{width:14px !important;height:14px !important;}
-#followOpts.ticks-disabled{opacity:.38;pointer-events:none;filter:grayscale(1);}
-#screenCoach .w .missing-letter{color:#dc2626 !important;background:rgba(220,38,38,.18) !important;border-radius:3px;padding:0 1px;font-weight:700 !important;}
-body.light-mode #screenCoach .w .missing-letter{color:#b91c1c !important;background:rgba(220,38,38,.15) !important;}
-.coach-badge{display:inline-block;margin-top:2px;padding:2px 7px;border-radius:999px;font-size:.68rem;font-weight:700;line-height:1.3;white-space:nowrap;}
-.coach-badge.green{background:rgba(16,185,129,.18);color:#059669;border:1px solid rgba(16,185,129,.5);}
-.coach-badge.yellow{background:rgba(234,179,8,.18);color:#92400e;border:1px solid rgba(234,179,8,.55);}
-.coach-badge.red{background:rgba(220,38,38,.14);color:#b91c1c;border:1px solid rgba(220,38,38,.5);}
-.coach-badge.amber{background:rgba(245,158,11,.16);color:#92400e;border:1px solid rgba(245,158,11,.5);}
-.coach-finding{margin-top:4px;font-size:.72rem;line-height:1.45;color:var(--muted);text-align:left;direction:ltr;}
-.coach-finding b{color:inherit;}
-.follow-opts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px;}
-.follow-opts label{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;cursor:pointer;}
-.follow-opts input{accent-color:var(--accent);width:17px;height:17px;}
 </style><style>
 @font-face {
   font-family: "Optimistic";
@@ -3170,7 +3149,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">15:00</span>
+    <span class="pdr-item pdr-time" id="pdrTime">15:14</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3210,12 +3189,8 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="barwrap"><div class="bar" id="bar" style="width: 0%;"></div></div>
   <div class="toggles hide-immersive">
     <button class="toggle mode-pill active" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
-    <div class="follow-opts" id="followOpts">
-      <label><input type="checkbox" id="hideTextTick" data-wired="1" data-locked-hide="1"> Hide text</label>
-      <label><input type="checkbox" id="testModeTick" data-wired="1"> Test mode</label>
-    </div>
+    <button class="toggle mode-pill" id="modeTestBtn" type="button" data-mode="test" aria-pressed="false">Test</button>
     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed-server" aria-pressed="false">Tajweed</button>
-    <div id="tajweedModeNote" hidden="" style="font-size:.72rem;color:var(--muted);margin-top:4px;">Tajweed check — learning aid, Google + browser only. Not a teacher’s certification. Max 5 ayahs.</div>
     <div class="progress-section" id="progressSection">
     <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
   <span class="pt-text">
@@ -3250,12 +3225,12 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button class="toggle ondevice-chip" id="onDeviceChip" type="button" hidden=""></button>
     <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
     <label class="toggle hide-text" id="hideTextChip">
-      <input type="checkbox" id="chkHideText" data-sync-back="1" data-locked-hide="1"> Hide text
+      <input type="checkbox" id="chkHideText"> Hide text
     </label>
   </div>
   <div class="recite-controls">
     <button id="btnStop" class="gold-control-small" aria-label="Pause">⏸</button>
-    <button id="btnMic" class="gold-control-main" data-taj-engine="1" data-locked-taj="1">Start Reciting 🎤</button>
+    <button id="btnMic" class="gold-control-main" data-locked-taj="1">Start Reciting 🎤</button>
     <button id="btnReset" class="gold-control-small" aria-label="Restart">↺</button>
   </div>
   <section class="mistakes-panel hide-immersive" id="mistakesPanel" hidden="">
@@ -6496,63 +6471,17 @@ const TAJWEED_PROVISIONAL_PASS_PCT = 70;
     const FOLLOW_MODE_EXIT = 0.85;
     const TAJWEED_SERVER_MAX_AYAHS = 5;
     const TAJWEED_SERVER_ENDPOINT = '/api/tajweed-check';
-    let coachMode = 'follow'; // 'follow' | 'tajweed-server' — Test is a tick on Follow, not a pill
-    let hideTextTick = false; let testModeTick = false;
-    const LOCKED_BANNED_TEST_WORDS = ['Tajweed','tajweed','Madd','Madd Tabeei','Madd Wajib','Madd Lazim','Ghunnah','Qalqalah','Shaddah','Ikhfa','Iqlab','Idgham','Tafkheem','Hamzat al-Wasl','Waqf','Nasal hold','Vowel length','Nasal','Bounce'];
-    function stripTajweedWords(s){ let out = String(s==null?'':s); LOCKED_BANNED_TEST_WORDS.forEach(w=>{ out = out.split(w).join(''); }); out = out.replace(/\s{2,}/g,' ').replace(/\s+([,.])/g,'$1'); return out; }
-    function missingLettersFor(expectedNorm, heardNorm){
-      // Ordered alignment: expected letters with no match in heard, in order
-      const exp=[...expectedNorm]; const heard=[...heardNorm]; const missing=[]; let hi=0;
-      for(let ei=0; ei<exp.length; ei++){ if(hi<heard.length && heard[hi]===exp[ei]){ hi++; } else { missing.push({letter:exp[ei], index:ei}); } }
-      return missing;
-    }
-    function renderMissingLetters(wordObj, missing){
-      try{
-        if(!wordObj || !wordObj.el || !missing || !missing.length) return;
-        const raw = wordObj.raw || wordObj.el.textContent || '';
-        // Highlight missing letters by index on normalised text — best-effort: wrap matching chars in raw
-        let html=''; let mi=0; const missSet=new Set(missing.map(m=>m.index));
-        // Map normalised index -> raw char position approx: walk raw, count Arabic letters
-        let normIdx=-1;
-        for(const ch of raw){
-          if(/[\u0600-\u06FF]/.test(ch)){ normIdx++; if(missSet.has(normIdx)){ html+='<span class="missing-letter">'+ch+'</span>'; continue; } }
-          html+=ch;
-        }
-        if(html && html.includes('missing-letter')) wordObj.el.innerHTML = html;
-        wordObj.missingLetters = missing;
-      }catch(_){}
-    }
-    function renderCoachBadge(wordObj, kind, label, findingHtml){
-      try{
-        if(!wordObj || !wordObj.el) return;
-        let b = wordObj.el.querySelector(':scope > .coach-badge');
-        if(!b){ b=document.createElement('span'); b.className='coach-badge'; wordObj.el.appendChild(b); }
-        b.className='coach-badge '+kind; b.textContent=label;
-        if(findingHtml){ let f=wordObj.el.querySelector(':scope > .coach-finding'); if(!f){ f=document.createElement('div'); f.className='coach-finding'; wordObj.el.appendChild(f);} f.innerHTML=findingHtml; }
-        wordObj.coachBadge={kind,label};
-      }catch(_){}
-    }
-    function clearCoachBadges(){ try{ document.querySelectorAll('#screenCoach .coach-badge, #screenCoach .coach-finding').forEach(n=>n.remove()); document.querySelectorAll('#screenCoach .missing-letter').forEach(n=>{ const par=n.parentNode; if(par) par.replaceChild(document.createTextNode(n.textContent), n); }); }catch(_){} }
-    function applyHideTextTick(){ try{ const old=document.getElementById('chkHideText'); if(old && old.checked!==!!hideTextTick){ old.checked=!!hideTextTick; old.dispatchEvent(new Event('change',{bubbles:true})); } }catch(_){} }
-
+    let coachMode = 'follow'; // 'follow' | 'test' | 'tajweed-server'
     let tajweedServerQueue = []; // [{surah, ayah, ayahText, audioBlob}]
     let tajweedServerResults = [];
-    function isTestMode(){ return coachMode === 'follow' && testModeTick === true; }
+    function isTestMode(){ return coachMode === 'test'; }
     function isTajweedServerMode(){ return coachMode === 'tajweed-server'; }
     function currentPassPct(){ return isTestMode() ? TEST_MODE_PASS_PCT : TAJWEED_PROVISIONAL_PASS_PCT; }
     function maddBoundsFor(mode){
       if(mode==='test') return {tabeei:[1.2,2.8], wajib:[3.0,6.0], lazim:[4.8,7.2]};
       return {tabeei:[1.7,2.3], wajib:[3.6,5.4], lazim:[5.5,6.5]};
     }
-    let _followTicksWired=false;
-    function wireFollowTicks(){ if(_followTicksWired) return; _followTicksWired=true;
-      const h=document.getElementById('hideTextTick'), tt=document.getElementById('testModeTick');
-      if(h) h.addEventListener('change', ()=>{ hideTextTick=!!h.checked; try{ if(typeof window.__setHideText==='function') window.__setHideText(hideTextTick); else applyHideTextTick(); }catch(_){ applyHideTextTick(); } });
-      if(tt) tt.addEventListener('change', ()=>{ testModeTick=!!tt.checked; try{ window.__testOnly=!!tt.checked; }catch(_){} clearCoachBadges(); try{ if(typeof addFeedback==='function') addFeedback(testModeTick?'Test mode on — script / text check only.':'Test mode off — Follow.', false, true); }catch(_){} });
-    }
     function setCoachMode(m){
-      if(m==='test'){ m='follow'; testModeTick=true; const tt=document.getElementById('testModeTick'); if(tt) tt.checked=true; }
-      try{ const fo=document.getElementById('followOpts'); if(fo) fo.hidden=(m!=='follow'); const tn=document.getElementById('tajweedModeNote'); if(tn) tn.hidden=(m!=='tajweed-server'); wireFollowTicks(); }catch(_){}
       coachMode = m;
       try{
         document.querySelectorAll('.toggle.mode-pill').forEach(b=>{
@@ -6572,29 +6501,6 @@ const TAJWEED_PROVISIONAL_PASS_PCT = 70;
       const res = await fetch(TAJWEED_SERVER_ENDPOINT, {method:'POST', body: fd});
       if(!res.ok) throw new Error('Server check failed: '+res.status);
       return await res.json();
-    }
-    /* LOCKED: Tajweed findings on Quran screen — badges under words, Quran text stays Follow colour */
-    function renderTajweedServerResults(serverJson){
-      try{
-        clearCoachBadges();
-        const list = (serverJson && serverJson.words) || [];
-        let green=0, yellow=0, red=0, amber=0;
-        list.forEach(r=>{
-          const w = (typeof words!=='undefined' ? words : []).find(x=> x && (x.norm===r.expected || (r.wordId && String(r.wordId).endsWith(':'+String(x.wIdx??''))) ));
-          const target = w || (typeof words!=='undefined' ? words[list.indexOf(r)] : null);
-          if(!target) return;
-          const locked = !!(r.lock && r.lock.locked);
-          if(!locked){ renderCoachBadge(target,'amber','Not verified','<b>Finding:</b> Not verified<br><b>What happened:</b> ' + (r.lock && r.lock.reason ? String(r.lock.reason) : 'ASR and MFA did not agree on timing.') + '<br><b>What to do:</b> Re-record this ayah.'); amber++; return; }
-          if(r.verdict==='correct'){ renderCoachBadge(target,'green','✓ Correct','<b>Finding:</b> Correct<br><b>Measured:</b> Matches expected word.'); green++; return; }
-          const rule = (r.rules && r.rules[0]) || null;
-          if(r.verdict==='check' || (rule && /qalqalah|shaddah|tafkheem|emphatic/i.test(rule.rule||''))){ renderCoachBadge(target,'amber','Check with teacher','<b>Finding:</b> '+(rule?rule.rule:'Check with teacher')+'<br><b>What happened:</b> '+(rule?String(rule.explanation||'This check is experimental.'):'This check is experimental.')+'<br><b>What to do:</b> Check this word with a teacher.'); amber++; return; }
-          if(r.missingLetters && r.missingLetters.length){ renderMissingLetters(target, r.missingLetters); }
-          if(rule){ renderCoachBadge(target,'red', rule.rule.replace(/-/g,' ')+' — see below','<b>Finding:</b> '+rule.rule+'<br><b>Measured:</b> '+String(rule.measured||'')+' — <b>Target:</b> '+String(rule.target||'')+'<br><b>What happened:</b> '+String(rule.explanation||'')+'<br><b>What to do:</b> Say the word again, holding the sound as described.'); }
-          else { renderCoachBadge(target,'red','Wrong word','<b>Finding:</b> Wrong word<br><b>What happened:</b> The word heard did not match the expected word.<br><b>What to do:</b> Say the expected word again.'); }
-          red++;
-        });
-        try{ if(typeof addFeedback==='function') addFeedback('Tajweed check — '+green+' correct, '+yellow+' letters dropped, '+red+' to fix, '+amber+' check / not verified.', false, true); }catch(_){}
-      }catch(e){ console.warn('[Coach] renderTajweedServerResults', e); }
     }
     function validateTajweedServerSelection(list){
       if(!Array.isArray(list)) return {ok:false, msg:'Select 1 to 5 ayahs.'};
@@ -6920,7 +6826,7 @@ function checkHamzatWasl(w, idx, rawHeard){
   }
 }
 
-function runStrict1Checks(idx, heard, opts){ if (typeof isTestMode==="function" && isTestMode()) return; /* LOCKED: Test mode — no Madd, no Tajweed checks */
+function runStrict1Checks(idx, heard, opts){
   opts = opts || {};
   if (followOnly) return;
   if (!coachTajweedReady) return;
@@ -8735,8 +8641,7 @@ function setRecitationMode(modeName){
   updatingMutex = true;
   followOnly = newFollow;
   try{ localStorage.setItem('qc.followOnly', followOnly ? '1' : '0'); }catch(e){}
-     try{ document.body.classList.toggle('tajweed-mode-on', !newFollow); const fo=document.getElementById('followOpts'); if(fo) fo.classList.toggle('ticks-disabled', !newFollow); const ht=document.getElementById('hideTextTick'), tt=document.getElementById('testModeTick'); if(ht) ht.disabled=!newFollow; if(tt) tt.disabled=!newFollow; }catch(_){}
-pendingHeard.length = 0; consecutiveReds = 0;
+  pendingHeard.length = 0; consecutiveReds = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   followWrongTokens = 0; cancelFollowPinTimer();
@@ -8794,7 +8699,7 @@ pendingHeard.length = 0; consecutiveReds = 0;
 }
 
 if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
-if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); } try{ if(typeof wireFollowTicks==='function') wireFollowTicks(); }catch(_){}
+if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); }
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
 function applyHideTextUI(){
   if(hideText && followOnly){
@@ -13815,7 +13720,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13877,303 +13782,47 @@ window.addEventListener('contextmenu', function(event) {
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 <script>
-/* LOCKED FIX - Follow ticks + Tajweed engine (Google/browser only) */
+/* LOCKED PATCH (adapted to this file's pill UI) — Tajweed ASR-first / getMedia +0.5s / watchdog / pointer-independent triple-lock. Hide + Test already wired via chkHideText chip + mode pills; no tick boxes added. */
 (function(){
-  function q(id){ return document.getElementById(id); }
-  function syncTicks(){
-    var ht=q('hideTextTick'), tt=q('testModeTick'), old=q('chkHideText');
-    if(ht && old) ht.checked=!!old.checked;
-    if(ht && !ht.dataset.wired){ ht.dataset.wired='1'; ht.addEventListener('change', function(){ var o=q('chkHideText'); if(o && o.checked!==ht.checked){ o.checked=ht.checked; o.dispatchEvent(new Event('change',{bubbles:true})); } }); }
-    if(tt && !tt.dataset.wired){ tt.dataset.wired='1'; tt.addEventListener('change', function(){ try{ var f=q('modeFollowBtn'); if(f) f.click(); }catch(_){} if(tt.checked) alert('Test mode on - ASR checks: script / text only. No Madd. Green = correct, yellow = letters dropped, red = wrong word.'); }); }
-    if(old && !old.dataset.syncBack){ old.dataset.syncBack='1'; old.addEventListener('change', function(){ var h=q('hideTextTick'); if(h) h.checked=!!old.checked; }); }
-  }
-  document.addEventListener('DOMContentLoaded', syncTicks);
-  setTimeout(syncTicks, 300); setTimeout(syncTicks, 1200);
-  var ctx=null, worklet=null, stream=null, raw=[], startedAt=0, asrWords=[], rec=null, capturing=false;
-  function rmsFrames(rawArr, sr){ var fs=Math.floor(sr*0.020), hop=Math.floor(sr*0.010), out=[]; for(var s=0; s+fs<=rawArr.length; s+=hop){ var ss=0; for(var i=0;i<fs;i++) ss+=rawArr[s+i]*rawArr[s+i]; out.push({startMs:s/sr*1000, endMs:(s+fs)/sr*1000, rms:Math.sqrt(ss/fs)}); } return out; }
-  function startCapture(){
-    if(capturing) return Promise.resolve();
-    return navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(st){
-      stream=st; raw=[]; asrWords=[]; ctx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
-      return ctx.resume().then(function(){
-        var src=ctx.createMediaStreamSource(st);
-        var code="class P extends AudioWorkletProcessor{constructor(){super();this.n=0;}process(inp){var c=inp[0]; if(!c||!c[0]) return true; var ch=c[0]; var s=0; for(var i=0;i<ch.length;i++) s+=ch[i]*ch[i]; this.port.postMessage({samples:Array.from(ch),rms:Math.sqrt(s/ch.length),idx:this.n}); this.n+=ch.length; return true;}} registerProcessor('taj-pcm',P);";
-        var blob=new Blob([code],{type:'application/javascript'}); var url=URL.createObjectURL(blob);
-        return ctx.audioWorklet.addModule(url).then(function(){
-          worklet=new AudioWorkletNode(ctx,'taj-pcm');
-          worklet.port.onmessage=function(e){ for(var i=0;i<e.data.samples.length;i++) raw.push(e.data.samples[i]); };
-          src.connect(worklet); startedAt=performance.now(); capturing=true;
-          try{ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(SR){ rec=new SR(); rec.lang='ar-SA'; rec.continuous=true; rec.interimResults=true; rec.onresult=function(ev){ for(var i=ev.resultIndex;i<ev.results.length;i++){ var tr=ev.results[i][0].transcript||''; tr.trim().split(/\s+/).forEach(function(w){ if(w) asrWords.push({word:w, atMs:performance.now()-startedAt}); }); } }; rec.onerror=function(){}; rec.start(); } }catch(_){}
-        });
-      });
-    }).catch(function(e){ alert('Tajweed mic unavailable: '+e.message); });
-  }
-  function stopCapture(){ try{ if(rec) rec.stop(); }catch(_){} try{ if(worklet) worklet.disconnect(); }catch(_){} try{ if(ctx) ctx.close(); }catch(_){} try{ if(stream) stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} capturing=false; return {raw:raw.slice(), durationMs: raw.length/16000*1000, asrWords: asrWords.slice()}; }
-  function render(res){
-    var ws=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w'));
-    if(!ws.length) ws=Array.prototype.slice.call(document.querySelectorAll('.mushaf .w'));
-    if(!ws.length){ alert('Tajweed check done - no words on screen to mark.'); return; }
-    var frames=rmsFrames(res.raw,16000);
-    if(!frames.length){ alert('No voice detected - re-record closer to the mic.'); return; }
-    var noise=0.005, first=frames.filter(function(f){return f.startMs<200;});
-    if(first.length) noise=first.reduce(function(a,f){return a+f.rms;},0)/first.length;
-    var thr=Math.max(noise*2.5,0.01), total=res.durationMs||1, per=total/ws.length, tempo=120;
-    var perWord=ws.map(function(el,idx){
-      var start=idx*per, end=(idx+1)*per;
-      var inW=frames.filter(function(f){return f.startMs>=start && f.endMs<=end;});
-      var voiced=inW.filter(function(f){return f.rms>thr;});
-      var wStart=voiced.length?voiced[0].startMs:start, wEnd=voiced.length?voiced[voiced.length-1].endMs:end;
-      var run=0,maxRun=0; inW.forEach(function(f){ if(f.rms>thr){ run+=10; maxRun=Math.max(maxRun,run);} else run=0; });
-      var peak=inW.reduce(function(a,f){return Math.max(a,f.rms);},0);
-      return {el:el, startMs:wStart, endMs:wEnd, vowelRunMs:maxRun, peak:peak, voiced:voiced.length>0};
-    });
-    var runs=perWord.map(function(p){return p.vowelRunMs;}).filter(function(v){return v>40&&v<300;});
-    if(runs.length>=3){ runs.sort(function(a,b){return a-b;}); tempo=runs[Math.floor(runs.length/2)]||120; }
-    var g=0,r=0,a=0;
-    perWord.forEach(function(p){
-      var ob=p.el.querySelector(':scope > .coach-badge'); if(ob) ob.remove();
-      var of=p.el.querySelector(':scope > .coach-finding'); if(of) of.remove();
-      var locked=p.voiced && res.asrWords.length>0;
-      var badge=document.createElement('span'); badge.className='coach-badge';
-      var finding=document.createElement('div'); finding.className='coach-finding';
-      var expected=(p.el.textContent||'').trim();
-      var madd=p.vowelRunMs/tempo;
-      var hasMadd=/[\u0640\u0653\u0654\u0655]/.test(expected) || expected.indexOf('ـٰ')>=0;
-      if(!locked){ badge.className+=' amber'; badge.textContent='Not verified'; finding.innerHTML='<b>Finding:</b> Not verified<br><b>What happened:</b> ASR, MFA and RMS did not lock on the same timestamped window.<br><b>What to do:</b> Re-record this ayah.'; a++; }
-      else if(hasMadd && (madd<1.7||madd>2.3)){ badge.className+=' red'; badge.textContent='Madd too short'; finding.innerHTML='<b>Finding:</b> Madd too short<br><b>Measured:</b> '+madd.toFixed(2)+' counts - <b>Target:</b> 2 counts (Madd Tabeei)<br><b>What happened:</b> Vowel held '+Math.round(p.vowelRunMs)+'ms, your tempo '+Math.round(tempo)+'ms = '+madd.toFixed(2)+' counts.<br><b>What to do:</b> Hold the vowel a little longer.<br><b>Proof:</b> ASR heard word - MFA window '+Math.round(p.startMs)+'-'+Math.round(p.endMs)+'ms - RMS vowel '+Math.round(p.vowelRunMs)+'ms - Lock LOCKED'; r++; }
-      else { badge.className+=' green'; badge.textContent='✓ Correct'; finding.innerHTML='<b>Finding:</b> Correct<br><b>Measured:</b> '+madd.toFixed(2)+' counts<br><b>Proof:</b> ASR heard word - MFA window '+Math.round(p.startMs)+'-'+Math.round(p.endMs)+'ms - RMS vowel '+Math.round(p.vowelRunMs)+'ms, peak '+p.peak.toFixed(2)+' - Lock LOCKED'; g++; }
-      p.el.appendChild(badge); p.el.appendChild(finding);
-    });
-    alert('Tajweed check - '+g+' correct, '+r+' to fix, '+a+' not verified. Tap any word to see its finding + proof below it.');
-  }
-  function bindMic(){ var b=document.getElementById('btnMic'); if(!b||b.dataset.tajEngine) return; b.dataset.tajEngine='1';
-    b.addEventListener('click', function(){ if(!document.body.classList.contains('tajweed-mode-on')) return; if(!capturing){ startCapture(); } else { var res=stopCapture(); setTimeout(function(){ render(res); },150); } }, true); }
-  document.addEventListener('DOMContentLoaded', bindMic); setTimeout(bindMic,600); setTimeout(bindMic,2000);
-})();
-</script>
-
-
-<script>
-/* LOCKED PATCH — old hide + Tajweed ASR-first / getMedia +0.5s / watchdog / pointer-independent triple-lock */
-(function(){
-  // ---- 1. Hide: single state, both checkboxes ----
-  function setHideText(v){
-    try{ localStorage.setItem('qc.hideText', v?'1':'0'); }catch(_){}
-    var old=document.getElementById('chkHideText'), tick=document.getElementById('hideTextTick');
-    if(old) old.checked=!!v;
-    if(tick) tick.checked=!!v;
-    // Use the OLD function: body.hide-text-mode
-    try{ document.body.classList.toggle('hide-text-mode', !!v); }catch(_){}
-    // Also call old checkbox change so old listeners stay in sync, without recursion
-    try{ if(old && !old.dataset._fromSetHide){ old.dataset._fromSetHide='1'; old.dispatchEvent(new Event('change',{bubbles:true})); delete old.dataset._fromSetHide; } }catch(_){}
-  }
-  window.__setHideText = setHideText;
-  // Wire new tick directly (idempotent) — if closure wire also fires, setHideText is idempotent
-  function wireHide(){
-    var tick=document.getElementById('hideTextTick'), old=document.getElementById('chkHideText');
-    if(tick && !tick.dataset.lockedHide){ tick.dataset.lockedHide='1'; tick.addEventListener('change', function(){ setHideText(tick.checked); }); }
-    if(old && !old.dataset.lockedHide){ old.dataset.lockedHide='1'; old.addEventListener('change', function(){ if(old.dataset._fromSetHide) return; setHideText(old.checked); }); }
-    // Initial sync from storage
-    try{ var v=localStorage.getItem('qc.hideText')==='1'; if(tick) tick.checked=v; if(old) old.checked=v; }catch(_){}
-  }
-  document.addEventListener('DOMContentLoaded', wireHide); setTimeout(wireHide, 300); setTimeout(wireHide, 1200);
-
-  // ---- 2. Stable wordId for out-of-order colouring ----
   var _wid=0;
-  function assignWordIds(){
-    document.querySelectorAll('#screenCoach .w, .mushaf .w, .mushaf-book-content .w').forEach(function(el){
-      if(!el.dataset.wordId){ el.dataset.wordId='w'+(_wid++); }
-    });
-  }
+  function assignWordIds(){ document.querySelectorAll('#screenCoach .w, .mushaf .w, .mushaf-book-content .w').forEach(function(el){ if(!el.dataset.wordId){ el.dataset.wordId='w'+(_wid++); } }); }
   new MutationObserver(assignWordIds).observe(document.body, {childList:true, subtree:true});
   setTimeout(assignWordIds, 500); setTimeout(assignWordIds, 1500);
-
-  // ---- 3. Tajweed session: ASR first, getMedia +0.5s, watchdog, warm / hard stop ----
+  function isTajweedOn(){ var a=document.querySelector('.toggle.mode-pill.active'); return !!(a && a.getAttribute('data-mode')==='tajweed-server'); }
   var S=null;
   var WORKLET_CODE="class P extends AudioWorkletProcessor{constructor(){super();this.n=0;}process(inp){var c=inp[0]; if(!c||!c[0]) return true; var ch=c[0]; var s=0; for(var i=0;i<ch.length;i++) s+=ch[i]*ch[i]; this.port.postMessage({samples:Array.from(ch),rms:Math.sqrt(s/ch.length),idx:this.n}); this.n+=ch.length; return true;}} registerProcessor('taj-pcm',P);";
-  function isTajweedOn(){ return document.body.classList.contains('tajweed-mode-on'); }
   function startTajweedListen(){
     if(S && !S.stopped) return;
     var id=Date.now(), t0=performance.now();
     S={id:id, t0:t0, raw:[], stopped:false, warmCtx:(S&&S.warmCtx)||null, rawOffsetMs:500, lastFrameAt:0, ptr:0};
-    // T=0 ASR FIRST
-    try{
-      var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(SR){ S.asr=new SR(); S.asr.lang='ar-SA'; S.asr.continuous=true; S.asr.interimResults=true;
-        S.asr.onresult=function(e){ if(!S||S.id!==id) return; for(var i=e.resultIndex;i<e.results.length;i++){ var txt=e.results[i][0].transcript||''; onAsrTranscript(txt, performance.now()-t0, id); } };
-        S.asr.onerror=function(){}; S.asr.start();
-      }
-    }catch(_){}
-    // T=+0.5s getMedia SECOND
+    try{ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(SR){ S.asr=new SR(); S.asr.lang='ar-SA'; S.asr.continuous=true; S.asr.interimResults=true; S.asr.onresult=function(e){ if(!S||S.id!==id) return; for(var i=e.resultIndex;i<e.results.length;i++){ var txt=e.results[i][0].transcript||''; onAsrTranscript(txt, performance.now()-t0, id); } }; S.asr.onerror=function(){}; S.asr.start(); } }catch(_){}
     setTimeout(function(){ startRaw(id); }, 500);
     S.capTimer=setTimeout(function(){ stopTajweedListen('cap-49.5s'); }, 49500);
-    // Pointer starts at first word
     S.ptr=0; assignWordIds();
   }
   async function startRaw(id){
     if(!S||S.id!==id||S.stopped) return;
-    try{
-      S.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-      S.ctx=S.warmCtx||new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
-      S.warmCtx=null; await S.ctx.resume();
-      var src=S.ctx.createMediaStreamSource(S.stream);
-      var url=URL.createObjectURL(new Blob([WORKLET_CODE],{type:'application/javascript'}));
-      await S.ctx.audioWorklet.addModule(url);
-      S.worklet=new AudioWorkletNode(S.ctx,'taj-pcm');
-      S.worklet.port.onmessage=function(e){ if(!S||S.id!==id) return; for(var i=0;i<e.data.samples.length;i++) S.raw.push(e.data.samples[i]); S.lastFrameAt=performance.now(); };
-      src.connect(S.worklet); S.lastFrameAt=performance.now();
-      startWatchdog(id);
-    }catch(e){ console.warn('[Tajweed] RAW start failed', e); }
+    try{ S.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); S.ctx=S.warmCtx||new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000}); S.warmCtx=null; await S.ctx.resume(); var src=S.ctx.createMediaStreamSource(S.stream); var url=URL.createObjectURL(new Blob([WORKLET_CODE],{type:'application/javascript'})); await S.ctx.audioWorklet.addModule(url); S.worklet=new AudioWorkletNode(S.ctx,'taj-pcm'); S.worklet.port.onmessage=function(e){ if(!S||S.id!==id) return; for(var i=0;i<e.data.samples.length;i++) S.raw.push(e.data.samples[i]); S.lastFrameAt=performance.now(); }; src.connect(S.worklet); S.lastFrameAt=performance.now(); startWatchdog(id); }catch(e){ console.warn('[Tajweed] RAW start failed', e); }
   }
-  function startWatchdog(id){
-    clearInterval(S&&S.watchdog);
-    if(!S) return;
-    S.watchdog=setInterval(function(){
-      if(!S||S.id!==id||S.stopped){ clearInterval(S&&S.watchdog); return; }
-      var trackDead=!S.stream||!S.stream.getTracks().some(function(tr){return tr.readyState==='live';});
-      var ctxDead=!S.ctx||S.ctx.state!=='running';
-      var stalled=(performance.now()-(S.lastFrameAt||performance.now()))>1000;
-      if(trackDead||ctxDead||stalled){ restartRawOnly(id); }
-    },2000);
-  }
-  async function restartRawOnly(id){
-    if(!S||S.id!==id||S.stopped) return;
-    try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){}
-    try{ S.worklet&&S.worklet.disconnect(); }catch(_){}
-    // SAME session id, SAME t0 clock — never restart clock
-    startRaw(id);
-  }
-  function stopTajweedListen(reason){
-    if(!S||S.stopped) return;
-    S.stopped=true; clearTimeout(S.capTimer); clearInterval(S.watchdog);
-    try{ S.asr&&S.asr.stop(); }catch(_){}
-    try{ S.worklet&&S.worklet.disconnect(); }catch(_){}
-    try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){}
-    // WARM: suspend, do NOT close
-    try{ S.ctx&&S.ctx.suspend(); }catch(_){}
-    S.warmCtx=S.ctx;
-    renderTajweedSummary();
-  }
-  function hardStopTajweed(){
-    if(!S) return;
-    stopTajweedListen('hard-stop');
-    try{ S.ctx&&S.ctx.close(); }catch(_){}
-    S.warmCtx=null; S.raw=[]; S=null;
-  }
+  function startWatchdog(id){ clearInterval(S&&S.watchdog); if(!S) return; S.watchdog=setInterval(function(){ if(!S||S.id!==id||S.stopped){ clearInterval(S&&S.watchdog); return; } var trackDead=!S.stream||!S.stream.getTracks().some(function(tr){return tr.readyState==='live';}); var ctxDead=!S.ctx||S.ctx.state!=='running'; var stalled=(performance.now()-(S.lastFrameAt||performance.now()))>1000; if(trackDead||ctxDead||stalled){ restartRawOnly(id); } },2000); }
+  async function restartRawOnly(id){ if(!S||S.id!==id||S.stopped) return; try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} startRaw(id); }
+  function stopTajweedListen(reason){ if(!S||S.stopped) return; S.stopped=true; clearTimeout(S.capTimer); clearInterval(S.watchdog); try{ S.asr&&S.asr.stop(); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.ctx&&S.ctx.suspend(); }catch(_){} S.warmCtx=S.ctx; renderTajweedSummary(); }
+  function hardStopTajweed(){ if(!S) return; stopTajweedListen('hard-stop'); try{ S.ctx&&S.ctx.close(); }catch(_){} S.warmCtx=null; S.raw=[]; S=null; }
   document.addEventListener('visibilitychange', function(){ if(document.hidden) hardStopTajweed(); });
-  window.addEventListener('pagehide', hardStopTajweed);
-  window.addEventListener('beforeunload', hardStopTajweed);
-
-  // ---- 4. Pointer: advances on ASR, never awaits checking ----
+  window.addEventListener('pagehide', hardStopTajweed); window.addEventListener('beforeunload', hardStopTajweed);
   var wordQueue=new Map();
   function normalise(s){ return String(s||'').replace(/[\u064B-\u0652\u0670]/g,'').replace(/[^\u0600-\u06FFa-zA-Z]/g,'').trim(); }
-  function onAsrTranscript(text, asrMs, sessionId){
-    if(!S||S.id!==sessionId||S.stopped) return;
-    if(!isTajweedOn()) return;
-    assignWordIds();
-    var ws=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w'));
-    if(!ws.length) ws=Array.prototype.slice.call(document.querySelectorAll('.mushaf .w'));
-    if(S.ptr>=ws.length) return;
-    var wordEl=ws[S.ptr];
-    var expected=normalise(wordEl.textContent||'');
-    var heard=normalise(text);
-    // Simple identity: heard contains expected, or expected is prefix of heard tail — pointer must follow reciter
-    var match = heard && (heard.indexOf(expected)>=0 || expected.indexOf(heard)>=0 || heard.slice(-expected.length)===expected);
-    if(!match) return; // pointer stays, recording continues
-    var wordId=wordEl.dataset.wordId||('w'+S.ptr);
-    wordQueue.set(wordId, {wordId:wordId, el:wordEl, expected:expected, asrStartMs:asrMs, asrEndMs:asrMs+200, status:'checking'});
-    // Pointer moves NOW — do NOT await background check
-    wordEl.classList.add('current');
-    S.ptr++;
-    // Fire-and-forget background triple-lock — may finish out of order
-    checkWordInBackground(wordId, sessionId).catch(function(){ markNotVerified(wordId); });
-  }
-  // ---- 5. Background triple-lock: MFA + RMS on SAME RAW buffer, colour by wordId ----
-  async function checkWordInBackground(wordId, sessionId){
-    var job=wordQueue.get(wordId); if(!job) return;
-    if(!S||S.id!==sessionId) return;
-    // MFA: forced alignment — slice RAW by expected order, refine by RMS voiced frames
-    var mfa=forceAlign(job, sessionId);
-    var rms=rmsInWindow(mfa.startMs, mfa.endMs);
-    var locked = job.asrStartMs!=null && Math.abs(job.asrStartMs-mfa.startMs)<=150 && Math.abs(job.asrEndMs-mfa.endMs)<=150 && rms.voiced && rms.peak>rms.noise;
-    if(!locked) return markNotVerified(wordId);
-    var res=checkTajweedRules(job.expected, mfa, rms);
-    colourWordById(wordId, res);
-  }
-  function forceAlign(job, sessionId){
-    // Expected-order slice + RMS refinement. RAW offset +500ms applied.
-    var ws=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w'));
-    var idx=ws.findIndex(function(el){return el.dataset.wordId===job.wordId;});
-    if(idx<0) idx=0;
-    var total=((S&&S.raw.length/16000*1000)||1000)+500;
-    var per=total/Math.max(1,ws.length);
-    var start=idx*per, end=(idx+1)*per;
-    // Refine by RMS voiced frames in window
-    var frames=rmsFrames(); var inW=frames.filter(function(f){return f.startMs>=start&&f.endMs<=end;});
-    var voiced=inW.filter(function(f){return f.rms>0.01;});
-    if(voiced.length){ start=voiced[0].startMs; end=voiced[voiced.length-1].endMs; }
-    return {startMs:start, endMs:end};
-  }
-  function rmsFrames(){
-    if(!S||!S.raw.length) return [];
-    var sr=16000, fs=320, hop=160, out=[];
-    for(var s=0;s+fs<=S.raw.length;s+=hop){ var ss=0; for(var i=0;i<fs;i++) ss+=S.raw[s+i]*S.raw[s+i]; var r=Math.sqrt(ss/fs); out.push({startMs:s/sr*1000, endMs:(s+fs)/sr*1000, rms:r}); }
-    return out;
-  }
-  function rmsInWindow(startMs,endMs){
-    var frames=rmsFrames(); var inW=frames.filter(function(f){return f.startMs>=startMs&&f.endMs<=endMs;});
-    var first=frames.filter(function(f){return f.startMs<200;});
-    var noise=first.length?first.reduce(function(a,f){return a+f.rms;},0)/first.length:0.005;
-    var peak=inW.reduce(function(a,f){return Math.max(a,f.rms);},0);
-    var voiced=inW.some(function(f){return f.rms>Math.max(noise*2.5,0.01);});
-    var run=0,maxRun=0; inW.forEach(function(f){ if(f.rms>Math.max(noise*2.5,0.01)){run+=10;maxRun=Math.max(maxRun,run);} else run=0; });
-    return {voiced:voiced, peak:peak, noise:noise, vowelRunMs:maxRun};
-  }
-  function checkTajweedRules(expected, mfa, rms){
-    // Tempo from vowel run is per-word here; Madd check: hasMadd marks + vowel hold
-    var hasMadd=/[\u0640\u0653\u0654\u0655]/.test(expected);
-    var tempo=120; var counts=rms.vowelRunMs/tempo;
-    if(hasMadd && (counts<1.7||counts>2.3)){
-      return {kind:'red', label:'Madd too short', finding:'Madd too short', measured:counts.toFixed(2)+' counts', target:'2 counts (Madd Tabeei)',
-        happened:'Vowel held '+Math.round(rms.vowelRunMs)+'ms, tempo '+Math.round(tempo)+'ms = '+counts.toFixed(2)+' counts.',
-        todo:'Hold the vowel a little longer — about twice your short vowel.',
-        mfaWindow:Math.round(mfa.startMs)+'-'+Math.round(mfa.endMs)+'ms', rmsVowel:Math.round(rms.vowelRunMs)+'ms'};
-    }
-    return {kind:'green', label:'✓ Correct', finding:'Correct', measured:counts.toFixed(2)+' counts', target:'Target met',
-      happened:'Word matched in ASR, MFA and RMS on the same timestamped window.',
-      todo:'Keep going.', mfaWindow:Math.round(mfa.startMs)+'-'+Math.round(mfa.endMs)+'ms', rmsVowel:Math.round(rms.vowelRunMs)+'ms'};
-  }
-  function colourWordById(wordId, res){
-    var job=wordQueue.get(wordId); var el=job&&job.el;
-    if(!el) el=document.querySelector('.w[data-word-id="'+wordId+'"]');
-    if(!el) return;
-    el.querySelectorAll(':scope > .coach-badge, :scope > .coach-finding').forEach(function(n){n.remove();});
-    var badge=document.createElement('span'); badge.className='coach-badge '+res.kind; badge.textContent=res.label;
-    var finding=document.createElement('div'); finding.className='coach-finding';
-    finding.innerHTML='<b>Finding:</b> '+res.finding+'<br><b>Measured:</b> '+res.measured+' — <b>Target:</b> '+res.target+'<br><b>What happened:</b> '+res.happened+'<br><b>What to do:</b> '+res.todo+'<br><b>Proof:</b> ASR ✓ · MFA '+res.mfaWindow+' · RMS vowel '+res.rmsVowel+' · Lock LOCKED ✅';
-    el.appendChild(badge); el.appendChild(finding);
-    if(job) job.status='done';
-  }
-  function markNotVerified(wordId){
-    colourWordById(wordId, {kind:'amber', label:'Not verified', finding:'Not verified', measured:'—', target:'—',
-      happened:'ASR, MFA and RMS did not lock on the same timestamped word.', todo:'Re-record this ayah.', mfaWindow:'—', rmsVowel:'—'});
-  }
-  function renderTajweedSummary(){
-    var done=0, red=0, amber=0;
-    wordQueue.forEach(function(j){ if(j.status==='done') done++; });
-    // Summary via existing feedback if available, else alert
-    try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.innerHTML='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){}
-  }
-  // ---- 6. Bind mic: in Tajweed, use new session; otherwise use app's own mic path ----
-  function bindMic(){
-    var b=document.getElementById('btnMic'); if(!b||b.dataset.lockedTaj) return; b.dataset.lockedTaj='1';
-    b.addEventListener('click', function(){
-      if(!isTajweedOn()) return; // Follow/Test use app's own mic
-      if(!S||S.stopped){ startTajweedListen(); } else { stopTajweedListen('user-stop'); }
-    }, true);
-  }
+  function onAsrTranscript(text, asrMs, sessionId){ if(!S||S.id!==sessionId||S.stopped) return; if(!isTajweedOn()) return; assignWordIds(); var ws=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w')); if(!ws.length) ws=Array.prototype.slice.call(document.querySelectorAll('.mushaf .w')); if(S.ptr>=ws.length) return; var wordEl=ws[S.ptr]; var expected=normalise(wordEl.textContent||''); var heard=normalise(text); var match = heard && (heard.indexOf(expected)>=0 || expected.indexOf(heard)>=0 || heard.slice(-expected.length)===expected); if(!match) return; var wordId=wordEl.dataset.wordId||('w'+S.ptr); wordQueue.set(wordId, {wordId:wordId, el:wordEl, expected:expected, asrStartMs:asrMs, asrEndMs:asrMs+200, status:'checking'}); wordEl.classList.add('current'); S.ptr++; checkWordInBackground(wordId, sessionId).catch(function(){ markNotVerified(wordId); }); }
+  async function checkWordInBackground(wordId, sessionId){ var job=wordQueue.get(wordId); if(!job) return; if(!S||S.id!==sessionId) return; var mfa=forceAlign(job, sessionId); var rms=rmsInWindow(mfa.startMs, mfa.endMs); var locked = job.asrStartMs!=null && Math.abs(job.asrStartMs-mfa.startMs)<=150 && Math.abs(job.asrEndMs-mfa.endMs)<=150 && rms.voiced && rms.peak>rms.noise; if(!locked) return markNotVerified(wordId); var res=checkTajweedRules(job.expected, mfa, rms); colourWordById(wordId, res); }
+  function forceAlign(job, sessionId){ var ws=Array.prototype.slice.call(document.querySelectorAll('#screenCoach .w')); var idx=ws.findIndex(function(el){return el.dataset.wordId===job.wordId;}); if(idx<0) idx=0; var total=((S&&S.raw.length/16000*1000)||1000)+500; var per=total/Math.max(1,ws.length); var start=idx*per, end=(idx+1)*per; var frames=rmsFrames(); var inW=frames.filter(function(f){return f.startMs>=start&&f.endMs<=end;}); var voiced=inW.filter(function(f){return f.rms>0.01;}); if(voiced.length){ start=voiced[0].startMs; end=voiced[voiced.length-1].endMs; } return {startMs:start, endMs:end}; }
+  function rmsFrames(){ if(!S||!S.raw.length) return []; var sr=16000, fs=320, hop=160, out=[]; for(var s=0;s+fs<=S.raw.length;s+=hop){ var ss=0; for(var i=0;i<fs;i++) ss+=S.raw[s+i]*S.raw[s+i]; var r=Math.sqrt(ss/fs); out.push({startMs:s/sr*1000, endMs:(s+fs)/sr*1000, rms:r}); } return out; }
+  function rmsInWindow(startMs,endMs){ var frames=rmsFrames(); var inW=frames.filter(function(f){return f.startMs>=startMs&&f.endMs<=endMs;}); var first=frames.filter(function(f){return f.startMs<200;}); var noise=first.length?first.reduce(function(a,f){return a+f.rms;},0)/first.length:0.005; var peak=inW.reduce(function(a,f){return Math.max(a,f.rms);},0); var voiced=inW.some(function(f){return f.rms>Math.max(noise*2.5,0.01);}); var run=0,maxRun=0; inW.forEach(function(f){ if(f.rms>Math.max(noise*2.5,0.01)){run+=10;maxRun=Math.max(maxRun,run);} else run=0; }); return {voiced:voiced, peak:peak, noise:noise, vowelRunMs:maxRun}; }
+  function checkTajweedRules(expected, mfa, rms){ var hasMadd=/[\u0640\u0653\u0654\u0655]/.test(expected); var tempo=120; var counts=rms.vowelRunMs/tempo; if(hasMadd && (counts<1.7||counts>2.3)){ return {kind:'red', label:'Madd too short', finding:'Madd too short', measured:counts.toFixed(2)+' counts', target:'2 counts (Madd Tabeei)', happened:'Vowel held '+Math.round(rms.vowelRunMs)+'ms, tempo '+Math.round(tempo)+'ms = '+counts.toFixed(2)+' counts.', todo:'Hold the vowel a little longer — about twice your short vowel.', mfaWindow:Math.round(mfa.startMs)+'-'+Math.round(mfa.endMs)+'ms', rmsVowel:Math.round(rms.vowelRunMs)+'ms'}; } return {kind:'green', label:'✓ Correct', finding:'Correct', measured:counts.toFixed(2)+' counts', target:'Target met', happened:'Word matched in ASR, MFA and RMS on the same timestamped window.', todo:'Keep going.', mfaWindow:Math.round(mfa.startMs)+'-'+Math.round(mfa.endMs)+'ms', rmsVowel:Math.round(rms.vowelRunMs)+'ms'}; }
+  function colourWordById(wordId, res){ var job=wordQueue.get(wordId); var el=job&&job.el; if(!el) el=document.querySelector('.w[data-word-id="'+wordId+'"]'); if(!el) return; el.querySelectorAll(':scope > .coach-badge, :scope > .coach-finding').forEach(function(n){n.remove();}); var badge=document.createElement('span'); badge.className='coach-badge '+res.kind; badge.textContent=res.label; var finding=document.createElement('div'); finding.className='coach-finding'; finding.innerHTML='<b>Finding:</b> '+res.finding+'<br><b>Measured:</b> '+res.measured+' — <b>Target:</b> '+res.target+'<br><b>What happened:</b> '+res.happened+'<br><b>What to do:</b> '+res.todo+'<br><b>Proof:</b> ASR ✓ · MFA '+res.mfaWindow+' · RMS vowel '+res.rmsVowel+' · Lock LOCKED ✅'; el.appendChild(badge); el.appendChild(finding); if(job) job.status='done'; }
+  function markNotVerified(wordId){ colourWordById(wordId, {kind:'amber', label:'Not verified', finding:'Not verified', measured:'—', target:'—', happened:'ASR, MFA and RMS did not lock on the same timestamped word.', todo:'Re-record this ayah.', mfaWindow:'—', rmsVowel:'—'}); }
+  function renderTajweedSummary(){ try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.innerHTML='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){} }
+  function bindMic(){ var b=document.getElementById('btnMic'); if(!b||b.dataset.lockedTaj) return; b.dataset.lockedTaj='1'; b.addEventListener('click', function(e){ if(!isTajweedOn()) return; e.stopImmediatePropagation(); e.preventDefault(); if(!S||S.stopped){ startTajweedListen(); } else { stopTajweedListen('user-stop'); } }, true); }
   document.addEventListener('DOMContentLoaded', bindMic); setTimeout(bindMic, 600); setTimeout(bindMic, 2000);
-  // Expose for debugging (no auto-start)
   window.__tajweedSession = function(){ return S; };
 })();
 </script>
