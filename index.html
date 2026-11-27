@@ -3122,7 +3122,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">06:25</span>
+    <span class="pdr-item pdr-time" id="pdrTime">06:32</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3626,7 +3626,7 @@ const JUZ_START_VERSE = {
   '1:1':1,   '2:142':2,  '2:253':3,  '3:92':4,   '4:24':5,
   '4:148':6, '5:83':7,   '6:111':8,  '7:88':9,   '8:41':10,
   '9:94':11, '11:6':12,  '12:53':13, '15:1':14,  '17:1':15,
-  '18:75':16,'21:1':17,  '23:1':18,  '25:21':19, '27:56':20,
+  '18:75':16,'21:1':17,  '23:1':18,  '25:21':19, '27:60':20,
   '29:46':21,'33:31':22, '36:28':23, '39:32':24, '41:47':25,
   '46:1':26, '51:31':27, '58:1':28,  '67:1':29,  '78:1':30
 };
@@ -10607,6 +10607,27 @@ async function applyIndoPakText(data){
   }catch(_){}
   return data;
 }
+/* PAGE 381/382 BOUNDARY (this Mushaf): the API puts 27:56-59 at the top of page 382, but in this Mushaf they close page 381, and page 382 opens with 27:60 (Juz 20 start, "A'man Khalaq"). */
+async function applyPage381_382Boundary(data){
+  if(!data || !Array.isArray(data.ayahs)) return data;
+  if(data.pageNumber === 382){ data.ayahs = data.ayahs.slice(4); return data; }
+  if(data.pageNumber !== 381) return data;
+  try{
+    let raw = null;
+    try{ raw = await fetchPageIndopak(382); }
+    catch(e){ const fb = await _fetchPageByEditionFallback(382); raw = { pageNumber: 382, ayahs: fb.ayahs.map(a => ({ text: a.text, numberInSurah: a.numberInSurah, surah: a.surah ? a.surah.number : 1, surahName: a.surah ? a.surah.name : '', surahEnglishName: a.surah ? a.surah.englishName : '', surahNumberOfAyahs: (a.surah && a.surah.numberOfAyahs) ? a.surah.numberOfAyahs : 0, juz: (typeof a.juz === 'number') ? a.juz : 1, manzil: (typeof a.manzil === 'number') ? a.manzil : 1, ruku: (typeof a.ruku === 'number') ? a.ruku : null, sajda: !!a.sajda, translation: null })) }; }
+    if(raw && Array.isArray(raw.ayahs) && raw.ayahs.length >= 4){
+      const extra = raw.ayahs.slice(0, 4);
+      if(extra.some(a => !a.translation)){
+        try{ const enRes = await fetchWithTimeout(ALQURAN_API + '/page/382/' + translationTextId, FETCH_TIMEOUT_MS).catch(() => null);
+          if(enRes && enRes.ok){ const enJson = await enRes.json(); if(enJson.code === 200 && enJson.data && Array.isArray(enJson.data.ayahs)){ const trans = enJson.data.ayahs.map(a => cleanTranslation(a.text)); extra.forEach((a, i) => { if(!a.translation) a.translation = trans[i] || null; }); } }
+        }catch(_){}
+      }
+      data.ayahs = data.ayahs.concat(extra);
+    }
+  }catch(_){}
+  return data;
+}
 async function fetchPageData(pageNumber){
   let data = null;
   try{ data = await fetchPageIndopak(pageNumber); }
@@ -10623,6 +10644,7 @@ async function fetchPageData(pageNumber){
       if(enRes && enRes.ok){ const enJson = await enRes.json(); if(enJson.code === 200 && enJson.data && Array.isArray(enJson.data.ayahs)){ const trans = enJson.data.ayahs.map(a => cleanTranslation(a.text)); data.ayahs.forEach((a, i) => { a.translation = trans[i] || null; }); } }
     }catch(_){}
   }
+  data = await applyPage381_382Boundary(data);
   return await applyIndoPakText(data);
 }
 function prefetchAdjacentPages(n){
