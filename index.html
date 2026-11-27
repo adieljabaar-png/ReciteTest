@@ -1,5 +1,9 @@
-@font-face { font-family: 'DigitalKhattMadani'; src: url('https://fonts.quran.ws/assets/fonts/digital-khatt-v2.woff2') format('woff2'); font-display: swap; }
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }
+/* Home-screen containment: prevent leaked stylesheet/source fragments from occupying visible top space. */
+#screenHome{overflow-x:hidden;}
+#screenHome > .home-source-leak, #screenHome > pre.home-source-leak, #screenHome > style, #screenHome > code, #screenHome > pre{display:none!important;}
+
+</style><head><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -252,16 +256,20 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-ruku-mark{font-family
 #tileDashboard .tile-list-item{display:block;position:relative;padding-left:12px;font-size:.68rem;font-weight:600;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #tileDashboard .tile-list-item::before{content:'';position:absolute;left:1px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:currentColor;}
 
-/* Quran.com line-numbered Mushaf layout (reader only). */
+/* Quran.com line-numbered Mushaf layout (reader only; numbered rows sorted so line 1 is page top). */
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-quran-line{
   display:flex; flex-direction:row; direction:rtl; align-items:baseline; justify-content:center;
-  flex-wrap:nowrap; text-align:center; width:100%; min-height:1.9em; line-height:2.25;
-  white-space:normal; overflow:visible; gap:0; margin:0; padding:0;
+  flex-wrap:wrap; text-align:center; width:100%; min-width:0; min-height:1.75em; line-height:2.05;
+  white-space:normal; overflow-wrap:normal; gap:0; margin:0; padding:0; box-sizing:border-box;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-quran-line .ayah{
-  display:inline; flex:0 0 auto; white-space:normal; text-align:center;
+  display:inline; flex:0 1 auto; min-width:0; white-space:normal; text-align:center;
 }
 body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-quran-line-fallback{flex-wrap:wrap;}
+/* Keep the verse fragment that begins a Juz visibly distinct without disrupting its line flow. */
+body.page-light.viewer-read-mode .qv-slot .mushaf.mushaf-book .ayah.juz-start{color:#fff!important;background:#000!important;border-radius:0;padding-inline:2px!important;}
+body.page-dark.viewer-read-mode .qv-slot .mushaf.mushaf-book .ayah.juz-start{color:#000!important;background:#fff!important;border-radius:0;padding-inline:2px!important;}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .ayah.juz-start *{color:inherit!important;background:transparent!important;}
 
 </style>
 <title>Quran Recitation Coach</title>
@@ -6069,8 +6077,8 @@ function updateTajweedStatusChip(){
     chip.setAttribute('aria-label','ASR unavailable'); return;
   }
   chip.className='toggle tj-status-ready';
-  chip.innerHTML='<span class="tj-status-dot"></span>ASR-only checks';
-  chip.title='Tajweed feedback uses ASR transcript and phonetic-normalization evidence only. Acoustic waveform, spectral and separate classifier checks are not used. Uncertain results are suppressed.';
+  chip.innerHTML='<span class="tj-status-dot"></span>ASR + acoustic estimates';
+  chip.title='ASR transcript checks are integrated with provisional acoustic rule estimates when microphone segments are available. Acoustic heuristics are not definitive Tajweed certification.';
   chip.setAttribute('aria-label','ASR-only Tajweed feedback active');
 }
 
@@ -6935,6 +6943,46 @@ function checkHamzatWasl(w, idx, rawHeard){
   }
 }
 
+function runIntegratedRuleChecks(w, idx, heardNorm, opts){
+  if (!w || !w.tjRules || followOnly) return;
+  opts = opts || {};
+  const hasAudio = !!(w.audio && typeof rmsAnalyser !== 'undefined' && rmsAnalyser.isRunning());
+  const align = hasAudio ? { available: true, ctx: getDeviceAdaptiveAudioContext(w) } : { available: false, ctx: { hasSignal:false, samples:[] } };
+  // Rule-specific checks that are supported by existing annotated rules and
+  // acoustic helper functions. These report provisional findings as yellow.
+  // Unified rule assessment: invoke the existing specialised acoustic/transcript
+  // checks through one entry point. Acoustic heuristics remain yellow unless
+  // transcript evidence independently establishes a clear mismatch.
+  try { checkAllNasalRules(w, heardNorm, align); } catch(_e){}
+  try { checkIkhfa(w, heardNorm, align); } catch(_e){}
+  try { checkIdghaamNoGhunnah(w, heardNorm, align); } catch(_e){}
+  try { checkQalqalah(w, heardNorm, align); } catch(_e){}
+  try { checkLaamShamsiyyah(w, heardNorm, align); } catch(_e){}
+  try { checkExtraSyllable(w); } catch(_e){}
+  try { checkHamzatWasl(w, idx, opts.rawHeard || heardNorm); } catch(_e){}
+  try { checkTajweedAudioAlignment(w, heardNorm); } catch(_e){}
+  // Madd duration is an estimate from the word's aligned voiced segment, not a
+  // vowel-specific measurement. Never issue a red verdict from this proxy.
+  if (w.tjRules.madd && STRICT_FEATURES.madd() && w.audio && hasAudio){
+    const dur = Number(w.audio.durationMs) || (w.audio.end - w.audio.start);
+    const need = maddRequiredMs(w.tjRules.madd);
+    if (dur > 0 && dur < need){
+      markStrict1Warning(w, 'madd-duration-estimate', 'aligned word segment ~' + Math.round(dur) + ' ms; Madd duration estimate below ' + Math.round(need) + ' ms (provisional)');
+    }
+  }
+  // Waqf/end-of-ayah Madd: use the requested fixed 250 ms target.
+  // This measures the aligned final-word segment (a proxy, not vowel isolation),
+  // so duration-only findings are yellow and never falsely presented as certain.
+  const next = words[idx + 1];
+  const isAyahEnd = !next || next.verse !== w.verse;
+  if (isAyahEnd && w.audio && hasAudio){
+    const dur = Number(w.audio.durationMs) || (w.audio.end - w.audio.start);
+    if (dur > 0 && dur < END_OF_AYAH_MADD_MIN_MS){
+      markStrict1Warning(w, 'end-ayah-madd-250ms', 'final ayah segment estimate ~' + Math.round(dur) + ' ms; below fixed 250 ms end-hold target (provisional)');
+    }
+  }
+}
+
 function runStrict1Checks(idx, heard, opts){
   /* Recite ASR-only Tajweed assessment layer (2026 redesign).
      The browser ASR transcript is the sole evidence source. RMS, spectral,
@@ -6960,10 +7008,23 @@ function runStrict1Checks(idx, heard, opts){
       w.el.classList.remove('warned','corrected');
       w.el.classList.add('correct');
     }
+    // Integrate rule-specific acoustic checks when a word-aligned microphone
+    // segment is available. Acoustic heuristics remain yellow (provisional).
+    try { runIntegratedRuleChecks(w, idx, asr, opts); } catch(_ruleErr) {}
     return;
   }
-  /* No rule-level verdict from a mismatched/uncertain transcript. The main
-     ASR word-alignment engine owns word mismatch feedback separately. */
+  /* ASR-only word pronunciation feedback: issue a red word-level verdict only
+     when normalized transcript and phonetic forms both differ materially.
+     Very small transcript variations are deliberately suppressed to reduce false flashes. */
+  const mismatchDistance = lev(asr, ref);
+  const phonDistance = (refPh && heardPh && refPh.length >= 2 && heardPh.length >= 2)
+    ? lev(refPh, heardPh) : Infinity;
+  const mismatchThreshold = Math.max(2, Math.floor(Math.max(ref.length, asr.length) * 0.20));
+  if (mismatchDistance >= mismatchThreshold && phonDistance > 1){
+    markStrict1Error(w, 'asr-word-mismatch',
+      'ASR heard ' + String(heard) + ' instead of the expected Quran word; normalized and phonetic forms differ');
+  }
+  try { runIntegratedRuleChecks(w, idx, asr, opts); } catch(_ruleErr) {}
 }
 
 function distributeMergedHeard(heard, wordsArr, startIdx, count){
@@ -10734,7 +10795,7 @@ async function fetchPageIndopak(pageNumber){
     const s = parseInt(sStr, 10) || 1; const a = parseInt(aStr, 10) || 1;
     let translation = '';
     if(Array.isArray(v.translations) && v.translations.length){ translation = cleanTranslation(v.translations.map(t => t.text || '').join(' ')); }
-    return { text: v.text_uthmani || '', words: Array.isArray(v.words) ? v.words.map(w => ({ text: w.text_uthmani || '', lineNumber: w.line_number || null, pageNumber: w.page_number || pageNumber, position: w.position || w.location || null, verseKey: w.verse_key || key })) : [], numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
+    return { text: v.text_uthmani || '', words: Array.isArray(v.words) ? v.words.map(w => ({ text: w.text_uthmani || '', lineNumber: (w.line_number || w.line_v2 || w.line_v1 || null), pageNumber: (w.page_number || w.v2_page || w.v1_page || pageNumber), position: w.position || w.location || null, verseKey: w.verse_key || key })) : [], numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
   })};
 }
 async function _fetchPageByEditionFallback(pageNumber){
@@ -11099,6 +11160,10 @@ function renderReaderPage(pageNumber, token){
       lineEl.appendChild(span);
     });
   });
+  // Normalize Quran.com line rows to ascending Mushaf line order. Line 1 is the page top.
+  const numberedLines = Array.from(content.querySelectorAll('.mushaf-quran-line[data-line]'));
+  numberedLines.sort((x,y) => (parseInt(x.dataset.line,10)||999) - (parseInt(y.dataset.line,10)||999));
+  numberedLines.forEach(line => content.appendChild(line));
   frame.appendChild(content);
   const footer = document.createElement('div'); footer.className = 'mushaf-book-footer-row'; footer.textContent = 'منزل ' + toAr(pageManzil);
   frame.appendChild(footer);
