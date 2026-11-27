@@ -1,4 +1,32 @@
-<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+<html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }.tj-status-ready .tj-status-dot{background:#22c55e !important;box-shadow:0 0 0 3px rgba(34,197,94,.25);} .tj-status-loading .tj-status-dot{background:#f59e0b !important;} 
+
+/* Tajweed server notice - small, inside Tajweed mode only */
+#tajweedServerNotice{display:none;align-items:center;gap:8px;margin:8px 0 0;padding:8px 10px;border:1px solid var(--gold,#d4af37);border-radius:8px;font-size:12px;line-height:1.4;background:rgba(212,175,55,.08);}
+#tajweedServerNotice .dot{width:8px;height:8px;border-radius:50%;background:#ef4444;flex:0 0 auto;}
+#tajweedServerNotice button{margin-left:auto;flex:0 0 auto;font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--gold,#d4af37);background:transparent;color:inherit;cursor:pointer;}
+
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -1338,6 +1366,8 @@ padding:9px 11px;border-radius:11px;min-height:42px;white-space:nowrap;
 .toggle.mode-pill:active{transform:scale(.96)}
 .toggle.mode-pill[data-mode="follow"].active{border-color:rgba(79,140,255,.75);background:rgba(79,140,255,.20);color:#fff;box-shadow:0 4px 14px rgba(79,140,255,.28);}
 .toggle.mode-pill[data-mode="tajweed"].active{border-color:rgba(155,110,255,.75);background:rgba(155,110,255,.22);color:#fff;box-shadow:0 4px 14px rgba(155,110,255,.28);}
+.toggle.mode-pill[data-mode="test"].active{border-color:rgba(212,175,55,.85);background:rgba(212,175,55,.22);color:#fff;box-shadow:0 4px 14px rgba(212,175,55,.30);}
+.toggle.mode-pill[data-mode="tajweed-server"].active{border-color:rgba(16,185,129,.85);background:rgba(16,185,129,.20);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.28);}
 body.light-mode .toggle.mode-pill[data-mode="follow"].active{background:rgba(42,111,224,.15);border-color:rgba(42,111,224,.7);color:#1a2233;}
 body.light-mode .toggle.mode-pill[data-mode="tajweed"].active{background:rgba(120,80,220,.15);border-color:rgba(120,80,220,.7);color:#2a1a6e;}
 .toggle.hide-text.active{border-color:rgba(255,176,32,.7);background:rgba(255,176,32,.12);color:#fff;}
@@ -3125,7 +3155,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">07:46</span>
+    <span class="pdr-item pdr-time" id="pdrTime">08:20</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3165,7 +3195,8 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="barwrap"><div class="bar" id="bar" style="width: 0%;"></div></div>
   <div class="toggles hide-immersive">
     <button class="toggle mode-pill active" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
-    <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed" aria-pressed="false">Tajweed</button>
+    <button class="toggle mode-pill" id="modeTestBtn" type="button" data-mode="test" aria-pressed="false">Test</button>
+    <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed-server" aria-pressed="false">Tajweed</button>
     <div class="progress-section" id="progressSection">
     <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
   <span class="pt-text">
@@ -3199,6 +3230,7 @@ body.light-mode .share-arabic{color:#1a2233;}
 </div>
     <button class="toggle ondevice-chip" id="onDeviceChip" type="button" hidden=""></button>
     <span class="toggle" id="tajweedStatusChip" hidden="" role="status" aria-live="polite" aria-atomic="true"></span>
+<div id="tajweedServerNotice" role="status"><span class="dot"></span><span id="tajweedServerNoticeText">Server not connected — Tajweed server check unavailable. Follow and Test modes still work.</span><button type="button" id="tajweedServerRetryBtn">Retry</button></div>
     <label class="toggle hide-text" id="hideTextChip">
       <input type="checkbox" id="chkHideText"> Hide text
     </label>
@@ -6101,7 +6133,7 @@ function updateTajweedStatusChip(){
     chip.setAttribute('aria-label', 'Tajweed running in transcript-only mode; acoustic rules not verified');
   } else if(acousticReady){
     chip.className = 'toggle tj-status-ready';
-    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · mic clues';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Rules ready';
     chip.title = 'All 12 annotated Tajweed categories are available. ASR aligns words with Quran text and the microphone supplies word-level RMS/spectral clues. Acoustic checks are provisional estimates, not phoneme-level Tajweed certification; uncertain findings are shown as yellow warnings for teacher/listener review.';
     chip.setAttribute('aria-label', '12 annotated Tajweed categories available with provisional microphone evidence');
   } else if(wantMic){
@@ -6111,7 +6143,7 @@ function updateTajweedStatusChip(){
     chip.setAttribute('aria-label', 'ASR active but microphone waveform analysis unavailable');
   } else {
     chip.className = 'toggle tj-status-loading';
-    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · start mic';
+    chip.innerHTML = '<span class="tj-status-dot"></span>Rules ready';
     chip.title = 'The 12 Tajweed categories are available from Quran annotations where present. Start listening to activate microphone analysis. Acoustic findings remain provisional and may require a teacher/listener review.';
     chip.setAttribute('aria-label', '12 Tajweed categories loaded; microphone analysis starts with recitation');
   }
@@ -6438,6 +6470,53 @@ function verifyMFAAlignmentSync(w, seg, heard){ return {ok:false,confidence:0}; 
    <= 70% -> yellow + incorrect (warning / mistake entry).
    >  70% -> green + correct (no warning / mistake entry). */
 const TAJWEED_PROVISIONAL_PASS_PCT = 70;
+    /* --- 3-MODE COACH (Follow / Test / Tajweed-server) --- */
+    const TEST_MODE_PASS_PCT = 50;
+    const TEST_MODE_PLAUSIBLE = 0.58;
+    const TEST_MODE_EXIT = 0.70;
+    const FOLLOW_MODE_PLAUSIBLE = 0.72;
+    const FOLLOW_MODE_EXIT = 0.85;
+    const TAJWEED_SERVER_MAX_AYAHS = 5;
+    const TAJWEED_SERVER_ENDPOINT = '/api/tajweed-check';
+    let coachMode = 'follow'; // 'follow' | 'test' | 'tajweed-server'
+    let tajweedServerQueue = []; // [{surah, ayah, ayahText, audioBlob}]
+    let tajweedServerResults = [];
+    function isTestMode(){ return coachMode === 'test'; }
+    function isTajweedServerMode(){ return coachMode === 'tajweed-server'; }
+    function currentPassPct(){ return isTestMode() ? TEST_MODE_PASS_PCT : TAJWEED_PROVISIONAL_PASS_PCT; }
+    function maddBoundsFor(mode){
+      if(mode==='test') return {tabeei:[1.2,2.8], wajib:[3.0,6.0], lazim:[4.8,7.2]};
+      return {tabeei:[1.7,2.3], wajib:[3.6,5.4], lazim:[5.5,6.5]};
+    }
+    function setCoachMode(m){
+      coachMode = m;
+      try{
+        document.querySelectorAll('.toggle.mode-pill').forEach(b=>{
+          const on = b.getAttribute('data-mode')===m || (m==='tajweed-server' && b.getAttribute('data-mode')==='tajweed-server');
+          b.classList.toggle('active', !!on); b.setAttribute('aria-pressed', on?'true':'false');
+        });
+      }catch(_){}
+      try{ updateTajweedStatusChip(); }catch(_){}
+      try{ if(coachMode==='tajweed-server') checkTajweedServerConnection(); }catch(_){}
+      try{ if(typeof addFeedback==='function') addFeedback('Mode: '+(m==='follow'?'Follow (strict)':m==='test'?'Test (lenient practice)':'Tajweed (server MFA, max 5 ayahs)'), false, true); }catch(_){}
+    }
+    /* Server MFA: send one ayah segment, get phone timings + per-rule scores. No model download. */
+    async function checkAyahOnServer(item){
+      const fd = new FormData();
+      fd.append('surah', String(item.surah||'')); fd.append('ayah', String(item.ayah||''));
+      fd.append('ayahText', item.ayahText||'');
+      if(item.audioBlob) fd.append('audio', item.audioBlob, 'ayah-'+(item.ayah||'')+'.webm');
+      const res = await fetch(TAJWEED_SERVER_ENDPOINT, {method:'POST', body: fd});
+      if(!res.ok){ try{ showTajweedServerNotice('Server not connected — Tajweed server check unavailable. Follow and Test modes still work.'); }catch(_){} throw new Error('Server check failed: '+res.status); }
+      return await res.json();
+    }
+    function validateTajweedServerSelection(list){
+      if(!Array.isArray(list)) return {ok:false, msg:'Select 1 to 5 ayahs.'};
+      if(list.length<1) return {ok:false, msg:'Select at least 1 ayah for Tajweed check.'};
+      if(list.length>TAJWEED_SERVER_MAX_AYAHS) return {ok:false, msg:'Tajweed check is limited to 5 ayahs. Please select up to 5.'};
+      return {ok:true};
+    }
+
 function checkTajweedAudioAlignment(w, heard){ return {available:true,confident:true,ctx:{rmsRunning:false,hasSeg:false,samples:[],hasSignal:false}}; } /* ASR-only: no provisional 70% gate */
 
 function checkQalqalah(w, heard, align){
@@ -13649,7 +13728,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13709,4 +13788,34 @@ window.addEventListener('contextmenu', function(event) {
   });
 })();
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>
+/* Tajweed server connection notice */
+let tajweedServerConnected = false;
+function showTajweedServerNotice(msg){
+  try{
+    const el=document.getElementById('tajweedServerNotice');
+    const txt=document.getElementById('tajweedServerNoticeText');
+    if(txt && msg) txt.textContent=msg;
+    if(el) el.style.display = (typeof coachMode!=='undefined' && coachMode==='tajweed-server') ? 'flex' : 'none';
+  }catch(_){}
+}
+function hideTajweedServerNotice(){ try{ const el=document.getElementById('tajweedServerNotice'); if(el) el.style.display='none'; }catch(_){} }
+async function checkTajweedServerConnection(){
+  if(typeof coachMode==='undefined' || coachMode!=='tajweed-server') return;
+  showTajweedServerNotice('Checking Tajweed server connection…');
+  try{
+    // Lightweight probe: POST empty check, server should answer 400/200/405 - any HTTP response = reachable
+    const r = await fetch(TAJWEED_SERVER_ENDPOINT, {method:'POST', body:new FormData()});
+    tajweedServerConnected = true; hideTajweedServerNotice();
+  }catch(e){
+    tajweedServerConnected = false;
+    showTajweedServerNotice('Server not connected — Tajweed server check unavailable. Follow and Test modes still work.');
+  }
+}
+try{
+  document.getElementById('tajweedServerRetryBtn')?.addEventListener('click', checkTajweedServerConnection);
+}catch(_){}
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+
+</body></html>
