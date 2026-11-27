@@ -1,8 +1,8 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v5.0.2
+   Quran Recitation Coach — Service Worker  v5.0.0
 
    What changed in 5.0.0:
-     • Cache version bumped to 5.0.2 so installed apps fetch the
+     • Cache version bumped to 5.0.0 so installed apps fetch the
        new 3-mode coach index.html:
        Follow (strict, unchanged) / Test (lenient practice:
        pass 50%, plausible 0.58, wider Madd windows, timing-only
@@ -67,7 +67,7 @@
 
 'use strict';
 
-const VERSION = '5.0.2';
+const VERSION = '5.0.3';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;

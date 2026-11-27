@@ -3149,7 +3149,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">20:26</span>
+    <span class="pdr-item pdr-time" id="pdrTime">21:05</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3228,7 +3228,7 @@ body.light-mode .share-arabic{color:#1a2233;}
       <input type="checkbox" id="chkHideText"> Hide text
     </label>
   </div>
-  <div class="recite-controls" data-taj-shared-bound="1">
+  <div class="recite-controls">
     <button id="btnStop" class="gold-control-small" aria-label="Pause">⏸</button>
     <button id="btnMic" class="gold-control-main">Start Reciting 🎤</button>
     <button id="btnReset" class="gold-control-small" aria-label="Restart">↺</button>
@@ -6231,6 +6231,7 @@ const TAJWEED_PROVISIONAL_PASS_PCT = 70;
     }
     function setCoachMode(m){
       coachMode = m;
+      try{ localStorage.setItem('qc.coachMode', m); }catch(e){} /* persist: reload must not reset Tajweed to Follow */
       try{
         document.querySelectorAll('.toggle.mode-pill').forEach(b=>{
           const on = b.getAttribute('data-mode')===m || (m==='tajweed-server' && b.getAttribute('data-mode')==='tajweed-server');
@@ -8406,6 +8407,7 @@ function setRecitationMode(modeName){
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
   } else if(_effMode === 'test'){
+    try{ speechRecognition && speechRecognition.stop(); }catch(_){} /* stop browser SR: a Tajweed SR session must not keep running into Test mode */
     releaseMicStream();
     coachTajweedMicFailed = false;
     addFeedback('📝 <b>Test</b> mode — lenient practice. ASR test only, no Tajweed colours.', false, true);
@@ -8461,6 +8463,16 @@ if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => { try{ if(typeo
 if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => { try{ if(typeof setCoachMode==='function') setCoachMode('tajweed-server'); }catch(_){} setRecitationMode('tajweed'); }); }
 const modeTestBtn = document.getElementById('modeTestBtn');
 if(modeTestBtn){ modeTestBtn.addEventListener('click', () => { try{ if(typeof setCoachMode==='function') setCoachMode('test'); }catch(_){} setRecitationMode('test'); }); }
+/* Restore coachMode after a reload: followOnly restores on its own, coachMode did not —
+   so a reloaded PWA showed a green Tajweed pill while coachMode was still 'follow',
+   and the engine believed coachMode instead of the pill. */
+try{
+  var _storedMode = localStorage.getItem('qc.coachMode');
+  if(_storedMode === 'test' || _storedMode === 'tajweed-server'){
+    setCoachMode(_storedMode);
+    setRecitationMode(_storedMode === 'test' ? 'test' : 'tajweed');
+  }
+}catch(_){}
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
 function applyHideTextUI(){
   if(hideText && followOnly){
@@ -13483,7 +13495,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13557,7 +13569,10 @@ window.addEventListener('contextmenu', function(event) {
   function assignWordIds(){ document.querySelectorAll('#screenCoach .w, .mushaf .w, .mushaf-book-content .w').forEach(function(el){ if(!el.dataset.wordId){ el.dataset.wordId='w'+(_wid++); } }); }
   new MutationObserver(assignWordIds).observe(document.body, {childList:true, subtree:true});
   setTimeout(assignWordIds, 500); setTimeout(assignWordIds, 1500);
-  function isTajweedOn(){ try{ if(typeof coachMode!=='undefined' && coachMode) return coachMode==='tajweed-server'; }catch(_){} var a=document.querySelector('.toggle.mode-pill.active'); return !!(a && a.getAttribute('data-mode')==='tajweed-server'); }
+  function isTajweedOn(){ var viaMode=false; try{ viaMode=(typeof coachMode!=='undefined' && coachMode==='tajweed-server'); }catch(_){}
+    var viaPill=false; try{ var a=document.querySelector('.toggle.mode-pill.active'); viaPill=!!(a && a.getAttribute('data-mode')==='tajweed-server'); }catch(_){}
+    var viaStored=false; try{ viaStored=(localStorage.getItem('qc.coachMode')==='tajweed-server'); }catch(_){}
+    return !!(viaMode || viaPill || viaStored); /* ANY of the three proves Tajweed — never let a stale coachMode='follow' veto a green Tajweed pill */ }
   var S=null;
   var WORKLET_CODE="class P extends AudioWorkletProcessor{constructor(){super();this.n=0;}process(inp){var c=inp[0]; if(!c||!c[0]) return true; var ch=c[0]; var s=0; for(var i=0;i<ch.length;i++) s+=ch[i]*ch[i]; this.port.postMessage({samples:Array.from(ch),rms:Math.sqrt(s/ch.length),idx:this.n}); this.n+=ch.length; return true;}} registerProcessor('taj-pcm',P);";
   function rmsFrames(){ if(!S||!S.raw.length) return []; var sr=16000,fs=320,hop=160,out=[]; for(var s=0;s+fs<=S.raw.length;s+=hop){ var ss=0; for(var i=0;i<fs;i++) ss+=S.raw[s+i]*S.raw[s+i]; var r=Math.sqrt(ss/fs); out.push({startMs:s/sr*1000,endMs:(s+fs)/sr*1000,rms:r}); } return out; }
@@ -13654,10 +13669,10 @@ window.addEventListener('contextmenu', function(event) {
   // Intercept at ANCESTOR in CAPTURE phase — this runs BEFORE the app's own btnMic handler on the button,
   // so in Tajweed we can stop the app's ASR-only handler from also starting. Follow/Test pass through untouched.
   function bindIntercept(){
-    var wrap=document.querySelector('.recite-controls')||document.getElementById('screenCoach')||document.body;
+    var wrap=document; /* document-level: catches #btnMic AND the fullscreen #fsMic, which lives outside .recite-controls */
     if(!wrap||wrap.dataset.tajSharedBound) return; wrap.dataset.tajSharedBound='1';
     wrap.addEventListener('click', function(e){
-      var btn=e.target&&e.target.closest?e.target.closest('#btnMic'):null;
+      var btn=e.target&&e.target.closest?e.target.closest('#btnMic, #fsMic'):null;
       if(!btn) return;
       if(!isTajweedOn()) return; // Follow/Test: let app handler run
       e.stopPropagation(); e.preventDefault();
