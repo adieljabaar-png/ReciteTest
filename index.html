@@ -251,6 +251,18 @@ body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-ruku-mark{font-family
 #tileDashboard .tile-list{grid-column:1 / -1;grid-row:2;display:flex;flex-direction:column;gap:2px;width:100%;min-width:0;position:relative;margin:0;text-align:left;}
 #tileDashboard .tile-list-item{display:block;position:relative;padding-left:12px;font-size:.68rem;font-weight:600;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #tileDashboard .tile-list-item::before{content:'';position:absolute;left:1px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:currentColor;}
+
+/* Quran.com line-numbered Mushaf layout (reader only). */
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-quran-line{
+  display:flex; flex-direction:row; direction:rtl; align-items:baseline; justify-content:center;
+  flex-wrap:nowrap; text-align:center; width:100%; min-height:1.9em; line-height:2.25;
+  white-space:normal; overflow:visible; gap:0; margin:0; padding:0;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-quran-line .ayah{
+  display:inline; flex:0 0 auto; white-space:normal; text-align:center;
+}
+body.viewer-read-mode .qv-slot .mushaf.mushaf-book .mushaf-quran-line-fallback{flex-wrap:wrap;}
+
 </style>
 <title>Quran Recitation Coach</title>
 <script>
@@ -985,6 +997,7 @@ direction:ltr;-webkit-text-stroke:0.2px currentColor;
 .mushaf-book-header-row .mbh-left{text-align:left;}
 .mushaf-book-header-row .mbh-right{text-align:right;}
 .mushaf-book-header-row .mbh-center{flex:0 0 auto;font-weight:800;font-size:1em;text-align:center;}
+.mushaf-book-content .mushaf-api-line{display:block;width:100%;text-align:justify;text-align-last:justify;direction:rtl;white-space:normal;}
 .mushaf-book-content{
 text-align:justify;text-align-last:center;text-justify:inter-word;
 line-height:2.15;font-size:1em;padding:0 2px 2px;
@@ -10710,7 +10723,7 @@ async function getJuzStartPage(juzNumber){
   return fallback;
 }
 async function fetchPageIndopak(pageNumber){
-  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&word_fields=text_uthmani&translations=' + currentTextTranslationQuranComId();
+  const url = QURAN_API_V4 + '/verses/by_page/' + pageNumber + '?fields=' + READER_EDITION + '&per_page=300&words=true&word_fields=text_uthmani,line_number,page_number,verse_key,location&translations=' + currentTextTranslationQuranComId();
   const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
@@ -10721,7 +10734,7 @@ async function fetchPageIndopak(pageNumber){
     const s = parseInt(sStr, 10) || 1; const a = parseInt(aStr, 10) || 1;
     let translation = '';
     if(Array.isArray(v.translations) && v.translations.length){ translation = cleanTranslation(v.translations.map(t => t.text || '').join(' ')); }
-    return { text: v.text_uthmani || '', numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
+    return { text: v.text_uthmani || '', words: Array.isArray(v.words) ? v.words.map(w => ({ text: w.text_uthmani || '', lineNumber: w.line_number || null, pageNumber: w.page_number || pageNumber, position: w.position || w.location || null, verseKey: w.verse_key || key })) : [], numberInSurah: a, surah: s, surahName: '', surahEnglishName: '', surahNumberOfAyahs: 0, juz: v.juz_number || 1, manzil: v.manzil_number || 1, ruku: (typeof v.ruku_number === 'number') ? v.ruku_number : null, sajda: !!v.sajdah, pageNumber: v.page_number || pageNumber, translation: translation || null };
   })};
 }
 async function _fetchPageByEditionFallback(pageNumber){
@@ -11051,18 +11064,40 @@ function renderReaderPage(pageNumber, token){
     const displayAyah = displayAyahNumber(a.surah, a.numberInSurah);
     const verseKey = a.surah + ':' + displayAyah;
     const isSajdah = (a.sajda === true) || SAJDAH_VERSES.has(verseKey);
-    const span = document.createElement('span'); span.className = 'ayah';
-    span.dataset.surah = String(a.surah); span.dataset.ayah = String(displayAyah);
-    span.dataset.verse = verseKey; span.dataset.page = String(pageNumber);
-    if(typeof a.ruku === 'number') span.dataset.ruku = String(a.ruku);
-    if(a.surahNumberOfAyahs) span.dataset.surahAyahs = String(a.surahNumberOfAyahs);
-    if(Number(a.surah) !== 1 && JUZ_START_VERSE[verseKey]) span.classList.add('juz-start');
-    span.appendChild(document.createTextNode(text + ' '));
-    const mark = document.createElement('span'); mark.className = 'mushaf-ayah-mark'; mark.textContent = toAr(displayAyah);
-    span.appendChild(mark);
-    if(isSajdah){ const sj = document.createElement('span'); sj.className = 'mushaf-sajdah-mark'; sj.textContent = '۩'; sj.title = 'Sajidah verse'; span.appendChild(sj); sajdahRefs.push(verseKey); }
-    if(a.translation){ const t = document.createElement('span'); t.className = 'translation'; t.textContent = a.translation; span.appendChild(t); }
-    content.appendChild(span);
+    // Render Quran.com word-level line metadata into fixed Mushaf line rows.
+    // Keep the .ayah data attributes on each line-fragment for existing highlighting.
+    const words = Array.isArray(a.words) ? a.words.filter(w => w && typeof w.text === 'string' && w.text.trim()) : [];
+    const lineSegments = [];
+    if(words.length && words.some(w => Number.isFinite(Number(w.lineNumber)))){
+      words.forEach(w => {
+        const ln = Number.isFinite(Number(w.lineNumber)) ? Number(w.lineNumber) : (lineSegments.length ? lineSegments[lineSegments.length-1].line : 0);
+        let seg = lineSegments[lineSegments.length-1];
+        if(!seg || seg.line !== ln){ seg = {line:ln, words:[]}; lineSegments.push(seg); }
+        seg.words.push(w.text.trim());
+      });
+    } else {
+      lineSegments.push({line:null, words:[text]});
+    }
+    lineSegments.forEach((seg, segIndex) => {
+      let lineEl;
+      if(seg.line !== null){
+        lineEl = content.querySelector('.mushaf-quran-line[data-line="' + seg.line + '"]');
+        if(!lineEl){ lineEl = document.createElement('div'); lineEl.className='mushaf-quran-line'; lineEl.dataset.line=String(seg.line); content.appendChild(lineEl); }
+      } else { lineEl = document.createElement('div'); lineEl.className='mushaf-quran-line mushaf-quran-line-fallback'; content.appendChild(lineEl); }
+      const span = document.createElement('span'); span.className = 'ayah';
+      span.dataset.surah = String(a.surah); span.dataset.ayah = String(displayAyah);
+      span.dataset.verse = verseKey; span.dataset.page = String(pageNumber);
+      if(typeof a.ruku === 'number') span.dataset.ruku = String(a.ruku);
+      if(a.surahNumberOfAyahs) span.dataset.surahAyahs = String(a.surahNumberOfAyahs);
+      if(Number(a.surah) !== 1 && JUZ_START_VERSE[verseKey]) span.classList.add('juz-start');
+      span.appendChild(document.createTextNode(seg.words.join(' ') + ' '));
+      if(segIndex === lineSegments.length-1){
+        const mark = document.createElement('span'); mark.className = 'mushaf-ayah-mark'; mark.textContent = toAr(displayAyah); span.appendChild(mark);
+        if(isSajdah){ const sj = document.createElement('span'); sj.className = 'mushaf-sajdah-mark'; sj.textContent = '۩'; sj.title = 'Sajidah verse'; span.appendChild(sj); sajdahRefs.push(verseKey); }
+        if(a.translation){ const t = document.createElement('span'); t.className = 'translation'; t.textContent = a.translation; span.appendChild(t); }
+      }
+      lineEl.appendChild(span);
+    });
   });
   frame.appendChild(content);
   const footer = document.createElement('div'); footer.className = 'mushaf-book-footer-row'; footer.textContent = 'منزل ' + toAr(pageManzil);
