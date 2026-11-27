@@ -1,0 +1,25 @@
+PASS | sw VERSION 5.0.2
+PASS | sw no 5.0.0 VERSION line
+PASS | sw cache names derive from VERSION
+PASS | sw skipWaiting + clients.claim
+PASS | index build marker 5.0.2
+PASS | _lastRecitationMode DECLARED
+PASS | Test branch strips colours
+PASS | applyTajweedColors refuses Test
+PASS | surah load gates colours to Tajweed
+PASS | chip ASR test before Rules ready
+PASS | engine posts to /api/tajweed-check
+PASS | engine capture intercept
+PASS | engine 49.5s cap
+PASS | engine announces shared capture
+PASS | engine chip timer + clear
+PASS | Tajweed switch stops browser SR
+PASS | all index script blocks parse
+PASS | server.js parses
+PASS | GET /api/health 200 + googleConfigured false (no key)
+PASS | POST non-multipart -> 400
+PASS | POST with audio, no key -> 503 honest (no faked timings)
+PASS | POST with audio, no key -> does NOT return words
+PASS | unknown route 404
+PASS | GET / serves index.html
+PASS | GET /sw.js serves v5.0.2

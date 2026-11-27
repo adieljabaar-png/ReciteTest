@@ -3149,7 +3149,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">18:42</span>
+    <span class="pdr-item pdr-time" id="pdrTime">20:26</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -5704,6 +5704,7 @@ async function applyTajweedColorsToCoach(){
   updateTajweedStatusChip();
   if (mode !== 'surah' || !words.length) return;
   if (followOnly) return;
+  if (typeof coachMode !== 'undefined' && coachMode === 'test'){ removeTajweedColorsFromCoach(); return; } /* Test: never Tajweed colours */
   addFeedback('🎨 Loading Tajweed colors…', false, true);
   let verses;
   try{ verses = await fetchCoachTajweed(surahNum); }
@@ -5850,6 +5851,13 @@ function updateTajweedStatusChip(){
     chip.innerHTML = '<span class="tj-status-dot"></span>Annotations incomplete';
     chip.title = 'Quran Tajweed annotations could not be fully aligned. Some words may not have rule metadata, so all 12 categories cannot be guaranteed for this surah.';
     chip.setAttribute('aria-label', 'Tajweed annotations incomplete');
+    return;
+  }
+  if(typeof coachMode !== 'undefined' && coachMode === 'test'){
+    chip.className = 'toggle tj-status-ready';
+    chip.innerHTML = '<span class="tj-status-dot"></span>ASR test';
+    chip.title = 'Test mode: ASR test only. Lenient practice, no Tajweed colours, no Madd/Ghunnah rule checks.';
+    chip.setAttribute('aria-label', 'Test mode: ASR test only, no Tajweed colours');
     return;
   }
   if(!coachTajweedReady){
@@ -6229,6 +6237,7 @@ const TAJWEED_PROVISIONAL_PASS_PCT = 70;
           b.classList.toggle('active', !!on); b.setAttribute('aria-pressed', on?'true':'false');
         });
       }catch(_){}
+      try{ if(m==='tajweed-server'){ if(typeof applyTajweedColorsToCoach==='function') applyTajweedColorsToCoach(); } else { if(typeof removeTajweedColorsFromCoach==='function') removeTajweedColorsFromCoach(); } }catch(_){}
       try{ updateTajweedStatusChip(); }catch(_){}
       try{ if(typeof addFeedback==='function') addFeedback('Mode: '+(m==='follow'?'Follow (strict)':m==='test'?'Test (lenient practice)':'Tajweed (server MFA, max 5 ayahs)'), false, true); }catch(_){}
     }
@@ -8375,9 +8384,12 @@ function applyMutexUI(){
 
 }
 
+let _lastRecitationMode = 'follow'; // last full coach mode (follow|test|tajweed-server) — prevents Test<->Tajweed no-op
 function setRecitationMode(modeName){
   const newFollow = (modeName === 'follow');
-  if(newFollow === followOnly && !updatingMutex) return;
+  const _effMode = (modeName === 'test') ? 'test' : (modeName === 'tajweed' ? 'tajweed-server' : 'follow');
+  if(_effMode === (typeof _lastRecitationMode !== 'undefined' ? _lastRecitationMode : 'follow') && !updatingMutex) return;
+  _lastRecitationMode = _effMode;
   updatingMutex = true;
   followOnly = newFollow;
   try{ localStorage.setItem('qc.followOnly', followOnly ? '1' : '0'); }catch(e){}
@@ -8393,11 +8405,18 @@ function setRecitationMode(modeName){
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
+  } else if(_effMode === 'test'){
+    releaseMicStream();
+    coachTajweedMicFailed = false;
+    addFeedback('📝 <b>Test</b> mode — lenient practice. ASR test only, no Tajweed colours.', false, true);
+    removeTajweedColorsFromCoach();
+    updateTajweedStatusChip();
   } else {
     addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
     if(wantMic && !rmsAnalyser.isRunning()){
-      const wasRunning = recRunning;
+      try{ speechRecognition && speechRecognition.stop(); }catch(_){} /* Tajweed: browser SR must NOT hold the mic — the shared engine owns it */
+      const wasRunning = false; /* do not restart browser SR in Tajweed mode */
       if(wasRunning){ try{ speechRecognition && speechRecognition.stop(); }catch(_){} }
 
       const restartRecognizer = () => {
@@ -8519,7 +8538,8 @@ async function loadSurah(n, keepFeedback){
     renderVerses(arJson.data.ayahs, translations);
     setStatus('Ready', 'idle', surahMeta.numberOfAyahs + ' ayahs · ' + (micPermission==='granted' ? 'Mic on' : 'Tap Start reciting to allow mic'));
     if(!keepFeedback) feedbackEl.innerHTML = '<div class="line"><b>' + surahMeta.englishName + '</b> <span class="ar">' + surahMeta.name + '</span> — loaded.</div>';
-    if (!followOnly){ coachTajweedApplied = false; coachTajweedReady = false; applyTajweedColorsToCoach(); }
+    if (!followOnly && (typeof coachMode !== 'undefined' && coachMode === 'tajweed-server')){ coachTajweedApplied = false; coachTajweedReady = false; applyTajweedColorsToCoach(); }
+    else if (!followOnly){ removeTajweedColorsFromCoach(); }
     else { fetchCoachTajweed(surahNum).catch(() => {}); }
   }catch(e){ console.error('[QuranCoach] loadSurah failed:', e); showLoadError(e); }
 }
@@ -13463,7 +13483,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13554,6 +13574,8 @@ window.addEventListener('contextmenu', function(event) {
       S={id:id,t0:t0,ctx:ctx,stream:stream,raw:[],stopped:false,warmCtx:null,lastFrameAt:performance.now(),ptr:0,chunks:[]};
       window.__tajShared=S;
       S.rmsFrames=rmsFrames;
+      try{ var fb2=document.getElementById('feedback'); if(fb2){ var dd=document.createElement('div'); dd.className='line soft'; dd.textContent='Shared capture started — one mic for ASR + RMS + MFA.'; fb2.prepend(dd); } }catch(_){}
+      try{ S.chipTimer=setInterval(function(){ try{ updateTajweedStatusChip(); }catch(_){} }, 1000); }catch(_){}
       // RMS on the SAME stream
       var url=URL.createObjectURL(new Blob([WORKLET_CODE],{type:'application/javascript'}));
       await ctx.audioWorklet.addModule(url);
@@ -13625,7 +13647,7 @@ window.addEventListener('contextmenu', function(event) {
   function markNotVerified(wordId){ colourWordById(wordId, {kind:'amber', label:'Not verified', finding:'Not verified', measured:'—', target:'—', happened:'ASR, MFA and RMS did not lock on the same timestamped word.', todo:'Re-record this ayah.', mfaWindow:'—', rmsVowel:'—'}); }
   function startWatchdog(id){ clearInterval(S&&S.watchdog); if(!S) return; S.watchdog=setInterval(function(){ if(!S||S.id!==id||S.stopped){ clearInterval(S&&S.watchdog); return; } var trackDead=!S.stream||!S.stream.getTracks().some(function(tr){return tr.readyState==='live';}); var ctxDead=!S.ctx||S.ctx.state!=='running'; var stalled=(performance.now()-(S.lastFrameAt||performance.now()))>1000; if(trackDead||ctxDead||stalled){ restartRawOnly(id); } },2000); }
   async function restartRawOnly(id){ if(!S||S.id!==id||S.stopped) return; try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.recorder&&S.recorder.stop(); }catch(_){} /* SAME t0, SAME session — re-open ONE stream, re-attach RMS + recorder */ try{ var stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); S.stream=stream; window.__tajShared=S; var src=S.ctx.createMediaStreamSource(stream); src.connect(S.worklet); S.lastFrameAt=performance.now(); try{ var mime2=['audio/webm;codecs=opus','audio/webm','audio/mp4',''].find(function(m){ try{ return !m||MediaRecorder.isTypeSupported(m); }catch(_){ return false; } }); S.recorder=new MediaRecorder(stream, mime2?{mimeType:mime2}:undefined); S.recorder.ondataavailable=function(ev){ if(ev.data&&ev.data.size) S.chunks.push(ev.data); }; S.recorder.onstop=function(){ sendToServer(id); }; S.recorder.start(250); }catch(e){ console.warn('[Tajweed] recorder restart failed', e); } }catch(e){ console.warn('[Tajweed] RAW restart failed', e); } }
-  function stopTajweedShared(reason){ if(!S||S.stopped) return; S.stopped=true; try{ updateTajweedStatusChip(); }catch(_){} clearTimeout(S.capTimer); clearInterval(S.watchdog); try{ S.recorder&&S.recorder.state!=='inactive'&&S.recorder.stop(); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.ctx&&S.ctx.suspend(); }catch(_){} S.warmCtx=S.ctx; try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){} }
+  function stopTajweedShared(reason){ if(!S||S.stopped) return; S.stopped=true; try{ updateTajweedStatusChip(); }catch(_){} clearTimeout(S.capTimer); clearInterval(S.watchdog); clearInterval(S.chipTimer); try{ S.recorder&&S.recorder.state!=='inactive'&&S.recorder.stop(); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.ctx&&S.ctx.suspend(); }catch(_){} S.warmCtx=S.ctx; try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){} }
   function hardStopTajweed(){ if(!S) return; stopTajweedShared('hard-stop'); try{ S.ctx&&S.ctx.close(); }catch(_){} S.warmCtx=null; S.raw=[]; S=null; window.__tajShared=null; }
   document.addEventListener('visibilitychange', function(){ if(document.hidden) hardStopTajweed(); });
   window.addEventListener('pagehide', hardStopTajweed); window.addEventListener('beforeunload', hardStopTajweed);
