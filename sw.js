@@ -1,7 +1,7 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v2.4.27
+   Quran Recitation Coach — Service Worker  v2.4.28
 
-   What changed in 2.4.27:
+   What changed in 2.4.28:
      • salaah.html (Learn Salaah) is now pre-cached with the app
        shell, so it opens offline from the Dashboard 'Salaah' tab
        (including /salaah.html?theme=dark|light) and so its Back
