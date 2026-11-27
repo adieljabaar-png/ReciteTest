@@ -1,22 +1,19 @@
 <html lang="en"><style>* { -webkit-text-size-adjust: 132% !important; }</style><head><style>* { -webkit-text-size-adjust: 132% !important; }.tj-status-ready .tj-status-dot{background:#22c55e !important;box-shadow:0 0 0 3px rgba(34,197,94,.25);} .tj-status-loading .tj-status-dot{background:#f59e0b !important;} 
 
-/* Tajweed certification - Quran screen results */
-span.w.tj-cert{color:#22c55e !important;}
-span.w.tj-rule-fail{color:#f59e0b !important;text-decoration:underline;text-decoration-color:#f59e0b;}
-span.w.tj-word-fail{color:#ef4444 !important;}
-#tajweedPanel{display:none;margin:8px 0 0;padding:10px;border:1px solid var(--gold,#d4af37);border-radius:10px;font-size:13px;line-height:1.5;}
-#tajweedPanel .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;}
-#tajweedPanel button{padding:6px 12px;border-radius:999px;border:1px solid var(--gold,#d4af37);background:transparent;color:inherit;cursor:pointer;font-size:13px;}
-#tajweedPanel button:disabled{opacity:.45;cursor:default;}
-#tajweedPanel input{width:64px;padding:4px 6px;border-radius:6px;border:1px solid #555;background:transparent;color:inherit;}
-.tj-ayah-summary{margin:8px 0;padding:8px 10px;border:1px solid var(--gold,#d4af37);border-radius:8px;font-size:12px;line-height:1.5;}
-.tj-ayah-summary.cert{border-color:#22c55e;}
-.tj-ayah-summary.fail{border-color:#ef4444;}
-.tj-detail-card{margin:6px 0 10px;padding:10px;border:1px solid #888;border-radius:10px;font-size:13px;line-height:1.6;background:rgba(0,0,0,.04);}
-body:not(.light-mode) .tj-detail-card{background:rgba(255,255,255,.06);}
-.tj-detail-card b{font-size:15px;}
-#tajweedCertSummary{margin:8px 0;padding:10px;border:1px solid var(--gold,#d4af37);border-radius:10px;font-size:13px;line-height:1.6;display:none;}
-
+/* LOCKED BUILD: Quran text always Follow colour, never Tajweed colours */
+#screenCoach .w, #screenCoach .w span, #screenCoach .w [class^="tj-"], #screenCoach .w [class*=" tj-"]{color:inherit !important;background:transparent !important;font-weight:inherit !important;}
+#screenCoach .w .missing-letter{color:#dc2626 !important;background:rgba(220,38,38,.18) !important;border-radius:3px;padding:0 1px;font-weight:700 !important;}
+body.light-mode #screenCoach .w .missing-letter{color:#b91c1c !important;background:rgba(220,38,38,.15) !important;}
+.coach-badge{display:inline-block;margin-top:2px;padding:2px 7px;border-radius:999px;font-size:.68rem;font-weight:700;line-height:1.3;white-space:nowrap;}
+.coach-badge.green{background:rgba(16,185,129,.18);color:#059669;border:1px solid rgba(16,185,129,.5);}
+.coach-badge.yellow{background:rgba(234,179,8,.18);color:#92400e;border:1px solid rgba(234,179,8,.55);}
+.coach-badge.red{background:rgba(220,38,38,.14);color:#b91c1c;border:1px solid rgba(220,38,38,.5);}
+.coach-badge.amber{background:rgba(245,158,11,.16);color:#92400e;border:1px solid rgba(245,158,11,.5);}
+.coach-finding{margin-top:4px;font-size:.72rem;line-height:1.45;color:var(--muted);text-align:left;direction:ltr;}
+.coach-finding b{color:inherit;}
+.follow-opts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px;}
+.follow-opts label{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;cursor:pointer;}
+.follow-opts input{accent-color:var(--accent);width:17px;height:17px;}
 </style><style>
 @font-face {
   font-family: "Optimistic";
@@ -3167,7 +3164,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">09:34</span>
+    <span class="pdr-item pdr-time" id="pdrTime">14:08</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -3207,8 +3204,12 @@ body.light-mode .share-arabic{color:#1a2233;}
   <div class="barwrap"><div class="bar" id="bar" style="width: 0%;"></div></div>
   <div class="toggles hide-immersive">
     <button class="toggle mode-pill active" id="modeFollowBtn" type="button" data-mode="follow" aria-pressed="true">Follow</button>
-    <button class="toggle mode-pill" id="modeTestBtn" type="button" data-mode="test" aria-pressed="false">Test</button>
     <button class="toggle mode-pill" id="modeTajweedBtn" type="button" data-mode="tajweed-server" aria-pressed="false">Tajweed</button>
+    <div class="follow-opts" id="followOpts">
+      <label><input type="checkbox" id="hideTextTick"> Hide text</label>
+      <label><input type="checkbox" id="testModeTick"> Test mode</label>
+    </div>
+    <div id="tajweedModeNote" hidden="" style="font-size:.72rem;color:var(--muted);margin-top:4px;">Tajweed check — learning aid, Google + browser only. Not a teacher’s certification. Max 5 ayahs.</div>
     <div class="progress-section" id="progressSection">
     <button class="progress-trigger" id="progressTrigger" type="button" aria-expanded="false" aria-haspopup="menu">
   <span class="pt-text">
@@ -3452,7 +3453,6 @@ const hideTextChip   = document.getElementById('hideTextChip');
 const fsRevealBtn    = document.getElementById('fsReveal');
 const modeFollowBtn  = document.getElementById('modeFollowBtn');
 const modeTajweedBtn = document.getElementById('modeTajweedBtn');
-const modeTestBtn = document.getElementById('modeTestBtn');
 const supportBox     = document.getElementById('support');
 const mistakesPanel  = document.getElementById('mistakesPanel');
 const mistakesList   = document.getElementById('mistakesList');
@@ -6490,22 +6490,63 @@ const TAJWEED_PROVISIONAL_PASS_PCT = 70;
     const FOLLOW_MODE_EXIT = 0.85;
     const TAJWEED_SERVER_MAX_AYAHS = 5;
     const TAJWEED_SERVER_ENDPOINT = '/api/tajweed-check';
-    let coachMode = 'follow'; // 'follow' | 'test' | 'tajweed-server'
-    try{
-      const savedMode = localStorage.getItem('qc.coachMode');
-      if(savedMode==='follow'||savedMode==='test'||savedMode==='tajweed-server') coachMode = savedMode;
-      else if(localStorage.getItem('qc.followOnly')==='0') coachMode = 'test'; // old Tajweed = now Test (lenient)
-    }catch(_){}
+    let coachMode = 'follow'; // 'follow' | 'tajweed-server' — Test is a tick on Follow, not a pill
+    let hideTextTick = false; let testModeTick = false;
+    const LOCKED_BANNED_TEST_WORDS = ['Tajweed','tajweed','Madd','Madd Tabeei','Madd Wajib','Madd Lazim','Ghunnah','Qalqalah','Shaddah','Ikhfa','Iqlab','Idgham','Tafkheem','Hamzat al-Wasl','Waqf','Nasal hold','Vowel length','Nasal','Bounce'];
+    function stripTajweedWords(s){ let out = String(s==null?'':s); LOCKED_BANNED_TEST_WORDS.forEach(w=>{ out = out.split(w).join(''); }); out = out.replace(/\s{2,}/g,' ').replace(/\s+([,.])/g,'$1'); return out; }
+    function missingLettersFor(expectedNorm, heardNorm){
+      // Ordered alignment: expected letters with no match in heard, in order
+      const exp=[...expectedNorm]; const heard=[...heardNorm]; const missing=[]; let hi=0;
+      for(let ei=0; ei<exp.length; ei++){ if(hi<heard.length && heard[hi]===exp[ei]){ hi++; } else { missing.push({letter:exp[ei], index:ei}); } }
+      return missing;
+    }
+    function renderMissingLetters(wordObj, missing){
+      try{
+        if(!wordObj || !wordObj.el || !missing || !missing.length) return;
+        const raw = wordObj.raw || wordObj.el.textContent || '';
+        // Highlight missing letters by index on normalised text — best-effort: wrap matching chars in raw
+        let html=''; let mi=0; const missSet=new Set(missing.map(m=>m.index));
+        // Map normalised index -> raw char position approx: walk raw, count Arabic letters
+        let normIdx=-1;
+        for(const ch of raw){
+          if(/[\u0600-\u06FF]/.test(ch)){ normIdx++; if(missSet.has(normIdx)){ html+='<span class="missing-letter">'+ch+'</span>'; continue; } }
+          html+=ch;
+        }
+        if(html && html.includes('missing-letter')) wordObj.el.innerHTML = html;
+        wordObj.missingLetters = missing;
+      }catch(_){}
+    }
+    function renderCoachBadge(wordObj, kind, label, findingHtml){
+      try{
+        if(!wordObj || !wordObj.el) return;
+        let b = wordObj.el.querySelector(':scope > .coach-badge');
+        if(!b){ b=document.createElement('span'); b.className='coach-badge'; wordObj.el.appendChild(b); }
+        b.className='coach-badge '+kind; b.textContent=label;
+        if(findingHtml){ let f=wordObj.el.querySelector(':scope > .coach-finding'); if(!f){ f=document.createElement('div'); f.className='coach-finding'; wordObj.el.appendChild(f);} f.innerHTML=findingHtml; }
+        wordObj.coachBadge={kind,label};
+      }catch(_){}
+    }
+    function clearCoachBadges(){ try{ document.querySelectorAll('#screenCoach .coach-badge, #screenCoach .coach-finding').forEach(n=>n.remove()); document.querySelectorAll('#screenCoach .missing-letter').forEach(n=>{ const par=n.parentNode; if(par) par.replaceChild(document.createTextNode(n.textContent), n); }); }catch(_){} }
+    function applyHideTextTick(){ try{ if(!words || !words.length) return; words.forEach(w=>{ if(!w.el) return; if(hideTextTick && coachMode==='follow'){ w.el.classList.add('hifz-hidden'); } else { w.el.classList.remove('hifz-hidden'); } }); }catch(_){} }
+
     let tajweedServerQueue = []; // [{surah, ayah, ayahText, audioBlob}]
     let tajweedServerResults = [];
-    function isTestMode(){ return coachMode === 'test'; }
+    function isTestMode(){ return coachMode === 'follow' && testModeTick === true; }
     function isTajweedServerMode(){ return coachMode === 'tajweed-server'; }
     function currentPassPct(){ return isTestMode() ? TEST_MODE_PASS_PCT : TAJWEED_PROVISIONAL_PASS_PCT; }
     function maddBoundsFor(mode){
       if(mode==='test') return {tabeei:[1.2,2.8], wajib:[3.0,6.0], lazim:[4.8,7.2]};
       return {tabeei:[1.7,2.3], wajib:[3.6,5.4], lazim:[5.5,6.5]};
     }
+    let _followTicksWired=false;
+    function wireFollowTicks(){ if(_followTicksWired) return; _followTicksWired=true;
+      const h=document.getElementById('hideTextTick'), tt=document.getElementById('testModeTick');
+      if(h) h.addEventListener('change', ()=>{ hideTextTick=!!h.checked; applyHideTextTick(); });
+      if(tt) tt.addEventListener('change', ()=>{ testModeTick=!!tt.checked; clearCoachBadges(); try{ if(typeof addFeedback==='function') addFeedback(testModeTick?'Test mode on — script / text check only.':'Test mode off — Follow.', false, true); }catch(_){} });
+    }
     function setCoachMode(m){
+      if(m==='test'){ m='follow'; testModeTick=true; const tt=document.getElementById('testModeTick'); if(tt) tt.checked=true; }
+      try{ const fo=document.getElementById('followOpts'); if(fo) fo.hidden=(m!=='follow'); const tn=document.getElementById('tajweedModeNote'); if(tn) tn.hidden=(m!=='tajweed-server'); wireFollowTicks(); }catch(_){}
       coachMode = m;
       try{
         document.querySelectorAll('.toggle.mode-pill').forEach(b=>{
@@ -6525,6 +6566,29 @@ const TAJWEED_PROVISIONAL_PASS_PCT = 70;
       const res = await fetch(TAJWEED_SERVER_ENDPOINT, {method:'POST', body: fd});
       if(!res.ok) throw new Error('Server check failed: '+res.status);
       return await res.json();
+    }
+    /* LOCKED: Tajweed findings on Quran screen — badges under words, Quran text stays Follow colour */
+    function renderTajweedServerResults(serverJson){
+      try{
+        clearCoachBadges();
+        const list = (serverJson && serverJson.words) || [];
+        let green=0, yellow=0, red=0, amber=0;
+        list.forEach(r=>{
+          const w = (typeof words!=='undefined' ? words : []).find(x=> x && (x.norm===r.expected || (r.wordId && String(r.wordId).endsWith(':'+String(x.wIdx??''))) ));
+          const target = w || (typeof words!=='undefined' ? words[list.indexOf(r)] : null);
+          if(!target) return;
+          const locked = !!(r.lock && r.lock.locked);
+          if(!locked){ renderCoachBadge(target,'amber','Not verified','<b>Finding:</b> Not verified<br><b>What happened:</b> ' + (r.lock && r.lock.reason ? String(r.lock.reason) : 'ASR and MFA did not agree on timing.') + '<br><b>What to do:</b> Re-record this ayah.'); amber++; return; }
+          if(r.verdict==='correct'){ renderCoachBadge(target,'green','✓ Correct','<b>Finding:</b> Correct<br><b>Measured:</b> Matches expected word.'); green++; return; }
+          const rule = (r.rules && r.rules[0]) || null;
+          if(r.verdict==='check' || (rule && /qalqalah|shaddah|tafkheem|emphatic/i.test(rule.rule||''))){ renderCoachBadge(target,'amber','Check with teacher','<b>Finding:</b> '+(rule?rule.rule:'Check with teacher')+'<br><b>What happened:</b> '+(rule?String(rule.explanation||'This check is experimental.'):'This check is experimental.')+'<br><b>What to do:</b> Check this word with a teacher.'); amber++; return; }
+          if(r.missingLetters && r.missingLetters.length){ renderMissingLetters(target, r.missingLetters); }
+          if(rule){ renderCoachBadge(target,'red', rule.rule.replace(/-/g,' ')+' — see below','<b>Finding:</b> '+rule.rule+'<br><b>Measured:</b> '+String(rule.measured||'')+' — <b>Target:</b> '+String(rule.target||'')+'<br><b>What happened:</b> '+String(rule.explanation||'')+'<br><b>What to do:</b> Say the word again, holding the sound as described.'); }
+          else { renderCoachBadge(target,'red','Wrong word','<b>Finding:</b> Wrong word<br><b>What happened:</b> The word heard did not match the expected word.<br><b>What to do:</b> Say the expected word again.'); }
+          red++;
+        });
+        try{ if(typeof addFeedback==='function') addFeedback('Tajweed check — '+green+' correct, '+yellow+' letters dropped, '+red+' to fix, '+amber+' check / not verified.', false, true); }catch(_){}
+      }catch(e){ console.warn('[Coach] renderTajweedServerResults', e); }
     }
     function validateTajweedServerSelection(list){
       if(!Array.isArray(list)) return {ok:false, msg:'Select 1 to 5 ayahs.'};
@@ -6850,7 +6914,7 @@ function checkHamzatWasl(w, idx, rawHeard){
   }
 }
 
-function runStrict1Checks(idx, heard, opts){
+function runStrict1Checks(idx, heard, opts){ if (typeof isTestMode==="function" && isTestMode()) return; /* LOCKED: Test mode — no Madd, no Tajweed checks */
   opts = opts || {};
   if (followOnly) return;
   if (!coachTajweedReady) return;
@@ -8648,10 +8712,8 @@ function clearSilenceTimer(){ clearTimeout(silenceTimer); silenceTimer = null; }
 
 let updatingMutex = false;
 function applyMutexUI(){
-  const _m = (typeof coachMode!=='undefined' && coachMode) ? coachMode : (followOnly ? 'follow' : 'test');
-  if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', _m==='follow'); modeFollowBtn.setAttribute('aria-pressed', _m==='follow' ? 'true' : 'false'); }
-  if(typeof modeTestBtn!=='undefined' && modeTestBtn){ modeTestBtn.classList.toggle('active', _m==='test'); modeTestBtn.setAttribute('aria-pressed', _m==='test' ? 'true' : 'false'); }
-  if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', _m==='tajweed-server'); modeTajweedBtn.setAttribute('aria-pressed', _m==='tajweed-server' ? 'true' : 'false'); }
+  if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly); modeFollowBtn.setAttribute('aria-pressed', followOnly ? 'true' : 'false'); }
+  if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly); modeTajweedBtn.setAttribute('aria-pressed', !followOnly ? 'true' : 'false'); }
   if(hideTextChip) hideTextChip.hidden = !followOnly;
   if(chkHideText) chkHideText.checked = hideText;
   if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
@@ -8662,16 +8724,11 @@ function applyMutexUI(){
 }
 
 function setRecitationMode(modeName){
-  // Normalise: old 'tajweed' = new strict server Tajweed; 'test' = old Tajweed engine, lenient
-  let norm = modeName;
-  if(norm==='tajweed') norm = 'tajweed-server';
-  if(norm!=='follow' && norm!=='test' && norm!=='tajweed-server') norm = 'test';
-  if(norm === coachMode && !updatingMutex) return;
+  const newFollow = (modeName === 'follow');
+  if(newFollow === followOnly && !updatingMutex) return;
   updatingMutex = true;
-  coachMode = norm;
-  followOnly = (norm === 'follow');
+  followOnly = newFollow;
   try{ localStorage.setItem('qc.followOnly', followOnly ? '1' : '0'); }catch(e){}
-  try{ localStorage.setItem('qc.coachMode', coachMode); }catch(e){}
   pendingHeard.length = 0; consecutiveReds = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
@@ -8681,37 +8738,56 @@ function setRecitationMode(modeName){
   if(followOnly){
     releaseMicStream();
     coachTajweedMicFailed = false;
-    try{ hideTajweedServerNotice(); }catch(_){}
     addFeedback('👂 <b>Follow</b> mode — memorisation aid. The highlight moves with you.', false, true);
     removeTajweedColorsFromCoach();
     updateTajweedStatusChip();
-  } else if(coachMode==='test'){
-    // TEST = old Tajweed engine, but lenient: pass 50%, timing-only = yellow hint, not red
-    try{ hideTajweedServerNotice(); }catch(_){}
-    addFeedback('🧪 <b>Test</b> mode — lenient practice. Timing issues are hints (yellow), only a clearly wrong / skipped word is red. Pass threshold 50%.', false, true);
-    applyTajweedColorsToCoach();
-    updateTajweedStatusChip();
-    // Live ASR continues exactly as the old Tajweed mode did (see start path below)
-    if(wantMic && !recRunning && !speechStarting && speechRecognition){
-      try{ speechStarting = true; speechRecognition.start(); }catch(_){ speechStarting = false; }
-    }
   } else {
-    // TAJWEED-SERVER = strict, server MFA, max 5 ayahs, split per ayah. No live ASR.
-    addFeedback('🎵 <b>Tajweed</b> mode — strict server check. Select 1–5 ayahs, record one ayah at a time, then send for MFA + RMS + ASR checking. No model download.', false, true);
+    addFeedback('🎵 <b>Tajweed</b> mode — strict, rule-aware. Tajweed colours are shown; mispronunciations and rule violations are marked red.', false, true);
     applyTajweedColorsToCoach();
-    updateTajweedStatusChip();
-    try{ showTajweedServerNotice('Server not connected — Tajweed server check unavailable. Follow and Test modes still work.'); }catch(_){}
-    try{ checkTajweedServerConnection(); }catch(_){}
-    // Stop live ASR so it does not fight the per-ayah recording
-    try{ if(speechRecognition){ speechRecognition.stop(); } }catch(_){}
+    if(wantMic && !rmsAnalyser.isRunning()){
+      const wasRunning = recRunning;
+      if(wasRunning){ try{ speechRecognition && speechRecognition.stop(); }catch(_){} }
+
+      const restartRecognizer = () => {
+        if(wasRunning && wantMic && !fsPaused && !micPaused){
+          try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
+          catch(_){ speechStarting = false; }
+        }
+      };
+
+      ensureMicStream().then(s => {
+        if(s){
+          coachTajweedMicFailed = false;
+          updateTajweedStatusChip();
+          if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
+            _rmsUnavailableNotified = true;
+            notifyRmsUnavailable();
+          }
+        } else {
+          const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
+          if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
+             nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
+            markTajweedMicFailed();
+          } else {
+            coachTajweedMicFailed = false;
+            updateTajweedStatusChip();
+          }
+        }
+        restartRecognizer();
+      }).catch(() => {
+        coachTajweedMicFailed = false;
+        updateTajweedStatusChip();
+        restartRecognizer();
+      });
+    } else {
+      updateTajweedStatusChip();
+    }
   }
   updatingMutex = false;
 }
 
 if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
-if(typeof modeTestBtn!=='undefined' && modeTestBtn){ modeTestBtn.addEventListener('click', () => setRecitationMode('test')); }
-if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed-server')); }
-try{ applyMutexUI(); }catch(_){}
+if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); }
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
 function applyHideTextUI(){
   if(hideText && followOnly){
@@ -9159,11 +9235,6 @@ function setMicButton(){
 }
 
 async function startReciting(){
-  if(typeof coachMode!=='undefined' && coachMode==='tajweed-server'){
-    try{ showTajweedPanel(); }catch(_){}
-    try{ addFeedback('🎵 Tajweed mode — use Record in the Tajweed panel to record one ayah at a time for certification.', false, true); }catch(_){}
-    return;
-  }
   unlockAudio();
   const _myTok = micSession;
   if(!words.length){
@@ -13797,307 +13868,6 @@ window.addEventListener('contextmenu', function(event) {
   });
 })();
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><div id="tajweedPanel" role="group" aria-label="Tajweed certification">
-  <div><b>Tajweed certification</b> — Record one ayah at a time. Max 5 ayahs. Google Cloud Speech-to-Text + MFA + RMS check the same recording.</div>
-  <div class="row"><label>From ayah <input id="tjFromAyah" type="number" min="1" value="1"></label><label>To ayah <input id="tjToAyah" type="number" min="1" value="1"></label><span id="tjSelectCount">1 ayah</span></div>
-  <div class="row"><button type="button" id="tjRecordBtn">● Record this ayah</button><button type="button" id="tjStopBtn" disabled="">■ Stop</button><button type="button" id="tjSendBtn" disabled="">Send for certification</button><button type="button" id="tjRerecordBtn" disabled="">Re-record</button></div>
-  <div id="tjStatus" style="margin-top:6px;opacity:.9">Select 1–5 ayahs, then Record.</div>
-  <div id="tajweedCertSummary"></div>
-</div>
-
-<script>
-/* ===== Tajweed certification: Recording -> RMS + MFA + Google Cloud STT (via server) =====
-   Client never calls Google directly. It POSTs the audio blob to /api/tajweed-check.
-   Server calls Google Cloud Speech-to-Text (ar-SA, chirp, word time offsets) + MFA + RMS,
-   and returns the combined certification result. No key / secret in this file. */
-(function(){
-  if(window.__tajweedCertInstalled) return; window.__tajweedCertInstalled = true;
-  const $ = (id)=>document.getElementById(id);
-  let tjStream=null, tjRecorder=null, tjChunks=[], tjCtx=null, tjAnalyser=null, tjRmsFrames=[], tjRmsTimer=null;
-  let tjCurrentAyah=1, tjRecording=false, tjBlob=null, tjQueue=[]; // {surah, ayah, ayahText, audioBlob}
-  let tjResults={}; // "surah:ayah" -> server result
-  let tjSelected=[];
-
-  function surahNum(){ try{ return (typeof surahNum!=='undefined' && surahNum) || (window.STORE && STORE.surah) || 1; }catch(_){ return 1; } }
-  function currentSurah(){ try{ if(typeof STORE!=='undefined' && STORE.surah) return STORE.surah; if(typeof surahNum==='function') return surahNum(); }catch(_){} return 1; }
-  function ayahTextFor(surah, ayah){
-    try{
-      const els = document.querySelectorAll('.ayah[data-surah="'+surah+'"][data-ayah="'+ayah+'"] span.w');
-      return Array.from(els).map(e=>e.textContent).join(' ');
-    }catch(_){ return ''; }
-  }
-  function setStatus(msg){ const el=$('tjStatus'); if(el) el.textContent=msg; }
-  function showPanel(){ const el=$('tajweedPanel'); if(el) el.style.display='block'; }
-  window.showTajweedPanel = showPanel;
-  function hidePanel(){ const el=$('tajweedPanel'); if(el) el.style.display='none'; }
-  window.hideTajweedPanel = hidePanel;
-
-  function updateSelection(){
-    const from = parseInt(($('tjFromAyah')||{}).value||'1',10)||1;
-    const to = parseInt(($('tjToAyah')||{}).value||String(from),10)||from;
-    const lo=Math.min(from,to), hi=Math.max(from,to);
-    const count = hi-lo+1;
-    const c=$('tjSelectCount'); if(c) c.textContent = count+' ayah'+(count>1?'s':'')+(count>5?' — max 5, please narrow the range':'');
-    tjSelected=[]; for(let a=lo;a<=hi;a++) tjSelected.push(a);
-    tjCurrentAyah = lo;
-    const ok = count>=1 && count<=5;
-    const rb=$('tjRecordBtn'); if(rb) rb.disabled = !ok || tjRecording;
-    return {ok, lo, hi, count};
-  }
-
-  function collectRms(){
-    if(!tjAnalyser) return;
-    const buf=new Float32Array(tjAnalyser.fftSize);
-    tjAnalyser.getFloatTimeDomainData(buf);
-    let s=0; for(let i=0;i<buf.length;i++) s+=buf[i]*buf[i];
-    const rms=Math.sqrt(s/buf.length);
-    tjRmsFrames.push({t:performance.now(), rms:+rms.toFixed(5)});
-    if(tjRmsFrames.length>4000) tjRmsFrames.splice(0, tjRmsFrames.length-4000);
-  }
-  function rmsHasSignal(){
-    if(!tjRmsFrames.length) return false;
-    return tjRmsFrames.some(f=>f.rms>0.02);
-  }
-  function rmsClipped(){
-    if(tjRmsFrames.length<20) return false;
-    let n=0; for(const f of tjRmsFrames) if(f.rms>0.95) n++;
-    return n>15;
-  }
-
-  async function startRecording(){
-    const sel=updateSelection();
-    if(!sel.ok){ setStatus('Select 1–5 ayahs.'); return; }
-    const ayah=tjCurrentAyah;
-    try{
-      tjStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}, video:false});
-    }catch(e){
-      setStatus('Microphone blocked — allow mic access, then Record again.');
-      try{ if(typeof addFeedback==='function') addFeedback('⚠️ Tajweed recording needs microphone permission.', true); }catch(_){}
-      return;
-    }
-    try{
-      tjCtx = new (window.AudioContext||window.webkitAudioContext)();
-      const src=tjCtx.createMediaStreamSource(tjStream);
-      tjAnalyser=tjCtx.createAnalyser(); tjAnalyser.fftSize=2048; tjAnalyser.smoothingTimeConstant=0.3;
-      src.connect(tjAnalyser);
-    }catch(_){ tjAnalyser=null; }
-    tjChunks=[]; tjRmsFrames=[];
-    let mime=''; try{ if(window.MediaRecorder && MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime='audio/webm;codecs=opus'; else if(window.MediaRecorder && MediaRecorder.isTypeSupported('audio/webm')) mime='audio/webm'; }catch(_){}
-    try{
-      tjRecorder = mime ? new MediaRecorder(tjStream,{mimeType:mime}) : new MediaRecorder(tjStream);
-    }catch(e){ setStatus('Recording is not supported in this browser.'); return; }
-    tjRecorder.ondataavailable=(e)=>{ if(e.data && e.data.size) tjChunks.push(e.data); };
-    tjRecorder.onstop=()=>{ tjBlob = new Blob(tjChunks,{type: tjRecorder.mimeType||'audio/webm'}); const sb=$('tjSendBtn'); if(sb) sb.disabled=false; const rb=$('tjRerecordBtn'); if(rb) rb.disabled=false; setStatus('Recorded Ayah '+ayah+' — tap Send for certification, or Re-record.'); };
-    tjRecorder.start(250);
-    tjRecording=true;
-    tjRmsTimer=setInterval(collectRms,30);
-    const rb=$('tjRecordBtn'); if(rb) rb.disabled=true;
-    const sb=$('tjStopBtn'); if(sb) sb.disabled=false;
-    const send=$('tjSendBtn'); if(send) send.disabled=true;
-    setStatus('● Recording Ayah '+ayah+' — recite the full ayah, then tap Stop.');
-    try{ if(typeof addFeedback==='function') addFeedback('● Recording Ayah '+ayah+' for Tajweed certification (RMS + MFA + Google Cloud Speech-to-Text).', false, true); }catch(_){}
-    // auto-stop at 60s
-    setTimeout(()=>{ if(tjRecording) stopRecording(); }, 60000);
-  }
-  function stopRecording(){
-    if(!tjRecording) return;
-    tjRecording=false;
-    try{ if(tjRmsTimer) clearInterval(tjRmsTimer); }catch(_){}
-    try{ if(tjRecorder && tjRecorder.state!=='inactive') tjRecorder.stop(); }catch(_){}
-    try{ if(tjStream) tjStream.getTracks().forEach(tr=>tr.stop()); }catch(_){}
-    try{ if(tjCtx) tjCtx.close(); }catch(_){}
-    const sb=$('tjStopBtn'); if(sb) sb.disabled=true;
-    const rb=$('tjRecordBtn'); if(rb) rb.disabled=false;
-    // silence / clipping checks on the recording just made
-    if(!rmsHasSignal()){ setStatus('No voice detected — re-record this ayah. Nothing was sent.'); const send=$('tjSendBtn'); if(send) send.disabled=true; return; }
-    if(rmsClipped()){ setStatus('Too loud / clipped — move the phone back and re-record. Nothing was sent.'); const send=$('tjSendBtn'); if(send) send.disabled=true; return; }
-  }
-
-  async function sendForCertification(){
-    if(!tjBlob){ setStatus('Record an ayah first.'); return; }
-    const surah=currentSurah(); const ayah=tjCurrentAyah;
-    const ayahText=ayahTextFor(surah, ayah);
-    if(!ayahText){ setStatus('Could not find Ayah '+ayah+' on this page. Open the right surah / page first.'); return; }
-    setStatus('Sending Ayah '+ayah+' — Google Cloud Speech-to-Text + MFA + RMS checking…');
-    const fd=new FormData();
-    fd.append('surah', String(surah)); fd.append('ayah', String(ayah)); fd.append('ayahText', ayahText);
-    fd.append('audio', tjBlob, 'ayah-'+ayah+'.webm');
-    try{ fd.append('rmsFrames', JSON.stringify(tjRmsFrames)); }catch(_){}
-    let res, data;
-    try{
-      const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(), 30000);
-      try{ res=await fetch('/api/tajweed-check',{method:'POST', body:fd, signal:ctrl.signal}); }
-      finally{ clearTimeout(to); }
-      if(!res.ok) throw new Error('Server '+res.status);
-      data=await res.json();
-    }catch(e){
-      setStatus('Server not connected — Tajweed certification unavailable. Your recording is kept. Tap Send again to retry.');
-      try{ if(typeof showTajweedServerNotice==='function') showTajweedServerNotice('Server not connected — Tajweed server check unavailable. Follow and Test modes still work.'); }catch(_){}
-      return;
-    }
-    try{ if(typeof hideTajweedServerNotice==='function') hideTajweedServerNotice(); }catch(_){}
-    tjResults[surah+':'+ayah]=data;
-    renderResult(surah, ayah, data);
-    // advance to next selected ayah, or finish
-    const idx=tjSelected.indexOf(ayah);
-    if(idx>=0 && idx<tjSelected.length-1){ tjCurrentAyah=tjSelected[idx+1]; tjBlob=null; const send=$('tjSendBtn'); if(send) send.disabled=true; setStatus('Ayah '+ayah+' checked. Next: Ayah '+tjCurrentAyah+' — tap Record.'); }
-    else { setStatus('All selected ayahs checked. See results on the Quran text above.'); }
-    updateCertSummary();
-  }
-
-  // --- Explanations: measured vs needed + fix cue ---
-  function fixFor(rule){
-    const m={
-      'Madd Tabeei':'Keep the vowel steady for 2 counts — count “1-2” — don’t cut it short.',
-      'Madd Wajib':'Stretch the vowel to 4–5 counts, keep the voice steady, don’t drop at the hamzah.',
-      'Madd Jaiz':'Stretch the vowel to 4–5 counts, keep the voice steady.',
-      'Madd Lazim':'Stretch to a full 6 counts — count “1-2-3-4-5-6” — especially before the shaddah / sukoon.',
-      'Ghunnah':'Hum through the nose for 2 counts, tongue down, then slide into the next letter without a hard stop.',
-      'Qalqalah':'Let it bounce lightly with a tiny echo — don’t swallow it or add a vowel after it.',
-      'Ikhfa':'Hide the ن — hum 2 counts, tongue not touching, then slide into the next letter.',
-      'Idgham':'Merge the two letters into one — no gap, no extra vowel — hold the merged sound for 2 counts where Ghunnah is required.',
-      'Iqlab':'Change ن to a light م hum for 2 counts, lips together, then ب.',
-      'Shaddah':'Hold the shaddah — double the consonant, don’t rush it.',
-      'Hamzat al-Wasl':'Drop the hamzah when continuing — don’t pronounce it as a full hamzah.',
-      'Laam Shamsiyyah':'Drop the ل and double the next letter — don’t pronounce the ل.'
-    };
-    return m[rule] || 'Re-record this ayah, saying the word as written, with the rule held for its full length.';
-  }
-  function ruleText(r){
-    const measured = r.measured_counts!=null ? (r.measured_counts+' counts') : (r.measured_ms!=null ? (r.measured_ms+' ms') : 'not measured');
-    const needed = r.needed_counts!=null ? (r.needed_counts+' counts') : (r.target_ms!=null ? (r.target_ms+' ms') : (r.needed||''));
-    const asr = r.checkers && r.checkers.asr!=null ? ('Google Cloud STT: '+(r.checkers.asr?'✓':'✗')) : '';
-    const mfa = r.checkers && r.checkers.mfa!=null ? ('MFA: '+(r.checkers.mfa?'✓':'✗')) : '';
-    const rms = r.checkers && r.checkers.rms!=null ? ('RMS: '+(r.checkers.rms?'✓':'✗')) : '';
-    return '<div><b>'+(r.rule||'Tajweed rule')+' — '+(r.pass?'Certified ✓':'Not certified')+'</b><br>'
-      + 'Measured: <b>'+measured+'</b>'+(needed?' — Needed: <b>'+needed+'</b>':'')+'<br>'
-      + [asr,mfa,rms].filter(Boolean).join(' · ')+'<br>'
-      + '<i>How to fix:</i> '+(r.explanation||fixFor(r.rule))+'</div>';
-  }
-
-  function clearAyahResults(surah, ayah){
-    try{
-      const line=document.querySelector('.ayah[data-surah="'+surah+'"][data-ayah="'+ayah+'"]');
-      if(line){ line.querySelectorAll('span.w').forEach(s=>s.classList.remove('tj-cert','tj-rule-fail','tj-word-fail','tj-unchecked')); }
-      document.querySelectorAll('.tj-ayah-summary[data-tj-ayah="'+surah+':'+ayah+'"]').forEach(e=>e.remove());
-      document.querySelectorAll('.tj-detail-card[data-tj-ayah="'+surah+':'+ayah+'"]').forEach(e=>e.remove());
-    }catch(_){}
-  }
-  function renderResult(surah, ayah, data){
-    clearAyahResults(surah, ayah);
-    const line=document.querySelector('.ayah[data-surah="'+surah+'"][data-ayah="'+ayah+'"]');
-    if(!line){ setStatus('Checked Ayah '+ayah+', but that ayah is not on this page. Open its page to see the word colours.'); return; }
-    const spans=Array.from(line.querySelectorAll('span.w'));
-    const words = (data && data.words) || [];
-    let wordsOk=0, rulesOk=0, rulesTotal=0;
-    // Map server words to spans by index when lengths match, else by expected text
-    spans.forEach((sp, i)=>{
-      const w = words[i] || words.find(x=>x.expected===sp.textContent);
-      if(!w){ sp.classList.add('tj-unchecked'); return; }
-      const wordRules = w.rules||[];
-      rulesTotal+=wordRules.length; rulesOk+=wordRules.filter(r=>r.pass).length;
-      const wordFail = w.wordCertified===false || (w.asr && w.asr.heard && w.expected && w.asr.heard!==w.expected);
-      const ruleFail = wordRules.some(r=>!r.pass);
-      if(wordFail){ sp.classList.add('tj-word-fail'); }
-      else if(ruleFail){ sp.classList.add('tj-rule-fail'); }
-      else { sp.classList.add('tj-cert'); wordsOk++; }
-      sp.dataset.tjWord = JSON.stringify(w);
-      sp.title = wordFail ? 'Word not certified — tap for detail' : ruleFail ? 'Word correct, rule failed — tap for detail' : 'Certified — tap for detail';
-    });
-    const certified = data.certified===true || (words.length && words.every(w=>w.wordCertified!==false && !(w.rules||[]).some(r=>!r.pass)));
-    const rules = (data.rules||[]);
-    // Ayah summary bar before the ayah line
-    const bar=document.createElement('div');
-    bar.className='tj-ayah-summary '+(certified?'cert':'fail');
-    bar.dataset.tjAyah=surah+':'+ayah;
-    const ruleLine = rules.length ? rules.map(r=>(r.rule||'')+' '+(r.pass?'✓':'✗')).join('  •  ') : (rulesTotal? (rulesOk+'/'+rulesTotal+' rules passed') : 'No Tajweed rule required in this ayah');
-    bar.innerHTML='<b>Ayah '+ayah+' • '+(certified?'CERTIFIED ✓':'NOT CERTIFIED')+'</b><br>'
-      + 'Words: '+wordsOk+'/'+spans.length+' correct &nbsp;•&nbsp; Rules: '+rulesOk+'/'+rulesTotal+' passed<br>'
-      + ruleLine+'<br><button type="button" data-tj-rerecord="'+surah+':'+ayah+'">Re-record this ayah</button> '
-      + '<button type="button" data-tj-details="'+surah+':'+ayah+'">See all details</button>';
-    line.parentNode.insertBefore(bar, line);
-    bar.querySelector('[data-tj-rerecord]')?.addEventListener('click', ()=>{
-      tjCurrentAyah=ayah; tjBlob=null; const send=$('tjSendBtn'); if(send) send.disabled=true;
-      setStatus('Re-recording Ayah '+ayah+' — tap Record.');
-      try{ document.getElementById('tjRecordBtn')?.scrollIntoView({behavior:'smooth', block:'center'}); }catch(_){}
-    });
-    bar.querySelector('[data-tj-details]')?.addEventListener('click', ()=>{
-      const existing=document.querySelector('.tj-detail-card[data-tj-ayah="'+surah+':'+ayah+'"][data-tj-all="1"]');
-      if(existing){ existing.remove(); return; }
-      const card=document.createElement('div'); card.className='tj-detail-card'; card.dataset.tjAyah=surah+':'+ayah; card.dataset.tjAll='1';
-      card.innerHTML='<b>Ayah '+ayah+' — all word details</b><br>'+words.map(w=>{
-        const rs=(w.rules||[]).map(ruleText).join('<hr>');
-        return '<div><b>'+(w.expected||'')+'</b> — '+(w.wordCertified===false?'Word not certified':(w.rules||[]).some(r=>!r.pass)?'Word correct, rule failed':'Certified ✓')
-          + (w.asr? '<br>Google Cloud STT heard: “'+(w.asr.heard||'')+'” — conf '+(w.asr.conf!=null?w.asr.conf:'—') : '')
-          + (w.mfa? '<br>MFA conf '+(w.mfa.conf!=null?w.mfa.conf:'—') : '')
-          + (rs? '<br>'+rs : '')+'</div>';
-      }).join('<hr>');
-      line.parentNode.insertBefore(card, line.nextSibling);
-    });
-    // Tap any checked word -> detail card after its ayah
-    spans.forEach((sp)=>{
-      sp.addEventListener('click', ()=>{
-        if(typeof coachMode==='undefined' || coachMode!=='tajweed-server') return;
-        if(!sp.dataset.tjWord) return;
-        const existing=document.querySelector('.tj-detail-card[data-tj-ayah="'+surah+':'+ayah+'"]:not([data-tj-all="1"])');
-        if(existing) existing.remove();
-        let w; try{ w=JSON.parse(sp.dataset.tjWord); }catch(_){ return; }
-        const card=document.createElement('div'); card.className='tj-detail-card'; card.dataset.tjAyah=surah+':'+ayah;
-        const rs=(w.rules||[]).map(ruleText).join('<hr>');
-        card.innerHTML='<b>'+(w.expected||sp.textContent)+'</b> — Ayah '+ayah+'<br>'
-          + (w.wordCertified===false ? '<b>Word not certified.</b><br>Google Cloud STT heard “'+(w.asr&&w.asr.heard||'')+'”, expected “'+(w.expected||'')+'”. Re-record this ayah, saying the word as written.' : (w.rules||[]).length ? '' : '<b>Certified ✓</b><br>No Tajweed rule required on this word. Word correct.')
-          + (w.asr? '<br>Google Cloud STT: heard “'+(w.asr.heard||'')+'” — conf '+(w.asr.conf!=null?w.asr.conf:'—') : '')
-          + (w.mfa? '<br>MFA: conf '+(w.mfa.conf!=null?w.mfa.conf:'—') : '')
-          + (rs? '<hr>'+rs : '');
-        line.parentNode.insertBefore(card, line.nextSibling);
-        card.scrollIntoView({behavior:'smooth', block:'center'});
-      });
-    });
-    try{ if(typeof addFeedback==='function') addFeedback('🎵 Ayah '+ayah+' checked: '+(certified?'CERTIFIED ✓':'NOT CERTIFIED — see word colours on the Quran text.'), !certified); }catch(_){}
-  }
-  function updateCertSummary(){
-    const el=$('tajweedCertSummary'); if(!el) return;
-    const keys=Object.keys(tjResults);
-    if(!keys.length){ el.style.display='none'; return; }
-    el.style.display='block';
-    el.innerHTML='<b>Tajweed Certification</b><br>'+keys.map(k=>{
-      const d=tjResults[k]; const ayah=k.split(':')[1];
-      const fail=(d.rules||[]).filter(r=>!r.pass).map(r=>r.rule).join(', ');
-      return 'Ayah '+ayah+': '+(d.certified? 'CERTIFIED ✓' : 'NOT CERTIFIED'+(fail?' — '+fail:'')) ;
-    }).join('<br>');
-  }
-
-  // Wire panel + mode visibility
-  function wire(){
-    const from=$('tjFromAyah'), to=$('tjToAyah');
-    if(from) from.addEventListener('change', updateSelection);
-    if(to) to.addEventListener('change', updateSelection);
-    const rec=$('tjRecordBtn'); if(rec) rec.addEventListener('click', startRecording);
-    const st=$('tjStopBtn'); if(st) st.addEventListener('click', stopRecording);
-    const send=$('tjSendBtn'); if(send) send.addEventListener('click', sendForCertification);
-    const re=$('tjRerecordBtn'); if(re) re.addEventListener('click', ()=>{ tjBlob=null; const s=$('tjSendBtn'); if(s) s.disabled=true; startRecording(); });
-    updateSelection();
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wire); else wire();
-
-  // Show / hide panel when mode changes - wrap setRecitationMode if present
-  const _orig = window.setRecitationMode;
-  // setRecitationMode is a global function declaration; hook via polling is avoided - instead observe pill clicks
-  document.addEventListener('click', (e)=>{
-    const btn=e.target && e.target.closest && e.target.closest('#modeFollowBtn,#modeTestBtn,#modeTajweedBtn');
-    if(!btn) return;
-    setTimeout(()=>{
-      try{
-        if(typeof coachMode!=='undefined' && coachMode==='tajweed-server'){ showPanel(); }
-        else { hidePanel(); if(tjRecording) stopRecording(); }
-      }catch(_){}
-    }, 50);
-  });
-  // If already in Tajweed mode on load, show panel
-  setTimeout(()=>{ try{ if(typeof coachMode!=='undefined' && coachMode==='tajweed-server') showPanel(); }catch(_){} }, 300);
-})();
-</script>
-
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 
 </body></html>
