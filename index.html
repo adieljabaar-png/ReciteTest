@@ -1398,13 +1398,13 @@ position:sticky;top:-8px;background:#111827;padding-top:4px;margin-top:-4px;z-in
 .mistakes-header .clear-btn{margin-left:auto;height:24px;padding:0 8px;font-size:.68rem;background:transparent;border-color:rgba(255,90,106,.3);color:var(--muted);}
 .mistakes-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px;}
 .mistakes-list li{
-display:flex;align-items:center;gap:8px;padding:5px 8px;
+display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px 8px;padding:5px 8px;
 background:rgba(255,90,106,.06);border:1px solid rgba(255,90,106,.22);border-radius:9px;
 font-size:.76rem;direction:ltr;animation:slide-in .22s ease;min-height:32px;
 }
 .mistakes-list .idx{min-width:22px;height:22px;background:var(--bad);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;font-family:-apple-system,sans-serif;}
 .mistakes-list .correct{font-family:'Amiri','Amiri Quran',serif;font-size:1.15rem;color:#fff;direction:rtl;flex-shrink:0;}
-.mistakes-list .heard{color:var(--muted);font-family:'Amiri','Amiri Quran',serif;font-size:.95rem;direction:rtl;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-shrink:1;}
+.mistakes-list .heard{color:var(--muted);font-family:-apple-system,system-ui,sans-serif;font-size:.72rem;line-height:1.35;direction:ltr;text-align:left;white-space:normal;overflow:visible;text-overflow:clip;min-width:0;flex:1 1 160px;}
 .mistakes-list .meta{margin-left:auto;color:var(--muted);font-size:.65rem;white-space:nowrap;flex-shrink:0;font-family:-apple-system,sans-serif;}
 .mistakes-list .tj-kind{display:inline-flex;align-items:center;background:rgba(155,110,255,.35);border:1px solid rgba(155,110,255,.75);color:#f0e6ff;font-size:.60rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:99px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:11em;flex-shrink:1;font-family:-apple-system,sans-serif;cursor:help;}
 body.light-mode .mistakes-list .tj-kind{background:rgba(120,80,220,.16);border-color:rgba(120,80,220,.55);color:#5b2d9e;}
@@ -3149,7 +3149,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">27 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">15:26</span>
+    <span class="pdr-item pdr-time" id="pdrTime">18:42</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -5836,7 +5836,7 @@ function updateTajweedStatusChip(){
   if(!chip) return;
   if(followOnly){ chip.hidden = true; return; }
   chip.hidden = false;
-  const liveTrack = false; /* REMOVED: no mic-stream capture - no live track */
+  const liveTrack = !!((window.__tajShared && window.__tajShared.stream && window.__tajShared.stream.getTracks().some(function(tr){ return tr.readyState==='live'; })) || (typeof micStream !== 'undefined' && micStream && micStream.getTracks().some(function(tr){ return tr.readyState==='live'; }))); /* SHARED: read the real live track, not a hardcoded false */
   const acousticReady = !!(liveTrack && rmsAnalyser.isRunning() && rmsAnalyser.sampleCount() > 3);
   if(coachTajweedMicFailed){
     chip.className = 'toggle tj-status-error';
@@ -8365,7 +8365,7 @@ function clearSilenceTimer(){ clearTimeout(silenceTimer); silenceTimer = null; }
 let updatingMutex = false;
 function applyMutexUI(){
   if(modeFollowBtn){ modeFollowBtn.classList.toggle('active', followOnly); modeFollowBtn.setAttribute('aria-pressed', followOnly ? 'true' : 'false'); }
-  if(modeTajweedBtn){ modeTajweedBtn.classList.toggle('active', !followOnly); modeTajweedBtn.setAttribute('aria-pressed', !followOnly ? 'true' : 'false'); }
+  if(modeTajweedBtn){ const _tajActive = !followOnly && (typeof coachMode === 'undefined' || coachMode !== 'test'); modeTajweedBtn.classList.toggle('active', _tajActive); modeTajweedBtn.setAttribute('aria-pressed', _tajActive ? 'true' : 'false'); }
   if(hideTextChip) hideTextChip.hidden = !followOnly;
   if(chkHideText) chkHideText.checked = hideText;
   if(hideTextChip) hideTextChip.classList.toggle('active', hideText && followOnly);
@@ -8438,8 +8438,10 @@ function setRecitationMode(modeName){
   updatingMutex = false;
 }
 
-if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => setRecitationMode('follow')); }
-if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => setRecitationMode('tajweed')); }
+if(modeFollowBtn){ modeFollowBtn.addEventListener('click', () => { try{ if(typeof setCoachMode==='function') setCoachMode('follow'); }catch(_){} setRecitationMode('follow'); }); }
+if(modeTajweedBtn){ modeTajweedBtn.addEventListener('click', () => { try{ if(typeof setCoachMode==='function') setCoachMode('tajweed-server'); }catch(_){} setRecitationMode('tajweed'); }); }
+const modeTestBtn = document.getElementById('modeTestBtn');
+if(modeTestBtn){ modeTestBtn.addEventListener('click', () => { try{ if(typeof setCoachMode==='function') setCoachMode('test'); }catch(_){} setRecitationMode('test'); }); }
 if(chkHideText){ chkHideText.addEventListener('change', () => { hideText = chkHideText.checked; try{ localStorage.setItem('qc.hideText', hideText ? '1' : '0'); }catch(e){} if(hideTextChip) hideTextChip.classList.toggle('active', hideText); applyHideTextUI(); }); }
 function applyHideTextUI(){
   if(hideText && followOnly){
@@ -8691,10 +8693,11 @@ function appendMistake(m){
   mistakeCountBadge.textContent = String(mistakes.length);
   const li = document.createElement('li');
   li.classList.add('severity-' + (m.severity || 'red'));
+  li.setAttribute('data-evidence', (typeof window !== 'undefined' && window.__tajShared && window.__tajShared.stream) ? 'shared-audio' : 'asr-timing-only');
   const kindBadge = m.tajweedName
     ? '<span class="tj-kind" title="' + escapeHtml(m.tajweedExplanation || m.tajweedName) + '" aria-label="' + escapeHtml(m.tajweedExplanation || m.tajweedName) + '">' + escapeHtml(m.tajweedName) + '</span>'
     : '';
-  const heardPart = m.heard ? '<span class="heard">→ ' + escapeHtml(m.heard) + '</span>' : '';
+  const heardPart = m.heard ? '<span class="heard" dir="ltr" lang="en">→ ' + escapeHtml(m.heard) + '</span>' : '';
   const ayahPart = m.verse ? m.verse.split(':')[1] : '';
   const ayahLabel = (ayahPart === '0') ? 'Bismillah' : ('Ayah ' + ayahPart);
   li.innerHTML = '<span class="idx">' + m.idx + '</span>' + kindBadge + '<span class="correct">' + escapeHtml(m.correct) + '</span>' + heardPart + '<span class="meta">' + ayahLabel + '</span>';
@@ -13460,7 +13463,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13534,7 +13537,7 @@ window.addEventListener('contextmenu', function(event) {
   function assignWordIds(){ document.querySelectorAll('#screenCoach .w, .mushaf .w, .mushaf-book-content .w').forEach(function(el){ if(!el.dataset.wordId){ el.dataset.wordId='w'+(_wid++); } }); }
   new MutationObserver(assignWordIds).observe(document.body, {childList:true, subtree:true});
   setTimeout(assignWordIds, 500); setTimeout(assignWordIds, 1500);
-  function isTajweedOn(){ var a=document.querySelector('.toggle.mode-pill.active'); return !!(a && a.getAttribute('data-mode')==='tajweed-server'); }
+  function isTajweedOn(){ try{ if(typeof coachMode!=='undefined' && coachMode) return coachMode==='tajweed-server'; }catch(_){} var a=document.querySelector('.toggle.mode-pill.active'); return !!(a && a.getAttribute('data-mode')==='tajweed-server'); }
   var S=null;
   var WORKLET_CODE="class P extends AudioWorkletProcessor{constructor(){super();this.n=0;}process(inp){var c=inp[0]; if(!c||!c[0]) return true; var ch=c[0]; var s=0; for(var i=0;i<ch.length;i++) s+=ch[i]*ch[i]; this.port.postMessage({samples:Array.from(ch),rms:Math.sqrt(s/ch.length),idx:this.n}); this.n+=ch.length; return true;}} registerProcessor('taj-pcm',P);";
   function rmsFrames(){ if(!S||!S.raw.length) return []; var sr=16000,fs=320,hop=160,out=[]; for(var s=0;s+fs<=S.raw.length;s+=hop){ var ss=0; for(var i=0;i<fs;i++) ss+=S.raw[s+i]*S.raw[s+i]; var r=Math.sqrt(ss/fs); out.push({startMs:s/sr*1000,endMs:(s+fs)/sr*1000,rms:r}); } return out; }
@@ -13546,7 +13549,7 @@ window.addEventListener('contextmenu', function(event) {
     try{
       var Ctx=window.AudioContext||window.webkitAudioContext;
       var ctx=new Ctx({sampleRate:16000});
-      await ctx.resume(); // inside gesture — iOS allows this
+      try{ ctx.resume(); }catch(_){} /* SYNCHRONOUS in the tap: iOS drops resume() that runs after an await */
       var stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
       S={id:id,t0:t0,ctx:ctx,stream:stream,raw:[],stopped:false,warmCtx:null,lastFrameAt:performance.now(),ptr:0,chunks:[]};
       window.__tajShared=S;
@@ -13567,6 +13570,7 @@ window.addEventListener('contextmenu', function(event) {
         S.recorder.start(250);
       }catch(e){ console.warn('[Tajweed] MediaRecorder failed', e); }
       S.capTimer=setTimeout(function(){ stopTajweedShared('cap-49.5s'); }, 49500);
+      try{ updateTajweedStatusChip(); }catch(_){}
       startWatchdog(id);
       assignWordIds();
     }catch(e){
@@ -13620,8 +13624,8 @@ window.addEventListener('contextmenu', function(event) {
   function colourWordById(wordId, res){ var job=wordQueue.get(wordId); var el=job&&job.el; if(!el) el=document.querySelector('.w[data-word-id="'+wordId+'"]'); if(!el) return; el.querySelectorAll(':scope > .coach-badge, :scope > .coach-finding').forEach(function(n){n.remove();}); var badge=document.createElement('span'); badge.className='coach-badge '+res.kind; badge.textContent=res.label; var finding=document.createElement('div'); finding.className='coach-finding'; finding.innerHTML='<b>Finding:</b> '+res.finding+'<br><b>Measured:</b> '+res.measured+' — <b>Target:</b> '+res.target+'<br><b>What happened:</b> '+res.happened+'<br><b>What to do:</b> '+res.todo+'<br><b>Proof:</b> ASR ✓ · MFA '+res.mfaWindow+' · RMS vowel '+res.rmsVowel+' · Lock LOCKED ✅'; el.appendChild(badge); el.appendChild(finding); if(job) job.status='done'; }
   function markNotVerified(wordId){ colourWordById(wordId, {kind:'amber', label:'Not verified', finding:'Not verified', measured:'—', target:'—', happened:'ASR, MFA and RMS did not lock on the same timestamped word.', todo:'Re-record this ayah.', mfaWindow:'—', rmsVowel:'—'}); }
   function startWatchdog(id){ clearInterval(S&&S.watchdog); if(!S) return; S.watchdog=setInterval(function(){ if(!S||S.id!==id||S.stopped){ clearInterval(S&&S.watchdog); return; } var trackDead=!S.stream||!S.stream.getTracks().some(function(tr){return tr.readyState==='live';}); var ctxDead=!S.ctx||S.ctx.state!=='running'; var stalled=(performance.now()-(S.lastFrameAt||performance.now()))>1000; if(trackDead||ctxDead||stalled){ restartRawOnly(id); } },2000); }
-  async function restartRawOnly(id){ if(!S||S.id!==id||S.stopped) return; try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.recorder&&S.recorder.stop(); }catch(_){} /* SAME t0, SAME session — re-open ONE stream, re-attach RMS + recorder */ try{ var stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); S.stream=stream; window.__tajShared=S; var src=S.ctx.createMediaStreamSource(stream); src.connect(S.worklet); S.lastFrameAt=performance.now(); }catch(e){ console.warn('[Tajweed] RAW restart failed', e); } }
-  function stopTajweedShared(reason){ if(!S||S.stopped) return; S.stopped=true; clearTimeout(S.capTimer); clearInterval(S.watchdog); try{ S.recorder&&S.recorder.state!=='inactive'&&S.recorder.stop(); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.ctx&&S.ctx.suspend(); }catch(_){} S.warmCtx=S.ctx; try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){} }
+  async function restartRawOnly(id){ if(!S||S.id!==id||S.stopped) return; try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.recorder&&S.recorder.stop(); }catch(_){} /* SAME t0, SAME session — re-open ONE stream, re-attach RMS + recorder */ try{ var stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:false,noiseSuppression:false,autoGainControl:false}}); S.stream=stream; window.__tajShared=S; var src=S.ctx.createMediaStreamSource(stream); src.connect(S.worklet); S.lastFrameAt=performance.now(); try{ var mime2=['audio/webm;codecs=opus','audio/webm','audio/mp4',''].find(function(m){ try{ return !m||MediaRecorder.isTypeSupported(m); }catch(_){ return false; } }); S.recorder=new MediaRecorder(stream, mime2?{mimeType:mime2}:undefined); S.recorder.ondataavailable=function(ev){ if(ev.data&&ev.data.size) S.chunks.push(ev.data); }; S.recorder.onstop=function(){ sendToServer(id); }; S.recorder.start(250); }catch(e){ console.warn('[Tajweed] recorder restart failed', e); } }catch(e){ console.warn('[Tajweed] RAW restart failed', e); } }
+  function stopTajweedShared(reason){ if(!S||S.stopped) return; S.stopped=true; try{ updateTajweedStatusChip(); }catch(_){} clearTimeout(S.capTimer); clearInterval(S.watchdog); try{ S.recorder&&S.recorder.state!=='inactive'&&S.recorder.stop(); }catch(_){} try{ S.worklet&&S.worklet.disconnect(); }catch(_){} try{ S.stream&&S.stream.getTracks().forEach(function(tr){tr.stop();}); }catch(_){} try{ S.ctx&&S.ctx.suspend(); }catch(_){} S.warmCtx=S.ctx; try{ var fb=document.getElementById('feedback'); if(fb){ var d=document.createElement('div'); d.className='line soft'; d.textContent='Tajweed check done — '+wordQueue.size+' words checked. Badges are under each word on the Quran screen.'; fb.prepend(d); } }catch(_){} }
   function hardStopTajweed(){ if(!S) return; stopTajweedShared('hard-stop'); try{ S.ctx&&S.ctx.close(); }catch(_){} S.warmCtx=null; S.raw=[]; S=null; window.__tajShared=null; }
   document.addEventListener('visibilitychange', function(){ if(document.hidden) hardStopTajweed(); });
   window.addEventListener('pagehide', hardStopTajweed); window.addEventListener('beforeunload', hardStopTajweed);
