@@ -8323,7 +8323,7 @@ async function ensureMicStream(){
     lastMicError = null;
     const _epoch = micEpoch;
     const s = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: false, autoGainControl: true }
     });
     if(_epoch !== micEpoch){
       // Stop / background / mode change happened while the permission
