@@ -3143,7 +3143,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">28 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">17:26</span>
+    <span class="pdr-item pdr-time" id="pdrTime">17:33</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -11291,6 +11291,52 @@ async function applyJuz22_23Shift(data){
   }
   return data;
 }
+
+let _juz26MovedFrom501 = null;
+let _juz26MovedFrom502 = null;
+/* Juz 25/26 boundary (real move):
+   - First 2 ayahs of page 501 move to end of page 500 (still Juz 25).
+   - First 5 ayahs of page 502 move to end of page 501 (still Juz 25).
+   - The new first ayah on page 502 becomes the FIRST ayah of Juz 26
+     and gets juz-start / inverted first row. Any original Juz 26
+     start ayah (46:1) inside a moved group loses juz-start. */
+async function applyJuz25_26Shift(data){
+  if(!data || !Array.isArray(data.ayahs)) return data;
+  if(data.pageNumber === 502 && data.ayahs.length){
+    _juz26MovedFrom502 = JSON.parse(JSON.stringify(data.ayahs.slice(0, 5)));
+    data.ayahs = data.ayahs.slice(5);
+    if(data.ayahs.length){ data.ayahs[0].juz = 26; data.ayahs[0]._juz26Start = true; }
+  } else if(data.pageNumber === 501 && data.ayahs.length){
+    _juz26MovedFrom501 = JSON.parse(JSON.stringify(data.ayahs.slice(0, 2)));
+    data.ayahs = data.ayahs.slice(2);
+    let moved = _juz26MovedFrom502;
+    if(!moved){
+      try{ const n = await fetchPageIndopak(502); if(n && Array.isArray(n.ayahs)) { moved = n.ayahs.slice(0, 5); _juz26MovedFrom502 = JSON.parse(JSON.stringify(moved)); } }catch(_){}
+    }
+    if(moved && moved.length){
+      moved.forEach(m => {
+        const copy = JSON.parse(JSON.stringify(m));
+        copy.juz = 25; copy.pageNumber = 501; copy._juz26Moved = true;
+        const last = data.ayahs[data.ayahs.length - 1];
+        if(!(last && last.surah === copy.surah && last.numberInSurah === copy.numberInSurah)) data.ayahs.push(copy);
+      });
+    }
+  } else if(data.pageNumber === 500 && data.ayahs.length){
+    let moved = _juz26MovedFrom501;
+    if(!moved){
+      try{ const n = await fetchPageIndopak(501); if(n && Array.isArray(n.ayahs)) { moved = n.ayahs.slice(0, 2); _juz26MovedFrom501 = JSON.parse(JSON.stringify(moved)); } }catch(_){}
+    }
+    if(moved && moved.length){
+      moved.forEach(m => {
+        const copy = JSON.parse(JSON.stringify(m));
+        copy.juz = 25; copy.pageNumber = 500; copy._juz26Moved = true;
+        const last = data.ayahs[data.ayahs.length - 1];
+        if(!(last && last.surah === copy.surah && last.numberInSurah === copy.numberInSurah)) data.ayahs.push(copy);
+      });
+    }
+  }
+  return data;
+}
 async function fetchPageData(pageNumber){
   let data = null;
   try{ data = await fetchPageIndopak(pageNumber); }
@@ -11311,6 +11357,7 @@ async function fetchPageData(pageNumber){
   data = await applyJuz19_20Shift(data);
   data = await applyJuz20_21Shift(data);
   data = await applyJuz22_23Shift(data);
+  data = await applyJuz25_26Shift(data);
   return await applyIndoPakText(data);
 }
 function prefetchAdjacentPages(n){
@@ -11453,6 +11500,35 @@ function applyJuzFirstVisualLines(root){
         el.insertBefore(wrap,selected[0]);selected.forEach(n=>wrap.appendChild(n));
       }
     }
+    /* Page 502 special case: the first ayah is short, so the second ayah
+       starts on the same visual row. Invert that piece of the second
+       ayah too, so the whole top row is inverted. */
+    if(el.dataset.page === '502'){
+      const wrapEl = el.querySelector('.juz-first-row');
+      const next = el.nextElementSibling;
+      if(wrapEl && next && next.classList && next.classList.contains('ayah') && !next.querySelector('.juz-first-row')){
+        const tn = Array.from(next.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+        if(tn){
+          const rowRect = wrapEl.getBoundingClientRect();
+          const rowCy = (rowRect.top + rowRect.bottom) / 2;
+          const value = tn.textContent; const range = document.createRange();
+          let end = 0;
+          for(let i = 0; i < value.length; i++){
+            range.setStart(tn, i); range.setEnd(tn, i + 1);
+            const r = range.getBoundingClientRect();
+            if(!r.width || !r.height) continue;
+            const cy = (r.top + r.bottom) / 2;
+            if(Math.abs(cy - rowCy) > r.height * 0.6) break;
+            end = i + 1;
+          }
+          if(end > 0){
+            if(end < value.length) tn.splitText(end);
+            const w2 = document.createElement('span'); w2.className = 'juz-first-row';
+            tn.parentNode.insertBefore(w2, tn); w2.appendChild(tn);
+          }
+        }
+      }
+    }
     el.dataset.juzRowDone='1';
   });
 }
@@ -11582,6 +11658,11 @@ function renderReaderPage(pageNumber, token){
     if(pageNumber === 442 && !content.querySelector('.ayah')) span.classList.add('juz-start');
     if(pageNumber === 442 && content.querySelector('.ayah')) span.classList.remove('juz-start');
     if(pageNumber === 443 && a._juz23Moved) span.classList.remove('juz-start');
+    /* Juz 25/26 real move: moved ayahs are Juz 25 (no start);
+       new first ayah on 502 is Juz 26's first ayah (start + inverted row). */
+    if(a._juz26Moved) span.classList.remove('juz-start');
+    if(pageNumber === 502 && !content.querySelector('.ayah')) span.classList.add('juz-start');
+    if(pageNumber === 502 && content.querySelector('.ayah')) span.classList.remove('juz-start');
     /* Juz 7 override: no inversion mid-page 121; invert first row of page 122 instead. */
     if(pageNumber===121) span.classList.remove('juz-start');
     if(pageNumber===122 && !content.querySelector('.ayah')) span.classList.add('juz-start');
@@ -14284,7 +14365,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
