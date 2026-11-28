@@ -6130,7 +6130,7 @@ function updateTajweedStatusChip(){
   chip.hidden = false;
   const liveTrack = !!(micStream && micStream.getAudioTracks &&
     micStream.getAudioTracks().some(t => t.readyState === 'live' && t.enabled));
-  const acousticReady = !!(liveTrack && rmsAnalyser.isRunning() && rmsAnalyser.sampleCount() > 3);
+  const acousticReady = false; // Tajweed mode is ASR-only in this build; RMS is intentionally not used.
   if(coachTajweedMicFailed){
     chip.className = 'toggle tj-status-error';
     chip.innerHTML = '<span class="tj-status-dot"></span>Mic unavailable';
@@ -6152,26 +6152,16 @@ function updateTajweedStatusChip(){
     chip.setAttribute('aria-label', 'Loading Tajweed rule checks');
     return;
   }
-  if(acousticReady && wantMic && _acousticMode === 'transcript'){
-    chip.className = 'toggle tj-status-error';
-    chip.innerHTML = '<span class="tj-status-dot"></span>Transcript only · mic silent';
-    chip.title = 'The microphone stream is open but no usable audio is reaching the waveform analyser (often because speech recognition holds the mic). Madd, Ghunnah, Qalqalah and other sound rules are transcript estimates and are NOT verified.';
-    chip.setAttribute('aria-label', 'Tajweed running in transcript-only mode; acoustic rules not verified');
-  } else if(acousticReady){
+  if(wantMic){
     chip.className = 'toggle tj-status-ready';
-    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · mic clues';
-    chip.title = 'All 12 annotated Tajweed categories are available. ASR aligns words with Quran text and the microphone supplies word-level RMS/spectral clues. Acoustic checks are provisional estimates, not phoneme-level Tajweed certification; uncertain findings are shown as yellow warnings for teacher/listener review.';
-    chip.setAttribute('aria-label', '12 annotated Tajweed categories available with provisional microphone evidence');
-  } else if(wantMic){
-    chip.className = 'toggle tj-status-error';
-    chip.innerHTML = '<span class="tj-status-dot"></span>ASR only · audio unavailable';
-    chip.title = 'ASR is listening, but a live getUserMedia/RMS stream is not available. Word alignment and limited transcript checks can continue; waveform-dependent Tajweed checks are not verified.';
-    chip.setAttribute('aria-label', 'ASR active but microphone waveform analysis unavailable');
+    chip.innerHTML = '<span class="tj-status-dot"></span>ASR only · acoustic RMS not used';
+    chip.title = 'Tajweed is using browser speech recognition and transcript comparisons only. RMS/audio waveform analysis is intentionally disabled in this Tajweed mode. Madd duration and actual Ghunnah/articulation quality are not acoustically verified.';
+    chip.setAttribute('aria-label', 'ASR-only Tajweed mode; acoustic RMS is not used');
   } else {
     chip.className = 'toggle tj-status-loading';
-    chip.innerHTML = '<span class="tj-status-dot"></span>12 rules · start mic';
-    chip.title = 'The 12 Tajweed categories are available from Quran annotations where present. Start listening to activate microphone analysis. Acoustic findings remain provisional and may require a teacher/listener review.';
-    chip.setAttribute('aria-label', '12 Tajweed categories loaded; microphone analysis starts with recitation');
+    chip.innerHTML = '<span class="tj-status-dot"></span>ASR Tajweed · start reciting';
+    chip.title = 'Transcript-based Tajweed checks are available when browser speech recognition starts. Acoustic RMS is intentionally not used.';
+    chip.setAttribute('aria-label', 'ASR Tajweed loaded; start speech recognition');
   }
 }
 
@@ -7037,137 +7027,28 @@ function checkHamzatWasl(w, idx, rawHeard){
 
 function runStrict1Checks(idx, heard, opts){
   opts = opts || {};
-  if (followOnly) return;
-  if (!coachTajweedReady) return;
-  const w = words[idx];
-  if (!w || w.isMuqattaat) return;
-
-  /* 1. Emphatic letters (Tafkheem) on every commit path */
-  if (STRICT_FEATURES.emphatics() && heard && w.norm && heard !== w.norm){
-    const viol = emphaticViolation(heard, w.norm);
-    if (viol.length){
-      markTajweedIssue(w, 'emphatic-' + viol[0].expected,
-        'sounded as ' + viol[0].heard, 'red');
-    }
+  if (followOnly || !coachTajweedReady) return;
+  const w = words[idx]; if (!w || w.isMuqattaat) return;
+  // ASR-only mode: transcript evidence is used conservatively. Acoustic qualities
+  // (Madd duration, Ghunnah resonance, Qalqalah, Ikhfa/Iqlab/Idghaam quality)
+  // are explicitly not verdicts here.
+  try { if (typeof noteAcousticMode === 'function') noteAcousticMode(false); } catch(_){}
+  try { updateTajweedStatusChip(); } catch(_){}
+  const heardN = (typeof normArCached === 'function') ? normArCached(heard||'') : (heard||'');
+  const expectedN = (w.norm||'');
+  if (!heardN) return;
+  // Conservative word/letter substitution candidate only. No red judgement from
+  // ASR spelling, diacritics, or Hamzat al-Wasl variants.
+  if (heardN !== expectedN && typeof isMatchWord === 'function' && !isMatchWord(heardN, (typeof phonArCached==='function'?phonArCached(heardN):''), null, w)) {
+    try { markStrict1Warning(w, 'asr-word-review', 'ASR transcript differs; this is a recognition candidate, not a confirmed Tajweed error.'); } catch(_){}
   }
-
-  const now = performance.now();
-  if (batchTimingCtx) batchTimingCtx.wordCount++;
-  const prevInSameBatch = (lastDirectCommitIdx >= 0) && (lastCommitBatchId === currentBatchId);
-
-  /* 2. RMS + alignment context (graceful fallback when mic RMS is unavailable) */
-  const align = checkTajweedAudioAlignment(w, heard);
-  noteAcousticMode(!!align.available);
-  updateTajweedStatusChip();
-
-  /* 3. Segment-based Madd timing */
-  if (!opts.skipTiming && !prevInSameBatch){
-    const nextW = words[idx + 1];
-    const isEndOfAyah = !nextW || nextW.verse !== w.verse;
-
-    if (align.available && w.tjRules && w.tjRules.madd && STRICT_FEATURES.madd()){
-      const kind = w.tjRules.madd;
-      const T_mora = getBaseMsPerLetter();
-      const vowelMs = rmsAnalyser.vowelRun(w.audio.start, w.audio.end).durationMs;
-      const required = isEndOfAyah
-        ? (T_mora !== null ? Math.round(T_mora * MADD_MIN_HARAKAT.normal) : END_OF_AYAH_MADD_MIN_MS)
-        : (T_mora !== null ? Math.round(T_mora * (MADD_MIN_HARAKAT[kind] || 1.7))
-                            : (MADD_MIN_DELTA_MS[kind] || 0));
-      const minSegMs = w.norm.length * (T_mora !== null ? T_mora : 100) * 0.55;
-      if (w.audio.durationMs >= minSegMs && vowelMs < required){
-        const tag = 'madd-' + kind + (isEndOfAyah ? '-end' : '');
-        const _maddMsg = 'estimated vowel-run ' + Math.round(vowelMs) + ' ms < ' + Math.round(required) + ' ms' +
-          (T_mora !== null ? ' (T=' + Math.round(T_mora) + 'ms/mora)' : '');
-        if (vowelMs < required * 0.65) markStrict1Error(w, tag, _maddMsg);
-        else markStrict1Warning(w, tag, _maddMsg);
-      } else if (!isEndOfAyah && T_mora !== null){
-        /* Over-long madd (warning only). Skipped at ayah end (waqf may be longer)
-           and when the segment is much longer than one word, because the segment
-           can then span several words and the longest vowel may belong elsewhere. */
-        const maxMs = maddMaxMs(kind);
-        const wordSized = w.audio.durationMs <= (w.norm.length * T_mora + maxMs) * 1.3;
-        if (isFinite(maxMs) && wordSized && vowelMs > maxMs){
-          markStrict1Warning(w, 'madd-' + kind + '-long',
-            'estimated vowel-run ' + Math.round(vowelMs) + ' ms > ' + Math.round(maxMs) +
-            ' ms (held too long; provisional phone-mic estimate)');
-        }
-      }
-    }
-
-    /* Pace sampling */
-    if (opts.timingReliable && align.available && lastDirectCommitIdx >= 0 && idx === lastDirectCommitIdx + 1){
-      const isMadd = !!(w.tjRules && w.tjRules.madd);
-      const sampleMs = rmsAnalyser.vowelRun(w.audio.start, w.audio.end).durationMs;
-      if (!isMadd && sampleMs > 0) recordPaceSample(sampleMs, Math.max(1, w.norm.length));
-    }
-  }
-
-  /* 4. Delta-based timing fallback when no RMS segment (adjacent commits only) */
-  if (!opts.skipTiming && !prevInSameBatch && lastDirectCommitIdx >= 0 && idx === lastDirectCommitIdx + 1){
-    if (!align.available){
-      const asrMs = now - lastDirectCommitAt;
-      if (w.tjRules && w.tjRules.madd && STRICT_FEATURES.madd()){
-        const required = maddRequiredMs(w.tjRules.madd);
-        if (asrMs < required){
-          markStrict1Warning(w, 'madd-' + w.tjRules.madd + '-timing',
-            'ASR timing estimate ' + Math.round(asrMs) + ' ms < ' + Math.round(required) + ' ms');
-        }
-      }
-      if (w.tjRules && w.tjRules.hasGhunnahContext && STRICT_FEATURES.ghunnah()){
-        const gType = w.tjRules.ghunnahType || 'ghunnah';
-        const required = ghunnahRequiredMs(gType);
-        if (asrMs < required){
-          markStrict1Warning(w, 'ghunnah-length-' + gType,
-            'ASR timing estimate for nasalisation ' + Math.round(asrMs) + ' ms < ' + Math.round(required) + ' ms');
-        }
-      }
-    }
-  }
-
-  /* 5. Batch timing accumulation for fast multi-word ASR commits */
-  if (prevInSameBatch && batchTimingCtx && lastDirectCommitIdx >= 0 && idx === lastDirectCommitIdx + 1){
-    const prevW = words[lastDirectCommitIdx];
-    const curW  = words[idx];
-    if (prevW && curW && prevW.verse === curW.verse && prevW.tjRules){
-      if (prevW.tjRules.madd && STRICT_FEATURES.madd()){
-        const req = maddRequiredMs(prevW.tjRules.madd);
-        if (req > 0){
-          batchTimingCtx.cumulativeRequired += req;
-          batchTimingCtx.contributions.push({ idx: lastDirectCommitIdx, rule: 'madd', need: req });
-        }
-      }
-      if (prevW.tjRules.hasGhunnahContext && STRICT_FEATURES.ghunnah()){
-        const gType = prevW.tjRules.ghunnahType || 'ghunnah';
-        const req = ghunnahRequiredMs(gType);
-        if (req > 0){
-          batchTimingCtx.cumulativeRequired += req;
-          batchTimingCtx.contributions.push({ idx: lastDirectCommitIdx, rule: 'ghunnah', need: req });
-        }
-      }
-    }
-  }
-
-  /* 6. Independent rule checks (RMS where available, transcript fallback otherwise) */
-  checkAllNasalRules(w, heard, align);
-  checkIkhfa(w, heard, align);
-  if (STRICT_FEATURES.laam()) checkLaamShamsiyyah(w, heard, align);
-  checkHamzatWasl(w, idx, opts.rawHeard || heard);
-  if (!strict1SilentOk(w, heard)){
-    markStrict1Warning(w, 'silent',
-      'ASR spelling differs from the annotated silent-letter form; transcript alone cannot prove that the silent letter was voiced');
-  }
-  if (STRICT_FEATURES.silent()) checkExtraSyllable(w);
-  checkQalqalah(w, heard, align);
-  checkIdghaamNoGhunnah(w, heard, align);
-
-  prevWordAudio = w.audio || prevWordAudio;
-
-  if (opts.breakChain){
-    lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; prevWordAudio = null;
-  } else {
-    lastDirectCommitIdx = idx; lastDirectCommitAt = now; lastCommitBatchId = currentBatchId;
-  }
+  // Hamzat al-Wasl / silent orthography: deliberately lenient, review only.
+  try { if (typeof checkHamzatWasl === 'function') checkHamzatWasl(w, idx, opts.rawHeard || heardN); } catch(_){}
+  try { if (typeof strict1SilentOk === 'function' && !strict1SilentOk(w, heardN)) markStrict1Warning(w, 'silent-review', 'Orthographic ASR variation — silent Alif/Wasl is not judged from transcript alone.'); } catch(_){}
+  // Explicitly reset timing chain so elapsed ASR callback time is never treated as sound duration.
+  lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; prevWordAudio = null;
 }
+
 function distributeMergedHeard(heard, wordsArr, startIdx, count){
   const out = new Array(count).fill('');
   if (!heard || count <= 0) return out;
@@ -9725,40 +9606,11 @@ async function startReciting(){
     if(followOnly){
     releaseMicStream();
   } else {
-    if(micPermission !== 'granted'){
-      const ok = await promptForMic();
-      if(_myTok !== micSession){ releaseMicStream(); return; }
-      if(!ok){
-        coachTajweedMicFailed = true;
-        updateTajweedStatusChip();
-        return;
-      }
-    }
-    if(mode === 'surah' && !coachTajweedReady && !coachTajweedDegraded){
-      addFeedback('🎨 Tajweed rules are still loading — recitation will start now; rule checks will activate once ready.', false, true);
-    }
-    const _tajStream = await ensureMicStream();
-    if(_myTok !== micSession){ releaseMicStream(); return; }
-    if(!_tajStream){
-      const nm = lastMicError && lastMicError.name ? lastMicError.name : '';
-      if(nm === 'NotAllowedError' || nm === 'NotFoundError' ||
-         nm === 'DevicesNotFoundError' || nm === 'SecurityError'){
-        coachTajweedMicFailed = true;
-        updateTajweedStatusChip();
-      } else {
-        coachTajweedMicFailed = false;
-        updateTajweedStatusChip();
-      }
-    } else {
-      coachTajweedMicFailed = false;
-      updateTajweedStatusChip();
-      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-        _rmsUnavailableNotified = true;
-        notifyRmsUnavailable();
-      }
-    }
+    // ASR-only Tajweed: no getUserMedia request, RMS graph, MediaRecorder,
+    // or parallel microphone stream. Web Speech owns its own input session.
+    coachTajweedMicFailed = false;
+    updateTajweedStatusChip();
   }
-  
 
   if(finished) resetProgress(true);
   fsPaused = false; micPaused = false; wantMic = true; speechFatalError = false; speechServiceNotified = false;
@@ -9772,9 +9624,7 @@ async function startReciting(){
   resetSpeechPipeline();
   try{
     if(!followOnly){
-      startTajweedOptionBEngine();
-      // Start live Arabic speech recognition as the transcript input in Tajweed mode.
-      // RMS/segment capture remains on the shared mic stream; browser ASR provides heard words.
+      // ASR-only Tajweed: intentionally no RMS segmenter or microphone stream.
       speechRecognition = createSpeechRecognition();
       if(!speechRecognition){
         addFeedback('⚠️ Live speech recognition is unavailable in this browser. Acoustic monitoring may run, but words cannot be transcribed.', true);
@@ -9787,13 +9637,9 @@ async function startReciting(){
         catch(e){ speechStarting = false; console.warn('[Tajweed] ASR start failed:',e); addFeedback('⚠️ Tajweed microphone is active but speech recognition could not start. Check microphone/browser permissions and retry.', true); }
       }
       recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
-      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
-        _rmsUnavailableNotified = true;
-        addFeedback('ℹ️ <b>Audio waveform analysis is unavailable.</b> Segment checks cannot be verified.', false, true);
-      }
       setStatus('Listening', 'listening', contextLabel());
-      addFeedback('🎧 Listening — recite clearly. Live Arabic recognition and acoustic Tajweed monitoring are active when supported.');
-      armSpeechKeepalive(); startMicDiagnostic();
+      addFeedback('🎧 Listening — ASR-only Tajweed. Acoustic RMS is intentionally disabled; Madd duration and sound-quality rules are not acoustically verified.');
+      armSpeechKeepalive();
       updateFsMicBtn(); syncFsButtons();
       return;
     }
@@ -9803,7 +9649,7 @@ async function startReciting(){
     if(speechStarting){}
     else { try{ speechStarting = true; speechRecognition.start(); }catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') throw e; } }
     recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
-    if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
+    if(followOnly) startMicDiagnostic(); armSpeechKeepalive();
     setStatus('Listening', 'listening', contextLabel());
     addFeedback('🎧 Listening — recite from anywhere in the page or surah.');
     // Inform the user when acoustic rules are unavailable
@@ -9884,12 +9730,10 @@ function pauseMic(){
 function resumeMic(){
   if(wantMic && !finished && !fsPaused){
     micPaused = false;
-    if(!followOnly){
-      ensureMicStream().then(s => { if(!s) markTajweedMicFailed(); }).catch(() => {});
-    }
+    // Resume browser ASR only in Tajweed mode; do not reacquire RMS/getUserMedia.
     recRunning = true; speechFatalError = false;
     lastResultAt = performance.now();
-    if(!followOnly) startMicDiagnostic(); armSpeechKeepalive();
+    if(followOnly) startMicDiagnostic(); armSpeechKeepalive();
     try{ speechStarting = true; speechRecognition && speechRecognition.start(); }
     catch(e){ speechStarting = false; if(!e || e.name !== 'InvalidStateError') console.warn('[Speech] resume failed:', e); }
     setStatus('Listening', 'listening', contextLabel());
