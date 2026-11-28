@@ -2069,7 +2069,7 @@ body.light-mode .mushaf-surah-header { color:#2a6fe0; border-bottom-color:rgba(4
 .tj-idghaam_ghunnah    { color:#16a085 !important; font-weight:700 }
 .tj-idghaam_no_ghunnah { color:#1abc9c !important; font-weight:700 }
 .tj-iqlab              { color:#8e44ad !important; font-weight:700 }
-.tj-silent             { color:#7f8c8d !important; font-weight:400 }
+
 .tajweed-mushaf.tj-fullscreen {
   position: fixed !important;
   inset: 0 !important;
@@ -2102,7 +2102,7 @@ body.light-mode .tj-ikhfa              { color:#b9770e !important }
 body.light-mode .tj-idghaam_ghunnah    { color:#0e6655 !important }
 body.light-mode .tj-idghaam_no_ghunnah { color:#117a65 !important }
 body.light-mode .tj-iqlab              { color:#6c3483 !important }
-body.light-mode .tj-silent             { color:#5d6d7e !important }
+
 @media (max-width:380px){
   .hifz-stats-bar{padding:8px 4px}
   .hifz-stat span{font-size:.86rem}
@@ -3290,7 +3290,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <button class="tj-chip active" data-rule="idghaam_ghunnah" type="button"><span class="tj-dot" style="background:#16a085"></span>Idghaam (with ghunnah)</button>
     <button class="tj-chip active" data-rule="idghaam_no_ghunnah" type="button"><span class="tj-dot" style="background:#1abc9c"></span>Idghaam (no ghunnah)</button>
     <button class="tj-chip active" data-rule="iqlab" type="button"><span class="tj-dot" style="background:#8e44ad"></span>Iqlab</button>
-    <button class="tj-chip active" data-rule="silent" type="button"><span class="tj-dot" style="background:#7f8c8d"></span>Silent</button>
+
   </div>
   <div class="mushaf tajweed-mushaf" id="tajweedMushaf">
     <div class="mushaf-inner"><div class="loading">Choose a surah above…</div></div>
@@ -3764,7 +3764,7 @@ const STRICT_FEATURES = {
   ghunnah:   () => localStorage.getItem('qc.strictGhunnah')        !== '0',
   laam:      () => localStorage.getItem('qc.strictLaamShamsiyyah') !== '0',
   emphatics: () => localStorage.getItem('qc.strictEmphatics')      !== '0',
-  silent:    () => localStorage.getItem('qc.strictSilent')         !== '0',
+  silent:    () => false, /* silent letters are not checked in Tajweed mode */
   hamWasl:   () => localStorage.getItem('qc.strictHamWasl')        !== '0'
 };
 const VARIANT_MAP = {
@@ -3898,6 +3898,9 @@ function phonArCached(s){
   return v;
 }
 function phonLooseArCached(s){
+  // Tajweed mode: do not use loose phonological substitutions for word alignment.
+  // Preserve the stricter phon normalization; loose tolerance remains unchanged elsewhere.
+  if(coachTajweedReady) return phonArCached(s);
   let v = _phonLooseCache.get(s);
   if(v === undefined){ v = phonNormLooseAr(s); trimCache(_phonLooseCache, CACHE_MAX); _phonLooseCache.set(s, v); }
   return v;
@@ -5378,7 +5381,7 @@ function recPush(newToks){
 }
 function recReset(){
   recTokens = []; recCursor = 0; pendingHeard = []; consecutiveReds = 0;
-  interimProgress.clear(); interimPrev.clear(); paceReset(); followWrongTokens = 0; cancelFollowPinTimer();
+  interimProgress.clear(); interimPrev.clear(); paceReset(); followWrongTokens = 0; followSkipVerseKey = null; followSkippedInAyah = 0; cancelFollowPinTimer();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
   prevWordAudio = null;
   if (typeof resetSpeechPipeline === 'function') resetSpeechPipeline();
@@ -5679,7 +5682,7 @@ function finishHifzTest(){
 }
 
 const TJ_API_BASE = 'https://api.quran.com/api/v4';
-const TJ_ALL_RULES = ['ham_wasl','laam_shamsiyah','madda_normal','madda_permissible','madda_obligatory','madda_necessary','qalqalah','ghunnah','ikhfa','idghaam_ghunnah','idghaam_no_ghunnah','iqlab','silent'];
+const TJ_ALL_RULES = ['ham_wasl','laam_shamsiyah','madda_normal','madda_permissible','madda_obligatory','madda_necessary','qalqalah','ghunnah','ikhfa','idghaam_ghunnah','idghaam_no_ghunnah','iqlab'];
 const tjState = { surah: null, ayahs: [], loading: false, enabledRules: new Set(TJ_ALL_RULES.slice()) };
 
 async function openTajweedScreen(){
@@ -5814,6 +5817,8 @@ function decorateTajweedToSpans(html){
     const seenCls = new Set();
     const names = String(cls).trim().split(/\s+/).filter(Boolean)
       .map(c => TJ_CLASS_ALIASES[c] || c)
+      /* Silent-letter highlighting is intentionally disabled in Tajweed mode. */
+      .filter(c => c !== 'silent')
       .filter(c => { if (seenCls.has(c)) return false; seenCls.add(c); return true; });
     const mapped = names.map(c => 'tj-' + c).join(' ');
     return '<span class="' + (mapped || 'tj-unknown') + '">';
@@ -6959,7 +6964,8 @@ function runStrict1Checks(idx, heard, opts){
   /* ── FIX 3 — segment-based timing (independent of adjacency) ── */
   if (!opts.skipTiming && !prevInSameBatch){
     const rmsAvailable = rmsAnalyser.isRunning() && rmsAnalyser.sampleCount() > 5 && rmsAnalyser.hasSignal();
-    const hasSeg = rmsAvailable && w.audio && w.audio.durationMs >= 40;
+    const hasSeg = rmsAvailable && w.audio && w.audio.durationMs >= 40 &&
+      Number.isFinite(w.audio.start) && Number.isFinite(w.audio.end) && w.audio.end > w.audio.start;
     const nextW = words[idx + 1];
     const isEndOfAyah = !nextW || nextW.verse !== w.verse;
 
@@ -6968,8 +6974,11 @@ function runStrict1Checks(idx, heard, opts){
       const T_mora = getBaseMsPerLetter();
       const vr = rmsAnalyser.vowelRun(w.audio.start, w.audio.end);
       const vowelMs = vr.durationMs;
+      /* End-of-ayah Madd is measured and finalized from this word's own
+         captured segment start/end; it does not wait for a following word.
+         The segment's vowel-run duration is the timed portion, with a 250ms minimum. */
       const required = isEndOfAyah
-        ? (T_mora !== null ? Math.round(T_mora * MADD_MIN_HARAKAT.normal) : END_OF_AYAH_MADD_MIN_MS)
+        ? END_OF_AYAH_MADD_MIN_MS
         : (T_mora !== null ? Math.round(T_mora * (MADD_MIN_HARAKAT[kind] || 1.7))
                             : (MADD_MIN_DELTA_MS[kind] || 0));
       const minSegMs = w.norm.length * (T_mora !== null ? T_mora : 100) * 0.6;
@@ -7041,8 +7050,7 @@ function runStrict1Checks(idx, heard, opts){
     const gap = w.audio.start - prevWordAudio.end;
     if (gap > 45){ markStrict1Warning(w, 'hamzat-al-wasl', 'glottal re-attack (gap ' + Math.round(gap) + ' ms)'); }
   }
-  if (!strict1SilentOk(w, heard)){ markStrict1Error(w, 'silent', 'silent letter pronounced'); }
-  if (STRICT_FEATURES.silent()) checkExtraSyllable(w);
+  /* Silent-letter checks and extra-syllable checks are disabled in Tajweed mode. */
   checkQalqalah(w, heard);
   checkIdghaamNoGhunnah(w, heard);
 
@@ -7098,7 +7106,19 @@ function splitSegmentByWords(seg, wordsArr, startIdx, count){
 const FOLLOW_TAU_PLAUSIBLE  = 0.72;
 const FOLLOW_TAU_JUMP       = 0.85;
 const FOLLOW_TAU_EXIT       = 0.68;
-const FOLLOW_MAX_LOOKAHEAD  = 0;
+const FOLLOW_MAX_LOOKAHEAD  = 2;
+const FOLLOW_MAX_SKIPS_PER_AYAH = 2;
+let followSkipVerseKey = null;
+let followSkippedInAyah = 0;
+function syncFollowSkipBudget(verseKey){
+  if(followSkipVerseKey !== verseKey){ followSkipVerseKey = verseKey; followSkippedInAyah = 0; }
+}
+function markFollowSkippedWord(i){
+  const w = words[i]; if(!w || !followOnly) return;
+  w.el.classList.remove("current","correct","corrected","model","located","pressing");
+  w.el.classList.add("skipped");
+  if(hideText) w.el.classList.add("revealed");
+}
 
 function followSimilarity(heard, hPhon, hPhonLoose, w){
   if (!w || !heard) return 0;
@@ -7728,15 +7748,21 @@ function gradeFollowFast(tokens, startIdx){
       used++; continue;
     }
 
-    /* 4. Restricted look-ahead k ≤ 2, τ_jump = 0.85, same-ayah only */
+    /* 4. Same-ayah look-ahead: at most two skipped target words per ayah.
+       The future word must be a strong match; skipped words are marked skipped,
+       never falsely marked correct. The budget is enforced cumulatively. */
+    syncFollowSkipBudget(w.verse);
     let jumped = false;
-    for (let k = 1; k <= FOLLOW_MAX_LOOKAHEAD; k++){
+    const skipBudget = Math.max(0, FOLLOW_MAX_SKIPS_PER_AYAH - followSkippedInAyah);
+    for (let k = 1; k <= Math.min(FOLLOW_MAX_LOOKAHEAD, skipBudget); k++){
       if (ptr + k >= words.length) break;
       const futureW = words[ptr + k];
       if (futureW.verse !== w.verse) break;
       const sim = followSimilarity(heard, hPhon, hPhonLoose, futureW);
       if (sim >= FOLLOW_TAU_JUMP){
-        commitManyCorrect(ptr, ptr + k + 1, null);
+        for(let q = 0; q < k; q++) markFollowSkippedWord(ptr + q);
+        commitCorrect(ptr + k, null);
+        followSkippedInAyah += k;
         advancePast(k + 1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -8852,7 +8878,7 @@ function setRecitationMode(modeName){
   pendingHeard.length = 0; consecutiveReds = 0;
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
-  followWrongTokens = 0; cancelFollowPinTimer();
+  followWrongTokens = 0; followSkipVerseKey = null; followSkippedInAyah = 0; cancelFollowPinTimer();
   _phrasesRetryDone = false;
   applyMutexUI(); applyFollowOnlyUI();
   if(followOnly){
@@ -9748,7 +9774,7 @@ async function resumeRecitationSession(modeKey){
   try{
     followOnly = (modeKey === 'follow');
     localStorage.setItem('qc.followOnly', followOnly ? '1' : '0');
-    lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false; prevWordAudio = null;
+    lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false; prevWordAudio = null; followSkipVerseKey = null; followSkippedInAyah = 0;
     applyMutexUI(); applyFollowOnlyUI();
     showScreen('coach'); coachLoaded = false; coachLoading = true;
     try{ await loadSurah(data.surah, true); coachLoaded = true; }
