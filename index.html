@@ -8420,9 +8420,13 @@ let _ctxSuspendedByUs = false;
 
 async function ensureMicStream(){
   if(micStream){
-    const live = micStream.getAudioTracks().some(t => t.readyState === 'live');
-    if(live){
-      try{ micStream.getAudioTracks().forEach(t => { t.enabled = true; }); }catch(_){}
+    const tracks = micStream.getAudioTracks();
+    const live = tracks.some(t => t.readyState === 'live');
+    // iOS/WebKit may leave a track live but muted after a competing
+    // Web Speech audio-session interruption. A live+muted track is not usable.
+    const persistentlyMuted = tracks.length && tracks.every(t => t.readyState === 'live' && t.muted);
+    if(live && !persistentlyMuted){
+      try{ tracks.forEach(t => { t.enabled = true; }); }catch(_){}
       if(!rmsAnalyser.isRunning()){
         const ok = rmsAnalyser.start(micStream);
         if(!ok && !_rmsUnavailableNotified){
@@ -8432,6 +8436,10 @@ async function ensureMicStream(){
       }
       return micStream;
     }
+    if(persistentlyMuted){
+      // Force acquisition of a fresh track instead of returning the unusable one.
+      releaseMicStream();
+    } else if(!live){ releaseMicStream(); }
   }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return null;
   try{
@@ -8506,7 +8514,23 @@ function handleMicTrackIssue(kind){
       micTrackMutedTimer = null;
       if(!wantMic) return;
       const t = micStream && micStream.getAudioTracks()[0];
-      if(t && t.muted) reportMicProblem('track-muted');
+      if(t && t.muted){
+        // Bounded recovery: reacquire a new track, do not endlessly restart ASR.
+        (async()=>{
+          const old=micStream;
+          releaseMicStream();
+          const fresh=await ensureMicStream().catch(()=>null);
+          if(!wantMic){releaseMicStream();return;}
+          const nt=fresh&&fresh.getAudioTracks()[0];
+          if(nt && nt.readyState==='live' && !nt.muted){
+            micDiagnosedWorking=false;
+            showToast('🔄 Microphone audio track recovered.',2600);
+            startMicDiagnostic();
+          } else {
+            reportMicProblem('track-muted');
+          }
+        })();
+      }
     }, 1500);
     return;
   }
