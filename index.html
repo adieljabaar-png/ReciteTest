@@ -2816,7 +2816,9 @@ body.light-mode .share-arabic{color:#1a2233;}
 </style>
 
 <style id="coach-page-fix">
-#pageEl .mushaf-inner{direction:rtl;text-align:justify;text-align-last:center;}
+#pageEl{padding-left:clamp(20px,6vw,32px) !important;padding-right:clamp(20px,6vw,32px) !important;box-sizing:border-box;width:100%;}
+#screenCoach .toggles{width:100%;box-sizing:border-box;}
+#pageEl .mushaf-inner{direction:rtl;text-align:justify;text-align-last:center;padding-left:0;padding-right:0;box-sizing:border-box;}
 #pageEl .ayah{display:inline;padding:0;margin:0;background:transparent !important;box-shadow:none !important;border-radius:0;}
 #pageEl .ayah.bismillah-line{display:block;text-align:center;}
 #pageEl .ayah .translation{display:none !important;}
@@ -3188,7 +3190,7 @@ body.hide-text-mode.reveal-all-text #pageEl .w.current{color:inherit !important;
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">28 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">01:52</span>
+    <span class="pdr-item pdr-time" id="pdrTime">02:21</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -7779,7 +7781,7 @@ async function runMFAInference(w, seg, heard) {
 }
 
 
-/* ===== RECITE helpers — Tarteel-aligned: word-level only (missed / incorrect / extra / tashkeel). No letter-level, no Madd timing, no dropped-letter counting. ===== */
+/* ===== RECITE helpers — word-level: word-level only (missed / incorrect / extra / tashkeel). No letter-level, no Madd timing, no dropped-letter counting. ===== */
 let reciteWrongStreak = 0;
 function reciteDroppedCount(expected, heard){ const e=String(expected||'').replace(/[\u064B-\u0652\u0670\u0653\u0640]/g,''); const h=String(heard||'').replace(/[\u064B-\u0652\u0670\u0653\u0640]/g,''); const hc={}; for(const c of h) hc[c]=(hc[c]||0)+1; let miss=0; for(const c of e){ if(hc[c]>0) hc[c]--; else miss++; } return miss; }
 function reciteTashkeelMismatch(expectedRaw, heardRaw){ if(!expectedRaw||!heardRaw) return false; const diac=/[\u064B-\u0652\u0670\u0653]/g; const e=(String(expectedRaw).match(diac)||[]).join(''); const h=(String(heardRaw).match(diac)||[]).join(''); if(!h) return false; return h!==e; }
@@ -7914,7 +7916,7 @@ function gradeFollowFast(tokens, startIdx){
       used++; continue;
     }
 
-    /* 7. Hold state — Recite (Tarteel): 1st unmatched token = Extra (recorded, pointer stays); 2nd+ = Incorrect (red). Follow: no marking. */
+    /* 7. Hold state — Recite: 1st unmatched token = Extra (recorded, pointer stays); 2nd+ = Incorrect (red). Follow: no marking. */
     if(reciteMode){ reciteWrongStreak++; if(reciteWrongStreak>=3){ reciteMark(ptr,'red','skipped'); reciteRecordMistake(ptr,'Skipped',rawTok); try{ showToast('<b>'+escapeHtml(w.raw)+'</b><br>skipped — word not recognised.',4000); }catch(e){} advancePast(1); noteFollowProgress(); pendingHeard.length = 0; reciteWrongStreak = 0; used++; continue; } if(reciteWrongStreak===1){ reciteRecordMistake(ptr,'Extra',rawTok); noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } if(reciteRedPtr !== ptr){ reciteMark(ptr,'red','incorrect'); reciteRecordMistake(ptr,'Incorrect',rawTok); reciteRedPtr = ptr; errors++; try{ scheduleHUD(); }catch(e){} } if(recitePointer === 'stop'){ noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } }
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
@@ -9869,12 +9871,13 @@ async function resumeRecitationSession(modeKey){
   if(!data){ showToast('No saved <b>' + (modeKey === 'follow' ? 'Follow' : (modeKey === 'recite' ? 'Recite' : 'Tajweed')) + '</b> session yet.'); return; }
   suppressProgressSave = true;
   try{
-    followOnly = (modeKey !== 'tajweed'); reciteMode = (modeKey === 'recite'); try{ localStorage.setItem('qc.reciteMode', reciteMode ? '1' : '0'); }catch(e){}
+    followOnly = (modeKey !== 'tajweed'); reciteMode = (modeKey === 'recite'); tajweedSwapped = (modeKey === 'tajweed'); try{ localStorage.setItem('qc.reciteMode', reciteMode ? '1' : '0'); }catch(e){}
     localStorage.setItem('qc.followOnly', followOnly ? '1' : '0');
+    try{ localStorage.setItem('qc.tajweedSwapped', tajweedSwapped ? '1' : '0'); }catch(e){}
     lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false; prevWordAudio = null;
     applyMutexUI(); applyFollowOnlyUI();
     showScreen('coach'); coachLoaded = false; coachLoading = true;
-    try{ await loadSurah(data.surah, true); coachLoaded = true; }
+    try{ await loadSurah(data.surah, true); coachLoaded = true; if(modeKey === 'tajweed'){ try{ applyTajweedColorsToCoach(); }catch(_){} } else { try{ removeTajweedColorsFromCoach(); }catch(_){} } }
     finally { coachLoading = false; }
     mushafDirtyForViewer = false;
     const idx = findWordIndexInWords(data.surah, data.ayah, data.offset);
@@ -9884,7 +9887,7 @@ async function resumeRecitationSession(modeKey){
       const el = words[ptr] && words[ptr].el;
       if(el){ el.classList.add('located'); setTimeout(() => el.classList.remove('located'), 1300); }
     }
-    const label = (modeKey === 'follow') ? 'Follow' : 'Tajweed';
+    const label = (modeKey === 'follow') ? 'Follow' : (modeKey === 'recite' ? 'Recite' : 'Tajweed');
     addFeedback('📍 Resumed <b>' + label + '</b> session at ' + data.surah + ':' + data.ayah + '.');
     setStatus('Ready', 'idle', label + ' mode · tap Start reciting');
     applyMutexUI(); applyFollowOnlyUI();
@@ -14046,8 +14049,8 @@ window.addEventListener('contextmenu', function(event) {
 
 <!-- RECITE v2: integrated in host script -->
 <!-- RECITE v2 -->
-<style id="reciteTarteelOverrides">
-/* Recite (Tarteel-aligned): light fills, no underlining, light-blue pointer */
+<style id="reciteOverrides">
+/* Recite: light fills, no underlining, light-blue pointer */
 body.recite-mode .w.current, .w.recite-current, .w.current.recite-pointer{background:#bfdbfe !important;color:#1e3a8a !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;}
 .w.error{background:#fecaca !important;color:#7f1d1d !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;border-radius:6px;}
 .w.warned{background:#fef08a !important;color:#713f12 !important;text-decoration:none !important;box-shadow:none !important;animation:none !important;border-radius:6px;}
