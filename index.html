@@ -9748,13 +9748,27 @@ async function startReciting(){
   try{
     if(!followOnly){
       startTajweedOptionBEngine();
+      // Start live Arabic speech recognition as the transcript input in Tajweed mode.
+      // RMS/segment capture remains on the shared mic stream; browser ASR provides heard words.
+      speechRecognition = createSpeechRecognition();
+      if(!speechRecognition){
+        addFeedback('⚠️ Live speech recognition is unavailable in this browser. Acoustic monitoring may run, but words cannot be transcribed.', true);
+      } else {
+        speechRecognition.lang = SPEECH_LANG || 'ar-SA';
+        speechRecognition.continuous = true;
+        speechRecognition.interimResults = true;
+        speechRecognition.maxAlternatives = 5;
+        try{ speechStarting = true; speechRecognition.start(); }
+        catch(e){ speechStarting = false; console.warn('[Tajweed] ASR start failed:',e); addFeedback('⚠️ Tajweed microphone is active but speech recognition could not start. Check microphone/browser permissions and retry.', true); }
+      }
       recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
       if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
         _rmsUnavailableNotified = true;
         addFeedback('ℹ️ <b>Audio waveform analysis is unavailable.</b> Segment checks cannot be verified.', false, true);
       }
       setStatus('Listening', 'listening', contextLabel());
-      addFeedback('🎧 Listening — Tajweed Option B: recite one word at a time, pause briefly between words.');
+      addFeedback('🎧 Listening — recite clearly. Live Arabic recognition and acoustic Tajweed monitoring are active when supported.');
+      armSpeechKeepalive(); startMicDiagnostic();
       updateFsMicBtn(); syncFsButtons();
       return;
     }
