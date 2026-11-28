@@ -1,5 +1,22 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v2.5.0
+   Quran Recitation Coach — Service Worker  v2.5.1
+
+   What changed in 2.5.1:
+     • Tajweed Option B engine: one mic stream, RMS owns the mic,
+       no parallel webkitSpeechRecognition in Tajweed mode.
+       Segment -> MediaRecorder (audio/mp4) -> pluggable segment ASR
+       (window.TAJWEED_SEGMENT_ASR / window.TAJWEED_ASR_URL, 800 ms
+       timeout). No provider = acoustic-only, never a faked transcript.
+     • Continuous recitation: recursive splitOverlong (up to 6 rounds),
+       per-part pointer advance, dip-significance test, duration
+       fallback when no usable dip exists (gap 0).
+     • Start Mic gated on Rules ready; blocked when rules are loading
+       or annotations are incomplete.
+     • index_11.html added to pre-cache and REFRESH_MANIFEST.
+     • Cache version bumped so installed apps fetch the updated
+       index.html / index_11.html instead of serving the old cached copy.
+     • No change to user data: localStorage, IndexedDB and the
+       persistent 'qc-audio' cache are still never touched.
 
    What changed in 2.5.0:
      • Recite mode added (ASR only + Madd timer, green/red/yellow/brown marking).
@@ -41,7 +58,7 @@
 
 'use strict';
 
-const VERSION = '2.5.0';
+const VERSION = '2.5.1';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -69,6 +86,7 @@ const OWNED_PREFIXES = ['qc-shell-', 'qc-text-', 'qc-fonts-', 'qc-runtime-'];
 const SHELL_URLS = [
   './',
   './index.html',
+  './index_11.html',
   './index_3.html',
   './index_39.html',
   './index_recite.html',
@@ -202,6 +220,7 @@ self.addEventListener('message', event => {
         await Promise.all([
           cache.delete('./manifest.json', { ignoreSearch: true }),
           cache.delete('./index.html',    { ignoreSearch: true }),
+          cache.delete('./index_11.html', { ignoreSearch: true }),
           cache.delete('./index_3.html',  { ignoreSearch: true }),
           cache.delete('./read.html',     { ignoreSearch: true }),
           cache.delete('./salaah.html',   { ignoreSearch: true }),

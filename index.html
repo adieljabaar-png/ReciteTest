@@ -19,6 +19,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style><style>* { -webkit-text-size-adjust: 132% !important; }.w.warned{background:#facc15 !important;color:#111 !important;} .w.error{background:#ef4444 !important;color:#fff !important;} .setting-panel{display:none;margin:8px 0;padding:10px;border:1px solid #c9a227;border-radius:10px;font-size:13px;line-height:1.6;} .setting-panel.open{display:block;} .setting-panel label{display:block;margin:6px 0;} .setting-panel small{color:#888;display:block;}
 </style><style>
 @font-face {
@@ -3144,7 +3165,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">28 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">01:44</span>
+    <span class="pdr-item pdr-time" id="pdrTime">03:54</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -5407,6 +5428,7 @@ const rmsAnalyser = (function(){
   }
   return {
     start, stop, voiceDurationMs, hasSignal,
+    peekSamples: () => samples.slice(),
     samplesIn, segments, segmentEndingBefore, vowelRun, nasalRatio,
     onsetCentroid, meanCentroid,
     bandNoiseFloor: () => bandNoiseFloor,
@@ -9442,6 +9464,190 @@ function setMicButton(){
   syncFsButtons();
 }
 
+/* Tajweed Option B engine (iPhone): ONE mic stream, RMS owns mic, no parallel webkitSpeechRecognition in Tajweed mode. SegmentClosed -> segment ASR provider (window.TAJWEED_SEGMENT_ASR / window.TAJWEED_ASR_URL) -> synchronous check. No provider => acoustic-only, never a faked transcript. Triallled segmenter: 30ms frames, open 2 frames, close 4 frames (5 if Madd), merge <80ms, split overlong at lowest-RMS dip. */
+function createTajweedSegmenter(opts){
+  opts = opts || {};
+  const closeHoldBase = opts.closeHold || 4;
+  const mergeMs = opts.mergeMs || 80;
+  const minMs = opts.minMs || 120;
+  const maxMs = opts.maxMs || 4000;
+  let floor = opts.floor || 0.008;
+  let openThr = Math.max(0.008, floor * 3);
+  let closeThr = openThr * 0.5;
+  let state = 'sil', startT = 0, below = 0, openCount = 0;
+  let pending = null;
+  const history = [];
+  function setFloor(f){ if (f > 0){ floor = f; openThr = Math.max(0.008, floor * 3); closeThr = openThr * 0.5; } }
+  function expectedRules(){ return (typeof tajweedOptionBExpectedRules === 'function') ? tajweedOptionBExpectedRules() : null; }
+  function feed(s){
+    const out = [];
+    history.push(s); if (history.length > 400) history.shift();
+    const rules = expectedRules();
+    const closeHold = (rules && rules.madd) ? 5 : closeHoldBase;
+    if (state === 'sil'){
+      if (pending && (s.t - pending.end) > mergeMs){
+        const seg = pending; pending = null;
+        if ((seg.end - seg.start) >= minMs) out.push({ type: 'close', segment: finish(seg) });
+      }
+      if (s.rms > openThr){
+        openCount++;
+        if (openCount >= 2){
+          if (pending && (s.t - pending.end) <= mergeMs){ startT = pending.start; }
+          else { startT = s.t; }
+          pending = null; state = 'speech'; below = 0; openCount = 0;
+          out.push({ type: 'open', t: startT });
+        }
+      } else openCount = 0;
+    } else {
+      if (s.rms < closeThr){
+        below++;
+        if (below >= closeHold){ pending = { start: startT, end: s.t - (below - 1) * 30 }; state = 'sil'; below = 0; openCount = 0; }
+      } else below = 0;
+      if ((s.t - startT) >= maxMs){ pending = { start: startT, end: s.t }; state = 'sil'; below = 0; }
+    }
+    return out;
+  }
+  function finish(seg){ return { start: seg.start, end: seg.end, durationMs: Math.max(0, seg.end - seg.start), peakRms: 0 }; }
+  function flush(){
+    if (!pending) return [];
+    const seg = pending; pending = null;
+    return ((seg.end - seg.start) >= minMs) ? [{ type: 'close', segment: finish(seg) }] : [];
+  }
+  function splitOverlong(seg, expectedMs){
+    if (!expectedMs) return [seg];
+    let parts = [seg];
+    for (let round = 0; round < 6; round++){
+      let didSplit = false;
+      const next = [];
+      for (let k = 0; k < parts.length; k++){
+        const part = parts[k];
+        if ((part.end - part.start) <= expectedMs * 1.8 + 150){ next.push(part); continue; }
+        const list = history.filter(h => h.t >= part.start + (part.end - part.start) * 0.3 && h.t <= part.start + (part.end - part.start) * 0.7);
+        if (!list.length){ next.push(part); continue; }
+        let dip = list[0]; for (let i = 1; i < list.length; i++) if (list[i].rms < dip.rms) dip = list[i];
+        const _partSamples = history.filter(h => h.t >= part.start && h.t <= part.end);
+        const _sorted = _partSamples.map(h => h.rms).sort((a, b) => a - b);
+        const _median = _sorted.length ? _sorted[Math.floor(_sorted.length / 2)] : 0;
+        let dipT = (dip.rms < _median * 0.6) ? dip.t : -1;
+        if (dipT < 0 || dipT <= part.start + 60 || dipT >= part.end - 60){
+          dipT = part.start + expectedMs;
+          if (dipT <= part.start + 60 || dipT >= part.end - 60){ next.push(part); continue; }
+        }
+        next.push({ start: part.start, end: dipT, durationMs: dipT - part.start });
+        next.push({ start: dipT, end: part.end, durationMs: part.end - dipT });
+        didSplit = true;
+      }
+      parts = next;
+      if (!didSplit) break;
+    }
+    return parts;
+  }
+  return { feed, flush, setFloor, splitOverlong, get openThr(){ return openThr; } };
+}
+let tajweedOptionBEngine = null;
+function tajweedOptionBExpectedRules(){
+  try{ const w = (typeof words !== 'undefined' && typeof ptr !== 'undefined') ? words[ptr] : null; return (w && w.tjRules) ? w.tjRules : null; }catch(_){ return null; }
+}
+function startTajweedOptionBEngine(){
+  if (tajweedOptionBEngine) return tajweedOptionBEngine;
+  const eng = { running: false, timer: null, seg: null, lastT: 0, recorder: null, recChunks: [], log: [], pendingWord: -1 };
+  eng.seg = createTajweedSegmenter({});
+  eng.poll = function(){
+    if (!eng.running) return;
+    try{
+      const samples = rmsAnalyser.peekSamples();
+      if (samples.length >= 60){
+        const recent = samples.slice(-70).map(s => s.rms).sort((a, b) => a - b);
+        eng.seg.setFloor(Math.max(0.002, Math.min(0.01, recent[Math.floor(recent.length * 0.2)] || 0.002)));
+      }
+      for (let i = 0; i < samples.length; i++){
+        const s = samples[i];
+        if (s.t <= eng.lastT) continue;
+        eng.lastT = s.t;
+        const evs = eng.seg.feed(s);
+        for (let j = 0; j < evs.length; j++){ if (evs[j].type === 'open') eng.onOpen(evs[j]); else eng.onClose(evs[j].segment); }
+      }
+    }catch(_){}
+  };
+  eng.onOpen = function(ev){
+    eng.pendingWord = (typeof ptr !== 'undefined') ? ptr : -1;
+    eng.recChunks = [];
+    try{
+      if (typeof MediaRecorder !== 'undefined' && typeof micStream !== 'undefined' && micStream){
+        const mime = (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported('audio/mp4')) ? 'audio/mp4' : '';
+        eng.recorder = mime ? new MediaRecorder(micStream, { mimeType: mime }) : new MediaRecorder(micStream);
+        eng.recorder.ondataavailable = function(e){ if (e.data && e.data.size) eng.recChunks.push(e.data); };
+        eng.recorder.start();
+      }
+    }catch(_){ eng.recorder = null; }
+  };
+  eng.onClose = function(segment){
+    const rec = eng.recorder; eng.recorder = null;
+    const idx = eng.pendingWord;
+    const done = function(blob){ eng.checkSegment(idx, segment, blob); };
+    if (rec){
+      try{
+        rec.onstop = function(){ done(eng.recChunks.length ? new Blob(eng.recChunks, { type: rec.mimeType || 'audio/mp4' }) : null); };
+        if (rec.state !== 'inactive') rec.stop(); else done(null);
+      }catch(_){ done(null); }
+    } else done(null);
+  };
+  eng.checkSegment = async function(idx, segment, blob){
+    if (idx < 0 || !words[idx]) return;
+    const w = words[idx];
+    const t0 = performance.now();
+    let expectedMs = null;
+    try{ const T = (typeof getBaseMsPerLetter === 'function' ? getBaseMsPerLetter() : null) || 110; expectedMs = Math.max(55, (w.norm ? w.norm.length : 0) * T); }catch(_){}
+    const parts = eng.seg.splitOverlong(segment, expectedMs);
+    for (let pi = 0; pi < parts.length; pi++){
+      const part = parts[pi];
+      const wi = idx + pi;
+      const word = words[wi]; if (!word) continue;
+      if (word.el) word.el.classList.add('tj-checking');
+      let heard = null, asrSource = 'none';
+      try{
+        if (typeof window.TAJWEED_SEGMENT_ASR === 'function' && blob){
+          const r = await Promise.race([Promise.resolve(window.TAJWEED_SEGMENT_ASR(blob, word)), new Promise(res => setTimeout(() => res(null), 800))]);
+          if (r){ heard = (typeof r === 'string') ? r : (r.text || null); asrSource = 'provider'; }
+        } else if (window.TAJWEED_ASR_URL && blob){
+          const fd = new FormData(); fd.append('audio', blob, 'segment.m4a'); fd.append('expected', word.norm || '');
+          const resp = await Promise.race([fetch(window.TAJWEED_ASR_URL, { method: 'POST', body: fd }), new Promise((_, rej) => setTimeout(() => rej(new Error('asr-timeout')), 800))]);
+          const j = await resp.json(); if (j && j.text){ heard = j.text; asrSource = 'url'; }
+        }
+      }catch(_){ heard = null; asrSource = 'error'; }
+      try{ const Tp = (typeof getBaseMsPerLetter === 'function' ? getBaseMsPerLetter() : null) || 110; expectedMs = Math.max(55, (word.norm ? word.norm.length : 0) * Tp); }catch(_){}
+      const segForCheck = { start: part.start, end: part.end, durationMs: part.durationMs };
+      word.audio = segForCheck;
+      try{ if (typeof runStrict1Checks === 'function') runStrict1Checks(wi, heard || '', {}); }catch(_){}
+      const warned = !!(word.el && word.el.classList.contains('warned'));
+      if (word.el) word.el.classList.remove('tj-checking');
+      if (typeof ptr !== 'undefined' && ptr === wi && typeof finished !== 'undefined' && !finished){
+        try{ if (typeof commitCorrect === 'function') commitCorrect(wi, segForCheck); if (typeof advancePast === 'function') advancePast(1); }catch(_){}
+      }
+      eng.log.push({ word: word.norm || '', heard: heard || null, asr: asrSource, segMs: Math.round(part.durationMs), expectedMs: Math.round(expectedMs || 0), warned: warned, latencyMs: Math.round(performance.now() - t0), t: Date.now() });
+      if (eng.log.length > 200) eng.log.shift();
+    }
+    try{ if (typeof updateTajweedStatusChip === 'function') updateTajweedStatusChip(); }catch(_){}
+  };
+  eng.start = function(){ if (eng.running) return; eng.running = true; eng.lastT = 0; eng.timer = setInterval(eng.poll, 30); };
+  eng.stop = function(){
+    eng.running = false;
+    if (eng.timer){ clearInterval(eng.timer); eng.timer = null; }
+    try{ if (eng.recorder && eng.recorder.state !== 'inactive') eng.recorder.stop(); }catch(_){}
+    eng.recorder = null;
+    try{ const evs = eng.seg.flush(); for (let i = 0; i < evs.length; i++) eng.onClose(evs[i].segment); }catch(_){}
+  };
+  tajweedOptionBEngine = eng;
+  eng.start();
+  return eng;
+}
+function stopTajweedOptionBEngine(){ if (!tajweedOptionBEngine) return; try{ tajweedOptionBEngine.stop(); }catch(_){} tajweedOptionBEngine = null; }
+function tajweedOptionBTestLog(){
+  const log = tajweedOptionBEngine ? tajweedOptionBEngine.log : [];
+  const lat = log.map(r => r.latencyMs);
+  return { n: log.length, medianLatencyMs: lat.length ? lat.slice().sort((a,b)=>a-b)[Math.floor(lat.length/2)] : 0, maxLatencyMs: lat.length ? Math.max.apply(null, lat) : 0, warned: log.filter(r => r.warned).length, log: log.slice(-20) };
+}
+
 async function startReciting(){
   unlockAudio();
   const _myTok = micSession;
@@ -9450,7 +9656,19 @@ async function startReciting(){
     if(_myTok !== micSession) return;
     if(!words.length) return;
   }
-  if(!SPEECH_SUPPORTED){ addFeedback('⚠️ Browser speech recognition is not available here. Try <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> on a device with internet.', true); setStatus('Speech not supported', 'error'); return; }
+  if(!followOnly && mode === 'surah'){
+    if(!coachTajweedReady){
+      addFeedback('⏳ Tajweed rules are still loading — wait for <b>Rules ready</b> before tapping Start.', true);
+      setStatus('Rules loading', 'loading', 'Wait for Rules ready');
+      return;
+    }
+    if(coachTajweedDegraded){
+      addFeedback('⚠️ Tajweed annotations are incomplete — Start is blocked until rules load fully. Reload the surah.', true);
+      setStatus('Rules unavailable', 'error', 'Reload the surah');
+      return;
+    }
+  }
+  if(!SPEECH_SUPPORTED && followOnly){ addFeedback('⚠️ Browser speech recognition is not available here. Try <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> on a device with internet.', true); setStatus('Speech not supported', 'error'); return; }
   if(!navigator.onLine){ speechServiceNotified = false; notifySpeechServiceUnreachable(); return; }
 
     if(followOnly){
@@ -9502,6 +9720,18 @@ async function startReciting(){
   try{ bumpStreak(); }catch(_){}
   resetSpeechPipeline();
   try{
+    if(!followOnly){
+      startTajweedOptionBEngine();
+      recRunning = true; lastResultAt = performance.now(); sessionHadResult = false;
+      if(!rmsAnalyser.isRunning() && !_rmsUnavailableNotified){
+        _rmsUnavailableNotified = true;
+        addFeedback('ℹ️ <b>Audio waveform analysis is unavailable.</b> Segment checks cannot be verified.', false, true);
+      }
+      setStatus('Listening', 'listening', contextLabel());
+      addFeedback('🎧 Listening — Tajweed Option B: recite one word at a time, pause briefly between words.');
+      updateFsMicBtn(); syncFsButtons();
+      return;
+    }
     speechRecognition = createSpeechRecognition();
     if(!speechRecognition){ addFeedback('⚠️ Could not create speech recognizer.', true); wantMic = false; releaseMicStream(); setMicButton(); return; }
     speechRecognition.maxAlternatives = followOnly ? 3 : 6;
@@ -9557,7 +9787,7 @@ function stopReciting(silent){
   cancelFollowPinTimer();
   stopMicDiagnostic();
   resetSpeechPipeline();
-  abortCoachSpeechRecognition();
+  abortCoachSpeechRecognition(); stopTajweedOptionBEngine();
 
   pendingJumpTarget = -1;
   _phrasesRetryDone = false;
@@ -13948,7 +14178,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -14024,4 +14254,4 @@ body.recite-mode .w.current, .w.recite-current, .w.current.recite-pointer{backgr
 .mode-pill[data-mode="follow"].active, .mode-pill[data-mode="recite"].active, .mode-pill[data-mode="tajweed"].active{background:#d4af37 !important;color:#1a1400 !important;font-weight:800 !important;border:2px solid #8a6d00 !important;box-shadow:0 4px 14px rgba(0,0,0,.35) !important;}
 .mode-pill:not(.active){opacity:.75;}
 </style>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
