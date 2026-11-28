@@ -1,10 +1,80 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v62 — Version bump to invalidate the v61 shell so clients pick
-         up the current index.html, which now adds a small *live
-         Tajweed readiness chip* (#tajweedStatusChip) to the coach
-         toggles row. No caching-strategy change from v61.
+   v64 — Bugfix-only release matching the current index.html,
+         which contains:
+           • THE MADD / GHUNNAH-LENGTH TIMING FIX (per-word
+             attribution): runStrict1Checks() now correctly
+             targets `w` (the current word's tjRules) against
+             `now - lastDirectCommitAt` — the window that
+             actually measures `w`'s utterance duration — so a
+             short madd is now caught. Previously it compared
+             `prevW.tjRules` against a window that measured
+             `w`'s duration, letting short madds pass silently.
+           • RETARGETED isEndOfAyah to `!nextW || nextW.verse
+             !== w.verse` (w is the ayah's LAST word), so the
+             end-of-ayah RMS path fires for the word that
+             actually carries the madd.
+           • RAISED END_OF_AYAH_MADD_MIN_MS 150 → 250 ms.
+           • SWAPPED #tajweedStatusChip / #tajweedNoiseChip
+             so "Rules ready" renders first.
+           • REMOVED dead code: waitForTajweedReady(),
+             adaptiveLookahead, batchTimingCtx.batchId, and
+             the unused `isFinal` parameter on grade() /
+             gradeFull().
+           • ADDED `ctx.startTime > 0` guard on the batch RMS
+             roll-up (fixes a false-negative on the first
+             batch of a session where startTime was 0 and the
+             RMS window started at epoch).
+           • ADDED `!important` to the `.w.<state> [class^="tj-"]`
+             CSS rule so recitation state now visually dominates
+             the child Tajweed-coloured spans.
+         No API, cache-name, or route-handling change in index.html.
+
+         SW-SIDE CHANGES IN v64:
+           • audioFromDownloadCache() now respects
+             req.cache === 'no-store' || 'reload'. This makes
+             the app's playTranslationWithHealing() actually
+             able to refresh a broken cached audio file — the
+             heal fetch fires with `cache: 'no-store'` +
+             `?_heal=<ts>`, and previously the SW served the
+             same corrupt bytes from qc-audio, so healing was
+             a no-op. Now a bypassed fetch goes to network,
+             and the app re-puts the fresh bytes under the
+             clean URL.
+           • audioFromDownloadCache() now responds with a real
+             206 Partial Content + Content-Range header when
+             the request carries a Range header. iOS Safari
+             is strict about receiving a genuine 206 for
+             <audio> files; the previous behaviour returned
+             200 with the full body, which works on Chrome /
+             Firefox but produced silent playback failures on
+             Safari. Yields huge reliability wins for cached
+             offline audio playback on iPhone / iPad.
+           • networkFresh() for Tajweed annotations now caches
+             successful responses in TEXT_CACHE and falls back
+             to them on network failure. Previously it was a
+             hard networkFresh with no fallback — offline users
+             got coachTajweedDegraded = true and lost all four
+             Tajweed rule checks for the session. Now:
+               – Online: fresh data, re-cached
+               – Offline with cache: last-seen data (Tajweed
+                 colouring + rule checks still active)
+               – Offline without cache: 504 (degraded, same
+                 as v63)
+             Freshness guarantee for online users is unchanged.
+           • notificationclick() now only calls
+             client.navigate(target) when the notification
+             carries a specific, non-default target URL.
+             Prayer-time notifications fire with no data.url
+             (defaults to './'), so tapping one used to
+             navigate an already-focused app back to Home —
+             killing any active recitation session mid-flow.
+             Now default-tap just focuses the window; only
+             notifications that explicitly carry a specific
+             path still navigate. App progress (saved every
+             600 ms via scheduleSaveProgress) is preserved
+             either way, but current screen is not lost.
 
    WHAT IS ACTUALLY SHIPPED IN THE CURRENT index.html
    (this is the source of truth this SW must match):
@@ -43,56 +113,11 @@
          Pointer pins on the 3rd unrecognised word and stops the
          mic after 7 s if it is still not recited.
      • Recitation modes permanently locked to STRICT matching.
-         Match selector removed from UI (applyMutexUI() hides it).
      • Tajweed mode — rule-aware checks covering FOUR rules:
          madd duration (normal / permissible / necessary),
          ghunnah nasal presence (ghunnah, ikhfa, idghaam, iqlab),
          ghunnah length (2 harakat via voiceDurationMs),
          silent-letter not pronounced (positional strict1SilentOk).
-       END-OF-AYAH MADD — SHIPPED IN v61, UNCHANGED IN v62:
-         End-of-ayah madds (normal / permissible / necessary) now
-         use a *single fixed* minimum of `END_OF_AYAH_MADD_MIN_MS =
-         150 ms` of voiced-RMS duration, and are NOT pace-scaled.
-         Rationale: at the end of an ayah the ASR commit gap is
-         dominated by the waqf pause, so the coach switches to
-         `rmsAnalyser.voiceDurationMs(lastDirectCommitAt, now)`,
-         which only counts samples above the calibrated noise
-         floor. That measurement is a clean voiced-time value, so
-         a single absolute floor is the correct comparison — a
-         normal 2-count madd easily exceeds 150 ms of voice, while
-         a skipped madd will not. Mid-ayah madds keep the existing
-         pace-scaled `maddRequiredMs()` path (ASR commit gap), and
-         the ASR-gap fallback still applies at the end of an ayah
-         when RMS samples are unavailable. The batch-timing path
-         is untouched because it only accumulates within a single
-         ayah (a batch that straddles a waqf is skipped).
-         The coach Info modal in index.html states the fixed
-         150 ms end-of-ayah minimum in the madd bullet.
-       TAJWEED READINESS CHIP — NEW IN v62:
-         A small #tajweedStatusChip sits in the coach .toggles
-         row, immediately after #tajweedNoiseChip. Three states
-         driven by updateTajweedStatusChip(), which reads only
-         coachTajweedReady / coachTajweedDegraded / followOnly:
-           – "Loading rules…"  (muted, pulsing dot)   — while
-             Quran.com annotations are being fetched.
-           – "Rules ready"     (green)                — once the
-             annotations have been aligned to the rendered words,
-             i.e. the moment runStrict1Checks() actually begins
-             enforcing the four Tajweed rules.
-           – "Rules unavailable" (amber)              — if the
-             annotation fetch threw; rule checks are disabled
-             for the session (pill text becomes
-             "⚠️ Tajweed (degraded)").
-         The chip is HIDDEN in Follow mode (Tajweed checks do
-         not apply there). Tapping it fires a toast that explains
-         the current state. It is updated from every state
-         transition: applyMutexUI(), applyTajweedColorsToCoach()
-         (3 call sites), removeTajweedColorsFromCoach(), and
-         loadSurah(). A new bullet was added to the coach Info
-         modal describing the chip.
-       The ham-wasl-silence check and its hasSilenceGap() helper
-       referenced in the v56 notes are NOT present in index.html
-       and have been removed from this comment header accordingly.
      • Two English text translations selectable in the UI:
          Abdullah Yusuf Ali · Saheeh International
        When "Play translation audio" is ticked, the displayed
@@ -100,7 +125,7 @@
      • 20 Qari reciters (RECITER_ORDER).
      • Multi-class rule detection (ghunnah + silent regexes).
      • Pace-scaled madd / ghunnah thresholds (mid-ayah only —
-       end-of-ayah madd uses the fixed 150 ms RMS minimum).
+       end-of-ayah madd uses the fixed 250 ms RMS minimum).
      • Adaptive MIN_RMS recalibration on the RMS analyser.
      • Split-token recombination, attempt-gated error marking,
        truncated-prefix honouring, silent-skips-reset-streak,
@@ -137,9 +162,8 @@
      1. /robots.txt  — bypassed below so it is never stale.
      2. index.html   — meta tags + pre-body blocker + overlay.
 
-   PRESERVED UNCHANGED FROM v61–v40 (functional strategies):
+   PRESERVED UNCHANGED FROM v63–v40 (functional strategies):
      - Google Fonts pre-cache bounded to 20 s at install.
-     - Tajweed annotations served networkFresh (bypass HTTP cache).
      - everyayah.com audio served from qc-audio download cache.
      - Quran APIs network-first with TEXT_CACHE fallback.
      - Manifest fetched with 2 s network budget, cached fallback,
@@ -152,17 +176,17 @@
        /robots.txt also bypassed so AI policy is always fresh.
      - Push notifications with inline SVG icon.
 
-   NOTE ON DEPLOY: after shipping v62, fully close the PWA (or
+   NOTE ON DEPLOY: after shipping v64, fully close the PWA (or
    close every tab showing the site) and reopen it. The browser
    fetches sw.js on navigation; the new worker's install calls
    skipWaiting() and its activate calls clients.claim(), so the
-   next open runs the new code path. Caches qc-*-v61 and older
+   next open runs the new code path. Caches qc-*-v63 and older
    are deleted on activate; qc-audio (downloads) is preserved.
    ============================================================ */
 
 'use strict';
 
-const VERSION = 'v62';
+const VERSION = 'v64';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
@@ -195,11 +219,7 @@ const FONT_CSS_URL = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;70
 const FONT_FETCH_TIMEOUT_MS  = 8000;
 const FONTS_PREFETCH_TOTAL_MS = 20000;
 
-/* Inline SVG icon used by push notifications. The deploy ships no
-   icon-192.png / badge-72.png raster files — the app itself uses
-   SVG data URIs in <link rel="icon"> / <link rel="apple-touch-icon">.
-   Reusing the same artwork here means the OS notification banner
-   actually shows the Recite logo instead of a broken-image marker. */
+/* Inline SVG icon used by push notifications. */
 const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'>" +
     "<rect width='180' height='180' rx='40' fill='#000000'/>" +
@@ -214,11 +234,11 @@ const NOTIFICATION_ICON = "data:image/svg+xml," + encodeURIComponent(
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     // 1. Shell — awaited (mandatory for offline open). The
-    //    `cache:'reload'` marker below guarantees the v62 worker
-    //    stores the *new* index.html that now includes the live
-    //    Tajweed readiness chip (#tajweedStatusChip) in the coach
-    //    toggles row, while keeping the AI-blocker script, meta
-    //    tags and hidden policy modal intact in source.
+    //    `cache:'reload'` marker below guarantees the v64 worker
+    //    stores the *new* index.html containing the madd/ghunnah
+    //    timing fix, CSS !important change, and dead-code cleanup,
+    //    while keeping the AI-blocker, meta tags and hidden policy
+    //    modal intact in source.
     try{
       const cache = await caches.open(SHELL_CACHE);
       await Promise.all(SHELL_URLS.map(async url => {
@@ -329,7 +349,20 @@ self.addEventListener('notificationclick', event => {
     const list = await clients.matchAll({ type: 'window', includeUncontrolled: true });
     for(const c of list){
       if(c.url.startsWith(self.location.origin) && 'focus' in c){
-        try{ c.navigate(target); }catch(_){}
+        // Only navigate for SPECIFIC targets (e.g. "open ayah 2:255").
+        // Prayer-time notifications fire with no data.url → target
+        // defaults to './'. Navigating a focused app to Home on a
+        // prayer-alert tap would kill any active recitation session
+        // mid-flow. So for the default case, just focus — the app is
+        // already where the user wanted to be.
+        const isSpecific =
+          target &&
+          target !== './' &&
+          target !== '/' &&
+          target !== self.registration.scope;
+        if(isSpecific){
+          try{ await c.navigate(target); }catch(_){}
+        }
         return c.focus();
       }
     }
@@ -366,17 +399,21 @@ self.addEventListener('fetch', event => {
     if(url.pathname === '/robots.txt')             return;
   }
 
-  // Tajweed annotation requests — forced fresh, never cached.
-  // The client always receives live Tajweed data, so a stale
-  // TEXT_CACHE or HTTP-cached response can never silently hide
-  // newly-shipped colour fields.
+  // Tajweed annotation requests — always try the network first so
+  // newly-shipped colour fields are never hidden behind a stale
+  // cache. networkFresh() caches successful responses for offline
+  // fallback (see its body); if the network fails it will return
+  // the last-seen cached version instead of a hard 504.
   if(url.hostname === HOST_QURAN_COM && url.search.includes('text_uthmani_tajweed')){
     event.respondWith(networkFresh(req));
     return;
   }
 
   // Audio from everyayah.com — served from the persistent download
-  // cache first (works fully offline), network second.
+  // cache first (works fully offline), network second. Respects
+  // req.cache ('no-store' / 'reload') so the app's healing path can
+  // actually fetch fresh bytes, and answers Range requests with a
+  // proper 206 for iOS Safari.
   if(url.hostname === HOST_EVERYAYAH){
     event.respondWith(audioFromDownloadCache(req));
     return;
@@ -417,21 +454,119 @@ self.addEventListener('fetch', event => {
 });
 
 /* ============================================================
-   Fetch strategies
+   Audio — persistent download cache with Range + bypass support
    ============================================================ */
 
 async function audioFromDownloadCache(req){
+  // Respect explicit no-store/reload from the app. This is what makes
+  // playTranslationWithHealing() actually able to refresh a broken
+  // cached audio file — the heal fetch fires with `cache: 'no-store'`
+  // + `?_heal=<ts>`, and without this guard the SW would keep serving
+  // the same corrupt bytes from qc-audio, defeating the heal entirely.
+  const bypass = req.cache === 'no-store' || req.cache === 'reload';
+
+  if(!bypass){
+    try{
+      const cache = await caches.open(AUDIO_CACHE);
+      const hit = await cache.match(req, { ignoreSearch: true, ignoreVary: true });
+      if(hit){
+        // <audio> sends `Range: bytes=0-` for media files. Serving the
+        // full cached response with a 200 works on Chrome / Firefox,
+        // but iOS Safari is strict about receiving a real 206 with a
+        // valid Content-Range header. Return a proper 206 slice when
+        // the client asked for a range.
+        const rangeHeader = req.headers.get('range');
+        if(rangeHeader) return serveRangeFromCached(hit, rangeHeader);
+        return hit;
+      }
+    }catch(_){}
+  }
+
   try{
-    const cache = await caches.open(AUDIO_CACHE);
-    const hit = await cache.match(req, { ignoreSearch: true, ignoreVary: true });
-    if(hit) return hit;
-  }catch(_){}
-  try{
+    // Preserve the request's own cache mode (`no-store` / `reload` /
+    // `default`) — passing the original Request object to fetch() is
+    // sufficient, no need to re-wrap.
     return await fetch(req);
   }catch(_){
+    // Network failed. If we bypassed the cache earlier, try it now as
+    // a last resort — a slightly-stale file beats a hard 504 when the
+    // user is offline mid-playback.
+    if(bypass){
+      try{
+        const cache = await caches.open(AUDIO_CACHE);
+        const hit = await cache.match(req, { ignoreSearch: true, ignoreVary: true });
+        if(hit) return hit;
+      }catch(_){}
+    }
     return new Response('', { status: 504, statusText: 'Gateway Timeout' });
   }
 }
+
+async function serveRangeFromCached(response, rangeHeader){
+  let blob;
+  try{ blob = await response.blob(); }
+  catch(_){ return response; }
+
+  const size = blob.size;
+  if(!size) return response;
+
+  // Parse the standard byte-range forms: bytes=0-, bytes=N-, bytes=0-N,
+  // bytes=-N (suffix range). Unparseable → return full 200.
+  const m = /^bytes=(\d*)-(\d*)$/.exec((rangeHeader || '').trim());
+  if(!m){
+    return new Response(blob, {
+      status: 200,
+      headers: {
+        'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
+        'Accept-Ranges': 'bytes',
+        'Content-Length': String(size)
+      }
+    });
+  }
+
+  let start, end;
+  if(m[1] === '' && m[2] !== ''){
+    // Suffix range: bytes=-N → last N bytes
+    const suffix = parseInt(m[2], 10);
+    if(!isFinite(suffix) || suffix <= 0) return response;
+    start = Math.max(0, size - suffix);
+    end   = size - 1;
+  } else if(m[1] !== '' && m[2] === ''){
+    // Open range: bytes=N- → from N to end
+    start = parseInt(m[1], 10);
+    end   = size - 1;
+  } else {
+    start = parseInt(m[1], 10);
+    end   = parseInt(m[2], 10);
+  }
+
+  if(!isFinite(start) || start < 0) start = 0;
+  if(!isFinite(end)   || end >= size) end = size - 1;
+
+  if(start > end){
+    return new Response('', {
+      status: 416,
+      statusText: 'Range Not Satisfiable',
+      headers: { 'Content-Range': 'bytes */' + size }
+    });
+  }
+
+  const slice = blob.slice(start, end + 1, 'audio/mpeg');
+  return new Response(slice, {
+    status: 206,
+    statusText: 'Partial Content',
+    headers: {
+      'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
+      'Content-Range': 'bytes ' + start + '-' + end + '/' + size,
+      'Content-Length': String(end - start + 1),
+      'Accept-Ranges': 'bytes'
+    }
+  });
+}
+
+/* ============================================================
+   Fetch strategies
+   ============================================================ */
 
 async function cacheFirst(req, cacheName, maxEntries){
   const cache = await caches.open(cacheName);
@@ -472,17 +607,35 @@ async function networkFirst(req, cacheName, maxEntries){
   }
 }
 
-/* networkFresh — always goes to the network, bypasses the browser's
-   HTTP cache entirely, and never falls back to any cache. Used for
-   Tajweed annotation requests where freshness is more important than
-   offline availability (Tajweed colouring requires network anyway). */
+/* networkFresh — always goes to the network first (bypassing the
+   browser HTTP cache entirely). Unlike v63, it now also caches
+   successful responses in TEXT_CACHE and falls back to them when
+   the network fails. This enables offline Tajweed colouring + rule
+   checks for surahs the user has already opened online, while
+   preserving the "always fresh when online" guarantee. */
 async function networkFresh(req){
   try{
     const freshReq = new Request(req, { cache: 'no-store' });
     const res = await fetch(freshReq);
-    if(res) return res;
-    return new Response('', { status: 504, statusText: 'Gateway Timeout' });
+    if(res && res.ok){
+      // Cache the successful response for offline fallback
+      try{
+        const cache = await caches.open(TEXT_CACHE);
+        await cache.put(req, res.clone());
+        // Cap the cache size — Tajweed surahs count towards the same
+        // quota as other Quran API responses.
+        trimCache(TEXT_CACHE, TEXT_CACHE_MAX).catch(() => {});
+      }catch(_){}
+      return res;
+    }
+    throw new Error('bad response');
   }catch(_){
+    // Offline / network failure — try the last-seen cached version
+    try{
+      const cache = await caches.open(TEXT_CACHE);
+      const hit = await cache.match(req, { ignoreSearch: true });
+      if(hit) return hit;
+    }catch(_){}
     return new Response('', { status: 504, statusText: 'Gateway Timeout' });
   }
 }
@@ -582,13 +735,6 @@ async function trimCache(cacheName, maxEntries){
 
 /* ============================================================
    Google Fonts pre-cache (bounded, best-effort)
-   ============================================================
-   Fetches the exact stylesheet URL used by index.html, stores it
-   in FONTS_CACHE, then parses every `url(...)` entry it contains
-   and fetches each font file in parallel. Any individual failure
-   is ignored so one slow font file can never abort the whole
-   pre-cache. Total operation is wrapped in a 20 s outer timeout
-   by the caller.
    ============================================================ */
 
 async function fetchWithTimeout(url, ms){
