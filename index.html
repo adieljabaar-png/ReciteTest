@@ -5208,13 +5208,13 @@ const rmsAnalyser = (function(){
   const bandNoiseFloor = new Float32Array(6);
   let _calibrated = false;
   let running = false, ctx = null, ctxOwned = false, source = null, analyser = null,
-      timeBuf = null, freqBuf = null, timer = null;
+      timeBuf = null, freqBuf = null, timer = null, silentGain = null;
   let streamRef=null, lastSampleAt=0, recoveryBusy=false, recoveryCount=0;
   const MAX_SAMPLE_STALL_MS=1800;
-  function teardownNodes(){ if(source){try{source.disconnect();}catch(_){}source=null;} if(analyser){try{analyser.disconnect();}catch(_){}analyser=null;} timeBuf=null;freqBuf=null; }
+  function teardownNodes(){ if(source){try{source.disconnect();}catch(_){}source=null;} if(analyser){try{analyser.disconnect();}catch(_){}analyser=null;} if(silentGain){try{silentGain.disconnect();}catch(_){}silentGain=null;} timeBuf=null;freqBuf=null; }
   function rebuildNodes(){
     if(!ctx||!streamRef||ctx.state==='closed')return false;
-    try{teardownNodes();source=ctx.createMediaStreamSource(streamRef);analyser=ctx.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=0;source.connect(analyser);timeBuf=new Float32Array(analyser.fftSize);freqBuf=new Float32Array(analyser.frequencyBinCount);lastSampleAt=performance.now();return true;}catch(_){teardownNodes();return false;}
+    try{teardownNodes();source=ctx.createMediaStreamSource(streamRef);analyser=ctx.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=0;source.connect(analyser);silentGain=ctx.createGain();silentGain.gain.value=0;analyser.connect(silentGain);silentGain.connect(ctx.destination);timeBuf=new Float32Array(analyser.fftSize);freqBuf=new Float32Array(analyser.frequencyBinCount);lastSampleAt=performance.now();return true;}catch(_){teardownNodes();return false;}
   }
   async function recover(){
     if(!running||recoveryBusy||!streamRef)return false;recoveryBusy=true;
@@ -5309,6 +5309,7 @@ const rmsAnalyser = (function(){
       const harm = computeHarmonicity(timeBuf);
       samples.push({ t: now, rms, bands: b.bands, centroid: b.centroid, flatness: b.flatness, harmonicity: harm });
       lastSampleAt=now;
+      if(samples.length===4){try{updateTajweedStatusChip();}catch(_){}}
       const cutoff = now - MAX_AGE_MS;
       while (samples.length && samples[0].t < cutoff) samples.shift();
       calibrateMinRms();
@@ -5317,7 +5318,7 @@ const rmsAnalyser = (function(){
     timer = setTimeout(() => { if(running && performance.now()-lastSampleAt>MAX_SAMPLE_STALL_MS) recover(); else loop(); }, SAMPLE_MS);
   }
   function start(stream){
-    if(running){streamRef=stream||streamRef;if(ctx&&ctx.state==='suspended')recover();return true;}
+    if(running){streamRef=stream||streamRef;if(ctx&&ctx.state==='suspended')recover();if(lastSampleAt&&performance.now()-lastSampleAt>MAX_SAMPLE_STALL_MS)recover();return true;}
     if(!stream)return false;
     try{streamRef=stream;const shared=window.__sharedAudioCtx;if(shared&&shared.state!=='closed'){ctx=shared;ctxOwned=false;}else{ctx=new(window.AudioContext||window.webkitAudioContext)();ctxOwned=true;}running=true;if(ctx.state==='suspended')ctx.resume().catch(()=>{});if(!rebuildNodes()){running=false;return false;}samples.length=0;loop();try{ctx.addEventListener('statechange',()=>{if(running&&ctx&&ctx.state==='suspended')setTimeout(()=>recover(),400);});}catch(_){}return true;
     }catch(e){if(ctxOwned&&ctx){try{ctx.close();}catch(_){}}ctx=null;teardownNodes();streamRef=null;ctxOwned=false;running=false;return false;}
