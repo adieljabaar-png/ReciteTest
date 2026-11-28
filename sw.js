@@ -1,7 +1,7 @@
 /* ============================================================
    Quran Recitation Coach — Service Worker
    ============================================================
-   v64 — Bugfix-only release matching the current index.html,
+   v9.0.1 — Bugfix-only release matching the current index.html,
          which contains:
            • THE MADD / GHUNNAH-LENGTH TIMING FIX (per-word
              attribution): runStrict1Checks() now correctly
