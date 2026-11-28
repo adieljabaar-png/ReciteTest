@@ -6153,15 +6153,15 @@ function updateTajweedStatusChip(){
     return;
   }
   if(wantMic){
-    chip.className = 'toggle tj-status-ready';
-    chip.innerHTML = '<span class="tj-status-dot"></span>ASR only · acoustic RMS not used';
-    chip.title = 'Tajweed is using browser speech recognition and transcript comparisons only. RMS/audio waveform analysis is intentionally disabled in this Tajweed mode. Madd duration and actual Ghunnah/articulation quality are not acoustically verified.';
-    chip.setAttribute('aria-label', 'ASR-only Tajweed mode; acoustic RMS is not used');
+    chip.className='toggle tj-status-ready';
+    chip.innerHTML='<span class="tj-status-dot"></span>ASR only · acoustic RMS not used';
+    chip.title='ASR transcript comparison and text-derived rule context only. RMS is intentionally disabled. Madd duration and sound quality are not acoustically verified.';
+    chip.setAttribute('aria-label','ASR-only Tajweed mode; acoustic RMS not used');
   } else {
-    chip.className = 'toggle tj-status-loading';
-    chip.innerHTML = '<span class="tj-status-dot"></span>ASR Tajweed · start reciting';
-    chip.title = 'Transcript-based Tajweed checks are available when browser speech recognition starts. Acoustic RMS is intentionally not used.';
-    chip.setAttribute('aria-label', 'ASR Tajweed loaded; start speech recognition');
+    chip.className='toggle tj-status-loading';
+    chip.innerHTML='<span class="tj-status-dot"></span>ASR Tajweed · start reciting';
+    chip.title='Transcript-based Tajweed comparison. RMS/audio analysis is not used in this mode.';
+    chip.setAttribute('aria-label','ASR Tajweed ready; start recognition');
   }
 }
 
@@ -6960,19 +6960,10 @@ function markStrict1Warning(w, kind, detail){
    must be silent. Evidence: explicit hamza / audible Alif in ASR, and/or a
    closure-dip + sharp burst in RMS at the word boundary. */
 function detectGlottalOnset(raw, targetRaw){
-  const clean = s => String(s || '').normalize('NFKC')
-    .replace(TASHKEEL, '')
-    .replace(/^[\s‎‏‪-‮⁦-⁩ـ]+/, '');
-  const h = clean(raw);
-  const t = clean(targetRaw);
-  if (!h) return { detected: false, reason: '' };
-  if (/^[أإآءؤئ]/.test(h)){
-    return { detected: true, reason: 'explicit hamza onset (' + h[0] + ')' };
-  }
-  if (/^[اٱ]/.test(h) && /^[اٱ]/.test(t)){
-    return { detected: true, reason: 'audible Alif (ا) onset where Hamzat al-Wasl should be silent' };
-  }
-  return { detected: false, reason: '' };
+  /* ASR orthography is not acoustic evidence of a glottal re-attack.
+     Recognition engines routinely retain/drop/normalize hamza and Wasl forms.
+     In this ASR-only build, transcript spelling alone must never flag Wasl. */
+  return { detected: false, reason: 'ASR transcript cannot verify glottal onset' };
 }
 
 function detectAcousticGlottalAttack(prevAudio, curAudio){
@@ -7025,28 +7016,47 @@ function checkHamzatWasl(w, idx, rawHeard){
   }
 }
 
+// ASR-only conservative audit engine. Contextual rule labels are read from Quran
+// annotations; ASR transcript is never treated as phonetic/acoustic proof.
+const ASR_TJ_UNVERIFIED = new Set(['madd_duration','ghunnah_quality','qalqalah_quality','ikhfa_quality','iqlab_quality','idgham_quality','tafkhim_tarqiq','waqf_quality']);
+function asrNormalizeTajweedText(s){
+  return normArCached(String(s||'')).replace(/[ـ]/g,'').trim();
+}
+function asrNoonContext(next){
+  const n=asrNormalizeTajweedText(next||'');
+  const ch=n.charAt(0);
+  if(['ء','ه','ع','ح','غ','خ'].includes(ch)) return 'izhar';
+  if(ch==='ب') return 'iqlab';
+  if(['ي','ن','م','و'].includes(ch)) return 'idgham_with_ghunnah';
+  if(['ل','ر'].includes(ch)) return 'idgham_without_ghunnah';
+  if(['ت','ث','ج','د','ذ','ز','س','ش','ص','ض','ط','ظ','ف','ق','ك'].includes(ch)) return 'ikhfa';
+  return 'unknown';
+}
+function asrTranscriptVerdict(expected, heard){
+  const e=asrNormalizeTajweedText(expected), h=asrNormalizeTajweedText(heard);
+  if(!h) return 'uncertain';
+  if(e===h) return 'text_match';
+  return 'recognition_candidate';
+}
 function runStrict1Checks(idx, heard, opts){
-  opts = opts || {};
-  if (followOnly || !coachTajweedReady) return;
-  const w = words[idx]; if (!w || w.isMuqattaat) return;
-  // ASR-only mode: transcript evidence is used conservatively. Acoustic qualities
-  // (Madd duration, Ghunnah resonance, Qalqalah, Ikhfa/Iqlab/Idghaam quality)
-  // are explicitly not verdicts here.
-  try { if (typeof noteAcousticMode === 'function') noteAcousticMode(false); } catch(_){}
-  try { updateTajweedStatusChip(); } catch(_){}
-  const heardN = (typeof normArCached === 'function') ? normArCached(heard||'') : (heard||'');
-  const expectedN = (w.norm||'');
-  if (!heardN) return;
-  // Conservative word/letter substitution candidate only. No red judgement from
-  // ASR spelling, diacritics, or Hamzat al-Wasl variants.
-  if (heardN !== expectedN && typeof isMatchWord === 'function' && !isMatchWord(heardN, (typeof phonArCached==='function'?phonArCached(heardN):''), null, w)) {
-    try { markStrict1Warning(w, 'asr-word-review', 'ASR transcript differs; this is a recognition candidate, not a confirmed Tajweed error.'); } catch(_){}
+  opts=opts||{};
+  if(followOnly || !coachTajweedReady) return;
+  const w=words[idx]; if(!w || w.isMuqattaat) return;
+  try{ updateTajweedStatusChip(); }catch(_){}
+  const heardN=asrNormalizeTajweedText(heard||'');
+  if(!heardN) return;
+  // Existing fuzzy phonetic matcher helps avoid spelling-normalization false positives.
+  const verdict=asrTranscriptVerdict(w.norm||w.raw, heardN);
+  if(verdict==='recognition_candidate' && typeof isMatchWord==='function' &&
+     !isMatchWord(heardN, (typeof phonArCached==='function'?phonArCached(heardN):''), null, w)){
+    try{ markStrict1Warning(w,'asr-word-review','ASR transcript differs from the Quran word. This is an uncertain recognition candidate, not a confirmed Tajweed error.'); }catch(_){}
   }
-  // Hamzat al-Wasl / silent orthography: deliberately lenient, review only.
-  try { if (typeof checkHamzatWasl === 'function') checkHamzatWasl(w, idx, opts.rawHeard || heardN); } catch(_){}
-  try { if (typeof strict1SilentOk === 'function' && !strict1SilentOk(w, heardN)) markStrict1Warning(w, 'silent-review', 'Orthographic ASR variation — silent Alif/Wasl is not judged from transcript alone.'); } catch(_){}
-  // Explicitly reset timing chain so elapsed ASR callback time is never treated as sound duration.
-  lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; prevWordAudio = null;
+  // Contextual rule annotations (if present) describe what applies in the text;
+  // they are not passed/falsely scored as pronunciation checks.
+  try{ maybeExplainRules(w); }catch(_){}
+  // Explicitly disable ASR spelling as silent-Alif/Wasl evidence.
+  // Madd/Ghunnah and articulation durations/qualities remain UNVERIFIED.
+  lastDirectCommitIdx=-1; lastDirectCommitAt=0; lastCommitBatchId=-1; prevWordAudio=null;
 }
 
 function distributeMergedHeard(heard, wordsArr, startIdx, count){
