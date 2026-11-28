@@ -5314,7 +5314,7 @@ const rmsAnalyser = (function(){
       calibrateMinRms();
       calibrateBandNoise();
     }catch(_){}
-    timer = setTimeout(() => { if(running && now-lastSampleAt>MAX_SAMPLE_STALL_MS) recover(); else loop(); }, SAMPLE_MS);
+    timer = setTimeout(() => { if(running && performance.now()-lastSampleAt>MAX_SAMPLE_STALL_MS) recover(); else loop(); }, SAMPLE_MS);
   }
   function start(stream){
     if(running){streamRef=stream||streamRef;if(ctx&&ctx.state==='suspended')recover();return true;}
