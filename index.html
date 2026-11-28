@@ -5209,6 +5209,17 @@ const rmsAnalyser = (function(){
   let _calibrated = false;
   let running = false, ctx = null, ctxOwned = false, source = null, analyser = null,
       timeBuf = null, freqBuf = null, timer = null;
+  let streamRef=null, lastSampleAt=0, recoveryBusy=false, recoveryCount=0;
+  const MAX_SAMPLE_STALL_MS=1800;
+  function teardownNodes(){ if(source){try{source.disconnect();}catch(_){}source=null;} if(analyser){try{analyser.disconnect();}catch(_){}analyser=null;} timeBuf=null;freqBuf=null; }
+  function rebuildNodes(){
+    if(!ctx||!streamRef||ctx.state==='closed')return false;
+    try{teardownNodes();source=ctx.createMediaStreamSource(streamRef);analyser=ctx.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=0;source.connect(analyser);timeBuf=new Float32Array(analyser.fftSize);freqBuf=new Float32Array(analyser.frequencyBinCount);lastSampleAt=performance.now();return true;}catch(_){teardownNodes();return false;}
+  }
+  async function recover(){
+    if(!running||recoveryBusy||!streamRef)return false;recoveryBusy=true;
+    try{if(ctx&&ctx.state==='suspended')await ctx.resume().catch(()=>{});if(!ctx||ctx.state==='closed'){ctx=new(window.AudioContext||window.webkitAudioContext)();ctxOwned=true;}const ok=rebuildNodes();if(ok){recoveryCount++;loop();}return ok;}catch(_){return false;}finally{recoveryBusy=false;}
+  }
   let _lastCalibrationAt = 0;
 
   function calibrateMinRms(){
@@ -5297,52 +5308,21 @@ const rmsAnalyser = (function(){
       const b = computeBands(freqBuf);
       const harm = computeHarmonicity(timeBuf);
       samples.push({ t: now, rms, bands: b.bands, centroid: b.centroid, flatness: b.flatness, harmonicity: harm });
+      lastSampleAt=now;
       const cutoff = now - MAX_AGE_MS;
       while (samples.length && samples[0].t < cutoff) samples.shift();
       calibrateMinRms();
       calibrateBandNoise();
     }catch(_){}
-    timer = setTimeout(loop, SAMPLE_MS);
+    timer = setTimeout(() => { if(running && now-lastSampleAt>MAX_SAMPLE_STALL_MS) recover(); else loop(); }, SAMPLE_MS);
   }
   function start(stream){
-    if (running) return true;
-    if (!stream) return false;
-    try{
-      const shared = window.__sharedAudioCtx;
-      if (shared && shared.state === 'running'){ ctx = shared; ctxOwned = false; }
-      else {
-        try {
-          ctx = new (window.AudioContext || window.webkitAudioContext)();
-          ctxOwned = true;
-          try { if (ctx.state === 'suspended') { ctx.resume().catch(() => {}); } } catch(_) {}
-        } catch (e) { ctx = null; return false; }
-      }
-      source   = ctx.createMediaStreamSource(stream);
-      analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0;
-      source.connect(analyser);
-      timeBuf = new Float32Array(analyser.fftSize);
-      freqBuf = new Float32Array(analyser.frequencyBinCount);
-      running = true;
-      loop();
-      return true;
-    }catch(e){
-      if (ctxOwned && ctx){ try{ ctx.close(); }catch(_){} }
-      ctx = null; source = null; analyser = null; timeBuf = null; freqBuf = null;
-      ctxOwned = false; running = false;
-      return false;
-    }
+    if(running){streamRef=stream||streamRef;if(ctx&&ctx.state==='suspended')recover();return true;}
+    if(!stream)return false;
+    try{streamRef=stream;const shared=window.__sharedAudioCtx;if(shared&&shared.state!=='closed'){ctx=shared;ctxOwned=false;}else{ctx=new(window.AudioContext||window.webkitAudioContext)();ctxOwned=true;}running=true;if(ctx.state==='suspended')ctx.resume().catch(()=>{});if(!rebuildNodes()){running=false;return false;}samples.length=0;loop();try{ctx.addEventListener('statechange',()=>{if(running&&ctx&&ctx.state==='suspended')setTimeout(()=>recover(),400);});}catch(_){}return true;
+    }catch(e){if(ctxOwned&&ctx){try{ctx.close();}catch(_){}}ctx=null;teardownNodes();streamRef=null;ctxOwned=false;running=false;return false;}
   }
-  function stop(){
-    running = false;
-    if (timer){ clearTimeout(timer); timer = null; }
-    if (source){ try{ source.disconnect(); }catch(_){} source = null; }
-    if (analyser){ try{ analyser.disconnect(); }catch(_){} analyser = null; }
-    if (ctxOwned && ctx){ try{ ctx.close(); }catch(_){} }
-    ctx = null; ctxOwned = false;
-    samples.length = 0;
-  }
+  function stop(){running=false;if(timer){clearTimeout(timer);timer=null;}teardownNodes();if(ctxOwned&&ctx){try{ctx.close();}catch(_){}}ctx=null;ctxOwned=false;streamRef=null;lastSampleAt=0;recoveryBusy=false;samples.length=0;}
   function voiceDurationMs(t0, t1){
     if (!(t1 > t0)) return 0;
     let ms = 0;
@@ -5457,7 +5437,7 @@ const rmsAnalyser = (function(){
   }
   return {
     start, stop, voiceDurationMs, hasSignal,
-    peekSamples: () => samples.slice(),
+    peekSamples: () => samples.slice(), lastSampleAt: () => lastSampleAt, recoveryCount: () => recoveryCount, audioContextState: () => ctx ? ctx.state : 'none',
     samplesIn, segments, segmentEndingBefore, vowelRun, nasalRatio,
     onsetCentroid, meanCentroid,
     bandNoiseFloor: () => bandNoiseFloor,
