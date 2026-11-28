@@ -40,6 +40,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>* { -webkit-text-size-adjust: 132% !important; }</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style><style>* { -webkit-text-size-adjust: 132% !important; }.w.warned{background:#facc15 !important;color:#111 !important;} .w.error{background:#ef4444 !important;color:#fff !important;} .setting-panel{display:none;margin:8px 0;padding:10px;border:1px solid #c9a227;border-radius:10px;font-size:13px;line-height:1.6;} .setting-panel.open{display:block;} .setting-panel label{display:block;margin:6px 0;} .setting-panel small{color:#888;display:block;}
 </style><style>
 @font-face {
@@ -3165,7 +3186,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">28 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">04:09</span>
+    <span class="pdr-item pdr-time" id="pdrTime">04:32</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -5454,6 +5475,7 @@ function recPush(newToks){
   if(overflow > 0){ recTokens.splice(0, overflow); recCursor = Math.max(0, recCursor - overflow); }
 }
 function recReset(){
+  reciteResetSkipCounts();
   recTokens = []; recCursor = 0; pendingHeard = []; consecutiveReds = 0;
   interimProgress.clear(); interimPrev.clear(); paceReset(); followWrongTokens = 0; cancelFollowPinTimer();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1;
@@ -7757,6 +7779,17 @@ async function runMFAInference(w, seg, heard) {
 
 /* ===== RECITE helpers — Tarteel-aligned: word-level only (missed / incorrect / extra / tashkeel). No letter-level, no Madd timing, no dropped-letter counting. ===== */
 let reciteWrongStreak = 0;
+/* RECITE 2-SKIP-PER-AYAH BLOCKER — skipped marks only, Recite mode only.
+   Counts only words actually marked 'Skipped' in Recite mode, per ayah (verse).
+   Bismillah / Muqattaat count normally when they are marked skipped. At the
+   cap the pointer stays on the next word and waits for a correct recitation;
+   nothing auto-advances and no extra skip is recorded. */
+let reciteSkippedByVerse = {};
+function reciteSkippedCountFor(verse){ return reciteSkippedByVerse[verse] || 0; }
+function reciteSkipAllowed(n, verse){ if(!reciteMode) return true; return (reciteSkippedCountFor(verse) + (n || 1)) <= 2; }
+function reciteNoteSkip(n, verse){ if(!reciteMode || !verse) return; reciteSkippedByVerse[verse] = reciteSkippedCountFor(verse) + (n || 1); }
+function reciteSkipBlockedToast(){ try{ showToast('<b>⛔ Max 2 skipped words in this ayah</b><br>Recite this word to continue.', 4000); }catch(e){} }
+function reciteResetSkipCounts(){ reciteSkippedByVerse = {}; }
 function reciteDroppedCount(expected, heard){ const e=String(expected||'').replace(/[\u064B-\u0652\u0670\u0653\u0640]/g,''); const h=String(heard||'').replace(/[\u064B-\u0652\u0670\u0653\u0640]/g,''); const hc={}; for(const c of h) hc[c]=(hc[c]||0)+1; let miss=0; for(const c of e){ if(hc[c]>0) hc[c]--; else miss++; } return miss; }
 function reciteTashkeelMismatch(expectedRaw, heardRaw){ if(!expectedRaw||!heardRaw) return false; const diac=/[\u064B-\u0652\u0670\u0653]/g; const e=(String(expectedRaw).match(diac)||[]).join(''); const h=(String(heardRaw).match(diac)||[]).join(''); if(!h) return false; return h!==e; }
 function reciteMark(i, kind, reason){ const w=words[i]; if(!w||!w.el) return; w.reciteKind=kind; w.reciteReason=reason||kind; if(kind==='red'){ w.el.className='w error'; } else if(kind==='peeked'){ w.el.className='w peeked'; } else if(kind==='yellow'){ w.el.className='w warned'; } else { w.el.className='w correct'; } if(w.el.dataset){ w.el.dataset.recite=kind; w.el.dataset.reciteReason=w.reciteReason; } }
@@ -7857,7 +7890,8 @@ function gradeFollowFast(tokens, startIdx){
       if (futureW.verse !== w.verse) break;
       const sim = followSimilarity(heard, hPhon, hPhonLoose, futureW);
       if (reciteMode ? isFollowPlausible(heard, hPhon, hPhonLoose, futureW) : (sim >= FOLLOW_TAU_JUMP)){
-        if(reciteMode){ for(let _i=ptr;_i<ptr+k;_i++){ reciteMark(_i,'red','skipped'); reciteRecordMistake(_i,'Skipped',''); } reciteCommit(ptr+k, heard, rawTok); } else { commitManyCorrect(ptr, ptr + k + 1, null); }
+        if(reciteMode && !reciteSkipAllowed(k, w.verse)){ reciteSkipBlockedToast(); break; }
+        if(reciteMode){ for(let _i=ptr;_i<ptr+k;_i++){ reciteMark(_i,'red','skipped'); reciteRecordMistake(_i,'Skipped',''); } reciteNoteSkip(k, w.verse); reciteCommit(ptr+k, heard, rawTok); } else { commitManyCorrect(ptr, ptr + k + 1, null); }
         advancePast(k + 1);
         noteFollowProgress();
         pendingHeard.length = 0;
@@ -7886,7 +7920,7 @@ function gradeFollowFast(tokens, startIdx){
     }
 
     /* 7. Hold state — Recite (Tarteel): 1st unmatched token = Extra (recorded, pointer stays); 2nd+ = Incorrect (red). Follow: no marking. */
-    if(reciteMode){ reciteWrongStreak++; if(reciteWrongStreak>=3){ reciteMark(ptr,'red','skipped'); reciteRecordMistake(ptr,'Skipped',rawTok); try{ showToast('<b>'+escapeHtml(w.raw)+'</b><br>skipped — word not recognised.',4000); }catch(e){} advancePast(1); noteFollowProgress(); pendingHeard.length = 0; reciteWrongStreak = 0; used++; continue; } if(reciteWrongStreak===1){ reciteRecordMistake(ptr,'Extra',rawTok); noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } if(reciteRedPtr !== ptr){ reciteMark(ptr,'red','incorrect'); reciteRecordMistake(ptr,'Incorrect',rawTok); reciteRedPtr = ptr; errors++; try{ scheduleHUD(); }catch(e){} } if(recitePointer === 'stop'){ noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } }
+    if(reciteMode){ reciteWrongStreak++; if(reciteWrongStreak>=3){ if(!reciteSkipAllowed(1, w.verse)){ reciteSkipBlockedToast(); reciteWrongStreak = 2; pendingHeard.length = 0; used++; continue; } reciteMark(ptr,'red','skipped'); reciteRecordMistake(ptr,'Skipped',rawTok); reciteNoteSkip(1, w.verse); try{ showToast('<b>'+escapeHtml(w.raw)+'</b><br>skipped — word not recognised.',4000); }catch(e){} advancePast(1); noteFollowProgress(); pendingHeard.length = 0; reciteWrongStreak = 0; used++; continue; } if(reciteWrongStreak===1){ reciteRecordMistake(ptr,'Extra',rawTok); noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } if(reciteRedPtr !== ptr){ reciteMark(ptr,'red','incorrect'); reciteRecordMistake(ptr,'Incorrect',rawTok); reciteRedPtr = ptr; errors++; try{ scheduleHUD(); }catch(e){} } if(recitePointer === 'stop'){ noteFollowWrongToken(); pendingHeard.length = 0; used++; continue; } }
     noteFollowWrongToken();
     pendingHeard.push(rawTok);
     /* Keep a small rolling buffer to recover ASR word-boundary shifts without
@@ -8046,6 +8080,8 @@ async function gradeFull(tokens, startIdx){
           if(isMatchWord(heard, hPhon, null, fw)){ la = k; break; }
         }
         if(la > 0){
+          if(reciteMode && !reciteSkipAllowed(la, w.verse)){ reciteSkipBlockedToast(); }
+          else {
           for(let q = 0; q < la; q++){
             const sw = words[ptr + q];
             if(sw && !sw.el.classList.contains('error') && !sw.el.classList.contains('skipped')){
@@ -8053,6 +8089,7 @@ async function gradeFull(tokens, startIdx){
               markSkippedWord(ptr + q);
             }
           }
+          if(reciteMode) reciteNoteSkip(la, w.verse);
           const tgt = ptr + la;
           commitCorrect(tgt, seg);
           runStrict1Checks(tgt, heard, { timingReliable: false, skipTiming: true, rawHeard: rawTok });
@@ -8061,6 +8098,7 @@ async function gradeFull(tokens, startIdx){
           lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; prevWordAudio = null;
           noteFollowProgress();
           used++; continue;
+        }
         }
       }
 
@@ -9366,7 +9404,7 @@ function recordMistake(i, kind, heardRaw){
 }
 
 function resetProgress(fullReset){
-  ptr=0; errors=0; finished=false; recReset();
+  ptr=0; errors=0; finished=false; reciteResetSkipCounts(); recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   if(fullReset){
@@ -9388,7 +9426,7 @@ function jumpToWordAndListen(idx){
   if(viewerOpen && viewerMode === 'audio') return;
   if(idx < 0 || idx >= words.length) return;
   longPressTriggered = false;
-  errors = 0; mistakes = []; mistakeCounter = 0; completedVerses = new Set(); recReset();
+  errors = 0; mistakes = []; mistakeCounter = 0; completedVerses = new Set(); reciteResetSkipCounts(); recReset();
   lastDirectCommitIdx = -1; lastDirectCommitAt = 0; lastCommitBatchId = -1; silentWarned = false;
   prevWordAudio = null;
   words.forEach(w => { w.el.classList.remove('correct','error','skipped','corrected','model','current','located','warned'); w._tajweedErrs = null; w._tajweedWarns = null; w.muqattaatCursor = 0; w._muqStuckCount = 0; });
@@ -13196,7 +13234,7 @@ function openCoachInfoModal(){
     '</ul></div>' +
     '<div class="feature"><h3><span class="fnum">3</span> 📖 Recite mode (word checks)</h3><ul>' +
       '<li><b>Recite</b> checks words only: <b>Correct</b> (green), <b>Skipped</b> (light red), <b>Incorrect</b> (light red), <b>Extra</b> (recorded), <b>Tashkeel</b> (light yellow), <b>Peeked</b> (light yellow background).</li>' +
-      '<li><b>Skipping:</b> up to 2 words may be skipped. Skipped words are marked light red. The pointer only advances past skipped words when the next word matches as <b>plausibly correct</b>.</li>' +
+      '<li><b>Skipping (Recite):</b> max 2 skipped words per ayah. At 2, the pointer stays on the next word until it is recited correctly — it cannot skip a 3rd word in that ayah. Skipped words are marked light red. The pointer only advances past skipped words when the next word matches as <b>plausibly correct</b>.</li>' +
       '<li><b>Dropped 3+ letters:</b> an attempted word missing 3 or more letters is marked light yellow and says <b>“missed”</b>, showing the word.</li>' +
       '<li><b>Not recognised at all:</b> after repeated no-match tokens the word is skipped, shown, and marked light red as <b>“skipped”</b>.</li>' +
       '<li><b>Pointer default:</b> <b>mark red and continue to follow</b> — a red word stays red and the pointer continues. Optional <b>stop on red</b> waits for correction.</li>' +
@@ -14186,7 +14224,7 @@ function showTextShareModal(text){
   showScreen(_openDash ? 'dashboard' : 'home');
   if(_openDash){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){} }
 })();
-</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
+</script><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio><audio playsinline="" webkit-playsinline="" preload="auto" style="display: none;"></audio>
 <script>
 (function () {
   var hasASR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -14281,4 +14319,4 @@ body.recite-mode .w.current, .w.recite-current, .w.current.recite-pointer{backgr
      shown (block) by body.listen-mode. A shown translation breaks the
      line for that one ayah only; the next ayah still continues after it. */
 </style>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>

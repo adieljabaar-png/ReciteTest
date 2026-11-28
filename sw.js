@@ -1,5 +1,11 @@
 /* ============================================================
-   Quran Recitation Coach — Service Worker  v2.5.1
+   Quran Recitation Coach — Service Worker  v2.5.2
+
+   What changed in 2.5.2:
+     • Recite mode: max 2 skipped words per ayah (skipped marks only).
+       At the cap the pointer stays and waits for the word to be
+       recited correctly; no 3rd skip in the same ayah.
+     • Cache version bumped so installed apps fetch the updated index.
 
    What changed in 2.5.1:
      • Tajweed Option B engine: one mic stream, RMS owns the mic,
@@ -58,7 +64,7 @@
 
 'use strict';
 
-const VERSION = '2.5.1';
+const VERSION = '2.5.2';
 
 const SHELL_CACHE   = `qc-shell-${VERSION}`;
 const TEXT_CACHE    = `qc-text-${VERSION}`;
