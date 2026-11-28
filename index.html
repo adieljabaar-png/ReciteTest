@@ -3143,7 +3143,7 @@ body.light-mode .share-arabic{color:#1a2233;}
     <span class="pdr-dot">·</span>
     <span class="pdr-item pdr-greg" id="pdrGreg">28 November 2026</span>
     <span class="pdr-dot">·</span>
-    <span class="pdr-item pdr-time" id="pdrTime">17:18</span>
+    <span class="pdr-item pdr-time" id="pdrTime">17:26</span>
   </div>
   <ul class="prayer-list" id="prayerList"><li class="prayer-row"><span class="pr-name">Set your location to see prayer times</span><span class="pr-time">--:--</span></li></ul>
   <div class="prayer-note" id="prayerNote">
@@ -11236,6 +11236,61 @@ async function applyJuz20_21Shift(data){
   }
   return data;
 }
+
+let _juz23MovedFrom441 = null;
+let _juz23MovedFrom442 = null;
+/* Juz 22/23 boundary (real move):
+   - Last 6 ayahs of page 441 move to the top of page 442.
+   - Last 4 ayahs of page 442 move to the top of page 443.
+   - The new first ayah on page 442 (first of the 6 moved from 441)
+     becomes the FIRST ayah of Juz 23 and gets juz-start /
+     inverted first row. The other moved ayahs are Juz 23
+     continuation (442) / Juz 23 continuation on 443 (no start).
+   - Any original Juz 23 start ayah (36:28) inside a moved group
+     or later on page 442 loses juz-start. */
+async function applyJuz22_23Shift(data){
+  if(!data || !Array.isArray(data.ayahs)) return data;
+  if(data.pageNumber === 441 && data.ayahs.length){
+    _juz23MovedFrom441 = JSON.parse(JSON.stringify(data.ayahs.slice(-6)));
+    data.ayahs = data.ayahs.slice(0, -6);
+  } else if(data.pageNumber === 442 && data.ayahs.length){
+    _juz23MovedFrom442 = JSON.parse(JSON.stringify(data.ayahs.slice(-4)));
+    data.ayahs = data.ayahs.slice(0, -4);
+    let moved = _juz23MovedFrom441;
+    if(!moved){
+      try{ const n = await fetchPageIndopak(441); if(n && Array.isArray(n.ayahs) && n.ayahs.length){ moved = n.ayahs.slice(-6); _juz23MovedFrom441 = JSON.parse(JSON.stringify(moved)); } }catch(_){}
+    }
+    if(moved && moved.length){
+      const first = data.ayahs[0];
+      if(!(first && first.surah === moved[0].surah && first.numberInSurah === moved[0].numberInSurah)){
+        const copies = moved.map((m, i) => {
+          const c = JSON.parse(JSON.stringify(m));
+          c.juz = 23; c.pageNumber = 442; c._juz23Moved = true;
+          if(i === 0) c._juz23Start = true;
+          return c;
+        });
+        data.ayahs = copies.concat(data.ayahs);
+      }
+    }
+  } else if(data.pageNumber === 443 && data.ayahs.length){
+    let moved = _juz23MovedFrom442;
+    if(!moved){
+      try{ const n = await fetchPageIndopak(442); if(n && Array.isArray(n.ayahs) && n.ayahs.length){ moved = n.ayahs.slice(-4); _juz23MovedFrom442 = JSON.parse(JSON.stringify(moved)); } }catch(_){}
+    }
+    if(moved && moved.length){
+      const first = data.ayahs[0];
+      if(!(first && first.surah === moved[0].surah && first.numberInSurah === moved[0].numberInSurah)){
+        const copies = moved.map(m => {
+          const c = JSON.parse(JSON.stringify(m));
+          c.juz = 23; c.pageNumber = 443; c._juz23Moved = true;
+          return c;
+        });
+        data.ayahs = copies.concat(data.ayahs);
+      }
+    }
+  }
+  return data;
+}
 async function fetchPageData(pageNumber){
   let data = null;
   try{ data = await fetchPageIndopak(pageNumber); }
@@ -11255,6 +11310,7 @@ async function fetchPageData(pageNumber){
   data = await applyJuz13_14Shift(data);
   data = await applyJuz19_20Shift(data);
   data = await applyJuz20_21Shift(data);
+  data = await applyJuz22_23Shift(data);
   return await applyIndoPakText(data);
 }
 function prefetchAdjacentPages(n){
@@ -11521,6 +11577,11 @@ function renderReaderPage(pageNumber, token){
        any later ayah on 402 (old 29:46 start) loses juz-start. */
     if(pageNumber === 402 && !content.querySelector('.ayah')) span.classList.add('juz-start');
     if(pageNumber === 402 && content.querySelector('.ayah')) span.classList.remove('juz-start');
+    /* Juz 22/23 real move: new first ayah on 442 IS Juz 23's start;
+       any later ayah on 442, and any moved ayah on 443, loses juz-start. */
+    if(pageNumber === 442 && !content.querySelector('.ayah')) span.classList.add('juz-start');
+    if(pageNumber === 442 && content.querySelector('.ayah')) span.classList.remove('juz-start');
+    if(pageNumber === 443 && a._juz23Moved) span.classList.remove('juz-start');
     /* Juz 7 override: no inversion mid-page 121; invert first row of page 122 instead. */
     if(pageNumber===121) span.classList.remove('juz-start');
     if(pageNumber===122 && !content.querySelector('.ayah')) span.classList.add('juz-start');
